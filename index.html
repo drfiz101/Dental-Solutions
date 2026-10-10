@@ -767,10 +767,13 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
 .lblist{display:flex;flex-direction:column;gap:10px}
 .lbc{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
 .lbc .danger-outline{align-self:flex-start}
+.aobar{position:fixed;z-index:2147483000;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;width:max-content;max-width:calc(100% - 32px);padding:12px 16px;border-radius:12px;background:#7a2e0f;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:14px}
+.aobar[hidden]{display:none}
 </style>
 
 </head>
 <body>
+<div id="aoBar" class="aobar" role="alertdialog" aria-live="assertive" hidden><span id="aoMsg">You'll be signed out soon because the app hasn't been used.</span><button class="btn primary small" id="aoStay" type="button">Stay signed in</button></div>
 <div class="login" id="login" hidden>
   <div class="login-card">
     <div class="dsbrand"><svg class="dsmark" viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="13" fill="#0F7A68"/><path d="M48 0v35A13 13 0 0 1 35 48H13z" fill="#2E6BB8" opacity=".55"/><path d="M16.5 11.5c-3.6 0-6 2.8-6 6.6 0 3.6 1.7 5.6 2.7 8.9 1 3.3 1.3 7.1 2.6 10.8.6 1.9 1.6 3.2 2.9 3.2s2-1.5 2.5-3.6c.5-2.3 1-5.4 2.8-5.4s2.3 3.1 2.8 5.4c.5 2.1 1.2 3.6 2.5 3.6s2.3-1.3 2.9-3.2c1.3-3.7 1.6-7.5 2.6-10.8 1-3.3 2.7-5.3 2.7-8.9 0-3.8-2.4-6.6-6-6.6-3 0-4.3 1.6-7.5 1.6s-4.5-1.6-7.5-1.6z" fill="#fff"/><path d="M20 21.5h8M24 17.5v8" stroke="#0F7A68" stroke-width="2.6" stroke-linecap="round"/></svg><div><b>Dental Solutions</b><span>Clinic management for dentists</span></div></div>
@@ -1035,6 +1038,7 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
     <div class="field"><label for="st-logo">Clinic logo</label><div style="display:flex;gap:8px;align-items:center"><img id="st-logoprev" class="logoprev" alt="" hidden><input id="st-logo" type="file" accept="image/*"></div></div>
     <div class="field"><label for="st-doctor">Doctor name</label><input id="st-doctor" maxlength="60" placeholder="Optional, use {doctor}"></div>
     <div class="field"><label for="st-slot">Booking slots</label><select id="st-slot"><option value="15">Every 15 min</option><option value="20">Every 20 min</option><option value="30">Every 30 min</option></select></div>
+    <div class="field"><label for="st-autoout">Auto log out</label><select id="st-autoout"><option value="0">Off (stay signed in)</option><option value="5">After 5 min of no use</option><option value="10">After 10 min of no use</option><option value="15">After 15 min of no use</option><option value="30">After 30 min of no use</option><option value="60">After 1 hour of no use</option><option value="120">After 2 hours of no use</option></select></div>
     <div class="field"><label for="st-open">Opens</label><input id="st-open" type="time"></div>
     <div class="field"><label for="st-close">Closes</label><input id="st-close" type="time"></div>
   </div>
@@ -1834,7 +1838,7 @@ $("o-list").addEventListener("change",e=>{
 $("o-copy").addEventListener("click",()=>copyText(orderText(),"Order copied. Paste it into WhatsApp."));
 
 /* ================= CLINIC: patients, appointments, billing ================= */
-let P={},A={},B={},SET={},clinicUnsubs=[],clinicStarted=false,clinicDirty=false;
+let P={},A={},B={},SET={},clinicUnsubs=[],clinicStarted=false,clinicDirty=false,SET_LOADED=false;
 let myName="",selPat=null,toothSel=null,apDate=ymd(new Date()),billF="all";
 const WA_IC='<svg class="waic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.2A8.5 8.5 0 1 1 20 11.5z"/><path d="M9 9.5c.3 2 2 3.8 4.5 4.5"/></svg>';
 let DEF_LABS=[{"name": "Kashif Lab", "phone": "", "days": 7, "works": ["Complete denture (acrylic)", "Complete denture (Molloplast)", "Partial denture (acrylic)", "Flexible denture", "Denture repair", "Reline"]}, {"name": "Naimat Lab", "phone": "", "days": 7, "works": ["PFM crown", "PFM bridge", "Cast partial framework", "Cast post & core"], "prices": {"PFM crown": 800, "PFM bridge": 800}}, {"name": "DVD Sallahudin Lab", "phone": "", "days": 7, "works": ["Zirconia crown", "Zirconia bridge"], "prices": {"Zirconia crown": 5000, "Zirconia bridge": 5000}}];
@@ -1858,9 +1862,9 @@ async function saveSet(next){SET=next;render();if(!db)return;try{await db.collec
 function startClinic(){
   if(!db||clinicStarted)return;clinicStarted=true;
   const sub=(c,fn)=>{try{clinicUnsubs.push(db.collection(c).onSnapshot(snap=>{const m={};for(const d of snap.docs){const v=d.data();if(v)m[d.id]=v}fn(m);softRender()},()=>{}))}catch(e){}};
-  sub("patients",m=>P=m);sub("appts",m=>A=m);sub("bills",m=>B=m);sub("labcases",m=>LC=m);sub("settings",m=>SET=m.main||{});
+  sub("patients",m=>P=m);sub("appts",m=>A=m);sub("bills",m=>B=m);sub("labcases",m=>LC=m);sub("settings",m=>{SET=m.main||{};SET_LOADED=true;aoCheck()});
 }
-function stopClinic(){for(const u of clinicUnsubs){try{u()}catch(e){}}clinicUnsubs=[];clinicStarted=false;P={};A={};B={};SET={};LC={}}
+function stopClinic(){for(const u of clinicUnsubs){try{u()}catch(e){}}clinicUnsubs=[];clinicStarted=false;SET_LOADED=false;P={};A={};B={};SET={};LC={}}
 function softRender(){
   const a=document.activeElement;
   if(document.querySelector("dialog[open]")||(a&&a.closest&&a.closest(".cview")&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))){clinicDirty=true;return}
@@ -2278,8 +2282,8 @@ $("prForm").addEventListener("submit",e=>{e.preventDefault();const prices=[...$(
 const setdlg=$("setdlg");let stLogo=null;
 async function compressLogo(file){const bmp=await createImageBitmap(file);let max=512,out="";for(let k=0;k<5;k++){const sc=Math.min(1,max/Math.max(bmp.width,bmp.height)),c=document.createElement("canvas");c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);const x=c.getContext("2d");x.drawImage(bmp,0,0,c.width,c.height);out=c.toDataURL("image/png");if(out.length<160000)return out;const c2=document.createElement("canvas");c2.width=c.width;c2.height=c.height;const y=c2.getContext("2d");y.fillStyle="#fff";y.fillRect(0,0,c2.width,c2.height);y.drawImage(c,0,0);out=c2.toDataURL("image/jpeg",.88);if(out.length<160000)return out;max=Math.round(max*.8)}return out}
 $("st-logo").addEventListener("change",async()=>{const f=$("st-logo").files&&$("st-logo").files[0];if(!f)return;try{stLogo=await compressLogo(f);$("st-logoprev").src=stLogo;$("st-logoprev").hidden=false}catch(e){toast("Couldn't read that image.")}});
-function openSet(){const s=S();for(const c of $("st-days").querySelectorAll("input"))c.checked=(s.clinic.days||[]).includes(+c.value);for(const k of ["name","phone","doctor","open","close","slot","tagline"])$("st-"+k).value=s.clinic[k]??"";$("st-logo").value="";stLogo=null;const lp=$("st-logoprev");lp.src=clinicLogo();lp.hidden=false;for(const k of Object.keys(DEF_SET.templates))$("tp-"+k).value=s.templates[k];$("st-aikey").value=s.aiKey||"";openD(setdlg)}
-$("setForm").addEventListener("submit",e=>{e.preventDefault();const clinic={};for(const k of ["name","phone","doctor","open","close","tagline"])clinic[k]=$("st-"+k).value.trim();if(stLogo)clinic.logo=stLogo;else if((SET.clinic||{}).logo)clinic.logo=SET.clinic.logo;clinic.slot=+$("st-slot").value||30;clinic.days=[...$("st-days").querySelectorAll("input:checked")].map(c=>+c.value);const templates={};for(const k of Object.keys(DEF_SET.templates))templates[k]=$("tp-"+k).value;const aiKey=$("st-aikey").value.trim();if(aiKey&&!/^sk-ant-/.test(aiKey)){toast("That doesn't look like a Claude API key. It starts with sk-ant-");$("st-aikey").focus();return}saveSet({...SET,clinic,templates,aiKey});setdlg.close();toast("Settings saved")});
+function openSet(){const s=S();for(const c of $("st-days").querySelectorAll("input"))c.checked=(s.clinic.days||[]).includes(+c.value);for(const k of ["name","phone","doctor","open","close","slot","tagline"])$("st-"+k).value=s.clinic[k]??"";$("st-logo").value="";stLogo=null;const lp=$("st-logoprev");lp.src=clinicLogo();lp.hidden=false;for(const k of Object.keys(DEF_SET.templates))$("tp-"+k).value=s.templates[k];$("st-aikey").value=s.aiKey||"";$("st-autoout").value=String(aoMinutes());openD(setdlg)}
+$("setForm").addEventListener("submit",e=>{e.preventDefault();const clinic={};for(const k of ["name","phone","doctor","open","close","tagline"])clinic[k]=$("st-"+k).value.trim();if(stLogo)clinic.logo=stLogo;else if((SET.clinic||{}).logo)clinic.logo=SET.clinic.logo;clinic.slot=+$("st-slot").value||30;clinic.autoOut=+$("st-autoout").value||0;clinic.days=[...$("st-days").querySelectorAll("input:checked")].map(c=>+c.value);const templates={};for(const k of Object.keys(DEF_SET.templates))templates[k]=$("tp-"+k).value;const aiKey=$("st-aikey").value.trim();if(aiKey&&!/^sk-ant-/.test(aiKey)){toast("That doesn't look like a Claude API key. It starts with sk-ant-");$("st-aikey").focus();return}saveSet({...SET,clinic,templates,aiKey});setdlg.close();toast("Settings saved")});
 $("st-reset").addEventListener("click",()=>{for(const k of Object.keys(DEF_SET.templates))$("tp-"+k).value=DEF_SET.templates[k]});
 
 /* --- teeth on bills --- */
@@ -3482,7 +3486,7 @@ function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}funct
 function showGate(html){$("gateBody").innerHTML=`<div class="dsbrand">${document.querySelector(".dsbrand .dsmark").outerHTML}<div><b>Dental Solutions</b><span>Clinic management for dentists</span></div></div><div class="gate">${html}</div>`;$("gate").hidden=false;$("login").hidden=true;$("who").hidden=true}
 function hideGate(){$("gate").hidden=true}
 $("gate").addEventListener("click",e=>{if(e.target.closest("[data-gout]"))firebase.auth().signOut();if(e.target.closest("[data-gconsole]"))openConsole()});
-function leaveClinic(){if(unsub){unsub();unsub=null}if(memUnsub){memUnsub();memUnsub=null}if(cdocUnsub){cdocUnsub();cdocUnsub=null}stopLogs();stopClinic();db=null;CLINIC=null;CDOC=null;MEM=null;overrides={}}
+function leaveClinic(){aoStop();if(unsub){unsub();unsub=null}if(memUnsub){memUnsub();memUnsub=null}if(cdocUnsub){cdocUnsub();cdocUnsub=null}stopLogs();stopClinic();db=null;CLINIC=null;CDOC=null;MEM=null;overrides={}}
 function setupFirebase(){
   if(!window.firebase||!window.FIREBASE_CONFIG){$("login").hidden=false;$("loginForm").hidden=true;$("loginErr").textContent="The app couldn't load. Check the internet connection and reload.";$("loginErr").hidden=false;return}
   firebase.initializeApp(FIREBASE_CONFIG);
@@ -3520,13 +3524,14 @@ async function enterClinic(u,seq){
     if(!CLINIC)openWorkspace(u,code,ms.data(),seq);else render()},()=>{});
 }
 function openWorkspace(u,code,mem,seq){
+  if(!roleCheck){const st=lsGet("ds-ao"),lim=(st!==null&&st!==""&&+st>=0?+st:AO_DEF)*60000,last=+lsGet("ds-last-"+u.uid)||0;if(lim&&last&&Date.now()-last>=lim){aoUid=u.uid;setTimeout(()=>aoSignOut(lim),0);return}}
   CLINIC=code;MEM=mem;useClinicDefaults(code,CDOC);
   const legacy=code==="alawan";db={collection:n=>legacy?fsRoot.collection(n):fsRoot.collection("clinics").doc(code).collection(n)};
   me={by:mem.username||u.email,uid:u.uid};myName=mem.name||mem.username||u.email;
   hideGate();$("login").hidden=true;$("who").hidden=false;$("whoName").textContent=myName;canWrite=true;$("notice").hidden=true;
   memUnsub=fsRoot.collection("clinics").doc(code).collection("members").doc(u.uid).onSnapshot(sn=>{if(seq!==authSeq)return;const d=sn.data();if(!d||d.active===false){firebase.auth().signOut();return}MEM=d;myName=d.name||d.username;$("whoName").textContent=myName;render()},()=>{});
   if(roleCheck){roleCheck=false;setTimeout(()=>{if(wantRole==="admin"&&myRole()!=="admin")toast("This login has staff access. Signed in as staff.");else toast("Signed in to "+(CDOC.name||code))},600)}
-  main="dashboard";startLogs();startClinic();
+  main="dashboard";aoStart(u.uid,roleCheck);startLogs();startClinic();
   unsub=db.collection("items").onSnapshot({includeMetadataChanges:false},snap=>{
     const next={};snap.forEach(d=>{const v=d.data();if(v)next[d.id]={...v}});
     for(const id in pending)if(pending[id]&&!id.startsWith("t"))next[id]=pending[id];
@@ -3534,6 +3539,26 @@ function openWorkspace(u,code,mem,seq){
   },err=>{if(err&&err.code==="permission-denied"){showNotice("This login can't open the clinic's records. Ask the clinic admin.");canWrite=false;render()}else showNotice("Live updates stopped. Check the internet connection and reload the app.")});
   render();window.scrollTo(0,0);
 }
+/* auto log out after no use */
+const AO_DEF=30;let aoUid=null,aoTick=null,aoLastSave=0;
+function aoMinutes(){const v=((SET&&SET.clinic)||{}).autoOut;if(v===0||v==="0")return 0;return +v>0?+v:AO_DEF}
+function aoLimit(){let m;if(SET_LOADED){m=aoMinutes();lsSet("ds-ao",String(m))}else{const st=lsGet("ds-ao");m=st!==null&&st!==""&&+st>=0?+st:AO_DEF}return m*60000}
+function aoLast(){return +lsGet("ds-last-"+aoUid)||0}
+function aoTouch(force){const n=Date.now();if(!force&&n-aoLastSave<5000)return;aoLastSave=n;lsSet("ds-last-"+aoUid,String(n))}
+function aoCheck(){if(!aoUid)return false;const lim=aoLimit();
+  if(!lim){$("aoBar").hidden=true;return false}
+  const idle=Date.now()-aoLast();
+  if(idle>=lim){aoSignOut(lim);return true}
+  const left=lim-idle;if(left<=60000){$("aoMsg").textContent="No one has used the app for a while. Signing out in "+Math.max(1,Math.ceil(left/1000))+" seconds.";$("aoBar").hidden=false}else $("aoBar").hidden=true;
+  return false}
+function aoSignOut(lim){const mins=Math.round(lim/60000);aoStop();$("lp").value="";for(const d of document.querySelectorAll("dialog[open]")){try{d.close()}catch(e){}}
+  firebase.auth().signOut().then(()=>{const e=$("loginErr");e.textContent="Signed out automatically after "+(mins>=60?(mins/60)+(mins>60?" hours":" hour"):mins+" minutes")+" of no use. Sign in again to continue.";e.hidden=false})}
+function aoActivity(){if(!aoUid)return;if(aoCheck())return;const warn=!$("aoBar").hidden;aoTouch(warn);if(warn)$("aoBar").hidden=true}
+function aoStart(uid,fresh){aoStop();aoUid=uid;aoTouch(true);aoTick=setInterval(aoCheck,5000)}
+function aoStop(){if(aoTick){clearInterval(aoTick);aoTick=null}aoUid=null;$("aoBar").hidden=true}
+for(const ev of ["pointerdown","keydown","wheel","touchstart"])window.addEventListener(ev,aoActivity,{passive:true,capture:true});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&aoUid)aoCheck()});
+$("aoStay").addEventListener("click",()=>{aoTouch(true);$("aoBar").hidden=true});
 /* sign in */
 $("lcode").value=lsGet("ds-code")||"";$("lremember").checked=lsGet("ds-remember")!=="0";$("le").value=lsGet("ds-remember")!=="0"?(lsGet("ds-user")||""):"";
 $("lrole").addEventListener("click",e=>{const b=e.target.closest("[data-lr]");if(!b)return;wantRole=b.dataset.lr;for(const x of document.querySelectorAll("[data-lr]"))x.setAttribute("aria-pressed",String(x===b));lsSet("aa-lr",wantRole)});

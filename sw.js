@@ -1,5 +1,5 @@
 // Keeps the app opening even with weak or no internet.
-const CACHE = "ds-v2";
+const CACHE = "ds-v3";
 const SHELL = ["./", "./index.html", "./firebase-config.js", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png", "./icons/logo.jpg", "./icons/logo-full.jpg"];
 
 self.addEventListener("install", e => {
