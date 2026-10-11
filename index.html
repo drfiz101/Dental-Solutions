@@ -769,6 +769,16 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
 .lbc .danger-outline{align-self:flex-start}
 .aobar{position:fixed;z-index:2147483000;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;width:max-content;max-width:calc(100% - 32px);padding:12px 16px;border-radius:12px;background:#7a2e0f;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:14px}
 .aobar[hidden]{display:none}
+.prtools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.prtools input{flex:1;min-width:180px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--surface);color:inherit}
+.prfull{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;padding:10px 12px;border-radius:10px;background:var(--accent-soft);font-size:.9rem}
+.prfull[hidden]{display:none}
+.prsec{border:1px solid var(--line);border-radius:12px;margin-top:8px;overflow:hidden}
+.prsec>summary{cursor:pointer;padding:11px 14px;font-weight:700;display:flex;justify-content:space-between;gap:10px;align-items:center;list-style:none}
+.prsec>summary::-webkit-details-marker{display:none}
+.prsec>summary::before{content:"▸";margin-right:8px;color:var(--muted)}.prsec[open]>summary::before{content:"▾"}
+.prsec>summary span.t{flex:1}.prsec>summary .muted{font-weight:500;font-size:.8rem}
+.prsec .lines{padding:0 12px 10px}.prsec .pr-addc{margin:0 12px 12px}
+.line.pr.unpriced .pr-p{border-color:var(--warn);background:var(--warn-soft)}
 </style>
 
 </head>
@@ -1025,8 +1035,10 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
 </form></dialog>
 <dialog id="bvdlg" class="wide"><div class="dlg" id="bv"></div></dialog>
 <dialog id="prdlg" class="wide"><form class="dlg" id="prForm" novalidate>
-  <h2>Treatment prices</h2><p class="muted small" style="margin:0">These fill bills automatically. The starting prices are examples, so change them to your clinic's own.</p>
-  <div class="lines" id="pr-lines"></div><button type="button" class="btn small" id="pr-add" style="align-self:flex-start">+ Add treatment</button>
+  <h2>Treatment prices</h2><p class="muted small" style="margin:0">Your clinic's procedures and charges, grouped by specialty. They fill bills, treatment plans and bookings automatically. Leave a price empty if you haven't set it yet.</p>
+  <div class="prtools"><input id="pr-q" type="search" placeholder="Search treatments…" aria-label="Search treatments" autocomplete="off"><span class="muted small" id="pr-stat"></span></div>
+  <div class="prfull" id="pr-fullbox" hidden><span id="pr-fullmsg"></span><button type="button" class="btn small primary" id="pr-full">Add full treatment list</button></div>
+  <div id="pr-lines"></div>
   <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save prices</button></div></div>
 </form></dialog>
 <dialog id="setdlg" class="wide"><form class="dlg" id="setForm" novalidate>
@@ -1852,7 +1864,7 @@ const ALAWAN_SET=DEF_SET,ALAWAN_LABS=DEF_LABS;
 function useClinicDefaults(code,cd){if(code==="alawan"){DEF_SET=ALAWAN_SET;DEF_LABS=ALAWAN_LABS;return}cd=cd||{};
   const strip=t=>t.replace(/\n*_\{clinic\} — Where excellence is guaranteed_/g,"\n\n_{clinic}_").replace(/Where excellence is guaranteed/g,"");
   const tm={};for(const [k,v] of Object.entries(ALAWAN_SET.templates))tm[k]=strip(v);
-  DEF_SET={clinic:{name:cd.name||"My Dental Clinic",tagline:"",phone:cd.phone||"",doctor:cd.ownerName||"",open:"10:00",close:"20:00",slot:30,days:[1,2,3,4,5,6]},templates:tm,team:cd.ownerName?[{name:cd.ownerName,role:"Dentist",title:"",phone:""}]:[],prices:ALAWAN_SET.prices};DEF_LABS=[]}
+  DEF_SET={clinic:{name:cd.name||"My Dental Clinic",tagline:"",phone:cd.phone||"",doctor:cd.ownerName||"",open:"10:00",close:"20:00",slot:30,days:[1,2,3,4,5,6]},templates:tm,team:cd.ownerName?[{name:cd.ownerName,role:"Dentist",title:"",phone:""}]:[],prices:TX_FULL()};DEF_LABS=[]}
 function S(){const s=SET||{};return {clinic:{...DEF_SET.clinic,...(s.clinic||{})},templates:{...DEF_SET.templates,...(s.templates||{})},prices:(s.prices&&s.prices.length?s.prices:DEF_SET.prices),team:s.team||DEF_SET.team,labs:(s.labs||DEF_LABS).map(l=>{if(l.prices)return l;const d=DEF_LABS.find(x=>x.name===l.name);return d&&d.prices?{...l,prices:{...d.prices}}:l}),aiKey:s.aiKey||""}}
 const nid=p=>p+"-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const STORES={patients:()=>P,appts:()=>A,bills:()=>B};
@@ -2231,7 +2243,7 @@ const readLines=()=>[...$("b-lines").querySelectorAll(".line")].map(r=>({desc:r.
 function billTotals(){const d=+$("b-disc").value||0,t=billCalc({items:readLines(),discount:d,payments:[{amount:bEdit?0:(+$("b-pay").value||0)}]});$("b-tot").innerHTML=`<div class="kv"><span>Subtotal</span><b>${rs(t.sub)}</b></div>${d?`<div class="kv"><span>Discount</span><b>− ${rs(d)}</b></div>`:""}<div class="kv tot"><span>Total</span><b>${rs(t.total)}</b></div>${bEdit?"":`<div class="kv"><span>Balance after payment</span><b>${rs(t.bal)}</b></div>`}`}
 $("b-add").addEventListener("click",()=>{$("b-lines").insertAdjacentHTML("beforeend",lineHTML());$("b-lines").lastElementChild.querySelector(".l-t").focus()});
 $("b-lines").addEventListener("click",e=>{const pk=e.target.closest("[data-pick]");if(pk){openTeeth(pk.closest(".line"));return}if(e.target.closest("[data-lrm]")){e.target.closest(".line").remove();if(!$("b-lines").children.length)$("b-lines").innerHTML=lineHTML();billTotals()}});
-$("b-lines").addEventListener("input",e=>{const r=e.target.closest(".line");if(e.target.classList.contains("l-t")){const pr=S().prices.find(x=>x.n===e.target.value),pe=r.querySelector(".l-p");if(pr&&(!pe.value||pe.dataset.auto)){pe.value=pr.p;pe.dataset.auto="1"}}if(e.target.classList.contains("l-p"))delete e.target.dataset.auto;billTotals()});
+$("b-lines").addEventListener("input",e=>{const r=e.target.closest(".line");if(e.target.classList.contains("l-t")){const pr=S().prices.find(x=>x.n===e.target.value),pe=r.querySelector(".l-p");if(pr&&(!pe.value||pe.dataset.auto)){if(+pr.p>0){pe.value=pr.p;pe.dataset.auto="1"}else if(pe.dataset.auto){pe.value="";delete pe.dataset.auto}}}if(e.target.classList.contains("l-p"))delete e.target.dataset.auto;billTotals()});
 for(const f of ["b-disc","b-pay"])$(f).addEventListener("input",billTotals);
 $("bForm").addEventListener("submit",e=>{
   e.preventDefault();const err=$("b-err"),pid=findPat($("b-pat").value);
@@ -2273,12 +2285,44 @@ $("bv").addEventListener("click",e=>{
   if(t.closest("[data-bvsent]")){setTimeout(()=>{bvSent=false;renderBV()},500);return}
 });
 $("bv").addEventListener("submit",e=>{if(e.target.id!=="payForm")return;e.preventDefault();const amt=+$("pay-amt").value;if(!(amt>0))return;const b=B[bvId];cset("bills",bvId,{...b,payments:[...(b.payments||[]),{date:ymd(new Date()),amount:amt,method:$("pay-m").value,...me}]});renderBV();toast("Payment added")});
+/* full treatment list, grouped by specialty */
+const TX_MASTER=[
+["Consultation & diagnosis",["Consultation / examination","Consultation / examination with X-ray","Specialist consultation","Emergency visit","Follow-up visit","Periapical X-ray (per film)","Bitewing X-ray","OPG (full mouth X-ray)","Lateral cephalogram","CBCT scan — single area","CBCT scan — full mouth","Intraoral photographs","Study models / impressions","Digital smile design","Oral cancer screening","Pulp vitality test"]],
+["Preventive & hygiene",["Scaling with polishing","Scaling — heavy calculus","Air polishing / stain removal","Fluoride varnish (full mouth)","Pit & fissure sealant (per tooth)","Desensitising treatment","Oral hygiene instruction","Night guard / occlusal splint","Sports mouthguard"]],
+["Fillings & restorative",["Filling (per tooth)","Composite filling — 1 surface","Composite filling — 2 surfaces","Composite filling — 3+ surfaces / build-up","Glass ionomer (GIC) filling","Amalgam filling","Temporary filling","Cervical / abfraction filling","Core build-up","Fibre post with core","Cast post with core","Composite bonding (per tooth)","Diastema closure (per tooth)","Inlay / onlay — composite","Inlay / onlay — ceramic"]],
+["Root canal (endodontics)",["Root canal (RCT)","RCT — anterior tooth","RCT — premolar","RCT — molar","Re-RCT","Re-RCT — molar","Emergency pulp opening","Pulp capping (direct / indirect)","Apexification / MTA plug","Regenerative endodontics","Broken instrument removal","Perforation repair (MTA)","Internal bleaching (per tooth)","Apicectomy (root-end surgery)"]],
+["Gum treatment (periodontics)",["Deep cleaning / root planing (per quadrant)","Deep cleaning — full mouth","Periodontal maintenance visit","Local antibiotic gel therapy","Laser gum treatment","Gingivectomy (per area)","Crown lengthening (per tooth)","Flap surgery (per quadrant)","Gum graft (per tooth)","Frenectomy","Gum depigmentation","Splinting of loose teeth"]],
+["Extractions & oral surgery",["Extraction — simple","Extraction — surgical","Root stump removal","Wisdom tooth — erupted","Impaction surgery","Wisdom tooth — soft tissue impaction","Wisdom tooth — bony impaction","Exposure of impacted canine","Incision & drainage","Dry socket treatment","Alveoloplasty (per area)","Cyst removal","Biopsy","Socket preservation","Sinus lift — internal","Sinus lift — open (lateral)","Suture removal"]],
+["Implants",["Implant (without crown)","Implant — premium brand","Immediate implant","Mini implant","Healing abutment / second stage","Abutment","Implant crown — PFM","Implant crown — zirconium","Bone graft (per point)","Membrane","All-on-4 (per arch)","Implant overdenture (per arch)","Peri-implantitis treatment","Implant removal"]],
+["Crowns & bridges",["Crown — metal","Crown — PFM","Crown — zirconium","Crown — E.max","Bridge unit — PFM","Bridge unit — zirconium","Maryland bridge","Temporary crown (per tooth)","Crown re-cementation (per tooth)","Crown removal (per tooth)"]],
+["Dentures",["Denture — acrylic (per arch)","Denture — Molloplast (per arch)","Denture — high-impact acrylic (per arch)","Immediate denture (per arch)","Partial denture (per tooth)","Flexible denture (per tooth)","Cast partial framework (per arch)","Overdenture (per arch)","Denture reline — chairside","Denture reline — lab","Soft liner","Denture repair","Tooth addition to denture"]],
+["Orthodontics (braces)",["Ortho consultation & records","Ortho conventional — advance","Ortho conventional — per visit","Ceramic braces — advance","Self-ligating braces — advance","Ortho aligners — advance","Ortho aligners — monthly instalment (150,000 over 10 months)","Retainer (per arch)","Clear (Essix) retainer (per arch)","Fixed lingual retainer (per arch)","Removable appliance","Functional appliance","Rapid palatal expander","Mini-screw / TAD","Bracket re-bonding","Debonding & polishing"]],
+["Children (paediatric)",["Child check-up","Pulpotomy","Pulpectomy (milk tooth)","Milk tooth extraction","Stainless steel crown","Zirconium crown — child","Strip crown — child","Space maintainer","Habit-breaking appliance","Fluoride for child"]],
+["Cosmetic dentistry",["Bleaching","Home whitening kit","Veneer (per tooth)","Composite veneer (per tooth)","Smile makeover consultation","Gum contouring","Tooth jewellery"]],
+["Jaw joint & other",["TMJ splint","TMJ consultation & treatment","Mouth ulcer / laser treatment","Halitosis (bad breath) treatment","Sedation","Extra anaesthesia","Medicines / prescription"]],
+["Facial aesthetics",["Botox (per area)","Dermal filler (per ml)","Botox for teeth grinding","PRP therapy"]]];
+const TX_CATS=TX_MASTER.map(x=>x[0]).concat(["Other"]);
+const TX_IDX=(()=>{const m={};for(const [c,l] of TX_MASTER)for(const n of l)m[n.toLowerCase()]=c;return m})();
+const TX_KEYS=[[/consult|x-?ray|opg|cbct|ceph|exam|check/,"Consultation & diagnosis"],[/scal|polish|fluoride|sealant|hygiene|night guard|mouthguard/,"Preventive & hygiene"],[/rct|root canal|pulp|apex|endo|apicect/,"Root canal (endodontics)"],[/gum|gingiv|perio|flap|frenec|root planing|splint/,"Gum treatment (periodontics)"],[/extract|impact|wisdom|surg|cyst|biops|sinus|socket|drainage/,"Extractions & oral surgery"],[/implant|abutment|bone graft|membrane|all-on/,"Implants"],[/ortho|brace|aligner|retainer|bracket|expander/,"Orthodontics (braces)"],[/denture|reline|cast partial|molloplast/,"Dentures"],[/crown|bridge|maryland/,"Crowns & bridges"],[/fill|composite|gic|amalgam|post|core|inlay|onlay|bond/,"Fillings & restorative"],[/bleach|whiten|veneer|smile|jewel/,"Cosmetic dentistry"],[/child|milk|paed|pedo|space maint/,"Children (paediatric)"],[/botox|filler|prp/,"Facial aesthetics"],[/tmj|ulcer|sedat|anaesth|medic/,"Jaw joint & other"]];
+function txCat(x){if(x&&x.c&&TX_CATS.includes(x.c))return x.c;const n=String((x&&x.n)||"").toLowerCase();if(TX_IDX[n])return TX_IDX[n];for(const [re,c] of TX_KEYS)if(re.test(n))return c;return "Other"}
+const TX_FULL=()=>TX_MASTER.flatMap(([c,l])=>l.map(n=>({n,p:0,c})));
 const prdlg=$("prdlg");
-const prLine=x=>{x=x||{};return `<div class="line pr"><input class="pr-n" value="${esc(x.n||"")}" placeholder="Treatment name" aria-label="Treatment name"><input class="pr-p" type="number" min="0" value="${x.p??""}" placeholder="Rs" aria-label="Price in rupees" inputmode="numeric"><button type="button" class="ldel" data-lrm aria-label="Remove">×</button></div>`};
-function openPrices(){$("pr-lines").innerHTML=S().prices.map(prLine).join("");openD(prdlg)}
-$("pr-add").addEventListener("click",()=>{$("pr-lines").insertAdjacentHTML("beforeend",prLine());$("pr-lines").lastElementChild.querySelector(".pr-n").focus()});
-$("pr-lines").addEventListener("click",e=>{if(e.target.closest("[data-lrm]"))e.target.closest(".line").remove()});
-$("prForm").addEventListener("submit",e=>{e.preventDefault();const prices=[...$("pr-lines").querySelectorAll(".line")].map(r=>({n:r.querySelector(".pr-n").value.trim(),p:+r.querySelector(".pr-p").value||0})).filter(x=>x.n);saveSet({...SET,prices});prdlg.close();toast("Prices saved")});
+const prLine=x=>{x=x||{};const p=+x.p||0;return `<div class="line pr${p?"":" unpriced"}"><input class="pr-n" value="${esc(x.n||"")}" placeholder="Treatment name" aria-label="Treatment name"><input class="pr-p" type="number" min="0" value="${p||""}" placeholder="Rs" aria-label="Price in rupees" inputmode="numeric"><button type="button" class="ldel" data-lrm aria-label="Remove">×</button></div>`};
+function prSec(c,items,open){const priced=items.filter(x=>+x.p>0).length;return `<details class="prsec" data-cat="${esc(c)}"${open?" open":""}><summary><span class="t">${esc(c)}</span><span class="muted" data-cnt>${items.length} · ${priced} priced</span></summary><div class="lines">${items.map(prLine).join("")}</div><button type="button" class="btn small pr-addc" data-addc>+ Add treatment here</button></details>`}
+function prRender(list){const by={};for(const c of TX_CATS)by[c]=[];for(const x of list)by[txCat(x)].push(x);
+  $("pr-lines").innerHTML=TX_CATS.filter(c=>by[c].length||c!=="Other").map(c=>prSec(c,by[c],false)).join("");prStat()}
+function prCollect(){const out=[];for(const sec of $("pr-lines").querySelectorAll(".prsec"))for(const r of sec.querySelectorAll(".line"))out.push({n:r.querySelector(".pr-n").value.trim(),p:+r.querySelector(".pr-p").value||0,c:sec.dataset.cat});return out.filter(x=>x.n)}
+function prStat(){const cur=prCollect(),have=new Set(cur.map(x=>x.n.toLowerCase())),miss=TX_FULL().filter(x=>!have.has(x.n.toLowerCase())).length,un=cur.filter(x=>!x.p).length;
+  $("pr-stat").textContent=cur.length+" treatments"+(un?" · "+un+" without a price":"");$("pr-fullbox").hidden=!miss;$("pr-fullmsg").textContent=miss+" common treatments aren't in your list yet.";
+  for(const sec of $("pr-lines").querySelectorAll(".prsec")){const ls=[...sec.querySelectorAll(".line")],pr=ls.filter(r=>+r.querySelector(".pr-p").value>0).length;sec.querySelector("[data-cnt]").textContent=ls.length+" · "+pr+" priced"}}
+function openPrices(){$("pr-q").value="";prRender(S().prices);openD(prdlg)}
+$("pr-full").addEventListener("click",()=>{const cur=prCollect(),have=new Set(cur.map(x=>x.n.toLowerCase())),add=TX_FULL().filter(x=>!have.has(x.n.toLowerCase()));const open=new Set([...$("pr-lines").querySelectorAll(".prsec[open]")].map(d=>d.dataset.cat));
+  prRender(cur.concat(add));for(const d of $("pr-lines").querySelectorAll(".prsec"))if(open.has(d.dataset.cat))d.open=true;toast(add.length+" treatments added. Fill in your prices, then tap Save prices.")});
+$("pr-q").addEventListener("input",()=>{const q=$("pr-q").value.trim().toLowerCase();for(const sec of $("pr-lines").querySelectorAll(".prsec")){let n=0;for(const r of sec.querySelectorAll(".line")){const hit=!q||r.querySelector(".pr-n").value.toLowerCase().includes(q)||sec.dataset.cat.toLowerCase().includes(q);r.hidden=!hit;if(hit)n++}sec.hidden=!!q&&!n;if(q)sec.open=n>0}});
+$("pr-lines").addEventListener("click",e=>{if(e.target.closest("[data-lrm]")){e.target.closest(".line").remove();prStat();return}
+  const a=e.target.closest("[data-addc]");if(a){const box=a.parentElement.querySelector(".lines");box.insertAdjacentHTML("beforeend",prLine());box.lastElementChild.querySelector(".pr-n").focus()}});
+$("pr-lines").addEventListener("input",e=>{if(e.target.classList.contains("pr-p"))e.target.closest(".line").classList.toggle("unpriced",!(+e.target.value>0));prStat()});
+$("prForm").addEventListener("submit",e=>{e.preventDefault();const prices=prCollect();saveSet({...SET,prices});prdlg.close();toast("Prices saved")});
 const setdlg=$("setdlg");let stLogo=null;
 async function compressLogo(file){const bmp=await createImageBitmap(file);let max=512,out="";for(let k=0;k<5;k++){const sc=Math.min(1,max/Math.max(bmp.width,bmp.height)),c=document.createElement("canvas");c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);const x=c.getContext("2d");x.drawImage(bmp,0,0,c.width,c.height);out=c.toDataURL("image/png");if(out.length<160000)return out;const c2=document.createElement("canvas");c2.width=c.width;c2.height=c.height;const y=c2.getContext("2d");y.fillStyle="#fff";y.fillRect(0,0,c2.width,c2.height);y.drawImage(c,0,0);out=c2.toDataURL("image/jpeg",.88);if(out.length<160000)return out;max=Math.round(max*.8)}return out}
 $("st-logo").addEventListener("change",async()=>{const f=$("st-logo").files&&$("st-logo").files[0];if(!f)return;try{stLogo=await compressLogo(f);$("st-logoprev").src=stLogo;$("st-logoprev").hidden=false}catch(e){toast("Couldn't read that image.")}});
@@ -2661,7 +2705,7 @@ function tpSave(k,pl){const p=P[selPat],now=new Date().toISOString();cset("patie
 function openTp(itemId,tooth,kind){tpKind=kind||"prop";const pl=tpGet(tpKind),it=itemId?pl.items.find(i=>i.id===itemId):null;tpEdit=itemId||null;trOpts();
   $("tpT").textContent=(it?"Edit":"Add to")+(tpKind==="plan"?" treatment plan":" proposed plan");$("tp-tr").value=it?it.tr:"";$("tp-th").value=it?it.tooth||"":(tooth?String(tooth):"");$("tp-q").value=it?it.qty||1:1;$("tp-p").value=it?it.price??"":"";$("tp-n").value=it?it.note||"":"";$("tp-ph").value=String(it?it.phase||2:2);$("tp-del").hidden=!it;$("tp-err").hidden=true;tpAmt();openD(tpdlg);setTimeout(()=>{if(!it)$("tp-tr").focus()},50)}
 function tpAmt(){const q=+$("tp-q").value||1,p=+$("tp-p").value||0;$("tp-amt").textContent=p?`Amount: ${rs(q*p)}`:""}
-$("tp-tr").addEventListener("change",()=>{const v=$("tp-tr").value.trim(),pr=priceFor(v);if(pr&&!$("tp-p").value)$("tp-p").value=pr.p;if(!tpEdit)$("tp-ph").value=String(tpGuessPhase(v));tpAmt()});
+$("tp-tr").addEventListener("change",()=>{const v=$("tp-tr").value.trim(),pr=priceFor(v);if(pr&&+pr.p>0&&!$("tp-p").value)$("tp-p").value=pr.p;if(!tpEdit)$("tp-ph").value=String(tpGuessPhase(v));tpAmt()});
 for(const k of ["tp-q","tp-p"])$(k).addEventListener("input",tpAmt);
 $("tp-th").addEventListener("change",()=>{const n=teethOf($("tp-th").value).length;if(n>1&&(+$("tp-q").value||1)===1&&/tooth|filling|crown|rct|root|veneer|extract|implant|pfm|zircon|flexible|partial/i.test($("tp-tr").value))$("tp-q").value=n;tpAmt()});
 $("tpdlg").addEventListener("click",e=>{const pk=e.target.closest("[data-pick]");if(pk)openTeeth(pk.closest(".line-lab"))});
