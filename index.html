@@ -847,6 +847,71 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
 .lkopt{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-weight:600;font-size:.88rem}
 .lkopt[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft);color:var(--accent)}
 .lkdot{width:20px;height:20px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.1)}
+
+/* ===== Simple layout ===== */
+.morebtn,.mebtn,.fab,.ptabs,.schips,.seg3,.d-simple,.callbtn{display:none!important}
+:root[data-layout="simple"] .morebtn{display:flex!important}
+:root[data-layout="simple"] .mebtn{display:inline-grid!important;place-items:center;width:44px;height:44px;border-radius:22px;border:1px solid var(--line);background:var(--surface);color:var(--accent);font-weight:700;font-size:.9rem;padding:0}
+:root[data-layout="simple"] #who>*:not(#meBtn){display:none!important}
+:root[data-layout="simple"] #who{position:absolute;top:14px;right:14px;z-index:3}
+:root[data-layout="simple"] header.top{padding:12px 64px 12px 14px!important;align-items:center}
+:root[data-layout="simple"] header.top::after{display:none}
+:root[data-layout="simple"] .head-logo{width:56px!important;padding:3px!important;box-shadow:none!important}
+:root[data-layout="simple"] .btag,:root[data-layout="simple"] .dsline{display:none!important}
+:root[data-layout="simple"] .bname{font-size:1.1rem!important}
+:root[data-layout="simple"] .mainbtn[data-main="lab"],:root[data-layout="simple"] .mainbtn[data-main="inventory"],:root[data-layout="simple"] .mainbtn[data-main="reports"]{display:none!important}
+:root[data-layout="simple"] .mainnav{position:fixed!important;left:0;right:0;bottom:0;z-index:60;display:grid!important;grid-template-columns:repeat(auto-fit,minmax(0,1fr))!important;gap:0!important;margin:0!important;padding:6px 4px calc(8px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px -12px rgba(0,0,0,.25);width:auto!important}
+:root[data-layout="simple"] .mainbtn{flex-direction:column!important;gap:2px!important;padding:6px 0!important;background:none!important;border:0!important;box-shadow:none!important;color:var(--muted)!important;font-size:.66rem!important;border-radius:12px!important;transform:none!important;min-height:52px}
+:root[data-layout="simple"] .mainbtn .lf{display:none!important}:root[data-layout="simple"] .mainbtn .ls{display:inline!important}
+:root[data-layout="simple"] .mainbtn[aria-pressed="true"]{color:var(--accent)!important;background:var(--accent-soft)!important}
+:root[data-layout="simple"] body{padding-bottom:84px}
+@media (min-width:900px){:root[data-layout="simple"] .mainnav{left:50%;right:auto;transform:translateX(-50%);width:min(640px,100%)!important;border:1px solid var(--line);border-radius:18px 18px 0 0}}
+/* home */
+:root[data-layout="simple"] .dgrid{display:flex!important;flex-direction:column;gap:12px}
+:root[data-layout="simple"] .d-simple{display:block!important;order:-2}
+:root[data-layout="simple"] .d-appts{order:-1}
+:root[data-layout="simple"] .d-clock,:root[data-layout="simple"] .d-today,:root[data-layout="simple"] .d-rep,:root[data-layout="simple"] .d-cal,:root[data-layout="simple"] .d-stock,:root[data-layout="simple"] .d-exp,:root[data-layout="simple"] .d-money,:root[data-layout="simple"] .d-pay{display:none!important}
+.d-simple{background:none!important;border:0!important;padding:4px 2px!important;box-shadow:none!important}
+.d-simple .sh1{font-family:var(--f-display);font-size:1.6rem;line-height:1.15;margin:2px 0 14px;text-transform:none;letter-spacing:0;color:var(--ink)}
+.d-simple .qa{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.d-simple .qab{min-height:84px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);font-weight:700;font-size:.85rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.d-simple .qab svg{width:24px;height:24px;color:var(--accent)}
+.d-simple .qab.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}.d-simple .qab.pri svg{color:var(--accent-ink)}
+.d-simple .m2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.d-simple .mt{text-align:left;border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.d-simple .mt span{font-size:.82rem;color:var(--muted)}.d-simple .mt b{font-family:var(--f-display);font-size:1.3rem}.d-simple .okc{color:var(--ok)}.d-simple .wc{color:var(--warn)}
+/* patients */
+:root[data-layout="simple"] .schips{display:flex!important;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.schips button,.seg3 button{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:700;font-size:.85rem}
+.schips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+:root[data-layout="simple"] #patNew,:root[data-layout="simple"] #ap-new{display:none!important}
+:root[data-layout="simple"] body[data-mview="patients"] #fabPat:not([hidden]),:root[data-layout="simple"] body[data-mview="appointments"] #fabAp{display:flex!important}
+.fab{position:fixed;right:18px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:61;width:60px;height:60px;border-radius:30px;border:0;background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 24px -8px rgba(0,0,0,.45);align-items:center;justify-content:center}
+body.no-pat_edit #fabPat,body.no-appt_edit #fabAp{display:none!important}
+/* appointments */
+:root[data-layout="simple"] .seg3{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:var(--idle-soft);border-radius:12px;padding:4px;grid-column:1/-1;margin-bottom:4px}
+.seg3 button{border:0;border-radius:9px;background:none;color:var(--muted)}.seg3 button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+#ap-chairs[data-cf="1"]>.chair:nth-child(3),#ap-chairs[data-cf="2"]>.chair:nth-child(2){display:none!important}
+/* patient profile tabs */
+:root[data-layout="simple"] .ptabs{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));margin:12px 0;border-bottom:1px solid var(--line)}
+.ptabs button{min-height:44px;border:0;background:none;font-weight:700;font-size:.82rem;color:var(--muted);border-bottom:3px solid transparent}
+.ptabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+:root[data-layout="simple"] #patDetail .pgrid{display:flex!important;flex-direction:column;gap:12px}
+:root[data-layout="simple"] #patDetail .lcol,:root[data-layout="simple"] #patDetail .side{display:contents!important}
+:root[data-layout="simple"] #patDetail[data-psec="treat"] [data-sec]:not([data-sec="treat"]),:root[data-layout="simple"] #patDetail[data-psec="chart"] [data-sec]:not([data-sec="chart"]),:root[data-layout="simple"] #patDetail[data-psec="xray"] [data-sec]:not([data-sec="xray"]),:root[data-layout="simple"] #patDetail[data-psec="visits"] [data-sec]:not([data-sec="visits"]),:root[data-layout="simple"] #patDetail[data-psec="notes"] [data-sec]:not([data-sec="notes"]){display:none!important}
+:root[data-layout="simple"] #patDetail [data-sec]{margin-top:0!important}
+:root[data-layout="simple"] .callbtn{display:inline-flex!important}
+
+:root[data-layout="simple"] #ap-team,:root[data-layout="simple"] #ap-set,:root[data-layout="simple"] #ap-tiles,:root[data-layout="simple"] #apView #ap-newpat{display:none!important}
+:root[data-layout="simple"] #apView:not([hidden]){display:flex!important;flex-direction:column;gap:12px}
+:root[data-layout="simple"] #apView>.vhead{margin:0}
+:root[data-layout="simple"] #ap-remind{order:5}
+:root[data-layout="simple"] #ap-chairs{display:flex!important;flex-direction:column;gap:12px}
+:root[data-layout="simple"] .mnav h2{font-size:1.05rem!important;min-width:0!important}
+/* more sheet */
+.mehead{display:flex;gap:12px;align-items:center;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:14px}
+.mli{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;padding:0 14px;border:0;border-bottom:1px solid var(--line);background:none;font-size:1rem;text-align:left;color:var(--ink)}
+.mli svg{width:22px;height:22px;flex:none}.mli.out{color:var(--bad);font-weight:700;border-bottom:0}
 </style>
 
 </head>
@@ -914,8 +979,8 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
         <p class="bmeta" id="hMeta"></p>
       </div>
     </div>
-    <div class="who" id="who" hidden><button class="btn small" id="installBtn" hidden>Install app</button><span class="netchip" id="netChip" role="status" aria-live="polite" hidden></span><span id="whoName"></span><span class="rolechip" id="roleChip" hidden></span><button class="btn small" id="lookBtn">🎨 Appearance</button><button class="btn small" id="profBtn" hidden>Clinic profile</button><button class="btn small" id="acBtn" hidden>Staff access</button><button class="btn small" id="consoleBtn" hidden>Owner console</button><button class="btn ghost small" id="pwBtn" hidden>Password</button><button class="btn ghost small" id="signOut">Sign out</button></div>
-    <nav class="nav mainnav" aria-label="Main"><button class="mainbtn" data-main="dashboard" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="lf">Dashboard</span><span class="ls">Home</span></button><button class="mainbtn" data-main="patients" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M21 19v-1a4 4 0 0 0-3-3.9M15.5 4.1a3.5 3.5 0 0 1 0 6.8"/></svg><span class="lf">Patients</span><span class="ls">Patients</span></button><button class="mainbtn" data-main="appointments" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h3"/></svg><span class="lf">Appointments</span><span class="ls">Appts</span></button><button class="mainbtn" data-main="billing" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="lf">Billing</span><span class="ls">Billing</span></button><button class="mainbtn" data-main="lab" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6"/><path d="M10 3v6l-5.5 9.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7.5 15h9"/></svg><span class="lf">Lab</span><span class="ls">Lab</span></button><button class="mainbtn" data-main="inventory" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg><span class="lf">Inventory</span><span class="ls">Stock</span></button></nav>
+    <div class="who" id="who" hidden><button class="btn small" id="installBtn" hidden>Install app</button><span class="netchip" id="netChip" role="status" aria-live="polite" hidden></span><button type="button" class="mebtn" id="meBtn" aria-label="Menu"></button><span id="whoName"></span><span class="rolechip" id="roleChip" hidden></span><button class="btn small" id="lookBtn">🎨 Appearance</button><button class="btn small" id="profBtn" hidden>Clinic profile</button><button class="btn small" id="acBtn" hidden>Staff access</button><button class="btn small" id="consoleBtn" hidden>Owner console</button><button class="btn ghost small" id="pwBtn" hidden>Password</button><button class="btn ghost small" id="signOut">Sign out</button></div>
+    <nav class="nav mainnav" aria-label="Main"><button class="mainbtn" data-main="dashboard" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="lf">Dashboard</span><span class="ls">Home</span></button><button class="mainbtn" data-main="patients" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M21 19v-1a4 4 0 0 0-3-3.9M15.5 4.1a3.5 3.5 0 0 1 0 6.8"/></svg><span class="lf">Patients</span><span class="ls">Patients</span></button><button class="mainbtn" data-main="appointments" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h3"/></svg><span class="lf">Appointments</span><span class="ls">Appts</span></button><button class="mainbtn" data-main="billing" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="lf">Billing</span><span class="ls">Billing</span></button><button class="mainbtn" data-main="lab" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6"/><path d="M10 3v6l-5.5 9.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7.5 15h9"/></svg><span class="lf">Lab</span><span class="ls">Lab</span></button><button class="mainbtn" data-main="inventory" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg><span class="lf">Inventory</span><span class="ls">Stock</span></button><button class="mainbtn morebtn" id="moreBtn" type="button" aria-label="More"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>More</span></button></nav>
   </header>
 
   <nav class="invnav" id="invnav" aria-label="Inventory">
@@ -939,6 +1004,7 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
   </section>
   <section id="dashView" class="view cview" hidden>
     <div class="dgrid">
+      <div class="card d-simple" id="d-simple"></div>
       <div class="card d-clock"><div class="clk" id="d-time"></div><div class="cdate" id="d-date"></div><div class="copen" id="d-open"></div></div>
       <div class="card d-today"><h3>Today at a glance</h3><div class="kpis" id="d-kpis"></div></div>
       <div class="card d-rep" id="d-rep"></div>
@@ -953,6 +1019,7 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
   <section id="patView" class="view cview" hidden>
     <div id="patList">
       <div class="vhead"><div><h2>Patients</h2><p class="muted" id="patCount"></p></div><div class="vact"><button class="btn primary" id="patNew">+ New patient</button></div></div>
+      <div class="schips" id="patChips"></div>
       <div class="search wide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="patQ" type="search" placeholder="Search by name, mobile number or file no." aria-label="Search patients"></div>
       <div class="card flush" id="patRows"></div>
     </div>
@@ -1100,6 +1167,12 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
   <p class="muted small" style="margin:0 0 10px">Changes show straight away and are saved on this device only. Each person can choose their own look.</p>
   <div id="lookBody"></div>
   <div class="actions"><button type="button" class="btn small" id="lookReset">Back to original look</button><span></span></div>
+</div></dialog>
+<button type="button" class="fab" id="fabPat" aria-label="Add patient"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button type="button" class="fab" id="fabAp" aria-label="Book appointment"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<dialog id="moredlg"><div class="dlg">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="margin:0">More</h2><button type="button" class="btn small" data-close>Close</button></div>
+  <div class="mehead" id="moreWho"></div>
+  <div id="moreList"></div>
 </div></dialog>
 <dialog id="rsdlg"><form class="dlg" id="rsForm" novalidate>
   <h2>Reschedule appointment</h2>
@@ -1499,7 +1572,7 @@ function expiring(it){const d=daysTo(it.expiry);return d!==null&&d<=60}
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
-function render(){
+function render(){try{syncSimple()}catch(e){}
   applyAccess();
   USE30=usageMap(30);
   const all=items(), live=all.filter(i=>!i.hidden);
@@ -1635,7 +1708,7 @@ $("subtabs").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!
 $("sub").addEventListener("change",e=>{activeType=e.target.value;render()});
 document.addEventListener("click",e=>{
   const v=e.target.closest(".viewbtn");if(v){view=v.dataset.view;localSet("aa-view",view);render();return}
-  const m=e.target.closest(".mainbtn");if(m){main=m.dataset.main;localSet("aa-main",main);render();window.scrollTo(0,0)}
+  const m=e.target.closest(".mainbtn");if(m&&m.dataset.main){main=m.dataset.main;localSet("aa-main",main);render();window.scrollTo(0,0)}
 });
 $("cq").addEventListener("input",()=>render());
 $("cabGrid").addEventListener("click",e=>{const b=e.target.closest("[data-edit]");if(b&&canWrite)openEdit(b.dataset.edit)});
@@ -2068,6 +2141,7 @@ function renderPatients(){
   const inTx=p=>{const it=(p.plan&&Array.isArray(p.plan.items))?p.plan.items:[];return it.length>0&&it.some(i=>!i.done)};
   const rank=p=>{const tx=inTx(p),la=lastAp[p.id]||"";return {tx,top:!!(nextAp[p.id]||tx||(la&&la>=recent)),act:[la,String(p.createdAt||"").slice(0,10)].sort().pop()||""}};
   const R={};for(const p of list)R[p.id]=rank(p);
+  if(isSimple()){if(patF==="tx")list=list.filter(p=>R[p.id].tx);else if(patF==="owe")list=list.filter(p=>patBal(p.id)>0)}renderPatChips();
   list.sort((a,b)=>(R[b.id].top-R[a.id].top)||R[b.id].act.localeCompare(R[a.id].act)||(b.createdAt||"").localeCompare(a.createdAt||"")||(a.name||"").localeCompare(b.name||""));
   $("patRows").innerHTML=list.length?list.slice(0,300).map(p=>{const bal=patBal(p.id),na=nextAp[p.id];return `<div class="prow2" role="button" tabindex="0" data-pat="${esc(p.id)}"><span class="av">${esc(initials(p.name))}</span><span class="pinfo2"><b>${esc(p.name)}</b><span class="sub2">${esc(p.phone||"No phone")}${p.fileNo?" · "+esc(p.fileNo):""}${p.age?" · "+esc(p.age)+" y":""}${p.gender?" · "+esc(p.gender):""}</span></span><span class="chips">${p.alerts?`<span class="chip2 bad">Medical alert</span>`:""}${R[p.id].tx?`<span class="chip2 ok">In treatment</span>`:""}${na?`<span class="chip2 acc">${esc(fmtDate(na.date))}, ${esc(fmtTime(na.time))}</span>`:""}${bal>0?`<span class="chip2 warn">${rs(bal)} left to pay</span>`:""}</span><button type="button" class="rowdel" data-pdelp="${esc(p.id)}" title="Delete patient" aria-label="Delete ${esc(p.name)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button></div>`}).join(""):`<div class="empty">${q?"No patient matches. Check the spelling or the phone number.":"No patients yet. Tap <b>+ New patient</b> to register the first one."}</div>`;
 }
@@ -2077,25 +2151,26 @@ function renderPatDetail(id){setTimeout(loadXThumbs,0);
   const bills=Object.entries(B).filter(([,b])=>b.patientId===id).map(([k,b])=>({id:k,...b})).sort((a,b)=>(b.date+(b.createdAt||"")).localeCompare(a.date+(a.createdAt||"")));
   const bal=bills.reduce((s,b)=>s+billCalc(b).bal,0),paid=bills.reduce((s,b)=>s+billCalc(b).paid,0),TH=toothHist(bills);
   const PL=planTeeth(p);const tooth=n=>{const st=teeth[n]||"";return `<button type="button" class="tooth${n>=31?" lower":""}${st?" "+st:""}${toothSel===n?" sel":""}${TH[n]?" hx":""}${PL.has(n)?" pl":""}" data-tooth="${n}" aria-label="Tooth ${n}${st?", "+TOOTH_ST[st]:""}">${n}</button>`};
-  $("patDetail").innerHTML=`<div class="pd-back"><button class="btn" data-back>‹ All patients</button></div>
+  $("patDetail").dataset.psec=pSec;$("patDetail").innerHTML=`<div class="pd-back"><button class="btn" data-back>‹ All patients</button></div>
   <div class="card pd-top"><div class="pd-id"><span class="av big">${esc(initials(p.name))}</span><div><h2>${esc(p.name)}</h2><p class="muted">${[p.fileNo,p.age?p.age+" years":"",p.gender,p.cnic?"CNIC "+p.cnic:"",p.ref?"Referred by "+p.ref:""].filter(Boolean).map(esc).join(" · ")}</p><p class="phline"><span class="seltxt">${esc(p.phone||"No phone")}</span>${waNum(p.phone)?` <a class="wa sm" href="${esc(waHref(p.phone,""))}" target="_blank" rel="noopener">${WA_IC}<span>WhatsApp</span></a>`:""}</p>${p.address?`<p class="muted">${esc(p.address)}</p>`:""}</div></div>
-    <div class="vact"><button class="btn" data-pedit>Edit</button><button class="btn" data-plab>Lab case</button><button class="btn" data-pbook>Book appointment</button><button class="btn primary" data-pbill>New bill</button></div></div>
+    <div class="vact">${p.phone?`<a class="btn callbtn" href="tel:${esc(String(p.phone).replace(/[^0-9+]/g,""))}">Call</a>`:""}<button class="btn" data-pedit>Edit</button><button class="btn" data-plab>Lab case</button><button class="btn" data-pbook>Book appointment</button><button class="btn primary" data-pbill>New bill</button></div></div>
   ${p.alerts?`<div class="alertbar">Medical alert: ${esc(p.alerts)}</div>`:""}
+  <div class="ptabs" role="tablist" aria-label="Patient sections">${[["treat","Treatment"],["chart","Chart"],["xray","X-rays"],["visits","Visits"],["notes","Notes"]].map(([k,n])=>`<button type="button" role="tab" data-psec="${k}" aria-selected="${pSec===k}">${n}</button>`).join("")}</div>
   <div class="pgrid">
-    <div class="lcol" style="min-width:0"><div class="card"><h3>Tooth chart</h3><p class="muted small" style="margin:-4px 0 10px">Tap a tooth, then choose its condition. Upper jaw on top, patient's right on your left.</p>
+    <div class="lcol" style="min-width:0"><div class="card" data-sec="chart"><h3>Tooth chart</h3><p class="muted small" style="margin:-4px 0 10px">Tap a tooth, then choose its condition. Upper jaw on top, patient's right on your left.</p>
       <div class="jaw"><div class="teeth">${UPPER.map(tooth).join("")}</div><div class="midline"></div><div class="teeth">${LOWER.map(tooth).join("")}</div></div>
       <div class="tpal">${toothSel?`<b>Tooth ${toothSel}:</b>`+Object.entries(TOOTH_ST).map(([k,v])=>`<button type="button" class="tbtn ${k}${teeth[toothSel]===k?" on":""}" data-tst="${k}">${v}</button>`).join("")+`<button type="button" class="tbtn" data-tst="">Healthy</button><button type="button" class="tbtn plan" data-tpadd="${toothSel}">+ Plan treatment</button>`:Object.entries(TOOTH_ST).map(([k,v])=>`<span class="tleg ${k}">${v}</span>`).join("")+`<span class="tleg hxl">● Treated (has bill)</span><span class="tleg pll">▁ Planned</span>`}</div>
       ${toothSel?`<div class="thist"><h4>Tooth ${toothSel}: treatment history</h4>${(TH[toothSel]||[]).length?TH[toothSel].map(h=>`<button class="kv kvb" data-bopen="${esc(h.id)}"><span>${esc(fmtDate(h.d))} · ${esc(h.t)}</span><small>${esc(h.no||"")}</small></button>`).join(""):`<p class="muted small" style="margin:0">No treatment billed on this tooth yet.</p>`}</div>`:(Object.keys(TH).length?`<div class="txsum"><span class="muted">Treated:</span>${Object.keys(TH).map(Number).sort((a,b)=>a-b).map(n=>`<span><b>${n}</b> ${esc([...new Set(TH[n].map(h=>h.t))].join(", "))}</span>`).join("")}</div>`:"")}
     </div>
-    ${propCard(p)}${planCard(p)}${xrCard(p)}</div>
+    <div data-sec="treat">${propCard(p)}${planCard(p)}</div><div data-sec="xray">${xrCard(p)}</div></div>
     <div class="side">
-      <div class="card"><div class="dh"><h3>Account</h3><button class="btn small" data-pstmt>Statement PDF</button></div><div class="kv"><span>Total paid</span><b>${rs(paid)}</b></div><div class="kv"><span>Balance due</span><b class="${bal>0?"due":""}">${rs(bal)}</b></div>${bal>0&&waNum(p.phone)?`<a class="wa sm" style="margin-top:8px" href="${esc(waHref(p.phone,fillT(S().templates.due,{...billVars({patientName:p.name}),balance:rs(bal)})))}" target="_blank" rel="noopener">${WA_IC}<span>Send balance reminder</span></a>`:""}${waNum(p.phone)?`<a class="wa sm" style="margin-top:8px" href="${esc(waHref(p.phone,fillT(S().templates.recall,billVars({patientName:p.name}))))}" target="_blank" rel="noopener">${WA_IC}<span>Send recall (check-up due)</span></a>`:""}</div>
-      <div class="card"><h3>Appointments</h3>${aps.length?aps.slice(0,8).map(a=>{const s=AST[a.status||"booked"]||AST.booked;return `<button class="kv kvb" data-apopen="${esc(a.id)}"><span>${esc(fmtDate(a.date))}, ${esc(fmtTime(a.time))}<small>${esc(a.treatment||"Check-up")} · Chair ${esc(a.chair)}</small></span><span class="chip2 ${s[1]}">${s[0]}</span></button>`}).join(""):`<p class="muted" style="margin:0">No appointments yet.</p>`}</div>
-      ${(()=>{const cs=lcList().filter(c=>c.patientId===id).sort((a,b)=>(b.sent||"").localeCompare(a.sent||""));return cs.length?`<div class="card"><h3>Lab work</h3>${cs.slice(0,6).map(c=>{const st=LST[c.status||"sent"]||LST.sent;return `<button class="kv kvb" data-lcopen="${esc(c.id)}"><span>${esc(c.work||"Lab work")}${c.teeth?" · "+esc(c.teeth):""}<small>${esc(c.lab||"")} · sent ${esc(c.sent?fmtDate(c.sent):"—")}</small></span><span class="chip2 ${lcLate(c)?"bad":st[1]}">${lcLate(c)?"Late":st[0]}</span></button>`}).join("")}</div>`:""})()}
-      <div class="card"><h3>Bills</h3>${bills.length?bills.slice(0,8).map(b=>{const t=billCalc(b);return `<button class="kv kvb" data-bopen="${esc(b.id)}"><span>${esc(b.no||"Bill")} · ${esc(fmtDate(b.date))}<small>${esc((b.items||[]).map(i=>i.desc).join(", ").slice(0,60))}</small></span>${t.bal>0?(t.paid>0?`<span class="chip2 acc">Paid ${rs(t.paid)}</span> <span class="chip2 warn">${rs(t.bal)} left</span>`:`<span class="chip2 warn">Due ${rs(t.bal)}</span>`):`<span class="chip2 ok">Paid ${rs(t.total)}</span>`}</button>`}).join(""):`<p class="muted" style="margin:0">No bills yet.</p>`}</div>
+      <div class="card" data-sec="treat"><div class="dh"><h3>Account</h3><button class="btn small" data-pstmt>Statement PDF</button></div><div class="kv"><span>Total paid</span><b>${rs(paid)}</b></div><div class="kv"><span>Balance due</span><b class="${bal>0?"due":""}">${rs(bal)}</b></div>${bal>0&&waNum(p.phone)?`<a class="wa sm" style="margin-top:8px" href="${esc(waHref(p.phone,fillT(S().templates.due,{...billVars({patientName:p.name}),balance:rs(bal)})))}" target="_blank" rel="noopener">${WA_IC}<span>Send balance reminder</span></a>`:""}${waNum(p.phone)?`<a class="wa sm" style="margin-top:8px" href="${esc(waHref(p.phone,fillT(S().templates.recall,billVars({patientName:p.name}))))}" target="_blank" rel="noopener">${WA_IC}<span>Send recall (check-up due)</span></a>`:""}</div>
+      <div class="card" data-sec="visits"><h3>Appointments</h3>${aps.length?aps.slice(0,8).map(a=>{const s=AST[a.status||"booked"]||AST.booked;return `<button class="kv kvb" data-apopen="${esc(a.id)}"><span>${esc(fmtDate(a.date))}, ${esc(fmtTime(a.time))}<small>${esc(a.treatment||"Check-up")} · Chair ${esc(a.chair)}</small></span><span class="chip2 ${s[1]}">${s[0]}</span></button>`}).join(""):`<p class="muted" style="margin:0">No appointments yet.</p>`}</div>
+      ${(()=>{const cs=lcList().filter(c=>c.patientId===id).sort((a,b)=>(b.sent||"").localeCompare(a.sent||""));return cs.length?`<div class="card" data-sec="visits"><h3>Lab work</h3>${cs.slice(0,6).map(c=>{const st=LST[c.status||"sent"]||LST.sent;return `<button class="kv kvb" data-lcopen="${esc(c.id)}"><span>${esc(c.work||"Lab work")}${c.teeth?" · "+esc(c.teeth):""}<small>${esc(c.lab||"")} · sent ${esc(c.sent?fmtDate(c.sent):"—")}</small></span><span class="chip2 ${lcLate(c)?"bad":st[1]}">${lcLate(c)?"Late":st[0]}</span></button>`}).join("")}</div>`:""})()}
+      <div class="card" data-sec="treat"><h3>Bills</h3>${bills.length?bills.slice(0,8).map(b=>{const t=billCalc(b);return `<button class="kv kvb" data-bopen="${esc(b.id)}"><span>${esc(b.no||"Bill")} · ${esc(fmtDate(b.date))}<small>${esc((b.items||[]).map(i=>i.desc).join(", ").slice(0,60))}</small></span>${t.bal>0?(t.paid>0?`<span class="chip2 acc">Paid ${rs(t.paid)}</span> <span class="chip2 warn">${rs(t.bal)} left</span>`:`<span class="chip2 warn">Due ${rs(t.bal)}</span>`):`<span class="chip2 ok">Paid ${rs(t.total)}</span>`}</button>`}).join(""):`<p class="muted" style="margin:0">No bills yet.</p>`}</div>
     </div>
   </div>
-  <div class="card" style="margin-top:12px"><h3>Visit notes</h3>
+  <div class="card" data-sec="notes" style="margin-top:12px"><h3>Visit notes</h3>
     <form class="noteform" id="noteForm"><textarea id="noteTxt" rows="2" maxlength="1500" placeholder="e.g. 36 RCT started, working length 21 mm. Next visit: obturation."></textarea><button class="btn primary" type="submit">Add note</button></form>
     ${notes.length?notes.map((n,ix)=>`<div class="note"><div><b>${esc(fmtDate(n.d))}</b>${byName(n)?` <span class="muted">· ${esc(byName(n))}</span>`:""}<p>${esc(n.t)}</p></div><button type="button" class="ldel" data-ndel="${ix}" aria-label="Delete note">×</button></div>`).join(""):`<p class="muted" style="margin:8px 0 0">No notes yet.</p>`}
   </div>`;
@@ -2339,7 +2414,7 @@ function renderAppts(){
   const pend=rem.filter(a=>!a.remindedAt&&waNum(a.phone)).length;
   $("ap-remind").innerHTML=`<div class="rhead"><h3>WhatsApp reminders for tomorrow · ${esc(dayName(tom))} ${esc(fmtDate(tom))}</h3><span class="chip2 ${pend?"warn":"ok"}">${rem.length?(pend?pend+" to send":"All sent"):"None booked"}</span></div>`+(rem.length?rem.map(a=>`<div class="rrow"><span><b>${esc(fmtTime(a.time))}</b> ${esc(a.patientName)} <small class="muted">· Chair ${esc(a.chair)}${a.treatment?" · "+esc(a.treatment):""}</small></span>${a.remindedAt?`<span class="chip2 ok">✓ Sent</span>`:waNum(a.phone)?`<a class="wa sm" href="${esc(waHref(a.phone,apMsg(a,"reminder")))}" target="_blank" rel="noopener" data-mark="appts|${esc(a.id)}|remindedAt">${WA_IC}<span>Send reminder</span></a>`:`<span class="chip2">No mobile number</span>`}</div>`).join(""):`<p class="muted" style="margin:0">No appointments booked for tomorrow yet.</p>`);
   const col=c=>{const its=day.filter(a=>String(a.chair)===c);return `<div class="card chair"><h3><span>Chair ${c}</span><span class="muted">${pl(its.filter(a=>a.status!=="cancelled").length,"booking")}</span></h3>${its.length?its.map(apCard).join(""):""}${(()=>{const fr=freeSlots(apDate,c);return `<div class="free"><span class="muted small">${!isOpen(apDate)?"Clinic closed on "+dayName(apDate)+"s":fr.length?"Free times · tap to book":"No free times left on this day"}</span><div class="frees">${fr.map(t=>`<button class="fslot" data-free="${c}|${t}">${fmtTime(t)}</button>`).join("")}</div>${isOpen(apDate)?`<button class="btn small addap" data-newap="${c}">+ Book Chair ${c} at another time</button>`:""}</div>`})()}</div>`};
-  $("ap-chairs").innerHTML=col("1")+col("2");
+  $("ap-chairs").innerHTML=(isSimple()?`<div class="seg3" role="group" aria-label="Chair">${[["both","Both chairs"],["1","Chair 1"],["2","Chair 2"]].map(([v,n])=>`<button type="button" data-chairf="${v}" aria-pressed="${chairF===v}">${n}</button>`).join("")}</div>`:"")+col("1")+col("2");$("ap-chairs").dataset.cf=isSimple()?chairF:"both";
 }
 $("ap-prev").addEventListener("click",()=>{apDate=addDays(apDate,-1);render()});
 $("ap-next").addEventListener("click",()=>{apDate=addDays(apDate,1);render()});
@@ -2534,7 +2609,7 @@ function tickClock(){if(main!=="dashboard"||!$("d-time"))return;const now=new Da
   $("d-date").textContent=now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   const [k,t]=clinicStatus();$("d-open").innerHTML=`<span class="odot ${k}"></span>${esc(t)}`}
 setInterval(tickClock,10000);
-function renderDash(){$("d-rep").innerHTML=dashRepCard();
+function renderDash(){$("d-rep").innerHTML=dashRepCard();try{renderSimpleHome()}catch(e){}
   const today=ymd(new Date()),tom=addDays(today,1),nowM=new Date().getHours()*60+new Date().getMinutes();
   const day=Object.entries(A).filter(([,a])=>a.date===today&&a.status!=="cancelled").map(([id,a])=>({id,...a})).sort((a,b)=>a.time.localeCompare(b.time));
   const cnt=s=>day.filter(a=>(a.status||"booked")===s).length;
@@ -3813,8 +3888,46 @@ function swipeDel(box,rowSel,btnSel){if(!box)return;let st=null;
   box.addEventListener("touchend",end);box.addEventListener("touchcancel",end);
   box.addEventListener("click",e=>{const r=e.target.closest("[data-noclick]");if(r){e.stopPropagation();e.preventDefault()}},true)}
 swipeDel($("patRows"),".prow2","[data-pdelp]");swipeDel($("list"),".row","[data-rmv]");
+/* simple layout (switch in Appearance) */
+let patF="all",chairF="both",pSec="treat";
+const isSimple=()=>document.documentElement.getAttribute("data-layout")==="simple";
+function greet(){const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"}
+function renderSimpleHome(){const el=$("d-simple");if(!el)return;if(!isSimple()){el.innerHTML="";return}
+  const today=ymd(new Date());let colT=0;for(const b of Object.values(B))for(const p of b.payments||[])if(p.date===today)colT+=+p.amount||0;
+  const owe=Object.values(B).reduce((a,b)=>a+billCalc(b).bal,0),nm=String(myName||"").split(" ").slice(0,2).join(" ");
+  el.innerHTML=`<p class="muted" style="margin:0">${esc(new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"}))}</p><h2 class="sh1">${greet()}${nm?", "+esc(nm):""}</h2>
+  <div class="qa"><button type="button" class="qab pri" data-newap data-qa="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18M12 13v5M9.5 15.5h5"/></svg>Book</button><button type="button" class="qab" data-qa="pat" id="qaPat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="4"/><path d="M3 21c0-4 3-6.5 7-6.5M18 14v6M15 17h6"/></svg>New patient</button><button type="button" class="qab" data-pbill data-qa="bill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>New bill</button></div>
+  <div class="m2"><button type="button" class="mt" data-go="billing"><span>Received today</span><b class="okc">${rs(colT)}</b></button><button type="button" class="mt" data-go="billing-due"><span>Patients owe</span><b class="wc">${rs(owe)}</b></button></div>`}
+function renderPatChips(){const el=$("patChips");if(!el)return;if(!isSimple()){el.innerHTML="";return}
+  el.innerHTML=[["all","All"],["tx","In treatment"],["owe","Owes money"]].map(([k,n])=>`<button type="button" data-patf="${k}" aria-pressed="${patF===k}">${n}</button>`).join("")}
+function goMain(m){main=m;localSet("aa-main",main);render();window.scrollTo(0,0)}
+function openMore(){const b=document.body,vis=id=>{const x=$(id);return x&&!x.hidden};
+  const items=[
+    !b.classList.contains("no-tab_lab")&&["lab","Lab work","#A8357A",'<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/>'],
+    !b.classList.contains("no-tab_inventory")&&["inventory","Stock","#6A48B2",'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/>'],
+    !b.classList.contains("no-tab_reports")&&["reports","Reports & income","#25587A",'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'],
+    !b.classList.contains("is-staff")&&["prices","Treatment prices","#AD620B",'<path d="M4 7h16M4 12h16M4 17h10"/>'],
+    vis("profBtn")&&["profBtn","Clinic profile & WhatsApp messages"],vis("acBtn")&&["acBtn","Staff access"],vis("consoleBtn")&&["consoleBtn","Owner console"],
+    vis("installBtn")&&["installBtn","Install app on this phone"],["lookBtn","Appearance & layout"],vis("pwBtn")&&["pwBtn","Change password"],["classic","Switch to classic layout"],["signOut","Sign out"]].filter(Boolean);
+  $("moreWho").innerHTML=`<span class="av">${esc(initials(myName||""))}</span><div><b>${esc(myName||"")}</b><div class="muted small">${esc((myRole()==="admin"?"Admin":"Staff")+" · "+((CDOC&&CDOC.name)||S().clinic.name||""))}</div></div>`;
+  $("moreList").innerHTML=items.map(([k,n,c,ic])=>`<button type="button" class="mli${k==="signOut"?" out":""}" data-mi="${k}">${ic?`<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>`:""}<span>${esc(n)}</span></button>`).join("");
+  openD($("moredlg"))}
+$("moreBtn").addEventListener("click",openMore);$("meBtn").addEventListener("click",openMore);
+$("moreList").addEventListener("click",e=>{const b=e.target.closest("[data-mi]");if(!b)return;const k=b.dataset.mi;$("moredlg").close();
+  if(["lab","inventory","reports"].includes(k))return goMain(k);
+  if(k==="prices")return openPrices();
+  if(k==="classic"){const L=lookGet();delete L.layout;try{localStorage.setItem("ds-look",JSON.stringify(L))}catch(x){}lookApply(L);render();toast("Classic layout. Switch back any time in Appearance.");return}
+  const t=$(k);if(t)t.click()});
+document.addEventListener("click",e=>{const t=e.target;
+  const qa=t.closest("[data-qa]");if(qa){const k=qa.dataset.qa;if(k==="book")return openAp(null);if(k==="pat")return $("patNew").click();if(k==="bill")return openBill(null);return}
+  const pf=t.closest("[data-patf]");if(pf){patF=pf.dataset.patf;render();return}
+  const cf=t.closest("[data-chairf]");if(cf){chairF=cf.dataset.chairf;render();return}
+  const ps=t.closest("[data-psec]");if(ps){pSec=ps.dataset.psec;$("patDetail").dataset.psec=pSec;for(const x of document.querySelectorAll("[data-psec]"))x.setAttribute("aria-selected",String(x===ps));window.scrollTo(0,0);return}});
+$("fabPat").addEventListener("click",()=>$("patNew").click());$("fabAp").addEventListener("click",()=>openAp(null));
+function syncSimple(){document.body.dataset.mview=main||"";const fp=$("fabPat");if(fp)fp.hidden=!!selPat;const me=$("meBtn");if(me)me.textContent=initials(myName||"")||"☰"}
 /* appearance */
 const LOOK_OPTS=[
+  ["layout","Layout",[["","Classic (current)"],["simple","Simple"]]],
   ["ac","Colour theme",[["","Teal (original)","#1D5F53"],["blue","Royal blue","#1F4E9C"],["plum","Plum","#6A3D8F"],["rose","Rose","#A3483A"],["gold","Gold","#8A6417"],["graphite","Graphite","#2B2F36"],["night","Night (dark)","#0E1716"]]],
   ["bgs","Background",[["","Plain"],["grad","Soft glow"],["pattern","Tooth pattern"],["tint","Tinted"]]],
   ["tabs","Tab style",[["","Colour tiles"],["pills","Pills"],["line","Underline"],["bottom","Bottom bar (phone app)"]]],
@@ -3828,8 +3941,8 @@ function lookApply(L){const r=document.documentElement;for(const [k] of LOOK_OPT
   const m=document.querySelector('meta[name="theme-color"]');if(m){const c=(LOOK_OPTS[0][2].find(x=>x[0]===(L.ac||""))||[])[2];if(c)m.setAttribute("content",c)}}
 function lookRender(){const L=lookGet();$("lookBody").innerHTML=LOOK_OPTS.map(([k,t,os])=>`<div class="lkgrp"><h4>${t}</h4><div class="lkopts">${os.map(([v,n,c])=>`<button type="button" class="lkopt" data-lk="${k}|${v}" aria-pressed="${(L[k]||"")===v}">${c?`<span class="lkdot" style="background:${c}"></span>`:""}${esc(n)}</button>`).join("")}</div></div>`).join("")}
 $("lookBtn").addEventListener("click",()=>{lookRender();openD($("lookdlg"))});
-$("lookBody").addEventListener("click",e=>{const b=e.target.closest("[data-lk]");if(!b)return;const [k,v]=b.dataset.lk.split("|"),L=lookGet();if(v)L[k]=v;else delete L[k];try{localStorage.setItem("ds-look",JSON.stringify(L))}catch(x){}lookApply(L);lookRender()});
-$("lookReset").addEventListener("click",()=>{try{localStorage.removeItem("ds-look")}catch(x){}lookApply({});lookRender();toast("Original look restored")});
+$("lookBody").addEventListener("click",e=>{const b=e.target.closest("[data-lk]");if(!b)return;const [k,v]=b.dataset.lk.split("|"),L=lookGet();if(v)L[k]=v;else delete L[k];try{localStorage.setItem("ds-look",JSON.stringify(L))}catch(x){}lookApply(L);lookRender();if(k==="layout")render()});
+$("lookReset").addEventListener("click",()=>{try{localStorage.removeItem("ds-look")}catch(x){}lookApply({});lookRender();render();toast("Original look restored")});
 lookApply(lookGet());
 /* online / offline status */
 let netOkTimer=null,netWasPending=false;
