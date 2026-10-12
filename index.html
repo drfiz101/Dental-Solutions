@@ -642,7 +642,7 @@ body.no-pat_del [data-ndel],body.no-pat_del [data-pdelp],body.no-pat_del .xrx,bo
 body.no-plan .tpcard,body.no-plan [data-tpadd],
 body.no-appt_edit #ap-new,body.no-appt_edit #ap-multi,body.no-appt_edit #ap-text,body.no-appt_edit #ap-photo,body.no-appt_edit [data-apedit],body.no-appt_edit [data-apres],body.no-appt_edit [data-free],body.no-appt_edit [data-newap],body.no-appt_edit [data-calnew],body.no-appt_edit [data-pbook],body.no-appt_edit [data-lcbook],
 body.no-appt_del #ap-del,
-body.no-bill_edit #b-new,body.no-bill_edit [data-pbill],body.no-bill_edit [data-apbill],body.no-bill_edit #payForm,body.no-bill_edit [data-tpbill],
+body.no-bill_edit #b-new,body.no-bill_edit [data-pbill],body.no-bill_edit [data-tprecv],body.no-bill_edit [data-apbill],body.no-bill_edit #payForm,body.no-bill_edit [data-tpbill],
 body.no-bill_del [data-bvdel],body.no-bill_del [data-bvedit],body.no-bill_del [data-pdel],
 body.no-lab_edit #lab-new,body.no-lab_edit [data-lcedit],body.no-lab_edit [data-plab],
 body.no-lab_pay [data-lcpay],body.no-lab_pay [data-lcpayall],body.no-lab_pay #lab-bills,body.no-lab_pay #lab-dues,
@@ -798,7 +798,7 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
 .rsslots .fslot{cursor:pointer}.rsslots .fslot[aria-pressed="true"]{background:var(--ok);color:#fff}
 .rsslots .fslot.cur{border-style:dashed}
 .okmsg{padding:12px;border-radius:10px;background:var(--ok-soft);color:var(--ok);font-weight:600}
-.tptot .paidl span:last-child{color:var(--ok);font-weight:700}.tprow small.due{color:var(--warn);font-weight:600}.tprow small.due .linkbtn{margin-left:6px;font-weight:700}
+.tptot .paidl span:last-child{color:var(--ok);font-weight:700}.tprow small.pay{display:block;margin-top:2px}.tprow small.pay .pd{color:var(--ok);font-weight:700}.tprow small.pay .due{color:var(--warn);font-weight:700}.tprow small.pay .linkbtn{margin-left:6px;font-weight:700;font-size:inherit}
 </style>
 
 </head>
@@ -2063,7 +2063,7 @@ $("patDetail").addEventListener("click",e=>{
   const bo=t.closest("[data-bopen]");if(bo)return openBillView(bo.dataset.bopen);
   if(t.closest("[data-pstmt]"))return openStmt("pat",{pid:selPat});
   if(t.closest("[data-xadd]"))return openXr();
-  const tpay=t.closest("[data-tppay]");if(tpay){const b=B[tpay.dataset.tppay];if(b){const bal=billCalc(b).bal;if(bal>0){cset("bills",tpay.dataset.tppay,{...b,payments:[...(b.payments||[]),{date:ymd(new Date()),amount:bal,method:"Cash",...me}]});toast(rs(bal)+" received · "+(b.no||"bill")+" is now paid")}}return}
+  const trc=t.closest("[data-tprecv]");if(trc)return tpRecv(trc.dataset.tprecv);
   const ta=t.closest("[data-tpadd]");if(ta){const n=+ta.dataset.tpadd||null;if(n)toothSel=null;return openTp(null,n,"prop")}
   if(t.closest("[data-tpadd2]"))return openTp(null,null,"plan");
   const te=t.closest("[data-tpedit]");if(te){const [k,id]=te.dataset.tpedit.split("|");return openTp(id,null,k)}
@@ -2756,7 +2756,7 @@ function planCalc(pl){const pd=pl.phaseDisc||{},phases=[1,2,3,4,5].map(ph=>{cons
   const sub=phases.reduce((s,g)=>s+g.sub,0),legacy=Math.min(+pl.discount||0,sub),disc=phases.reduce((s,g)=>s+g.disc,0)+legacy,total=sub-disc,done=phases.reduce((s,g)=>s+g.done,0),nDone=pl.items.filter(i=>i.done).length;
   return {phases,sub,disc,legacy,total,done,left:Math.max(0,total-done),nDone,n:pl.items.length}}
 function phaseBlock(kind,g,canTick){return `<div class="tpph"><div><b>Phase ${g.ph} · ${esc(TP_PH[g.ph-1])}</b><small>${esc(TP_PHD[g.ph-1])}</small></div></div>`+
-  g.its.map(it=>`<div class="tprow${it.done?" done":""}${canTick?"":" nt"}">${canTick?`<input type="checkbox" data-tpdone="${esc(it.id)}" ${it.done?"checked":""} aria-label="Mark ${esc(it.tr)} done">`:""}<span class="tpth">${esc(it.tooth||"—")}</span><span class="tpt">${esc(it.tr)}${it.note?`<small>${esc(it.note)}</small>`:""}${it.done?(()=>{const b=it.billId&&B[it.billId],bal=b?billCalc(b).bal:0;return `<small class="ok">✓ Done ${it.doneOn?esc(fmtDate(it.doneOn)):""}${it.billNo?(b&&bal>0?` · ${esc(it.billNo)}`:" · paid · "+esc(it.billNo)):""}</small>${b&&bal>0?`<small class="due">${rs(bal)} not paid yet <button type="button" class="linkbtn" data-tppay="${esc(it.billId)}">Mark paid</button></small>`:""}`})():(canTick?`<small class="muted">Pending</small>`:"")}</span><span class="tpa">${rs(itAmt(it))}${(+it.qty||1)>1?`<small>${+it.qty} × ${rs(it.price)}</small>`:""}</span><button type="button" class="tpedit" data-tpedit="${kind}|${esc(it.id)}" aria-label="Edit">✎</button></div>`).join("")+
+  g.its.map(it=>`<div class="tprow${it.done?" done":""}${canTick?"":" nt"}">${canTick?`<input type="checkbox" data-tpdone="${esc(it.id)}" ${it.done?"checked":""} aria-label="Mark ${esc(it.tr)} done">`:""}<span class="tpth">${esc(it.tooth||"—")}</span><span class="tpt">${esc(it.tr)}${it.note?`<small>${esc(it.note)}</small>`:""}${canTick?(()=>{const t=itemPay(it);return `<small class="${it.done?"ok":"muted"}">${it.done?"✓ Done "+(it.doneOn?esc(fmtDate(it.doneOn)):""):"Not done yet"}</small><small class="pay">${t?(t.bal<=0?`<span class="pd">Paid ${rs(t.paid)}</span> · ${esc(it.billNo||"")}`:t.paid>0?`<span class="pd">Paid ${rs(t.paid)}</span> · <span class="due">${rs(t.bal)} left</span> <button type="button" class="linkbtn" data-tprecv="${esc(it.id)}">+ Payment</button>`:`<span class="due">Not paid · ${rs(t.bal)}</span> <button type="button" class="linkbtn" data-tprecv="${esc(it.id)}">+ Payment</button>`):`<span class="due">Not paid</span> <button type="button" class="linkbtn" data-tprecv="${esc(it.id)}">+ Payment</button>`}</small>`})():""}</span><span class="tpa">${rs(itAmt(it))}${(+it.qty||1)>1?`<small>${+it.qty} × ${rs(it.price)}</small>`:""}</span><button type="button" class="tpedit" data-tpedit="${kind}|${esc(it.id)}" aria-label="Edit">✎</button></div>`).join("")+
   `<div class="tpsum"><span>Phase subtotal</span><b>${rs(g.sub)}</b><label>Discount <input type="number" min="0" inputmode="numeric" data-tpdisc="${kind}|${g.ph}" value="${g.disc||""}" placeholder="0" aria-label="Phase ${g.ph} discount"></label><span class="tpnet">Phase total <b>${rs(g.total)}</b></span></div>`}
 function totalsBlock(c,big){return `<div class="tptot">${c.disc?`<div><span>Subtotal</span><span>${rs(c.sub)}</span></div><div><span>Discounts</span><span>− ${rs(c.disc)}</span></div>`:""}<div class="g"><span>${big}</span><span>${rs(c.total)}</span></div></div>`}
 function propCard(p){const pr=propOf(p),c=planCalc(pr),dl=dentists(),acc=pr.status==="accepted";
@@ -2770,26 +2770,28 @@ function propCard(p){const pr=propOf(p),c=planCalc(pr),dl=dentists(),acc=pr.stat
   :`<p class="muted" style="margin:0">Tap a tooth on the chart and choose <b>+ Plan treatment</b>, or tap <b>+ Add</b>. Group treatments into phases, give a discount per phase, then print or send the proposal.</p>`}</div>`}
 /* ticking a plan item = treatment done and paid */
 function itemNet(pl,it){const g=planCalc(pl).phases.find(x=>x.ph===(+it.phase||2)),a=itAmt(it);return Math.max(0,Math.round(g&&g.sub?a-g.disc*a/g.sub:a))}
-function tpTick(d){const pid=selPat,p=P[pid],pl=planOf(p),it=pl.items.find(i=>i.id===d.dataset.tpdone);if(!it)return;const today=ymd(new Date());
-  const put=u=>{const pp=P[pid],l=planOf(pp);cset("patients",pid,{...pp,plan:{...l,items:l.items.map(i=>i.id===it.id?u:i),updatedAt:new Date().toISOString()}})};
-  if(d.checked){const net=itemNet(pl,it);let u={...it,done:true,doneOn:today},msg="Marked done";
-    if(it.billId&&B[it.billId]){const b=B[it.billId],bal=billCalc(b).bal;if(bal>0){cset("bills",it.billId,{...b,payments:[...(b.payments||[]),{date:today,amount:bal,method:"Cash",auto:it.id,...me}]});msg="Done · "+rs(bal)+" paid · "+(b.no||"bill")}}
-    else if(net>0){const id=nid("b"),no=nextBillNo(today),items=[{desc:it.tr,tooth:it.tooth||"",qty:+it.qty||1,price:+it.price||0}];
-      cset("bills",id,{no,createdAt:new Date().toISOString(),...me,patientId:pid,patientName:p.name,phone:p.phone||"",date:today,items,discount:Math.max(0,itAmt(it)-net),note:"Treatment plan",autoItem:it.id,payments:[{date:today,amount:net,method:"Cash",auto:it.id,...me}]});
-      u={...u,billNo:no,billId:id,autoBill:true};msg="Done · "+rs(net)+" paid (cash) · "+no;put(u);chartFromBill(pid,items);toast(msg);return}
-    put(u);toast(msg);return}
-  const b=it.billId&&B[it.billId];
-  if(b){const autoP=(b.payments||[]).filter(x=>x.auto===it.id).reduce((a,x)=>a+(+x.amount||0),0);
-    if(!confirm("Mark \""+it.tr+"\" as not done?\n\n"+(it.autoBill?"Bill "+(b.no||"")+" and its "+rs(billCalc(b).paid)+" payment will be removed.":autoP?"The "+rs(autoP)+" payment recorded when you ticked it will be removed from "+(b.no||"the bill")+".":"Bill "+(b.no||"")+" stays as it is."))){d.checked=true;return}
-    if(it.autoBill&&b.autoItem===it.id){cdel("bills",it.billId);const u={...it,done:false,doneOn:null};delete u.billNo;delete u.billId;delete u.autoBill;put(u);toast("Marked not done · bill removed");return}
-    if(autoP)cset("bills",it.billId,{...b,payments:(b.payments||[]).filter(x=>x.auto!==it.id)})}
-  put({...it,done:false,doneOn:null});toast("Marked not done")}
+function tpTick(d){const pid=selPat,p=P[pid],pl=planOf(p),it=pl.items.find(i=>i.id===d.dataset.tpdone);if(!it)return;
+  cset("patients",pid,{...p,plan:{...pl,items:pl.items.map(i=>i.id===it.id?{...i,done:d.checked,doneOn:d.checked?ymd(new Date()):null}:i),updatedAt:new Date().toISOString()}});
+  toast(d.checked?"✓ Treatment done":"Marked not done")}
+/* receive payment for one plan item — separate from done */
+function itemPay(it){const b=it.billId&&B[it.billId];return b?billCalc(b):null}
+function tpRecv(itemId){const pid=selPat,p=P[pid],pl=planOf(p),it=pl.items.find(i=>i.id===itemId);if(!it)return;const today=ymd(new Date());
+  const b=it.billId&&B[it.billId],net=itemNet(pl,it),left=b?billCalc(b).bal:net;
+  if(left<=0){toast("Already fully paid");return}
+  const v=prompt("Payment received for "+it.tr+" (Rs)\nFull amount: "+left.toLocaleString("en-US")+" — or type a smaller amount for an advance.",String(left));if(v===null)return;
+  const amt=Math.round(+String(v).replace(/[^0-9.]/g,"")||0);if(!(amt>0)){toast("Enter the amount received");return}if(amt>left){toast("That's more than the "+rs(left)+" left on this item");return}
+  const pay={date:today,amount:amt,method:"Cash",...me};
+  if(b){cset("bills",it.billId,{...b,payments:[...(b.payments||[]),pay]});toast(rs(amt)+" received · "+(b.no||"bill")+(amt===left?" fully paid":" · "+rs(left-amt)+" left"));return}
+  const id=nid("b"),no=nextBillNo(today);
+  cset("bills",id,{no,createdAt:new Date().toISOString(),...me,patientId:pid,patientName:p.name,phone:p.phone||"",date:today,items:[{desc:it.tr,tooth:it.tooth||"",qty:+it.qty||1,price:+it.price||0}],discount:Math.max(0,itAmt(it)-net),note:"Treatment plan",autoItem:it.id,payments:[pay]});
+  const pp=P[pid],l=planOf(pp);cset("patients",pid,{...pp,plan:{...l,items:l.items.map(i=>i.id===it.id?{...i,billNo:no,billId:id}:i),updatedAt:new Date().toISOString()}});
+  toast(rs(amt)+" received · "+no+(amt===left?" fully paid":" · "+rs(left-amt)+" left"))}
 function planPaid(pl){const ids=[...new Set(pl.items.filter(i=>i.billId&&B[i.billId]).map(i=>i.billId))];return ids.reduce((a,id)=>a+billCalc(B[id]).paid,0)}
 function planCard(p){const tp=planOf(p);if(!tp.items.length)return "";const c=planCalc(tp),pct=c.total?Math.round(c.done/c.total*100):0,unb=tp.items.filter(i=>i.done&&!i.billNo).length;
-  return `<div class="card tpcard tpactive" style="margin-top:12px"><div class="dh"><div><h3>Treatment plan</h3><p class="muted small" style="margin:2px 0 0">Tick an item when it's done and paid — a paid bill is made automatically.</p></div><button class="btn small" data-tpadd2>+ Add</button></div>
+  return `<div class="card tpcard tpactive" style="margin-top:12px"><div class="dh"><div><h3>Treatment plan</h3><p class="muted small" style="margin:2px 0 0">Tick ✓ when the treatment is done (fitted in the mouth). Record money separately with + Payment.</p></div><button class="btn small" data-tpadd2>+ Add</button></div>
   <div class="tpprog"><div class="bar"><i style="width:${pct}%"></i></div><span>${c.nDone} of ${c.n} done · ${rs(c.done)} of ${rs(c.total)}</span></div>
   ${c.phases.map(g=>phaseBlock("plan",g,true)).join("")}${totalsBlock(c,"Plan total")}${c.legacy?`<p class="muted small" style="margin:4px 0 0">Includes an earlier overall discount of ${rs(c.legacy)}.</p>`:""}
-  ${(()=>{const paid=Math.min(c.total,planPaid(tp)),pend=Math.max(0,c.total-paid),dnp=Math.max(0,c.done-paid);return `<div class="tptot"><div class="paidl"><span>Paid</span><span>${rs(paid)}</span></div><div class="rem"><span>Pending</span><span>${rs(pend)}</span></div>${dnp>0?`<p class="muted small" style="margin:4px 0 0">Pending includes ${rs(dnp)} for work already done but not paid yet. Tap <b>Mark paid</b> on those items.</p>`:""}</div>`})()}
+  ${(()=>{const paid=Math.min(c.total,planPaid(tp)),pend=Math.max(0,c.total-paid),dnp=Math.max(0,c.done-paid);return `<div class="tptot"><div class="paidl"><span>Paid</span><span>${rs(paid)}</span></div><div class="rem"><span>Pending</span><span>${rs(pend)}</span></div>${dnp>0?`<p class="muted small" style="margin:4px 0 0">Pending includes ${rs(dnp)} for work already done but not paid yet. Tap <b>+ Payment</b> on those items.</p>`:""}</div>`})()}
   ${unb?`<div class="row" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small primary" data-tpbill>Bill ${pl(unb,"done item")}</button></div>`:""}</div>`}
 const tpdlg=$("tpdlg");let tpEdit=null,tpKind="prop",tpReset=false,propOpen=false;const propInc={x:true,n:true,f:true};
 function priceFor(v){v=String(v||"").trim().toLowerCase();if(!v)return null;const ex=S().prices.find(x=>x.n.toLowerCase()===v);if(ex)return ex;
