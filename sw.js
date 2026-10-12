@@ -31,7 +31,8 @@ self.addEventListener("fetch", e => {
   if (lib) {
     e.respondWith(caches.match(req).then(hit => {
       if (hit && hit.ok) return hit;
-      return fetch(req).then(res => {
+      const get = req.mode === "no-cors" ? fetch(new Request(req.url, { mode: "cors", credentials: "omit" })).catch(() => fetch(req)) : fetch(req);
+      return get.then(res => {
         if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
         return res;
       }).catch(() => hit || Response.error());
