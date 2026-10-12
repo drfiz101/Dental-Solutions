@@ -648,7 +648,7 @@ body.no-lab_edit #lab-new,body.no-lab_edit [data-lcedit],body.no-lab_edit [data-
 body.no-lab_pay [data-lcpay],body.no-lab_pay [data-lcpayall],body.no-lab_pay #lab-bills,body.no-lab_pay #lab-dues,
 body.no-inv_buy [data-buy],body.no-inv_buy #m-buy,body.no-inv_buy #m-vbill,body.no-inv_buy [data-lpaid],
 body.no-inv_edit #addBtn,body.no-inv_edit [data-edit],body.no-inv_edit [data-rmv],
-body.no-pdf [data-tpprint],body.no-pdf [data-tppdf],body.no-pdf [data-tpsend],body.no-pdf #lab-pdf,body.no-pdf #b-pdf,body.no-pdf #m-pdf,body.no-pdf [data-pstmt],body.no-pdf [data-lcpdf],body.no-pdf #rp-print,body.no-pdf #rp-pdf{display:none!important}
+body.no-pdf [data-tpprint],body.no-pdf [data-tpbillpdf],body.no-pdf [data-tpbillsend],body.no-pdf [data-tppdf],body.no-pdf [data-tpsend],body.no-pdf #lab-pdf,body.no-pdf #b-pdf,body.no-pdf #m-pdf,body.no-pdf [data-pstmt],body.no-pdf [data-lcpdf],body.no-pdf #rp-print,body.no-pdf #rp-pdf{display:none!important}
 body.no-lab_edit select[data-lcst],body.no-inv_count .stepper,body.no-appt_edit .stsel{pointer-events:none;opacity:.6}
 
 .stq{flex-wrap:wrap}
@@ -2077,6 +2077,8 @@ $("patDetail").addEventListener("click",e=>{
   if(t.closest("[data-tpopen]")){propOpen=!propOpen;render();return}
   if(t.closest("[data-tpreset]")){if(!tpReset){tpReset=true;render();setTimeout(()=>{if(tpReset){tpReset=false;render()}},4000);return}tpReset=false;const p=P[selPat];cset("patients",selPat,{...p,proposal:emptyPlan()});propOpen=false;toast("Ready for a new proposal");return}
   if(t.closest("[data-tpbill]"))return billFromPlan();
+  const tbp=t.closest("[data-tpbillpdf]");if(tbp)return planBillAct("pdf",tbp);
+  const tbs=t.closest("[data-tpbillsend]");if(tbs)return planBillAct("send",tbs);
   const xd=t.closest("[data-xdel]");if(xd){e.stopPropagation();xrDel=xd.dataset.xdel;render();return}
   if(t.closest("[data-xno]")){xrDel=null;render();return}
   if(t.closest("[data-xyes]")){const p=P[selPat],x=(p.xrays||[]).find(y=>y.id===xrDel);xrDel=null;cset("patients",selPat,{...p,xrays:(p.xrays||[]).filter(y=>y!==x)});if(x)delFileDoc(x.fileId);toast("X-ray deleted");return}
@@ -2715,6 +2717,31 @@ async function billPdfBlob(b){
     pdf.addImage(cv.toDataURL("image/jpeg",.92),"JPEG",(W-w)/2,0,w,h);return pdf.output("blob")}
   finally{box.remove()}
 }
+/* whole treatment plan as one bill */
+function planBillInner(pid){const p=P[pid]||{},pl=planOf(p),cl=planCalc(pl),c=S().clinic,logo=(document.querySelector(".head-logo img")||{}).src||"";
+  const paid=Math.min(cl.total,planPaid(pl)),bal=Math.max(0,cl.total-paid),today=ymd(new Date());let k=0;
+  const bids=[...new Set(pl.items.filter(i=>i.billId&&B[i.billId]).map(i=>i.billId))],pays=bids.flatMap(id=>(B[id].payments||[]).map(x=>({...x,no:B[id].no}))).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  const rows=cl.phases.map(g=>`<tr class="ph"><td colspan="7"><b>Phase ${g.ph} · ${esc(TP_PH[g.ph-1])}</b></td></tr>`+g.its.map(it=>{const t=itemPay(it),st=(it.done?"Done":"Pending")+" · "+(t&&t.bal<=0&&t.paid>0?"Paid":t&&t.paid>0?"Part paid":"Not paid");return `<tr><td>${++k}</td><td>${esc(it.tr)}${it.note?`<small style="display:block;color:#5b6b67">${esc(it.note)}</small>`:""}</td><td>${esc(it.tooth||"—")}</td><td class="r">${+it.qty||1}</td><td class="r">${rs(it.price)}</td><td class="r">${rs(itAmt(it))}</td><td class="r" style="font-size:11px;color:#3d4d49">${st}</td></tr>`}).join("")).join("");
+  return `<div class="inv"><style>${INV_CSS}
+.inv tr.ph td{background:#EEF4FB;color:#123f7a;font-size:12px;padding:6px 10px}
+.inv td.r{white-space:nowrap}.inv td{vertical-align:top}
+</style>
+<div class="bar"></div>
+<div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}<br>${esc(openDaysText())} · ${esc(fmtTime(c.open))} – ${esc(fmtTime(c.close))}</div></div></div>
+<div class="ttl"><h1>TREATMENT BILL</h1><p>File no. <b>${esc(p.fileNo||"—")}</b></p><p>Date: <b>${esc(fmtDate(today))}</b></p><span class="st ${bal>0?"due":"paid"}">${bal>0?"Balance due":"Paid in full"}</span></div></div>
+<div class="pt"><div><span>Patient</span><b>${esc(p.name||"")}</b></div><div><span>Mobile</span>${esc(p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div>${pl.dentist?`<div><span>Dentist</span>${esc(pl.dentist)}</div>`:""}</div>
+<table><thead><tr><th style="width:30px">#</th><th>Treatment</th><th style="width:90px">Teeth</th><th class="r" style="width:40px">Qty</th><th class="r" style="width:84px">Rate</th><th class="r" style="width:96px">Cost</th><th class="r" style="width:110px">Status</th></tr></thead><tbody>${rows}</tbody></table>
+<div class="bot"><div>${pays.length?`<div class="pay"><h4>Payments received</h4>${pays.map(x=>`<div><span>${esc(fmtDate(x.date))} · ${esc(x.method||"Cash")}${x.no?" · "+esc(x.no):""}</span><b>${rs(x.amount)}</b></div>`).join("")}</div>`:""}</div>
+<div class="tot"><div><span>Total treatment cost</span><span>${rs(cl.sub)}</span></div>${cl.phases.filter(g=>g.disc).map(g=>`<div><span>Discount · Phase ${g.ph}</span><span>− ${rs(g.disc)}</span></div>`).join("")}${cl.legacy?`<div><span>Discount</span><span>− ${rs(cl.legacy)}</span></div>`:""}${cl.disc?`<div><span><b>Total discount</b></span><span><b>− ${rs(cl.disc)}</b></span></div>`:""}<div class="g"><span>Net total</span><span>${rs(cl.total)}</span></div><div><span>Paid</span><span>${rs(paid)}</span></div><div class="bal${bal>0?"":" z"}"><span>Balance</span><span>${rs(bal)}</span></div></div></div>
+<div class="ft"><div class="thx"><b>Thank you for choosing ${esc(c.name)}.</b>For appointments or queries, call or WhatsApp ${esc(c.phone)}.</div><div class="sig cg">Computer-generated bill.<br>No signature required.</div></div>
+<p class="gen">Computer-generated treatment bill · ${esc(p.name||"")} · printed ${esc(fmtDate(today))}</p></div>`}
+async function planBillAct(kind,btn){const pid=selPat,p=P[pid];if(!p)return;const old=btn.innerHTML;btn.disabled=true;btn.textContent="Preparing PDF…";
+  try{const blob=await htmlPdfBlob(planBillInner(pid)),name="Treatment-bill-"+String(p.name||"patient").replace(/[^A-Za-z0-9]+/g,"-")+".pdf",pl=planOf(p),cl=planCalc(pl),paid=Math.min(cl.total,planPaid(pl)),c=S().clinic;
+    if(kind==="send"){const msg=`Salam ${p.name},\n\nPlease find your treatment bill from *${c.name}* attached.\n\n*Total:* ${rs(cl.total)}${cl.disc?` (after ${rs(cl.disc)} discount)`:""}\n*Paid:* ${rs(paid)}\n*Balance:* ${rs(Math.max(0,cl.total-paid))}\n\nFor any query, please call us at ${c.phone}.\n\nWarm regards,\nTeam ${c.name}`;
+      if(!window.claude&&navigator.canShare){const file=new File([blob],name,{type:"application/pdf"});if(navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"Treatment bill",text:msg});return}catch(e){if(e&&e.name==="AbortError")return}}}
+      if(await propSave(blob,name)){window.open(waHref(p.phone,msg),"_blank","noopener");toast("PDF saved. Attach it in the WhatsApp chat with 📎.")}return}
+    if(await propSave(blob,name))toast("Treatment bill PDF saved")}
+  catch(e){toast("Couldn't make the PDF. Try again.")}finally{btn.disabled=false;btn.innerHTML=old}}
 const billFileName=b=>`${(b.no||"Bill")}-${String(b.patientName||"patient").replace(/[^A-Za-z0-9]+/g,"-")}.pdf`;
 async function downloadBill(id,btn){
   const b=B[id];if(!b)return;const old=btn&&btn.innerHTML;if(btn){btn.disabled=true;btn.textContent="Preparing PDF…"}
@@ -2810,7 +2837,7 @@ function planCard(p){const tp=planOf(p);if(!tp.items.length)return "";const c=pl
   <div class="tpprog"><div class="bar"><i style="width:${pct}%"></i></div><span>${c.nDone} of ${c.n} done · ${rs(c.done)} of ${rs(c.total)}</span></div>
   ${c.phases.map(g=>phaseBlock("plan",g,true)).join("")}${totalsBlock(c,"Plan total")}${c.legacy?`<p class="muted small" style="margin:4px 0 0">Includes an earlier overall discount of ${rs(c.legacy)}.</p>`:""}
   ${(()=>{const paid=Math.min(c.total,planPaid(tp)),pend=Math.max(0,c.total-paid),dnp=Math.max(0,c.done-paid);return `<div class="tptot"><div class="paidl"><span>Paid</span><span>${rs(paid)}</span></div><div class="rem"><span>Pending</span><span>${rs(pend)}</span></div>${dnp>0?`<p class="muted small" style="margin:4px 0 0">Pending includes ${rs(dnp)} for work already done but not paid yet. Tap <b>+ Payment</b> on those items.</p>`:""}</div>`})()}
-  ${unb?`<div class="row" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small primary" data-tpbill>Bill ${pl(unb,"done item")}</button></div>`:""}</div>`}
+  <div class="row" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small" data-tpbillpdf>Treatment bill PDF</button>${waNum(p.phone)?`<button type="button" class="wa sm" data-tpbillsend>${WA_IC}<span>Send bill on WhatsApp</span></button>`:""}${unb?`<button type="button" class="btn small primary" data-tpbill>Bill ${pl(unb,"done item")}</button>`:""}</div></div>`}
 const tpdlg=$("tpdlg");let tpEdit=null,tpKind="prop",tpReset=false,propOpen=false;const propInc={x:true,n:true,f:true};
 function priceFor(v){v=String(v||"").trim().toLowerCase();if(!v)return null;const ex=S().prices.find(x=>x.n.toLowerCase()===v);if(ex)return ex;
   const tk=s=>s.toLowerCase().replace(/zirconia/g,"zirconium").replace(/\brct\b/g,"root canal rct").replace(/\bcleaning\b/g,"scaling").split(/[^a-z]+/).filter(w=>w.length>2&&!["per","with","the","and","tooth","arch"].includes(w)),want=tk(v);if(!want.length)return null;
