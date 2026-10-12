@@ -939,6 +939,14 @@ html,body{overflow-x:hidden;max-width:100%;overscroll-behavior-x:none}
 
 :root[data-layout="simple"] body>.mainnav{display:none!important}
 :root[data-layout="simple"] body.ws-on>.mainnav{display:grid!important}
+
+/* customisable home */
+.homebar{display:flex;justify-content:flex-end;margin:0 0 8px}
+html:root #dashView .dgrid>.card[data-wh]{display:none!important}
+html:root #dashView .dgrid>.card[data-ws]{display:block!important}
+.hwrow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}.hwrow label{flex:1;display:flex;gap:10px;align-items:center;min-height:44px;cursor:pointer;font-weight:600}.hwrow input{width:20px;height:20px;flex:none}
+.hwrow.off label{color:var(--muted);font-weight:400}
+.hwmv{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:1.1rem;font-weight:700}.hwmv:disabled{opacity:.35}
 /* more sheet */
 .mehead{display:flex;gap:12px;align-items:center;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:14px}
 .mli{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;padding:0 14px;border:0;border-bottom:1px solid var(--line);background:none;font-size:1rem;text-align:left;color:var(--ink)}
@@ -1034,6 +1042,7 @@ html,body{overflow-x:hidden;max-width:100%;overscroll-behavior-x:none}
     <div id="rp-body"></div>
   </section>
   <section id="dashView" class="view cview" hidden>
+    <div class="homebar"><button type="button" class="btn small" id="homeEdit">✎ Customise home</button></div>
     <div class="dgrid">
       <div class="card d-simple" id="d-simple"></div>
       <div class="card d-clock"><div class="clk" id="d-time"></div><div class="cdate" id="d-date"></div><div class="copen" id="d-open"></div></div>
@@ -1209,6 +1218,12 @@ html,body{overflow-x:hidden;max-width:100%;overscroll-behavior-x:none}
   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="margin:0">🔔 Alerts &amp; sounds</h2><button type="button" class="btn small" data-close>Done</button></div>
   <p class="muted small" style="margin:6px 0 10px">Alerts ring while the app is open on this phone or computer. Saved on this device only.</p>
   <div id="alBody"></div>
+</div></dialog>
+<dialog id="homedlg"><div class="dlg">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="margin:0">Customise home</h2><button type="button" class="btn small" data-close>Done</button></div>
+  <p class="muted small" style="margin:6px 0 10px">Tick the widgets you want, and use the arrows to change their order. Saved on this device, separately for the Classic and Simple layouts.</p>
+  <div id="homeList"></div>
+  <div class="actions"><button type="button" class="btn small" id="homeReset">Reset to default</button><span></span></div>
 </div></dialog>
 <dialog id="rsdlg"><form class="dlg" id="rsForm" novalidate>
   <h2>Reschedule appointment</h2>
@@ -2646,7 +2661,7 @@ function tickClock(){if(main!=="dashboard"||!$("d-time"))return;const now=new Da
   $("d-date").textContent=now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   const [k,t]=clinicStatus();$("d-open").innerHTML=`<span class="odot ${k}"></span>${esc(t)}`}
 setInterval(tickClock,10000);
-function renderDash(){$("d-rep").innerHTML=dashRepCard();try{renderSimpleHome()}catch(e){}
+function renderDash(){$("d-rep").innerHTML=dashRepCard();try{renderSimpleHome()}catch(e){}try{homeApply()}catch(e){}
   const today=ymd(new Date()),tom=addDays(today,1),nowM=new Date().getHours()*60+new Date().getMinutes();
   const day=Object.entries(A).filter(([,a])=>a.date===today&&a.status!=="cancelled").map(([id,a])=>({id,...a})).sort((a,b)=>a.time.localeCompare(b.time));
   const cnt=s=>day.filter(a=>(a.status||"booked")===s).length;
@@ -3976,12 +3991,24 @@ $("alBody").addEventListener("change",e=>{const t=e.target.closest("[data-al]");
 $("alBody").addEventListener("click",async e=>{const m=e.target.closest("[data-almins]");if(m){const c=alGet();c.mins=+m.dataset.almins;alSet(c);alRender();return}
   if(e.target.closest("#alTest")){alUnlock();const c=alGet();const was=c.sound;c.sound=true;alSet(c);chime("ap");c.sound=was;alSet(c);return}
   if(e.target.closest("#alPerm")){try{await Notification.requestPermission()}catch(x){}alRender()}});
+/* customisable home widgets */
+const HOME_W=[["d-simple","Quick buttons & today's money"],["d-clock","Clock & opening hours"],["d-today","Today at a glance"],["d-rep","This month: income, expenses, profit"],["d-appts","Today's appointments"],["d-cal","Calendar"],["d-pay","Pending payments & bills"],["d-stock","Restock needed"],["d-exp","Expiring soon"],["d-money","Lab, reminders & spending"]];
+const homeKey=()=>"ds-home-"+(isSimple()?"simple":"classic");
+function homeDefault(){return isSimple()?{order:["d-simple","d-appts","d-rep","d-pay","d-clock","d-today","d-cal","d-stock","d-exp","d-money"],hidden:["d-clock","d-today","d-rep","d-cal","d-stock","d-exp","d-money","d-pay"]}:{order:HOME_W.map(w=>w[0]),hidden:["d-simple"]}}
+function homeGet(){let c=null;try{c=JSON.parse(localStorage.getItem(homeKey())||"null")}catch(e){}const d=homeDefault();if(!c||!Array.isArray(c.order))return d;const all=HOME_W.map(w=>w[0]);c.order=c.order.filter(k=>all.includes(k)).concat(all.filter(k=>!c.order.includes(k)));c.hidden=(c.hidden||[]).filter(k=>all.includes(k));return c}
+function homeSave(c){try{localStorage.setItem(homeKey(),JSON.stringify(c))}catch(e){}homeApply()}
+function homeApply(){const c=homeGet();for(const el of document.querySelectorAll("#dashView .dgrid>.card")){const k=HOME_W.map(w=>w[0]).find(x=>el.classList.contains(x));if(!k)continue;el.style.order=String(c.order.indexOf(k));if(c.hidden.includes(k)){el.setAttribute("data-wh","");el.removeAttribute("data-ws")}else{el.setAttribute("data-ws","");el.removeAttribute("data-wh")}}}
+function homeRender(){const c=homeGet();$("homeList").innerHTML=c.order.map((k,i)=>{const n=(HOME_W.find(w=>w[0]===k)||[k,k])[1],on=!c.hidden.includes(k);return `<div class="hwrow${on?"":" off"}"><label><input type="checkbox" data-hw="${k}" ${on?"checked":""}> <span>${esc(n)}</span></label><button type="button" class="hwmv" data-hup="${k}" aria-label="Move ${esc(n)} up" ${i?"":"disabled"}>↑</button><button type="button" class="hwmv" data-hdn="${k}" aria-label="Move ${esc(n)} down" ${i<c.order.length-1?"":"disabled"}>↓</button></div>`}).join("")}
+$("homeEdit").addEventListener("click",()=>{homeRender();openD($("homedlg"))});
+$("homeList").addEventListener("change",e=>{const t=e.target.closest("[data-hw]");if(!t)return;const c=homeGet(),k=t.dataset.hw;c.hidden=c.hidden.filter(x=>x!==k);if(!t.checked)c.hidden.push(k);homeSave(c);homeRender()});
+$("homeList").addEventListener("click",e=>{const u=e.target.closest("[data-hup]"),d=e.target.closest("[data-hdn]");if(!u&&!d)return;const c=homeGet(),k=(u||d).dataset[u?"hup":"hdn"],i=c.order.indexOf(k),j=u?i-1:i+1;if(j<0||j>=c.order.length)return;[c.order[i],c.order[j]]=[c.order[j],c.order[i]];homeSave(c);homeRender()});
+$("homeReset").addEventListener("click",()=>{try{localStorage.removeItem(homeKey())}catch(e){}homeApply();homeRender();toast("Home reset to default")});
 /* simple layout (switch in Appearance) */
 (function(){const st=window.scrollTo.bind(window);window.scrollTo=function(a,b){try{if(document.documentElement.getAttribute("data-layout")==="simple"){const w=document.querySelector(".wrap");if(w){if(a&&typeof a==="object")w.scrollTo(a);else w.scrollTo(a||0,b||0)}}}catch(e){}return st(a,b)}})();
 let patF="all",chairF="both",pSec="treat";
 const isSimple=()=>document.documentElement.getAttribute("data-layout")==="simple";
 function greet(){const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"}
-function renderSimpleHome(){const el=$("d-simple");if(!el)return;if(!isSimple()){el.innerHTML="";return}
+function renderSimpleHome(){const el=$("d-simple");if(!el)return;
   const today=ymd(new Date());let colT=0;for(const b of Object.values(B))for(const p of b.payments||[])if(p.date===today)colT+=+p.amount||0;
   const owe=Object.values(B).reduce((a,b)=>a+billCalc(b).bal,0),nm=String(myName||"").split(" ").slice(0,2).join(" ");
   el.innerHTML=`<p class="muted" style="margin:0">${esc(new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"}))}</p><h2 class="sh1">${greet()}${nm?", "+esc(nm):""}</h2>
@@ -4037,7 +4064,7 @@ function lookApply(L){setTimeout(placeNav,0);const r=document.documentElement;fo
   const m=document.querySelector('meta[name="theme-color"]');if(m){const c=(LOOK_OPTS[0][2].find(x=>x[0]===(L.ac||""))||[])[2];if(c)m.setAttribute("content",c)}}
 function lookRender(){const L=lookGet();$("lookBody").innerHTML=LOOK_OPTS.map(([k,t,os])=>`<div class="lkgrp"><h4>${t}</h4><div class="lkopts">${os.map(([v,n,c])=>`<button type="button" class="lkopt" data-lk="${k}|${v}" aria-pressed="${(L[k]||"")===v}">${c?`<span class="lkdot" style="background:${c}"></span>`:""}${esc(n)}</button>`).join("")}</div></div>`).join("")}
 $("lookBtn").addEventListener("click",()=>{lookRender();openD($("lookdlg"))});
-$("lookBody").addEventListener("click",e=>{const b=e.target.closest("[data-lk]");if(!b)return;const [k,v]=b.dataset.lk.split("|"),L=lookGet();if(v)L[k]=v;else delete L[k];try{localStorage.setItem("ds-look",JSON.stringify(L))}catch(x){}lookApply(L);lookRender();if(k==="layout")render()});
+$("lookBody").addEventListener("click",e=>{const b=e.target.closest("[data-lk]");if(!b)return;const [k,v]=b.dataset.lk.split("|"),L=lookGet();if(v)L[k]=v;else delete L[k];try{localStorage.setItem("ds-look",JSON.stringify(L))}catch(x){}lookApply(L);lookRender();if(k==="layout"){render();try{homeApply()}catch(x){}}});
 $("lookReset").addEventListener("click",()=>{try{localStorage.removeItem("ds-look")}catch(x){}lookApply({});lookRender();render();toast("Original look restored")});
 lookApply(lookGet());
 /* online / offline status */
