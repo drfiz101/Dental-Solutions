@@ -931,7 +931,7 @@ html,body{overflow-x:hidden;max-width:100%;overscroll-behavior-x:none}
 /* alerts */
 .albox{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:2147483000;display:flex;flex-direction:column;gap:8px;width:min(460px,calc(100% - 20px));pointer-events:none}
 .alc{pointer-events:auto;display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:0 12px 30px -10px rgba(0,0,0,.35);border-left:5px solid var(--accent);animation:alin .25s ease}
-.alc.lab{border-left-color:#A8357A}.ali{font-size:22px}.alt{flex:1;min-width:0;display:flex;flex-direction:column}.alt span{font-size:.85rem;color:var(--muted)}.ala{display:flex;gap:6px;flex-direction:column}
+.alc.lab{border-left-color:#A8357A}.alc.new{border-left-color:#2E6BB8}.ali{font-size:22px}.alt{flex:1;min-width:0;display:flex;flex-direction:column}.alt span{font-size:.85rem;color:var(--muted)}.ala{display:flex;gap:6px;flex-direction:column}
 @keyframes alin{from{transform:translateY(-10px);opacity:0}to{transform:none;opacity:1}}
 .altg{display:flex;gap:12px;align-items:flex-start;padding:10px 0;cursor:pointer}.altg input{width:20px;height:20px;margin-top:2px}.altg small{display:block;color:var(--muted)}
 :root[data-layout="simple"] #alBtn{display:none!important}
@@ -2102,9 +2102,9 @@ async function saveSet(next){SET=next;render();if(!db)return;W(db.collection("se
 function startClinic(){
   if(!db||clinicStarted)return;clinicStarted=true;
   const sub=(c,fn)=>{try{clinicUnsubs.push(db.collection(c).onSnapshot(snap=>{const m={};for(const d of snap.docs){const v=d.data();if(v)m[d.id]=v}fn(m);softRender()},()=>{}))}catch(e){}};
-  sub("patients",m=>P=m);sub("appts",m=>A=m);sub("bills",m=>B=m);sub("labcases",m=>LC=m);sub("settings",m=>{SET=m.main||{};SET_LOADED=true;aoCheck()});
+  sub("patients",m=>P=m);sub("appts",m=>{try{apNewCheck(m)}catch(e){}A=m});sub("bills",m=>B=m);sub("labcases",m=>LC=m);sub("settings",m=>{SET=m.main||{};SET_LOADED=true;aoCheck()});
 }
-function stopClinic(){for(const u of clinicUnsubs){try{u()}catch(e){}}clinicUnsubs=[];clinicStarted=false;SET_LOADED=false;P={};A={};B={};SET={};LC={}}
+function stopClinic(){apSeen=null;for(const u of clinicUnsubs){try{u()}catch(e){}}clinicUnsubs=[];clinicStarted=false;SET_LOADED=false;P={};A={};B={};SET={};LC={}}
 function softRender(){
   const a=document.activeElement;
   if(document.querySelector("dialog[open]")||(a&&a.closest&&a.closest(".cview")&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))){clinicDirty=true;return}
@@ -3930,19 +3930,19 @@ async function loadMyPhoto(){myPhoto="";if(!me||!me.uid)return;try{myPhoto=await
 function renderMeChip(){const w=$("whoName");if(!w)return;w.innerHTML=(myPhoto?`<img class="whoimg" src="${myPhoto}" alt="">`:"")+esc(myName||"")}
 function pickMyPhoto(){const i=document.createElement("input");i.type="file";i.accept="image/*";i.onchange=async()=>{const f=i.files&&i.files[0];if(!f)return;try{const d=await avatarFrom(f);myPhoto=d;localPhotos["user_"+me.uid]=d;if(db)W(db.collection("photos").doc("user_"+me.uid).set({data:d,createdAt:new Date().toISOString()}),"Couldn't save the photo.");syncSimple();renderMeChip();toast("Photo saved")}catch(x){toast("Couldn't read that photo.")}};i.click()}
 /* ---------- alerts: upcoming appointments and lab cases due ---------- */
-const AL_DEF={appt:true,mins:10,lab:true,sound:true};
+const AL_DEF={appt:true,mins:10,lab:true,sound:true,newap:true};
 function alGet(){try{return {...AL_DEF,...(JSON.parse(localStorage.getItem("ds-alerts")||"{}")||{})}}catch(e){return {...AL_DEF}}}
 function alSet(v){try{localStorage.setItem("ds-alerts",JSON.stringify(v))}catch(e){}}
 let alCtx=null;
 function alUnlock(){try{if(!alCtx){const C=window.AudioContext||window.webkitAudioContext;if(C)alCtx=new C()}if(alCtx&&alCtx.state==="suspended")alCtx.resume()}catch(e){}}
 window.addEventListener("pointerdown",alUnlock,{passive:true,capture:true});
-function chime(kind){if(!alGet().sound)return;try{alUnlock();if(!alCtx)return;const t0=alCtx.currentTime+.02,notes=kind==="lab"?[660,880,660]:[784,988,1319];
+function chime(kind){if(!alGet().sound)return;try{alUnlock();if(!alCtx)return;const t0=alCtx.currentTime+.02,notes=kind==="lab"?[660,880,660]:kind==="new"?[523,659,784,1047]:[784,988,1319];
   notes.forEach((f,i)=>{const o=alCtx.createOscillator(),g=alCtx.createGain();o.type="sine";o.frequency.value=f;o.connect(g);g.connect(alCtx.destination);const s=t0+i*.22;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.35,s+.02);g.gain.exponentialRampToValueAtTime(.001,s+.5);o.start(s);o.stop(s+.55)})}catch(e){}
   try{if(navigator.vibrate)navigator.vibrate([200,100,200])}catch(e){}}
 function sysNotify(title,body){try{if(!("Notification" in window)||Notification.permission!=="granted")return;const o={body,icon:"icons/icon-192.png",badge:"icons/icon-192.png",tag:title+body};
   if(navigator.serviceWorker&&navigator.serviceWorker.ready)navigator.serviceWorker.ready.then(r=>r.showNotification(title,o)).catch(()=>{try{new Notification(title,o)}catch(x){}});else new Notification(title,o)}catch(e){}}
 function alShow(kind,title,body,act){const box=$("alBox"),id="al"+Date.now()+Math.random().toString(36).slice(2,5);
-  box.insertAdjacentHTML("beforeend",`<div class="alc ${kind}" id="${id}" role="alert"><div class="ali">${kind==="lab"?"🧪":"🦷"}</div><div class="alt"><b>${esc(title)}</b><span>${esc(body)}</span></div><div class="ala">${act?`<button type="button" class="btn small primary" data-alopen="${esc(act)}">Open</button>`:""}<button type="button" class="btn small" data-aldis>OK</button></div></div>`);
+  box.insertAdjacentHTML("beforeend",`<div class="alc ${kind}" id="${id}" role="alert"><div class="ali">${kind==="lab"?"🧪":kind==="new"?"📅":"🦷"}</div><div class="alt"><b>${esc(title)}</b><span>${esc(body)}</span></div><div class="ala">${act?`<button type="button" class="btn small primary" data-alopen="${esc(act)}">Open</button>`:""}<button type="button" class="btn small" data-aldis>OK</button></div></div>`);
   chime(kind);sysNotify(title,body)}
 $("alBox").addEventListener("click",e=>{const c=e.target.closest(".alc");if(!c)return;const o=e.target.closest("[data-alopen]");if(o){const [k,v]=o.dataset.alopen.split("|");if(k==="ap"){apDate=v;goMain("appointments")}else if(k==="lab")goMain("lab")}if(o||e.target.closest("[data-aldis]"))c.remove()});
 function alSeen(k){try{const m=JSON.parse(localStorage.getItem("ds-alseen")||"{}");if(m[k])return true;m[k]=Date.now();const cut=Date.now()-3*864e5;for(const x in m)if(m[x]<cut)delete m[x];localStorage.setItem("ds-alseen",JSON.stringify(m));return false}catch(e){return false}}
@@ -3953,9 +3953,16 @@ function alCheck(){if(!CLINIC||!db)return;const cfg=alGet(),now=new Date(),today
     for(const c of due)if(!alSeen("lab|"+c.id+"|"+today))alShow("lab",(c.due<today?"Lab case overdue":"Lab case due today")+": "+(c.patientName||""),(c.work||"Lab work")+(c.teeth?" · "+c.teeth:"")+(c.lab?" · "+c.lab:"")+(c.due<today?" · was due "+fmtDate(c.due):""),"lab|")}}
 setInterval(()=>{try{alCheck()}catch(e){}},30000);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")setTimeout(()=>{try{alCheck()}catch(e){}},1500)});
+let apSeen=null;
+function apNewCheck(m){const ids=Object.keys(m);if(!apSeen){apSeen=new Set(ids);return}
+  const cfg=alGet(),fresh=Date.now()-15*60000;
+  for(const id of ids){if(apSeen.has(id))continue;apSeen.add(id);const a=m[id];if(!cfg.newap||!a||a.status==="cancelled")continue;
+    if(me&&a.uid&&a.uid===me.uid)continue;const t=Date.parse(a.createdAt||"");if(!t||t<fresh)continue;
+    alShow("new","New appointment: "+(a.patientName||"Patient"),(a.date===ymd(new Date())?"Today":dayName(a.date)+" "+fmtDate(a.date))+", "+fmtTime(a.time)+" · Chair "+(a.chair||"")+(a.treatment?" · "+a.treatment:"")+(a.by?" · booked by "+(byName(a)||a.by):""),"ap|"+a.date)}}
 function alRender(){const c=alGet(),perm=("Notification" in window)?Notification.permission:"unsupported";
   $("alBody").innerHTML=`<label class="altg"><input type="checkbox" data-al="appt" ${c.appt?"checked":""}> <span><b>Upcoming appointments</b><small>Ring before each booked patient's time</small></span></label>
   <div class="lkopts" style="margin:4px 0 12px 32px">${[5,10,15,30].map(m=>`<button type="button" class="lkopt" data-almins="${m}" aria-pressed="${+c.mins===m}">${m} min before</button>`).join("")}</div>
+  <label class="altg"><input type="checkbox" data-al="newap" ${c.newap?"checked":""}> <span><b>New bookings</b><small>Pop up and ring when someone else in the clinic books an appointment</small></span></label>
   <label class="altg"><input type="checkbox" data-al="lab" ${c.lab?"checked":""}> <span><b>Lab cases due</b><small>Ring on the day a lab case is due back, and if it's overdue</small></span></label>
   <label class="altg"><input type="checkbox" data-al="sound" ${c.sound?"checked":""}> <span><b>Play a sound</b><small>Turn off to show the alert silently</small></span></label>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button type="button" class="btn" id="alTest">▶ Test sound</button>${perm==="default"?`<button type="button" class="btn primary" id="alPerm">Allow phone notifications</button>`:perm==="granted"?`<span class="chip2 ok">Phone notifications on</span>`:perm==="denied"?`<span class="chip2">Notifications blocked in phone settings</span>`:""}</div>`}
