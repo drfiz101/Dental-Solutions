@@ -802,6 +802,51 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
 .tprow small.pay{display:block;margin-top:2px}.tprow small.pay .pd{color:var(--ok);font-weight:700}.tprow small.pay .due{color:var(--warn);font-weight:700}.tprow small.pay .linkbtn{margin-left:6px;font-weight:700;font-size:inherit}
 .tpck{display:flex;flex-direction:column;gap:4px}.tpck label{display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:.7rem;font-weight:700;color:var(--muted);cursor:pointer}
 .tpck .tdn input:checked+span{color:var(--ok)}.tpck .pdk input{accent-color:#1e7a46}.tpck .pdk input:checked+span{color:#1e7a46}.tpck .pdk.part span{color:var(--warn)}
+
+/* ===== Appearance options ===== */
+:root[data-ac="blue"]{--c-dash:#1F4E9C;--c-dash-soft:#E1E9F6;--bg:#EEF3FA;--accent:#1F4E9C;--accent-soft:#E1E9F6;--line:#D5DFEE;--ink:#14233B;--muted:#56677F;--idle-soft:#EBEFF5}
+:root[data-ac="plum"]{--c-dash:#5B3480;--c-dash-soft:#EEE5F6;--bg:#F5F1F8;--accent:#6A3D8F;--accent-soft:#EEE5F6;--line:#E2D9EC;--ink:#271A33;--muted:#6C5F77;--idle-soft:#F0ECF3}
+:root[data-ac="rose"]{--c-dash:#8F3D31;--c-dash-soft:#F6E4DF;--bg:#FAF4F1;--accent:#A3483A;--accent-soft:#F6E4DF;--line:#EAD9D3;--ink:#33201C;--muted:#77615B;--idle-soft:#F4EEEC}
+:root[data-ac="graphite"]{--c-dash:#2B2F36;--c-dash-soft:#E5E6E9;--bg:#F1F1EF;--accent:#2B2F36;--accent-soft:#E5E6E9;--line:#DADBDF;--ink:#1B1D21;--muted:#5F636B;--idle-soft:#ECECEE}
+:root[data-ac="gold"]{--c-dash:#7A5714;--c-dash-soft:#F3EAD3;--bg:#F7F4EC;--accent:#8A6417;--accent-soft:#F3EAD3;--line:#E6DDC6;--ink:#2B2416;--muted:#6E6550;--idle-soft:#F1EDE3}
+/* backgrounds */
+:root[data-bgs="grad"] body{background:radial-gradient(1200px 600px at 100% -10%,var(--accent-soft),transparent 60%),radial-gradient(900px 500px at -10% 110%,var(--accent-soft),transparent 55%),var(--bg);background-attachment:fixed}
+:root[data-bgs="pattern"] body{background-color:var(--bg);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cpath d='M28 22c-4-3-10-2-11 4-1 5 1 10 2 15 1 4 1 9 4 9 3 0 3-6 5-9 1-2 3-2 4 0 2 3 2 9 5 9 3 0 3-5 4-9 1-5 3-10 2-15-1-6-7-7-11-4-1 1-3 1-4 0z' fill='none' stroke='%23888' stroke-opacity='.13' stroke-width='1.4'/%3E%3C/svg%3E");background-attachment:fixed}
+:root[data-bgs="tint"] body{background:var(--accent-soft)}
+/* tabs: pills */
+:root[data-tabs="pills"] .mainnav{display:flex!important;flex-wrap:wrap;gap:6px!important}
+:root[data-tabs="pills"] .mainbtn{flex-direction:row!important;gap:6px!important;padding:8px 12px!important;border-radius:999px!important;background:var(--surface)!important;border:1px solid var(--line)!important;color:var(--muted)!important;font-size:.8rem!important;box-shadow:none!important}
+:root[data-tabs="pills"] .mainbtn svg{width:16px;height:16px}
+:root[data-tabs="pills"] .mainbtn[aria-pressed="true"]{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--accent-ink)!important}
+/* tabs: underline */
+:root[data-tabs="line"] .mainnav{gap:0!important;border-bottom:1px solid var(--line)}
+:root[data-tabs="line"] .mainbtn{background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;color:var(--muted)!important;border-bottom:3px solid transparent!important;transform:none!important}
+:root[data-tabs="line"] .mainbtn[aria-pressed="true"]{color:var(--m,var(--accent))!important;border-bottom-color:var(--m,var(--accent))!important}
+/* tabs: bottom bar like a phone app */
+:root[data-tabs="bottom"] .mainnav{position:fixed!important;left:0;right:0;bottom:0;z-index:60;display:grid!important;grid-template-columns:repeat(auto-fit,minmax(0,1fr))!important;gap:0!important;margin:0!important;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px -12px rgba(0,0,0,.25)}
+:root[data-tabs="bottom"] .mainbtn{flex-direction:column!important;gap:2px!important;padding:6px 0!important;background:none!important;border:0!important;box-shadow:none!important;color:var(--muted)!important;font-size:.64rem!important;border-radius:10px!important;transform:none!important}
+:root[data-tabs="bottom"] .mainbtn[aria-pressed="true"]{color:var(--m,var(--accent))!important;background:var(--ms,var(--accent-soft))!important}
+:root[data-tabs="bottom"] body{padding-bottom:78px}
+@media (min-width:900px){:root[data-tabs="bottom"] .mainnav{left:50%;right:auto;transform:translateX(-50%);width:min(720px,100%);border:1px solid var(--line);border-radius:16px 16px 0 0}}
+/* corners */
+:root[data-corner="square"] .card,:root[data-corner="square"] header.top,:root[data-corner="square"] .btn,:root[data-corner="square"] .mainbtn,:root[data-corner="square"] input,:root[data-corner="square"] select,:root[data-corner="square"] textarea,:root[data-corner="square"] dialog,:root[data-corner="square"] .tile,:root[data-corner="square"] .chip2,:root[data-corner="square"] .wa{border-radius:4px!important}
+:root[data-corner="soft"] .card,:root[data-corner="soft"] header.top,:root[data-corner="soft"] dialog,:root[data-corner="soft"] .tile{border-radius:22px!important}
+:root[data-corner="soft"] .btn,:root[data-corner="soft"] .wa{border-radius:999px!important}
+/* cards: shadow / flat */
+:root[data-cards="float"] .card,:root[data-cards="float"] .tile{border-color:transparent!important;box-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px -12px rgba(0,0,0,.18)}
+:root[data-cards="flat"] .card,:root[data-cards="flat"] header.top{box-shadow:none!important}
+/* text size */
+:root[data-size="large"]{font-size:18px}:root[data-size="large"] body{font-size:17px}
+:root[data-size="small"]{font-size:15px}:root[data-size="small"] body{font-size:14px}
+/* font */
+:root[data-font="classic"]{--f-display:Georgia,"Times New Roman",serif}
+:root[data-font="system"]{--f-display:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+/* appearance dialog */
+.lkgrp{margin:0 0 14px}.lkgrp h4{margin:0 0 6px;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.lkopts{display:flex;flex-wrap:wrap;gap:8px}
+.lkopt{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-weight:600;font-size:.88rem}
+.lkopt[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft);color:var(--accent)}
+.lkdot{width:20px;height:20px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.1)}
 </style>
 
 </head>
@@ -869,7 +914,7 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
         <p class="bmeta" id="hMeta"></p>
       </div>
     </div>
-    <div class="who" id="who" hidden><button class="btn small" id="installBtn" hidden>Install app</button><span class="netchip" id="netChip" role="status" aria-live="polite" hidden></span><span id="whoName"></span><span class="rolechip" id="roleChip" hidden></span><button class="btn small" id="profBtn" hidden>Clinic profile</button><button class="btn small" id="acBtn" hidden>Staff access</button><button class="btn small" id="consoleBtn" hidden>Owner console</button><button class="btn ghost small" id="pwBtn" hidden>Password</button><button class="btn ghost small" id="signOut">Sign out</button></div>
+    <div class="who" id="who" hidden><button class="btn small" id="installBtn" hidden>Install app</button><span class="netchip" id="netChip" role="status" aria-live="polite" hidden></span><span id="whoName"></span><span class="rolechip" id="roleChip" hidden></span><button class="btn small" id="lookBtn">🎨 Appearance</button><button class="btn small" id="profBtn" hidden>Clinic profile</button><button class="btn small" id="acBtn" hidden>Staff access</button><button class="btn small" id="consoleBtn" hidden>Owner console</button><button class="btn ghost small" id="pwBtn" hidden>Password</button><button class="btn ghost small" id="signOut">Sign out</button></div>
     <nav class="nav mainnav" aria-label="Main"><button class="mainbtn" data-main="dashboard" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="lf">Dashboard</span><span class="ls">Home</span></button><button class="mainbtn" data-main="patients" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M21 19v-1a4 4 0 0 0-3-3.9M15.5 4.1a3.5 3.5 0 0 1 0 6.8"/></svg><span class="lf">Patients</span><span class="ls">Patients</span></button><button class="mainbtn" data-main="appointments" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h3"/></svg><span class="lf">Appointments</span><span class="ls">Appts</span></button><button class="mainbtn" data-main="billing" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="lf">Billing</span><span class="ls">Billing</span></button><button class="mainbtn" data-main="lab" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6"/><path d="M10 3v6l-5.5 9.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7.5 15h9"/></svg><span class="lf">Lab</span><span class="ls">Lab</span></button><button class="mainbtn" data-main="inventory" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg><span class="lf">Inventory</span><span class="ls">Stock</span></button></nav>
   </header>
 
@@ -1050,6 +1095,12 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
   <p class="perr" id="pt-err" hidden></p>
   <div class="actions"><button type="button" class="btn danger-outline" id="pt-del">Delete patient</button><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
+<dialog id="lookdlg" class="wide"><div class="dlg">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="margin:0">🎨 Appearance</h2><button type="button" class="btn small" data-close>Done</button></div>
+  <p class="muted small" style="margin:0 0 10px">Changes show straight away and are saved on this device only. Each person can choose their own look.</p>
+  <div id="lookBody"></div>
+  <div class="actions"><button type="button" class="btn small" id="lookReset">Back to original look</button><span></span></div>
+</div></dialog>
 <dialog id="rsdlg"><form class="dlg" id="rsForm" novalidate>
   <h2>Reschedule appointment</h2>
   <p class="muted" id="rs-now" style="margin:0"></p>
@@ -3762,6 +3813,24 @@ function swipeDel(box,rowSel,btnSel){if(!box)return;let st=null;
   box.addEventListener("touchend",end);box.addEventListener("touchcancel",end);
   box.addEventListener("click",e=>{const r=e.target.closest("[data-noclick]");if(r){e.stopPropagation();e.preventDefault()}},true)}
 swipeDel($("patRows"),".prow2","[data-pdelp]");swipeDel($("list"),".row","[data-rmv]");
+/* appearance */
+const LOOK_OPTS=[
+  ["ac","Colour theme",[["","Teal (original)","#1D5F53"],["blue","Royal blue","#1F4E9C"],["plum","Plum","#6A3D8F"],["rose","Rose","#A3483A"],["gold","Gold","#8A6417"],["graphite","Graphite","#2B2F36"],["night","Night (dark)","#0E1716"]]],
+  ["bgs","Background",[["","Plain"],["grad","Soft glow"],["pattern","Tooth pattern"],["tint","Tinted"]]],
+  ["tabs","Tab style",[["","Colour tiles"],["pills","Pills"],["line","Underline"],["bottom","Bottom bar (phone app)"]]],
+  ["corner","Corners",[["","Rounded"],["soft","Extra round"],["square","Square"]]],
+  ["cards","Cards",[["","Outlined"],["float","Floating shadow"],["flat","Flat"]]],
+  ["font","Headings font",[["","Modern"],["classic","Classic"],["system","Phone default"]]],
+  ["size","Text size",[["small","Small"],["","Normal"],["large","Large"]]]];
+function lookGet(){try{return JSON.parse(localStorage.getItem("ds-look")||"{}")||{}}catch(e){return {}}}
+function lookApply(L){const r=document.documentElement;for(const [k] of LOOK_OPTS){if(k==="ac")continue;if(L[k])r.setAttribute("data-"+k,L[k]);else r.removeAttribute("data-"+k)}
+  if(L.ac==="night"){r.removeAttribute("data-ac");r.setAttribute("data-theme","dark")}else if(L.ac){r.setAttribute("data-ac",L.ac);r.setAttribute("data-theme","light")}else{r.removeAttribute("data-ac");if(lsGet("aa-theme")==null)r.removeAttribute("data-theme")}
+  const m=document.querySelector('meta[name="theme-color"]');if(m){const c=(LOOK_OPTS[0][2].find(x=>x[0]===(L.ac||""))||[])[2];if(c)m.setAttribute("content",c)}}
+function lookRender(){const L=lookGet();$("lookBody").innerHTML=LOOK_OPTS.map(([k,t,os])=>`<div class="lkgrp"><h4>${t}</h4><div class="lkopts">${os.map(([v,n,c])=>`<button type="button" class="lkopt" data-lk="${k}|${v}" aria-pressed="${(L[k]||"")===v}">${c?`<span class="lkdot" style="background:${c}"></span>`:""}${esc(n)}</button>`).join("")}</div></div>`).join("")}
+$("lookBtn").addEventListener("click",()=>{lookRender();openD($("lookdlg"))});
+$("lookBody").addEventListener("click",e=>{const b=e.target.closest("[data-lk]");if(!b)return;const [k,v]=b.dataset.lk.split("|"),L=lookGet();if(v)L[k]=v;else delete L[k];try{localStorage.setItem("ds-look",JSON.stringify(L))}catch(x){}lookApply(L);lookRender()});
+$("lookReset").addEventListener("click",()=>{try{localStorage.removeItem("ds-look")}catch(x){}lookApply({});lookRender();toast("Original look restored")});
+lookApply(lookGet());
 /* online / offline status */
 let netOkTimer=null,netWasPending=false;
 function isOnline(){return navigator.onLine!==false}
