@@ -935,6 +935,9 @@ html,body{overflow-x:hidden;max-width:100%;overscroll-behavior-x:none}
 @keyframes alin{from{transform:translateY(-10px);opacity:0}to{transform:none;opacity:1}}
 .altg{display:flex;gap:12px;align-items:flex-start;padding:10px 0;cursor:pointer}.altg input{width:20px;height:20px;margin-top:2px}.altg small{display:block;color:var(--muted)}
 :root[data-layout="simple"] #alBtn{display:none!important}
+
+:root[data-layout="simple"] body>.mainnav{display:none!important}
+:root[data-layout="simple"] body.ws-on>.mainnav{display:grid!important}
 /* more sheet */
 .mehead{display:flex;gap:12px;align-items:center;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:14px}
 .mli{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;padding:0 14px;border:0;border-bottom:1px solid var(--line);background:none;font-size:1rem;text-align:left;color:var(--ink)}
@@ -3855,7 +3858,7 @@ function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}funct
 function showGate(html){$("gateBody").innerHTML=`<div class="dsbrand">${document.querySelector(".dsbrand .dsmark").outerHTML}<div><b>Dental Solutions</b><span>Clinic management for dentists</span></div></div><div class="gate">${html}</div>`;$("gate").hidden=false;$("login").hidden=true;$("who").hidden=true}
 function hideGate(){$("gate").hidden=true}
 $("gate").addEventListener("click",e=>{if(e.target.closest("[data-gout]"))firebase.auth().signOut();if(e.target.closest("[data-gconsole]"))openConsole()});
-function leaveClinic(){aoStop();if(unsub){unsub();unsub=null}if(memUnsub){memUnsub();memUnsub=null}if(cdocUnsub){cdocUnsub();cdocUnsub=null}stopLogs();stopClinic();db=null;CLINIC=null;CDOC=null;MEM=null;overrides={}}
+function leaveClinic(){aoStop();document.body.classList.remove("ws-on");if(unsub){unsub();unsub=null}if(memUnsub){memUnsub();memUnsub=null}if(cdocUnsub){cdocUnsub();cdocUnsub=null}stopLogs();stopClinic();db=null;CLINIC=null;CDOC=null;MEM=null;overrides={}}
 function setupFirebase(){
   if(!window.firebase||!window.FIREBASE_CONFIG){if(window.__bootFail)window.__bootFail("Part of the app couldn't download. Check your internet connection and tap Repair app.","firebase");$("login").hidden=false;$("loginForm").hidden=true;$("loginErr").textContent="The app couldn't load. Check the internet connection and reload.";$("loginErr").hidden=false;return}
   firebase.initializeApp(FIREBASE_CONFIG);
@@ -3897,7 +3900,7 @@ function openWorkspace(u,code,mem,seq){
   CLINIC=code;MEM=mem;useClinicDefaults(code,CDOC);
   const legacy=code==="alawan";db={collection:n=>legacy?fsRoot.collection(n):fsRoot.collection("clinics").doc(code).collection(n)};
   me={by:mem.username||u.email,uid:u.uid};myName=mem.name||mem.username||u.email;
-  hideGate();$("login").hidden=true;$("who").hidden=false;$("whoName").textContent=myName;canWrite=true;$("notice").hidden=true;
+  document.body.classList.add("ws-on");hideGate();$("login").hidden=true;$("who").hidden=false;$("whoName").textContent=myName;canWrite=true;$("notice").hidden=true;
   memUnsub=fsRoot.collection("clinics").doc(code).collection("members").doc(u.uid).onSnapshot(sn=>{if(seq!==authSeq)return;const d=sn.data();if(!d||d.active===false){firebase.auth().signOut();return}MEM=d;myName=d.name||d.username;renderMeChip();render()},()=>{});
   if(roleCheck){roleCheck=false;setTimeout(()=>{if(wantRole==="admin"&&myRole()!=="admin")toast("This login has staff access. Signed in as staff.");else toast("Signed in to "+(CDOC.name||code))},600)}
   main="dashboard";aoStart(u.uid,roleCheck);netUI();netCheckQueued();setTimeout(()=>{loadMyPhoto();try{alCheck()}catch(e){}},2500);startLogs();startClinic();
@@ -4010,7 +4013,7 @@ document.addEventListener("click",e=>{const t=e.target;
   const cf=t.closest("[data-chairf]");if(cf){chairF=cf.dataset.chairf;render();return}
   const ps=t.closest("[data-psec]");if(ps){pSec=ps.dataset.psec;$("patDetail").dataset.psec=pSec;for(const x of document.querySelectorAll("[data-psec]"))x.setAttribute("aria-selected",String(x===ps));window.scrollTo(0,0);return}});
 $("fabPat").addEventListener("click",()=>$("patNew").click());$("fabAp").addEventListener("click",()=>openAp(null));
-function syncSimple(){document.body.dataset.mview=main||"";const fp=$("fabPat");if(fp)fp.hidden=!!selPat;const me=$("meBtn");if(me){if(myPhoto)me.innerHTML=`<img src="${myPhoto}" alt="">`;else me.textContent=initials(myName||"")||"☰"}}
+function syncSimple(){try{placeNav()}catch(e){}document.body.dataset.mview=main||"";const fp=$("fabPat");if(fp)fp.hidden=!!selPat;const me=$("meBtn");if(me){if(myPhoto)me.innerHTML=`<img src="${myPhoto}" alt="">`;else me.textContent=initials(myName||"")||"☰"}}
 /* appearance */
 const LOOK_OPTS=[
   ["layout","Layout",[["","Classic (current)"],["simple","Simple"]]],
@@ -4022,7 +4025,13 @@ const LOOK_OPTS=[
   ["font","Headings font",[["","Modern"],["classic","Classic"],["system","Phone default"]]],
   ["size","Text size",[["small","Small"],["","Normal"],["large","Large"]]]];
 function lookGet(){try{return JSON.parse(localStorage.getItem("ds-look")||"{}")||{}}catch(e){return {}}}
-function lookApply(L){const r=document.documentElement;for(const [k] of LOOK_OPTS){if(k==="ac")continue;if(L[k])r.setAttribute("data-"+k,L[k]);else r.removeAttribute("data-"+k)}
+/* in the Simple layout the tab bar lives outside the scrolling area (iPhone hides fixed bars inside scrollers) */
+const NAV_HOME={};
+function placeNav(){const nav=document.querySelector(".mainnav");if(!nav)return;if(!NAV_HOME.p){NAV_HOME.p=nav.parentElement;NAV_HOME.n=nav.nextSibling}
+  const simple=document.documentElement.getAttribute("data-layout")==="simple";
+  if(simple&&nav.parentElement!==document.body)document.body.appendChild(nav);
+  else if(!simple&&nav.parentElement!==NAV_HOME.p)NAV_HOME.p.insertBefore(nav,NAV_HOME.n&&NAV_HOME.n.parentNode===NAV_HOME.p?NAV_HOME.n:null)}
+function lookApply(L){setTimeout(placeNav,0);const r=document.documentElement;for(const [k] of LOOK_OPTS){if(k==="ac")continue;if(L[k])r.setAttribute("data-"+k,L[k]);else r.removeAttribute("data-"+k)}
   if(L.ac==="night"){r.removeAttribute("data-ac");r.setAttribute("data-theme","dark")}else if(L.ac){r.setAttribute("data-ac",L.ac);r.setAttribute("data-theme","light")}else{r.removeAttribute("data-ac");if(lsGet("aa-theme")==null)r.removeAttribute("data-theme")}
   const m=document.querySelector('meta[name="theme-color"]');if(m){const c=(LOOK_OPTS[0][2].find(x=>x[0]===(L.ac||""))||[])[2];if(c)m.setAttribute("content",c)}}
 function lookRender(){const L=lookGet();$("lookBody").innerHTML=LOOK_OPTS.map(([k,t,os])=>`<div class="lkgrp"><h4>${t}</h4><div class="lkopts">${os.map(([v,n,c])=>`<button type="button" class="lkopt" data-lk="${k}|${v}" aria-pressed="${(L[k]||"")===v}">${c?`<span class="lkdot" style="background:${c}"></span>`:""}${esc(n)}</button>`).join("")}</div></div>`).join("")}
