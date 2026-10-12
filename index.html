@@ -640,7 +640,7 @@ body.is-staff #ap-team,body.is-staff #ap-set,body.is-staff #b-prices,body.is-sta
 body.no-pat_edit #patNew,body.no-pat_edit [data-pedit],body.no-pat_edit #ap-newpat,
 body.no-pat_del [data-ndel],body.no-pat_del [data-pdelp],body.no-pat_del .xrx,body.no-pat_del #pt-del,
 body.no-plan .tpcard,body.no-plan [data-tpadd],
-body.no-appt_edit #ap-new,body.no-appt_edit #ap-multi,body.no-appt_edit #ap-text,body.no-appt_edit #ap-photo,body.no-appt_edit [data-apedit],body.no-appt_edit [data-free],body.no-appt_edit [data-newap],body.no-appt_edit [data-calnew],body.no-appt_edit [data-pbook],body.no-appt_edit [data-lcbook],
+body.no-appt_edit #ap-new,body.no-appt_edit #ap-multi,body.no-appt_edit #ap-text,body.no-appt_edit #ap-photo,body.no-appt_edit [data-apedit],body.no-appt_edit [data-apres],body.no-appt_edit [data-free],body.no-appt_edit [data-newap],body.no-appt_edit [data-calnew],body.no-appt_edit [data-pbook],body.no-appt_edit [data-lcbook],
 body.no-appt_del #ap-del,
 body.no-bill_edit #b-new,body.no-bill_edit [data-pbill],body.no-bill_edit [data-apbill],body.no-bill_edit #payForm,body.no-bill_edit [data-tpbill],
 body.no-bill_del [data-bvdel],body.no-bill_del [data-bvedit],body.no-bill_del [data-pdel],
@@ -794,6 +794,10 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
 .swiping{background:var(--surface)!important;z-index:1}
 .swiping::after{content:"🗑  Delete";position:absolute;top:0;bottom:0;left:100%;width:140px;display:flex;align-items:center;padding-left:20px;background:#e5484d;color:#fff;font-weight:700;font-size:.92rem}
 .swipe-arm::after{background:#b42318}
+.rsslots{display:flex;flex-wrap:wrap;gap:6px}
+.rsslots .fslot{cursor:pointer}.rsslots .fslot[aria-pressed="true"]{background:var(--ok);color:#fff}
+.rsslots .fslot.cur{border-style:dashed}
+.okmsg{padding:12px;border-radius:10px;background:var(--ok-soft);color:var(--ok);font-weight:600}
 </style>
 
 </head>
@@ -1018,6 +1022,23 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
   <p class="perr" id="pt-err" hidden></p>
   <div class="actions"><button type="button" class="btn danger-outline" id="pt-del">Delete patient</button><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
+<dialog id="rsdlg"><form class="dlg" id="rsForm" novalidate>
+  <h2>Reschedule appointment</h2>
+  <p class="muted" id="rs-now" style="margin:0"></p>
+  <div id="rs-pick">
+    <div class="grid2">
+      <div class="field"><label for="rs-d">New date</label><input id="rs-d" type="date"></div>
+      <div class="field"><label for="rs-c">Chair</label><select id="rs-c"><option value="1">Chair 1</option><option value="2">Chair 2</option></select></div>
+    </div>
+    <div class="field"><label>New time</label><div class="frees rsslots" id="rs-slots"></div><p class="muted small" id="rs-hint" style="margin:4px 0 0"></p></div>
+    <p class="perr" id="rs-err" hidden></p>
+    <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary" id="rs-save">Reschedule</button></div></div>
+  </div>
+  <div id="rs-done" hidden>
+    <p class="okmsg" id="rs-donemsg" style="margin:0"></p>
+    <div class="actions"><span></span><div><button type="button" class="btn" data-close>Done</button><a class="wa" id="rs-wa" target="_blank" rel="noopener"><span>Send new time on WhatsApp</span></a></div></div>
+  </div>
+</form></dialog>
 <dialog id="apdlg"><form class="dlg" id="apForm" novalidate>
   <h2 id="apT">Book appointment</h2>
   <div class="field"><div class="lrow"><label for="ap-pat">Patient</label><button type="button" class="linkbtn" id="ap-toggle-new">+ New patient</button></div><div id="ap-patwrap"><input id="ap-pat" list="ap-pats" autocomplete="off" placeholder="Type name or mobile number of a registered patient" style="width:100%"><datalist id="ap-pats"></datalist></div></div>
@@ -1074,6 +1095,7 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
   <p class="phint" style="margin:0">Words in curly brackets are filled in automatically: {name} {day} {date} {time} {treatment} {chair} {clinic} {phone} {doctor}. Bills also use {bill} {total} {paid} {balance}.</p>
   <div class="field"><label for="tp-confirm">Booking confirmation</label><textarea id="tp-confirm" rows="4"></textarea></div>
   <div class="field"><label for="tp-reminder">Reminder (day before)</label><textarea id="tp-reminder" rows="4"></textarea></div>
+  <div class="field"><label for="tp-resched">Rescheduled appointment</label><textarea id="tp-resched" rows="4"></textarea></div>
   <div class="field"><label for="tp-missed">Missed appointment</label><textarea id="tp-missed" rows="3"></textarea></div>
   <div class="field"><label for="tp-receipt">Payment receipt</label><textarea id="tp-receipt" rows="3"></textarea></div>
   <div class="field"><label for="tp-due">Balance reminder</label><textarea id="tp-due" rows="3"></textarea></div>
@@ -1874,7 +1896,7 @@ const WA_IC='<svg class="waic" viewBox="0 0 24 24" fill="none" stroke="currentCo
 let DEF_LABS=[{"name": "Kashif Lab", "phone": "", "days": 7, "works": ["Complete denture (acrylic)", "Complete denture (Molloplast)", "Partial denture (acrylic)", "Flexible denture", "Denture repair", "Reline"]}, {"name": "Naimat Lab", "phone": "", "days": 7, "works": ["PFM crown", "PFM bridge", "Cast partial framework", "Cast post & core"], "prices": {"PFM crown": 800, "PFM bridge": 800}}, {"name": "DVD Sallahudin Lab", "phone": "", "days": 7, "works": ["Zirconia crown", "Zirconia bridge"], "prices": {"Zirconia crown": 5000, "Zirconia bridge": 5000}}];
 let DEF_SET={
  clinic:{name:"Al Awan Dental Clinic",tagline:"Where excellence is guaranteed",phone:"0311 0053535",doctor:"Dr Faizan Malik",open:"15:00",close:"20:00",slot:30,days:[1,2,3,4,5]},
- templates:{"confirm": "Salam {name},\n\nThank you for choosing *{clinic}*. We are pleased to confirm your appointment:\n\n*Date:* {day}, {date}\n*Time:* {time}\n*Treatment:* {treatment}\n*Dentist:* {doctor}\n\nKindly arrive 10 minutes early and bring any previous X-rays or reports. Should you need to reschedule, simply reply to this message or call us at {phone}.\n\nWe look forward to seeing you.\n\nWarm regards,\nTeam {clinic}", "reminder": "Salam {name},\n\nThis is a gentle reminder of your appointment at *{clinic}* tomorrow:\n\n*Date:* {day}, {date}\n*Time:* {time}\n*Dentist:* {doctor}\n\nKindly reply *YES* to confirm. If you need a different time, please call us at {phone} and we will gladly arrange it.\n\nWarm regards,\nTeam {clinic}", "missed": "Salam {name},\n\nWe missed you at your appointment on {date} at {time} and hope all is well.\n\nYour dental health matters to us, so please reply to this message or call us at {phone} at your convenience, and we will arrange a new time for you.\n\nWarm regards,\nTeam {clinic}", "receipt": "Salam {name},\n\nThank you for visiting *{clinic}*. Here are your bill details:\n\n*Bill no:* {bill}\n*Date:* {date}\n*Total:* {total}\n*Paid:* {paid}\n*Balance:* {balance}\n\nYour PDF receipt is attached for your records. For any query, please call us at {phone}.\n\nWishing you a healthy smile.\n\nWarm regards,\nTeam {clinic}", "due": "Salam {name},\n\nWe hope you are doing well. This is a courteous reminder that a balance of *{balance}* remains on your account at *{clinic}*.\n\nYou may settle it at your next visit or at your convenience. For any query, please call us at {phone}.\n\nThank you for your trust in us.\n\nWarm regards,\nTeam {clinic}", "recall": "Salam {name},\n\nWe hope you and your family are keeping well. It has been a while since your last visit to *{clinic}*, and it is now time for your routine dental check-up and cleaning.\n\nRegular check-ups every six months keep your smile healthy and help us catch small problems early.\n\nKindly reply to this message or call us at {phone} to book a time that suits you.\n\nWarm regards,\nTeam {clinic}", "team": "🦷 *New appointment*\n{name} ({file})\n📅 {day}, {date}\n🕒 {time} – {end}\n🪑 {chair} · {dentist}\nTreatment: {treatment}\nBooked by: {by}"},
+ templates:{"confirm": "Salam {name},\n\nThank you for choosing *{clinic}*. We are pleased to confirm your appointment:\n\n*Date:* {day}, {date}\n*Time:* {time}\n*Treatment:* {treatment}\n*Dentist:* {doctor}\n\nKindly arrive 10 minutes early and bring any previous X-rays or reports. Should you need to reschedule, simply reply to this message or call us at {phone}.\n\nWe look forward to seeing you.\n\nWarm regards,\nTeam {clinic}", "reminder": "Salam {name},\n\nThis is a gentle reminder of your appointment at *{clinic}* tomorrow:\n\n*Date:* {day}, {date}\n*Time:* {time}\n*Dentist:* {doctor}\n\nKindly reply *YES* to confirm. If you need a different time, please call us at {phone} and we will gladly arrange it.\n\nWarm regards,\nTeam {clinic}", "missed": "Salam {name},\n\nWe missed you at your appointment on {date} at {time} and hope all is well.\n\nYour dental health matters to us, so please reply to this message or call us at {phone} at your convenience, and we will arrange a new time for you.\n\nWarm regards,\nTeam {clinic}", "receipt": "Salam {name},\n\nThank you for visiting *{clinic}*. Here are your bill details:\n\n*Bill no:* {bill}\n*Date:* {date}\n*Total:* {total}\n*Paid:* {paid}\n*Balance:* {balance}\n\nYour PDF receipt is attached for your records. For any query, please call us at {phone}.\n\nWishing you a healthy smile.\n\nWarm regards,\nTeam {clinic}", "due": "Salam {name},\n\nWe hope you are doing well. This is a courteous reminder that a balance of *{balance}* remains on your account at *{clinic}*.\n\nYou may settle it at your next visit or at your convenience. For any query, please call us at {phone}.\n\nThank you for your trust in us.\n\nWarm regards,\nTeam {clinic}", "recall": "Salam {name},\n\nWe hope you and your family are keeping well. It has been a while since your last visit to *{clinic}*, and it is now time for your routine dental check-up and cleaning.\n\nRegular check-ups every six months keep your smile healthy and help us catch small problems early.\n\nKindly reply to this message or call us at {phone} to book a time that suits you.\n\nWarm regards,\nTeam {clinic}", "team": "🦷 *New appointment*\n{name} ({file})\n📅 {day}, {date}\n🕒 {time} – {end}\n🪑 {chair} · {dentist}\nTreatment: {treatment}\nBooked by: {by}", "resched": "Salam {name},\n\nYour appointment at *{clinic}* has been rescheduled. Your new appointment is:\n\n*Date:* {day}, {date}\n*Time:* {time}\n*Dentist:* {doctor}\n\nIf this time does not suit you, kindly reply to this message or call us at {phone}, and we will gladly arrange another.\n\nWe look forward to seeing you.\n\nWarm regards,\nTeam {clinic}"},
  team:[{"name": "Dr Faizan Malik", "role": "Dentist", "title": "Chief Dental Surgeon & Prosthodontist", "phone": "+923459148761"}, {"name": "Dr Shazia Sami", "role": "Dentist", "title": "Chief Orthodontist", "phone": "+923459166886"}, {"name": "Dr AbuBakar", "role": "Dentist", "title": "Dentist (PGT Prostho)", "phone": "+923144407085"}, {"name": "Atif Jamshed", "role": "Assistant", "title": "Chief Dental Assistant", "phone": "+923411946403"}, {"name": "Bilal", "role": "Assistant", "title": "Dental Assistant", "phone": ""}],
  prices:[["Consultation / examination with X-ray", 1000], ["Filling (per tooth)", 8000], ["Root canal (RCT)", 15000], ["Re-RCT", 18000], ["Extraction — simple", 5000], ["Extraction — surgical", 8000], ["Impaction surgery", 15000], ["Crown — PFM", 15000], ["Crown — zirconium", 30000], ["Scaling with polishing", 8000], ["Pulpotomy", 8000], ["Crown re-cementation (per tooth)", 2000], ["Crown removal (per tooth)", 2000], ["Veneer (per tooth)", 30000], ["Ortho conventional — advance", 40000], ["Ortho conventional — per visit", 7000], ["Ortho aligners — advance", 100000], ["Ortho aligners — monthly instalment (150,000 over 10 months)", 15000], ["Retainer (per arch)", 10000], ["Implant (without crown)", 100000], ["Bone graft (per point)", 5000], ["Membrane", 35000], ["Denture — acrylic (per arch)", 70000], ["Denture — Molloplast (per arch)", 90000], ["Flexible denture (per tooth)", 8000], ["Partial denture (per tooth)", 4000], ["Cast partial framework (per arch)", 20000], ["Bleaching", 45000]].map(([n,p])=>({n,p}))
 };
@@ -2188,13 +2210,39 @@ function renderWaSteps(){
   $("wa-acts").innerHTML=h;
 }
 $("wa-acts").addEventListener("click",e=>{const a=e.target.closest("[data-wstep]");if(!a||!waSteps)return;waSteps.done.add(+a.dataset.wstep);setTimeout(renderWaSteps,400)});
+/* reschedule */
+const rsdlg=$("rsdlg");let rsId=null,rsTime="";
+function rsSlots(){const a=A[rsId];if(!a)return;const d=$("rs-d").value,c=$("rs-c").value,dur=+a.dur||30,box=$("rs-slots"),now=new Date(),nm=d===ymd(now)?now.getHours()*60+now.getMinutes():(d<ymd(now)?1e9:0);
+  if(!d){box.innerHTML="";$("rs-hint").textContent="Pick a date.";return}
+  if(!isOpen(d)){box.innerHTML="";$("rs-hint").textContent="The clinic is closed on "+dayName(d)+"s. Pick another date.";rsTime="";return}
+  const list=slots().map(t=>({t,past:toMin(t)<nm,busy:overlaps(d,c,t,dur,rsId,a.dentist)})).filter(x=>!x.past);
+  const free=list.filter(x=>!x.busy.length);if(rsTime&&!free.some(x=>x.t===rsTime))rsTime="";
+  box.innerHTML=free.map(x=>`<button type="button" class="fslot${d===a.date&&c===String(a.chair)&&x.t===a.time?" cur":""}" data-rst="${x.t}" aria-pressed="${x.t===rsTime}">${fmtTime(x.t)}</button>`).join("");
+  $("rs-hint").textContent=free.length?(rsTime?"New time: "+dayName(d)+", "+fmtDate(d)+" at "+fmtTime(rsTime)+" · Chair "+c:"Tap a free time."):"No free times on this day for Chair "+c+". Try the other chair or another date."}
+function openResched(id){const a=A[id];if(!a)return;rsId=id;rsTime="";
+  $("rs-now").innerHTML=`<b>${esc(a.patientName)}</b> · now ${esc(dayName(a.date))}, ${esc(fmtDate(a.date))} at ${esc(fmtTime(a.time))} · Chair ${esc(a.chair)}${a.dentist?" · "+esc(a.dentist):""}`;
+  const today=ymd(new Date());$("rs-d").min=today;$("rs-d").value=a.date>=today?a.date:today;$("rs-c").value=String(a.chair||"1");
+  $("rs-pick").hidden=false;$("rs-done").hidden=true;$("rs-err").hidden=true;rsSlots();openD(rsdlg)}
+$("rs-d").addEventListener("change",()=>{rsTime="";rsSlots()});$("rs-c").addEventListener("change",rsSlots);
+$("rs-slots").addEventListener("click",e=>{const b=e.target.closest("[data-rst]");if(!b)return;rsTime=b.dataset.rst;rsSlots()});
+$("rsForm").addEventListener("submit",e=>{e.preventDefault();const a=A[rsId],err=$("rs-err");if(!a)return;const d=$("rs-d").value,c=$("rs-c").value;
+  if(!d||!rsTime){err.textContent="Pick the new date and a free time.";err.hidden=false;return}
+  if(d===a.date&&rsTime===a.time&&c===String(a.chair)){err.textContent="That's the same date and time. Pick a new one.";err.hidden=false;return}
+  if(overlaps(d,c,rsTime,+a.dur||30,rsId,a.dentist).length){err.textContent="That time was just taken. Pick another.";err.hidden=false;rsSlots();return}
+  const hist=[...(a.history||[]),{date:a.date,time:a.time,chair:a.chair,at:new Date().toISOString(),by:myName||me.by||""}];
+  const n={...a,date:d,time:rsTime,chair:c,status:"booked",history:hist,rescheduledAt:new Date().toISOString()};delete n.confirmSentAt;delete n.remindedAt;delete n.missedSentAt;
+  cset("appts",rsId,n);
+  $("rs-donemsg").textContent="Moved to "+dayName(d)+", "+fmtDate(d)+" at "+fmtTime(rsTime)+" · Chair "+c+".";
+  const w=$("rs-wa");if(waNum(n.phone)){w.hidden=false;w.href=waHref(n.phone,apMsg(n,"resched"));w.dataset.mark="appts|"+rsId+"|confirmSentAt";if(!w.querySelector("svg"))w.insertAdjacentHTML("afterbegin",WA_IC)}else w.hidden=true;
+  $("rs-pick").hidden=true;$("rs-done").hidden=false;toast("Appointment rescheduled")});
+$("rs-wa").addEventListener("click",()=>setTimeout(()=>rsdlg.close(),300));
 function apCard(a){
   const st=a.status||"booked",p=P[a.patientId],ok=waNum(a.phone),end=fromMin(toMin(a.time)+(+a.dur||30));
   const msgs=ok?(a.confirmSentAt?`<span class="chip2 ok">✓ Confirmation sent</span>`:`<a class="wa sm" href="${esc(waHref(a.phone,apMsg(a,"confirm")))}" target="_blank" rel="noopener" data-mark="appts|${esc(a.id)}|confirmSentAt">${WA_IC}<span>Confirm</span></a>`)+(st==="noshow"?(a.missedSentAt?`<span class="chip2 ok">✓ Missed msg sent</span>`:`<a class="wa sm" href="${esc(waHref(a.phone,apMsg(a,"missed")))}" target="_blank" rel="noopener" data-mark="appts|${esc(a.id)}|missedSentAt">${WA_IC}<span>Missed visit</span></a>`):""):`<span class="chip2">No mobile number</span>`;
   return `<div class="apc st-${st}"><div class="tm">${esc(fmtTime(a.time))}<span>to ${esc(fmtTime(end))}</span></div><div class="ab">
     <div class="ah"><button class="linkbtn strong" data-gopat="${esc(a.patientId)}">${esc(a.patientName)}</button>${p&&p.alerts?` <span class="chip2 bad" title="${esc(p.alerts)}">Alert: ${esc(p.alerts.slice(0,28))}</span>`:""}</div>
     <div class="muted small">${a.dentist?`<b class="dent">${esc(a.dentist)}</b> · `:""}${esc(a.treatment||"Check-up")}${a.note?" · "+esc(a.note):""}</div>
-    <div class="row3"><select class="stsel s-${st}" data-st="${esc(a.id)}" aria-label="Status of ${esc(a.patientName)}">${Object.entries(AST).map(([k,v])=>`<option value="${k}"${k===st?" selected":""}>${v[0]}</option>`).join("")}</select>${msgs}<button class="btn small" data-apedit="${esc(a.id)}">Edit</button>${st==="done"?`<button class="btn small primary" data-apbill="${esc(a.id)}">Bill</button>`:""}</div></div></div>`;
+    <div class="row3"><select class="stsel s-${st}" data-st="${esc(a.id)}" aria-label="Status of ${esc(a.patientName)}">${Object.entries(AST).map(([k,v])=>`<option value="${k}"${k===st?" selected":""}>${v[0]}</option>`).join("")}</select>${msgs}<button class="btn small" data-apedit="${esc(a.id)}">Edit</button>${st!=="done"?`<button class="btn small" data-apres="${esc(a.id)}">Reschedule</button>`:""}${st==="done"?`<button class="btn small primary" data-apbill="${esc(a.id)}">Bill</button>`:""}</div></div></div>`;
 }
 function renderAppts(){
   const today=ymd(new Date()),tom=addDays(today,1);
@@ -2228,6 +2276,7 @@ $("tmForm").addEventListener("submit",e=>{e.preventDefault();const team=[...$("t
   saveSet({...SET,team});tmdlg.close();toast("Team saved")});
 $("apView").addEventListener("click",e=>{
   const t=e.target,ed=t.closest("[data-apedit]");if(ed)return openAp(ed.dataset.apedit);
+  const rs=t.closest("[data-apres]");if(rs)return openResched(rs.dataset.apres);
   const bl=t.closest("[data-apbill]");if(bl)return openBill(null,{fromAp:bl.dataset.apbill});
   const na=t.closest("[data-newap]");if(na)return openAp(null,{chair:na.dataset.newap,date:apDate});
   const fr=t.closest("[data-free]");if(fr){const [c,tm]=fr.dataset.free.split("|");return openAp(null,{chair:c,date:apDate,time:tm})}
