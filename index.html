@@ -806,6 +806,30 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
 
 </head>
 <body>
+<div id="bootErr" style="display:none;position:fixed;inset:0;z-index:2147483600;background:#f3f6f5;padding:28px 20px;font:15px/1.5 system-ui,-apple-system,sans-serif;color:#17201e;overflow:auto">
+  <div style="max-width:440px;margin:40px auto;background:#fff;border:1px solid #dde6e3;border-radius:14px;padding:22px">
+    <h2 style="margin:0 0 6px;font-size:20px">The app didn't open properly</h2>
+    <p id="bootMsg" style="margin:0 0 14px;color:#4b5b57">Check your internet connection, then tap Repair app.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button type="button" id="bootRepair" style="padding:11px 16px;border-radius:10px;border:0;background:#0F7A68;color:#fff;font-weight:700;font-size:15px">Repair app</button>
+      <button type="button" onclick="location.reload()" style="padding:11px 16px;border-radius:10px;border:1px solid #cfdad6;background:#fff;font-weight:700;font-size:15px">Try again</button>
+    </div>
+    <p style="margin:14px 0 0;font-size:12px;color:#7a8a86">Repair clears the app's saved copy and downloads the latest version. Your clinic records are safe — they're stored online.</p>
+    <p id="bootDetail" style="margin:10px 0 0;font-size:11px;color:#9aa8a4;word-break:break-word"></p>
+  </div>
+</div>
+<script>
+(function(){var shown=false;
+  function show(msg,detail){if(shown)return;shown=true;var e=document.getElementById("bootErr");if(!e)return;if(msg)document.getElementById("bootMsg").textContent=msg;document.getElementById("bootDetail").textContent=detail||"";e.style.display="block"}
+  window.__bootFail=show;
+  window.addEventListener("error",function(ev){if(window.__appReady)return;var t=ev&&ev.target;if(t&&t.tagName){if(t.tagName==="SCRIPT"&&t.src&&/gstatic|firebase-config/.test(t.src))show("Part of the app couldn't download. Check your internet connection and tap Repair app.",t.src);return}show(null,(ev&&ev.message)||"")},true);
+  setTimeout(function(){if(window.__appReady)return;var vis=function(id){var x=document.getElementById(id);return x&&!x.hidden&&x.offsetParent!==null};if(!vis("login")&&!vis("who")&&!vis("gate"))show("The app is taking too long to start. Check your internet connection and tap Repair app.","")},20000);
+  document.getElementById("bootRepair").onclick=function(){var b=this;b.disabled=true;b.textContent="Repairing…";
+    var jobs=[];try{if(window.caches)jobs.push(caches.keys().then(function(k){return Promise.all(k.map(function(n){return caches.delete(n)}))}))}catch(e){}
+    try{if(navigator.serviceWorker)jobs.push(navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))}))}catch(e){}
+    Promise.all(jobs).catch(function(){}).then(function(){location.replace(location.pathname+"?r="+Date.now())})};
+})();
+</script>
 <div id="aoBar" class="aobar" role="alertdialog" aria-live="assertive" hidden><span id="aoMsg">You'll be signed out soon because the app hasn't been used.</span><button class="btn primary small" id="aoStay" type="button">Stay signed in</button></div>
 <div class="login" id="login" hidden>
   <div class="login-card">
@@ -3674,10 +3698,10 @@ function hideGate(){$("gate").hidden=true}
 $("gate").addEventListener("click",e=>{if(e.target.closest("[data-gout]"))firebase.auth().signOut();if(e.target.closest("[data-gconsole]"))openConsole()});
 function leaveClinic(){aoStop();if(unsub){unsub();unsub=null}if(memUnsub){memUnsub();memUnsub=null}if(cdocUnsub){cdocUnsub();cdocUnsub=null}stopLogs();stopClinic();db=null;CLINIC=null;CDOC=null;MEM=null;overrides={}}
 function setupFirebase(){
-  if(!window.firebase||!window.FIREBASE_CONFIG){$("login").hidden=false;$("loginForm").hidden=true;$("loginErr").textContent="The app couldn't load. Check the internet connection and reload.";$("loginErr").hidden=false;return}
+  if(!window.firebase||!window.FIREBASE_CONFIG){if(window.__bootFail)window.__bootFail("Part of the app couldn't download. Check your internet connection and tap Repair app.","firebase");$("login").hidden=false;$("loginForm").hidden=true;$("loginErr").textContent="The app couldn't load. Check the internet connection and reload.";$("loginErr").hidden=false;return}
   firebase.initializeApp(FIREBASE_CONFIG);
   const fs=firebase.firestore();try{fs.settings({cacheSizeBytes:300*1024*1024,merge:true})}catch(e){}fs.enablePersistence({synchronizeTabs:true}).catch(()=>{});fsRoot=fs;
-  firebase.auth().onAuthStateChanged(u=>{const seq=++authSeq;leaveClinic();
+  firebase.auth().onAuthStateChanged(u=>{window.__appReady=true;const seq=++authSeq;leaveClinic();
     if(!u){hideGate();$("login").hidden=false;$("who").hidden=true;render();return}
     if(registering)return;
     enterClinic(u,seq).catch(e=>showGate(`<h2>Couldn't open the clinic</h2><p class="muted">${esc(authMsg(e))}</p><div class="row"><button class="btn" data-gout>Sign out</button></div>`));
