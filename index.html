@@ -798,6 +798,12 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
 .rsslots .fslot{cursor:pointer}.rsslots .fslot[aria-pressed="true"]{background:var(--ok);color:#fff}
 .rsslots .fslot.cur{border-style:dashed}
 .okmsg{padding:12px;border-radius:10px;background:var(--ok-soft);color:var(--ok);font-weight:600}
+.aiprev{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;position:relative}
+.aiprev .aiin{width:794px;transform-origin:top left}
+.aiwait{display:flex;gap:10px;align-items:center;padding:28px 6px;margin:0;font-weight:600}
+.spin{width:18px;height:18px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:spn .8s linear infinite;flex:none}@keyframes spn{to{transform:rotate(360deg)}}
+.aili{display:flex;gap:10px;align-items:center;padding:4px 0;border-top:1px dashed var(--line)}.aili .linkbtn{flex:1;text-align:left}
+.btn.ai{background:linear-gradient(135deg,#efe7ff,#e3f0ff);border-color:#cbbdf5;color:#4a2fa3;font-weight:700}
 </style>
 
 </head>
@@ -1022,6 +1028,21 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
   <p class="perr" id="pt-err" hidden></p>
   <div class="actions"><button type="button" class="btn danger-outline" id="pt-del">Delete patient</button><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
+<dialog id="aidlg" class="wide"><div class="dlg">
+  <div class="dh" style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><h2 style="margin:0">✨ AI proposal writer</h2><p class="muted small" id="ai-who" style="margin:2px 0 0"></p></div><button type="button" class="btn small" data-close>Close</button></div>
+  <p class="notice" id="ai-nokey" hidden style="margin:0">The AI writer needs a Claude API key. The clinic admin can add one in <b>Clinic profile → AI key</b> (from console.anthropic.com). Each proposal costs a few rupees.</p>
+  <div id="ai-ask">
+    <div class="field"><label for="ai-q">Tell the AI what to put in the proposal</label><textarea id="ai-q" rows="6" placeholder="e.g. Phase one only. Remove upper bridge Rs 5000. Extract remaining teeth as per prognosis, Rs 5000 per tooth, 8 teeth remain (0 to 8). Patient is 70+, proposal is for him and family. Next phase: tooth replacement options after healing."></textarea><span class="muted small">Write it the way you'd tell your assistant — treatments, teeth, prices, phases, discounts and anything to explain. English, Urdu or Roman Urdu is fine.</span></div>
+    <div class="actions"><span></span><div><button type="button" class="btn primary" id="ai-go">Write proposal</button></div></div>
+  </div>
+  <div id="ai-wait" hidden><p class="aiwait"><span class="spin"></span> Writing the proposal… this takes about 15–30 seconds.</p></div>
+  <p class="perr" id="ai-err" hidden></p>
+  <div id="ai-view" hidden>
+    <div class="aiprev" id="ai-prev"></div>
+    <div class="field" style="margin-top:10px"><label for="ai-rev">Want changes? Tell the AI</label><div style="display:flex;gap:8px"><input id="ai-rev" maxlength="400" placeholder="e.g. Add 10% discount on phase one, and mention he is diabetic" style="flex:1"><button type="button" class="btn" id="ai-redo">Rewrite</button></div></div>
+    <div class="actions"><button type="button" class="btn small" id="ai-new">Start over</button><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button type="button" class="btn" id="ai-save">Save</button><button type="button" class="btn" id="ai-pdf">Download PDF</button><button type="button" class="wa" id="ai-send"><span>Send PDF on WhatsApp</span></button></div></div>
+  </div>
+</div></dialog>
 <dialog id="rsdlg"><form class="dlg" id="rsForm" novalidate>
   <h2>Reschedule appointment</h2>
   <p class="muted" id="rs-now" style="margin:0"></p>
@@ -1101,7 +1122,7 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
   <div class="field"><label for="tp-due">Balance reminder</label><textarea id="tp-due" rows="3"></textarea></div>
   <div class="field"><label for="tp-recall">Recall (check-up due)</label><textarea id="tp-recall" rows="4"></textarea></div>
   <div class="field"><label for="tp-team">Team message (new booking)</label><textarea id="tp-team" rows="4"></textarea><span class="muted small">Also uses {file} {end} {dentist} {by}.</span></div>
-  <div class="field aikey"><label for="st-aikey">AI photo reading key (optional)</label><input id="st-aikey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…"><span class="muted small">Paste a Claude API key from <b>console.anthropic.com</b> to read appointment photos in any language, including handwriting and Urdu. Each photo costs a few rupees from your Anthropic credit. Leave empty to use the free reader.</span></div>
+  <div class="field aikey"><label for="st-aikey">AI key — for the AI proposal writer and reading appointment photos (optional)</label><input id="st-aikey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…"><span class="muted small">Paste a Claude API key from <b>console.anthropic.com</b> to read appointment photos in any language, including handwriting and Urdu. Each photo costs a few rupees from your Anthropic credit. Leave empty to use the free reader.</span></div>
   <div class="actions"><button type="button" class="btn ghost" id="st-reset">Reset messages</button><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
 <dialog id="tmdlg" class="wide"><form class="dlg" id="tmForm" novalidate>
@@ -2062,6 +2083,9 @@ $("patDetail").addEventListener("click",e=>{
   const bo=t.closest("[data-bopen]");if(bo)return openBillView(bo.dataset.bopen);
   if(t.closest("[data-pstmt]"))return openStmt("pat",{pid:selPat});
   if(t.closest("[data-xadd]"))return openXr();
+  if(t.closest("[data-aiprop]"))return openAiProp(selPat);
+  const aio=t.closest("[data-aiopen]");if(aio)return openAiProp(selPat,aio.dataset.aiopen);
+  const aid=t.closest("[data-aidel]");if(aid){const p=P[selPat];if(p&&confirm("Delete this AI proposal?")){cset("patients",selPat,{...p,aiProps:(p.aiProps||[]).filter(x=>x.id!==aid.dataset.aidel)});toast("AI proposal deleted")}return}
   const ta=t.closest("[data-tpadd]");if(ta){const n=+ta.dataset.tpadd||null;if(n)toothSel=null;return openTp(null,n,"prop")}
   if(t.closest("[data-tpadd2]"))return openTp(null,null,"plan");
   const te=t.closest("[data-tpedit]");if(te){const [k,id]=te.dataset.tpedit.split("|");return openTp(id,null,k)}
@@ -2210,6 +2234,121 @@ function renderWaSteps(){
   $("wa-acts").innerHTML=h;
 }
 $("wa-acts").addEventListener("click",e=>{const a=e.target.closest("[data-wstep]");if(!a||!waSteps)return;waSteps.done.add(+a.dataset.wstep);setTimeout(renderWaSteps,400)});
+/* ---------- AI proposal writer ---------- */
+const aidlg=$("aidlg");let aiDoc=null,aiPid=null,aiSavedId=null,aiBusy=false;
+const AIP_FONTS="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap";
+function aipFonts(){if(!document.getElementById("aipFonts")){const l=document.createElement("link");l.id="aipFonts";l.rel="stylesheet";l.href=AIP_FONTS;document.head.appendChild(l)}}
+const aiPlu=(u,q)=>q===1?u:(/^tooth$/i.test(u)?"teeth":/s$/.test(u)?u:u+"s");
+const rsx=n=>"Rs. "+Math.round(+n||0).toLocaleString("en-US");
+const aiCtx=()=>!!(window.claude&&window.claude.complete)||!!S().aiKey;
+async function aiText(prompt){
+  if(window.claude&&window.claude.complete){try{return await window.claude.complete(prompt)}catch(e){throw Object.assign(new Error("api"),{code:"api"})}}
+  const key=S().aiKey;if(!key)throw Object.assign(new Error("nokey"),{code:"bad_key"});
+  if(!isOnline())throw Object.assign(new Error("net"),{code:"net"});
+  let r;try{r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"x-api-key":key,"anthropic-version":"2023-06-01","content-type":"application/json","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:AI_MODEL,max_tokens:4000,messages:[{role:"user",content:prompt}]})})}catch(e){throw Object.assign(new Error("net"),{code:"net"})}
+  if(!r.ok){const j=await r.json().catch(()=>({})),msg=(j.error&&j.error.message)||"";throw Object.assign(new Error("api"),{code:r.status===401||r.status===403?"bad_key":r.status===429?"rate_limited":/credit|billing|balance/i.test(msg)?"no_credit":"api",detail:msg})}
+  const j=await r.json();return (j.content||[]).map(c=>c.text||"").join("")}
+function aiPrompt(pid,ask,prev){const p=P[pid]||{},c=S().clinic,st=p.teeth||{},pr=propOf(p);
+  const finds=Object.entries(st).filter(([,v])=>v).map(([n,v])=>n+": "+(TOOTH_ST[v]||v)).join(", ");
+  const prices=S().prices.filter(x=>+x.p>0).map(x=>x.n+" = Rs "+x.p).join("; ");
+  return `You write patient treatment proposals for a dental clinic in Pakistan. Reply with ONE JSON object only, no other text.
+
+Clinic: ${c.name}. Dentist: ${c.doctor||"the dentist"}. Today: ${fmtDate(ymd(new Date()))}.
+Patient: ${p.name||"the patient"}${p.age?", age "+p.age:""}${p.gender?", "+p.gender:""}.${p.alerts?" Medical alert: "+p.alerts+".":""}
+${finds?"Chart findings (FDI tooth numbers): "+finds+".":""}
+${pr.items.length?"Treatments already on the proposed plan: "+pr.items.map(i=>i.tr+(i.tooth?" ("+i.tooth+")":"")+" Rs "+itAmt(i)).join("; ")+".":""}
+Clinic price list (use these when the dentist doesn't give a price): ${prices||"none"}.
+
+${prev?`Here is the current proposal JSON:\n${JSON.stringify(prev)}\n\nThe dentist wants these changes: ${ask}\nReturn the full updated JSON.`:`The dentist's instructions: ${ask}`}
+
+Rules:
+- Use exactly the prices the dentist gives. Otherwise use the clinic price list. If no price is known, set rate to 0 (the app will show "To be confirmed"). Never invent prices.
+- Do NOT calculate amounts or totals; the app does the arithmetic. Give rate and quantity only.
+- For "per tooth" or "per unit" work with an uncertain count, give qtyMin and qtyMax (e.g. 0 and 8). Otherwise qtyMin = qtyMax.
+- Professional, warm, plain English (unless the dentist asks for another language). Short sentences. Speak to the patient/family respectfully. You may use **bold** in text.
+- Split work into phases or sections only if the dentist asks for it or it clearly helps.
+- Set "glance": true on a procedures section that has exactly one item with a quantity range of up to 16, to show a cost table for every possible count.
+
+JSON format:
+{"title":"Treatment Proposal","subtitle":"short line, e.g. Phase One — Removal & Extraction","patientNote":"short line under the patient's name, e.g. Age 70+ · and family (or empty)","preparedBy":"${c.doctor||""}","preparedByRole":"Dentist","intro":"1–3 sentences",
+"sections":[
+ {"type":"procedures","heading":"Phase One procedures","items":[{"name":"Removal of upper bridge","detail":"one short line","rate":5000,"unit":"","qtyMin":1,"qtyMax":1},{"name":"Extraction of remaining teeth, as per prognosis","detail":"8 teeth remain. Only those that cannot be saved will be removed.","rate":5000,"unit":"tooth","qtyMin":0,"qtyMax":8}],"totalLabel":"Phase One total","discount":0,"glance":true,"glanceCaption":"Bridge removal + number of teeth extracted"},
+ {"type":"text","heading":"How the final number is decided","text":"..."},
+ {"type":"note","label":"NEXT","text":"..."}
+]}`}
+function aiParse(t){const m=String(t||"").match(/\{[\s\S]*\}/);if(!m)return null;try{const d=JSON.parse(m[0]);return d&&Array.isArray(d.sections)?d:null}catch(e){return null}}
+const mdB=s=>esc(s||"").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
+function aiCalc(sec){let mn=0,mx=0;for(const it of sec.items||[]){const r=+it.rate||0,a=+it.qtyMin||0,b=Math.max(a,+(it.qtyMax??it.qtyMin)||0);mn+=r*a;mx+=r*b}const d=+sec.discount||0;return {mn:Math.max(0,mn-d),mx:Math.max(0,mx-d),d}}
+function aiDocHtml(pid,d){const p=P[pid]||{},c=S().clinic,logo=clinicLogo();let n=0;
+  const range=(a,b)=>a===b?rsx(a):rsx(a)+" – "+rsx(b).replace("Rs. ","");
+  const secs=(d.sections||[]).map(s=>{
+    if(s.type==="procedures"){const cl=aiCalc(s),its=s.items||[],hn=String(++n).padStart(2,"0");let k=0;
+      const rows=its.map(it=>{const r=+it.rate||0,a=+it.qtyMin||0,b=Math.max(a,+(it.qtyMax??it.qtyMin)||0),u=it.unit?" / "+esc(it.unit):"";
+        return `<tr><td class="n">${++k}</td><td><b>${esc(it.name)}</b>${it.detail?`<small>${esc(it.detail)}</small>`:""}</td><td class="r">${r?rsx(r)+u:"To be confirmed"}</td><td class="c">${a===b?a:a+" – "+b}</td><td class="r">${r?range(r*a,r*b):"—"}</td></tr>`}).join("");
+      let gl="";const vr=its.filter(it=>(+it.qtyMax||0)>(+it.qtyMin||0));
+      if(s.glance&&vr.length===1&&(+vr[0].qtyMax-+vr[0].qtyMin)<=16&&+vr[0].rate>0){const v=vr[0],fixed=its.filter(x=>x!==v).reduce((t,x)=>t+(+x.rate||0)*(+x.qtyMin||0),0)-(+s.discount||0),u=v.unit||"unit",cells=[];
+        for(let q=+v.qtyMin;q<=+v.qtyMax;q++)cells.push(`<div class="gc${q===+v.qtyMax?" hi":""}"><b>${q}</b><span>${esc((q===+v.qtyMax&&q>1?"All ":"")+aiPlu(u,q))}</span><em>${Math.max(0,fixed+q*v.rate).toLocaleString("en-US")}</em></div>`);
+        gl=`<h2 class="sh"><span>${String(++n).padStart(2,"0")} — Your cost at a glance</span>${s.glanceCaption?`<small>${esc(s.glanceCaption)}</small>`:""}</h2><div class="gl" style="grid-template-columns:repeat(${Math.min(cells.length,9)},1fr)">${cells.join("")}</div><p class="fn">All amounts in Pakistani Rupees (Rs.).</p>`}
+      return `<h2 class="sh"><span>${hn} — ${esc(s.heading||"Procedures")}</span></h2><table class="pt"><thead><tr><th class="n">#</th><th>Procedure</th><th class="r">Rate</th><th class="c">Qty</th><th class="r">Amount</th></tr></thead><tbody>${rows}${cl.d?`<tr class="ds"><td></td><td>Discount</td><td></td><td></td><td class="r">− ${rsx(cl.d)}</td></tr>`:""}<tr class="tt"><td></td><td colspan="3">${esc(s.totalLabel||"Total")}</td><td class="r">${range(cl.mn,cl.mx)}</td></tr></tbody></table>${gl}`}
+    if(s.type==="note")return `<div class="nb"><span>${esc(s.label||"Note")}</span><p>${mdB(s.text)}</p></div>`;
+    return `<h3 class="tx">${esc(s.heading||"")}</h3><p class="tp">${mdB(s.text)}</p>`}).join("");
+  return `<div class="aip"><style>
+.aip{width:794px;min-height:1123px;box-sizing:border-box;padding:48px 54px 40px;background:#fff;color:#1f2a37;font:13px/1.6 Barlow,"Segoe UI",system-ui,sans-serif;display:flex;flex-direction:column}
+.aip *{box-sizing:border-box}.aip h1,.aip h2,.aip h3,.aip .cnd{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif}
+.aip .hd{display:flex;gap:20px;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid #d5dbe3}
+.aip .hd img{width:84px;height:84px;object-fit:contain;border:1px solid #e3e8ee;padding:4px;background:#fff}
+.aip .hd .t{flex:1}.aip .cl{margin:0;font:600 11px Barlow,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#5b7088}
+.aip h1{margin:4px 0 0;font-size:38px;line-height:1.05;font-weight:700;color:#141c26}.aip .sub{margin:4px 0 0;font:500 20px "Barlow Condensed","Arial Narrow",Arial,sans-serif;color:#55606e}
+.aip .dt{text-align:right;font-size:12px;color:#5b6573;padding-top:26px}.aip .dt b{display:block;color:#141c26;font-size:13px}
+.aip .pp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0 14px}.aip .pp div{border:1px solid #d5dbe3;padding:12px 16px}
+.aip .pp span{display:block;font:600 10px Barlow,Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#5b7088}.aip .pp b{display:block;font:700 22px "Barlow Condensed","Arial Narrow",Arial,sans-serif;color:#141c26;margin-top:2px}.aip .pp em{font-style:normal;color:#5b6573;font-size:12.5px}
+.aip .in{margin:0 0 6px;max-width:560px;font-size:14px}
+.aip h2.sh{display:flex;justify-content:space-between;align-items:baseline;margin:20px 0 8px;font-size:23px;font-weight:700;color:#141c26}.aip h2.sh small{font:400 12px Barlow,Arial,sans-serif;color:#5b6573}
+.aip table.pt{width:100%;border-collapse:collapse}.aip .pt th{background:#eaf3fd;border-bottom:1px solid #b8cde6;font:600 10.5px Barlow,Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#1f3550;padding:9px 10px;text-align:left}
+.aip .pt td{padding:11px 10px;border-bottom:1px solid #e3e8ee;vertical-align:top;font-size:13px}.aip .pt td small{display:block;color:#66717f;font-size:12px}
+.aip .pt .r{text-align:right;white-space:nowrap}.aip .pt .c{text-align:center;white-space:nowrap}.aip .pt .n{width:30px;color:#3d4753}
+.aip .pt tr.tt td{font:700 18px "Barlow Condensed","Arial Narrow",Arial,sans-serif;color:#141c26;border-bottom:0;padding-top:12px}.aip .pt tr.tt td.r{color:#1f3c63}.aip .pt tr.ds td{color:#2E7D4F}
+.aip .gl{display:grid;border:1px solid #d5dbe3}.aip .gc{text-align:center;padding:10px 4px;border-left:1px solid #d5dbe3}.aip .gc:first-child{border-left:0}
+.aip .gc b{display:block;font:700 24px "Barlow Condensed","Arial Narrow",Arial,sans-serif;color:#141c26;line-height:1.1}.aip .gc span{display:block;font:500 10px Barlow,Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#66717f}.aip .gc em{display:block;font-style:normal;font-weight:700;font-size:12.5px;margin-top:6px}
+.aip .gc.hi{background:#eaf3fd}.aip .gc.hi b{color:#1f3c63}.aip .fn{margin:6px 0 0;font-size:11px;color:#66717f}
+.aip h3.tx{margin:18px 0 2px;font-size:19px;font-weight:700;color:#141c26}.aip .tp{margin:0;max-width:600px;font-size:13.5px}
+.aip .nb{display:flex;gap:22px;align-items:center;background:#1e2a39;color:#e9eef5;padding:14px 18px;margin-top:18px}.aip .nb span{font:600 11px Barlow,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#a9bed8}.aip .nb p{margin:0;font-size:13px}
+.aip .ft{margin-top:auto;padding-top:14px;border-top:1px solid #d5dbe3;display:flex;justify-content:space-between;font-size:11px;color:#5b6573}.aip .ft span:first-child{letter-spacing:.18em;text-transform:uppercase;font-weight:600}.aip .ft span:last-child{font-style:italic}
+</style>
+<div class="hd">${logo?`<img src="${esc(logo)}" alt="">`:""}<div class="t"><p class="cl">${esc(c.name)}</p><h1>${esc(d.title||"Treatment Proposal")}</h1>${d.subtitle?`<p class="sub">${esc(d.subtitle)}</p>`:""}</div><div class="dt">Date<b>${esc(fmtDate(d.date||ymd(new Date())))}</b></div></div>
+<div class="pp"><div><span>Prepared for</span><b>${esc(p.name||"")}</b>${d.patientNote?`<em>${esc(d.patientNote)}</em>`:""}</div><div><span>Prepared by</span><b>${esc(d.preparedBy||c.doctor||c.name)}</b><em>${esc((d.preparedByRole||"Dentist")+" · "+c.name)}</em></div></div>
+${d.intro?`<p class="in">${mdB(d.intro)}</p>`:""}
+${secs}
+<div class="ft" style="margin-top:28px"><span>${esc(c.name)}</span><span>${esc(c.tagline||("Phone / WhatsApp "+(c.phone||"")))}</span></div>
+</div>`}
+function aiShow(state,msg){$("ai-ask").hidden=state!=="ask";$("ai-wait").hidden=state!=="wait";$("ai-view").hidden=state!=="view";const e=$("ai-err");e.hidden=!msg;if(msg)e.textContent=msg}
+function aiPreview(){const box=$("ai-prev");box.innerHTML=`<div class="aiin">${aiDocHtml(aiPid,aiDoc)}</div>`;const inn=box.firstElementChild;
+  const fit=()=>{const s=Math.min(1,box.clientWidth/794);inn.style.transform="scale("+s+")";box.style.height=Math.ceil(inn.firstElementChild.offsetHeight*s)+"px"};fit();setTimeout(fit,300);document.fonts&&document.fonts.ready.then(fit)}
+function openAiProp(pid,savedId){aipFonts();aiPid=pid;const p=P[pid];if(!p)return;aiSavedId=savedId||null;
+  const sv=savedId?(p.aiProps||[]).find(x=>x.id===savedId):null;aiDoc=sv?sv.doc:null;
+  $("ai-who").textContent=p.name+(p.age?" · "+p.age+" y":"");$("ai-q").value=sv?"":"";$("ai-rev").value="";
+  $("ai-nokey").hidden=aiCtx();$("ai-go").disabled=!aiCtx();
+  if(aiDoc){aiShow("view");openD(aidlg);aiPreview()}else{aiShow("ask");openD(aidlg);setTimeout(()=>$("ai-q").focus(),50)}}
+const aiErrMsg=e=>({bad_key:"The AI key isn't working. The admin can check it in Clinic profile → AI key.",no_credit:"Your Anthropic account is out of credit. Top it up at console.anthropic.com.",rate_limited:"Too many requests just now. Wait a minute and try again.",net:"No internet connection. The AI writer needs internet."})[e&&e.code]||"The AI couldn't write the proposal. Try again, or reword your instructions.";
+async function aiRun(ask,prev){if(aiBusy)return;aiBusy=true;aiShow("wait");
+  try{let d=null;for(let i=0;i<2&&!d;i++)d=aiParse(await aiText(aiPrompt(aiPid,ask,prev)));
+    if(!d)throw Object.assign(new Error("parse"),{code:"parse"});d.date=ymd(new Date());aiDoc=d;aiSavedId=null;aiShow("view");aiPreview()}
+  catch(e){aiShow(prev?"view":"ask",aiErrMsg(e));if(prev&&aiDoc)aiPreview()}finally{aiBusy=false}}
+$("ai-go").addEventListener("click",()=>{const q=$("ai-q").value.trim();if(q.length<8){aiShow("ask","Describe the treatment and prices in a sentence or two.");return}aiRun(q,null)});
+$("ai-redo").addEventListener("click",()=>{const q=$("ai-rev").value.trim();if(!q){$("ai-rev").focus();return}$("ai-rev").value="";aiRun(q,aiDoc)});
+$("ai-new").addEventListener("click",()=>{aiDoc=null;aiSavedId=null;aiShow("ask");$("ai-q").focus()});
+function aiSave(quiet){const p=P[aiPid];if(!p||!aiDoc)return;const list=[...(p.aiProps||[])];const rec={id:aiSavedId||nid("aip"),title:(aiDoc.title||"Treatment Proposal")+(aiDoc.subtitle?" — "+aiDoc.subtitle:""),date:aiDoc.date||ymd(new Date()),doc:aiDoc,by:myName||""};
+  const i=list.findIndex(x=>x.id===rec.id);if(i>=0)list[i]=rec;else list.unshift(rec);aiSavedId=rec.id;cset("patients",aiPid,{...p,aiProps:list.slice(0,30)});if(!quiet)toast("Proposal saved to "+p.name+"'s profile")}
+$("ai-save").addEventListener("click",()=>aiSave(false));
+const aiFile=()=>"Treatment-proposal-"+String((P[aiPid]||{}).name||"patient").replace(/[^A-Za-z0-9]+/g,"-")+".pdf";
+async function aiPdf(btn){const old=btn.innerHTML;btn.disabled=true;btn.textContent="Preparing PDF…";try{aipFonts();if(document.fonts)await document.fonts.ready;aiSave(true);return await htmlPdfBlob(aiDocHtml(aiPid,aiDoc))}finally{btn.disabled=false;btn.innerHTML=old}}
+$("ai-pdf").addEventListener("click",async e=>{try{const b=await aiPdf(e.currentTarget);if(await propSave(b,aiFile()))toast("PDF saved")}catch(x){toast("Couldn't make the PDF. Try again.")}});
+$("ai-send").addEventListener("click",async e=>{const p=P[aiPid],c=S().clinic;if(!p)return;try{const blob=await aiPdf(e.currentTarget),name=aiFile();
+  const msg=`Salam ${p.name},\n\nThank you for visiting *${c.name}*. Please find your treatment proposal attached.\n\nWe would be glad to explain any part of it or answer your questions. Please call or WhatsApp us at ${c.phone}.\n\nWarm regards,\nTeam ${c.name}`;
+  if(!window.claude&&navigator.canShare){const file=new File([blob],name,{type:"application/pdf"});if(navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"Treatment proposal",text:msg});return}catch(x){if(x&&x.name==="AbortError")return}}}
+  if(await propSave(blob,name)){if(waNum(p.phone))window.open(waHref(p.phone,msg),"_blank","noopener");toast("PDF saved. Attach it in the WhatsApp chat with 📎.")}}catch(x){toast("Couldn't make the PDF. Try again.")}});
+function aiPropList(p){const l=p.aiProps||[];if(!l.length)return "";return `<div class="ailist"><p class="muted small" style="margin:10px 0 4px"><b>AI proposals</b></p>${l.map(x=>`<div class="aili"><button type="button" class="linkbtn" data-aiopen="${esc(x.id)}">${esc(x.title)}</button><span class="muted small">${esc(fmtDate(x.date))}</span><button type="button" class="ldel" data-aidel="${esc(x.id)}" aria-label="Delete this AI proposal">×</button></div>`).join("")}</div>`}
+
 /* reschedule */
 const rsdlg=$("rsdlg");let rsId=null,rsTime="";
 function rsSlots(){const a=A[rsId];if(!a)return;const d=$("rs-d").value,c=$("rs-c").value,dur=+a.dur||30,box=$("rs-slots"),now=new Date(),nm=d===ymd(now)?now.getHours()*60+now.getMinutes():(d<ymd(now)?1e9:0);
@@ -2757,14 +2896,14 @@ function phaseBlock(kind,g,canTick){return `<div class="tpph"><div><b>Phase ${g.
   `<div class="tpsum"><span>Phase subtotal</span><b>${rs(g.sub)}</b><label>Discount <input type="number" min="0" inputmode="numeric" data-tpdisc="${kind}|${g.ph}" value="${g.disc||""}" placeholder="0" aria-label="Phase ${g.ph} discount"></label><span class="tpnet">Phase total <b>${rs(g.total)}</b></span></div>`}
 function totalsBlock(c,big){return `<div class="tptot">${c.disc?`<div><span>Subtotal</span><span>${rs(c.sub)}</span></div><div><span>Discounts</span><span>− ${rs(c.disc)}</span></div>`:""}<div class="g"><span>${big}</span><span>${rs(c.total)}</span></div></div>`}
 function propCard(p){const pr=propOf(p),c=planCalc(pr),dl=dentists(),acc=pr.status==="accepted";
-  if(acc&&!propOpen)return `<div class="card tpcard tpdone" style="margin-top:12px"><div class="dh"><div><h3>Proposed treatment plan</h3><p class="muted small" style="margin:2px 0 0"><span class="chip2 ok">Accepted ${esc(fmtDate(pr.acceptedOn))}</span> ${pl(pr.items.length,"treatment")} · ${rs(c.total)}${pr.dentist?" · "+esc(pr.dentist):""}</p></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn small" data-tpopen>View</button><button class="btn small" data-tpreset>${tpReset?"Tap again to clear":"New proposal"}</button></div></div></div>`;
-  return `<div class="card tpcard" style="margin-top:12px"><div class="dh"><div><h3>Proposed treatment plan</h3><p class="muted small" style="margin:2px 0 0">The estimate you share with the patient.${acc?` <span class="chip2 ok">Accepted ${esc(fmtDate(pr.acceptedOn))}</span>`:pr.items.length?` <span class="chip2 warn">Awaiting decision</span>`:""}</p></div><button class="btn small primary" data-tpadd>+ Add</button></div>
+  if(acc&&!propOpen)return `<div class="card tpcard tpdone" style="margin-top:12px"><div class="dh"><div><h3>Proposed treatment plan</h3><p class="muted small" style="margin:2px 0 0"><span class="chip2 ok">Accepted ${esc(fmtDate(pr.acceptedOn))}</span> ${pl(pr.items.length,"treatment")} · ${rs(c.total)}${pr.dentist?" · "+esc(pr.dentist):""}</p></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn small ai" data-aiprop>✨ AI</button><button class="btn small" data-tpopen>View</button><button class="btn small" data-tpreset>${tpReset?"Tap again to clear":"New proposal"}</button></div></div>${aiPropList(p)}</div>`;
+  return `<div class="card tpcard" style="margin-top:12px"><div class="dh"><div><h3>Proposed treatment plan</h3><p class="muted small" style="margin:2px 0 0">The estimate you share with the patient.${acc?` <span class="chip2 ok">Accepted ${esc(fmtDate(pr.acceptedOn))}</span>`:pr.items.length?` <span class="chip2 warn">Awaiting decision</span>`:""}</p></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn small ai" data-aiprop>✨ Write with AI</button><button class="btn small primary" data-tpadd>+ Add</button></div></div>
   ${pr.items.length?c.phases.map(g=>phaseBlock("prop",g,false)).join("")+totalsBlock(c,"Estimated total")+
   `<div class="tpmeta"><div><label for="tpm-dent">Prepared by</label><select id="tpm-dent" data-tpmeta="dentist"><option value="">—</option>${dl.map(m=>`<option${m.name===pr.dentist?" selected":""}>${esc(m.name)}</option>`).join("")}</select></div><div class="full"><label for="tpm-note">Note for the patient</label><input id="tpm-note" maxlength="300" data-tpmeta="note" value="${esc(pr.note||"")}" placeholder="e.g. Ortho advance Rs 40,000, then Rs 7,000 per visit"></div></div>
   <div class="tpexp"><div class="row tpinc"><span class="muted small">Include:</span>${(p.xrays||[]).some(x=>!x.pdf)?`<label><input type="checkbox" data-tpinc="x" ${propInc.x?"checked":""}> X-rays (${(p.xrays||[]).filter(x=>!x.pdf).length})</label>`:""}${(p.notes||[]).length?`<label><input type="checkbox" data-tpinc="n" ${propInc.n?"checked":""}> Clinical notes (${p.notes.length})</label>`:""}<label><input type="checkbox" data-tpinc="f" ${propInc.f?"checked":""}> Chart findings</label></div>
    <div class="row"><button type="button" class="btn small" data-tpprint>Print</button><button type="button" class="btn small" data-tppdf>Download PDF</button>${waNum(p.phone)?`<button type="button" class="wa sm" data-tpsend>${WA_IC}<span>Send PDF on WhatsApp</span></button>`:""}</div>
    <div class="row tpacc">${acc?`<button type="button" class="btn small" data-tpopen>Hide</button><button type="button" class="btn small" data-tpreset>${tpReset?"Tap again to clear":"Start a new proposal"}</button>`:`<button type="button" class="btn small primary" data-tpaccept>Patient accepted → move to treatment plan</button>`}</div></div>`
-  :`<p class="muted" style="margin:0">Tap a tooth on the chart and choose <b>+ Plan treatment</b>, or tap <b>+ Add</b>. Group treatments into phases, give a discount per phase, then print or send the proposal.</p>`}</div>`}
+  :`<p class="muted" style="margin:0">Tap a tooth on the chart and choose <b>+ Plan treatment</b>, or tap <b>+ Add</b>. Group treatments into phases, give a discount per phase, then print or send the proposal. Or tap <b>✨ Write with AI</b> and describe it in your own words.</p>`}${aiPropList(p)}</div>`}
 function planCard(p){const tp=planOf(p);if(!tp.items.length)return "";const c=planCalc(tp),pct=c.total?Math.round(c.done/c.total*100):0,unb=tp.items.filter(i=>i.done&&!i.billNo).length;
   return `<div class="card tpcard tpactive" style="margin-top:12px"><div class="dh"><div><h3>Treatment plan</h3><p class="muted small" style="margin:2px 0 0">Accepted treatment. Tick each item when it's done.</p></div><button class="btn small" data-tpadd2>+ Add</button></div>
   <div class="tpprog"><div class="bar"><i style="width:${pct}%"></i></div><span>${c.nDone} of ${c.n} done · ${rs(c.done)} of ${rs(c.total)}</span></div>
