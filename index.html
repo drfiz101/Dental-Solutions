@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>Dental Solutions</title>
 <meta name="theme-color" content="#1D5F53">
 <link rel="manifest" href="manifest.webmanifest">
@@ -908,6 +908,18 @@ body.no-pat_edit #fabPat,body.no-appt_edit #fabAp{display:none!important}
 :root[data-layout="simple"] #ap-remind{order:5}
 :root[data-layout="simple"] #ap-chairs{display:flex!important;flex-direction:column;gap:12px}
 :root[data-layout="simple"] .mnav h2{font-size:1.05rem!important;min-width:0!important}
+
+/* ===== iPhone: steady screen ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
+html,body{overflow-x:hidden;max-width:100%;overscroll-behavior-x:none}
+@media (max-width:900px){input,select,textarea{font-size:16px!important}}
+/* simple layout = fixed app screen: only the middle scrolls, header area and bottom tabs never move */
+:root[data-layout="simple"],:root[data-layout="simple"] body{height:100%;overflow:hidden;overscroll-behavior:none;position:fixed;inset:0;width:100%}
+:root[data-layout="simple"] body{padding-bottom:0!important}
+:root[data-layout="simple"] .wrap{position:fixed;top:0;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom,0px));overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;max-width:none!important;margin:0!important;padding:calc(10px + env(safe-area-inset-top,0px)) max(14px,calc((100vw - 1100px)/2)) 24px!important}
+:root[data-layout="simple"] .mainnav{height:calc(66px + env(safe-area-inset-bottom,0px));box-sizing:border-box;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))!important;align-items:stretch;touch-action:none}
+:root[data-layout="simple"] .mainbtn{min-height:0!important}
+:root[data-layout="simple"] .fab{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
 /* more sheet */
 .mehead{display:flex;gap:12px;align-items:center;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:14px}
 .mli{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;padding:0 14px;border:0;border-bottom:1px solid var(--line);background:none;font-size:1rem;text-align:left;color:var(--ink)}
@@ -3889,6 +3901,7 @@ function swipeDel(box,rowSel,btnSel){if(!box)return;let st=null;
   box.addEventListener("click",e=>{const r=e.target.closest("[data-noclick]");if(r){e.stopPropagation();e.preventDefault()}},true)}
 swipeDel($("patRows"),".prow2","[data-pdelp]");swipeDel($("list"),".row","[data-rmv]");
 /* simple layout (switch in Appearance) */
+(function(){const st=window.scrollTo.bind(window);window.scrollTo=function(a,b){try{if(document.documentElement.getAttribute("data-layout")==="simple"){const w=document.querySelector(".wrap");if(w){if(a&&typeof a==="object")w.scrollTo(a);else w.scrollTo(a||0,b||0)}}}catch(e){}return st(a,b)}})();
 let patF="all",chairF="both",pSec="treat";
 const isSimple=()=>document.documentElement.getAttribute("data-layout")==="simple";
 function greet(){const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"}
