@@ -643,7 +643,7 @@ body.no-plan .tpcard,body.no-plan [data-tpadd],
 body.no-appt_edit #ap-new,body.no-appt_edit #ap-multi,body.no-appt_edit #ap-text,body.no-appt_edit #ap-photo,body.no-appt_edit [data-apedit],body.no-appt_edit [data-apres],body.no-appt_edit [data-free],body.no-appt_edit [data-newap],body.no-appt_edit [data-calnew],body.no-appt_edit [data-pbook],body.no-appt_edit [data-lcbook],
 body.no-appt_del #ap-del,
 body.no-bill_edit #b-new,body.no-bill_edit [data-pbill],body.no-bill_edit [data-tprecv],body.no-bill_edit [data-apbill],body.no-bill_edit #payForm,body.no-bill_edit [data-tpbill],
-body.no-bill_del [data-bvdel],body.no-bill_del [data-bvedit],body.no-bill_del [data-pdel],
+body.no-bill_del [data-bvdel],body.no-bill_edit [data-ppedit],body.no-bill_del [data-bvedit],body.no-bill_del [data-pdel],
 body.no-lab_edit #lab-new,body.no-lab_edit [data-lcedit],body.no-lab_edit [data-plab],
 body.no-lab_pay [data-lcpay],body.no-lab_pay [data-lcpayall],body.no-lab_pay #lab-bills,body.no-lab_pay #lab-dues,
 body.no-inv_buy [data-buy],body.no-inv_buy #m-buy,body.no-inv_buy #m-vbill,body.no-inv_buy [data-lpaid],
@@ -962,6 +962,8 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 .pam{min-height:48px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-weight:700;font-size:.95rem;color:var(--ink)}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
+
+.pedit{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 10px;font-size:.8rem;font-weight:700;color:var(--accent);margin-left:8px;min-height:32px}
 /* more sheet */
 .mehead{display:flex;gap:12px;align-items:center;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:14px}
 .mli{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;padding:0 14px;border:0;border-bottom:1px solid var(--line);background:none;font-size:1rem;text-align:left;color:var(--ink)}
@@ -1245,6 +1247,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
   <p class="muted" id="pa-sub" style="margin:0"></p>
   <div class="field"><label for="pa-amt">Amount (Rs)</label><input id="pa-amt" type="number" min="1" inputmode="numeric"></div>
   <div class="field"><label>How was it paid?</label><div class="pamethods" id="pa-m" role="group" aria-label="Payment method"></div></div>
+  <div class="field" id="pa-datew" hidden><label for="pa-date">Date received</label><input id="pa-date" type="date"></div>
   <div class="field" id="pa-refw"><label for="pa-ref">Transaction ID / reference (optional)</label><input id="pa-ref" maxlength="60" placeholder="e.g. TID 0123456789" autocomplete="off"></div>
   <p class="perr" id="pa-err" hidden></p>
   <div class="actions"><span></span><div><button type="button" class="btn" id="pa-cancel">Cancel</button><button type="submit" class="btn primary">Save payment</button></div></div>
@@ -2577,7 +2580,7 @@ function renderBV(){
   $("bv").innerHTML=`<div class="bvh"><div><h2>${esc(b.no||"Bill")}</h2><p class="muted" style="margin:2px 0 0">${esc(fmtDate(b.date))} · <button class="linkbtn" data-gopat="${esc(b.patientId)}">${esc(b.patientName)}</button>${b.phone?" · "+esc(b.phone):""}</p></div><span class="chip2 ${t.bal>0?"warn":"ok"}">${t.bal>0?"Due "+rs(t.bal):"Paid in full"}</span></div>
   <div>${(b.items||[]).map(i=>`<div class="kv"><span>${esc(i.desc)}${i.tooth?` <small class="muted">· tooth ${esc(i.tooth)}</small>`:""}${(+i.qty||1)>1?` <small class="muted">× ${esc(i.qty)}</small>`:""}</span><b>${rs((+i.qty||1)*(+i.price||0))}</b></div>`).join("")}${b.discount?`<div class="kv"><span>Discount</span><b>− ${rs(b.discount)}</b></div>`:""}<div class="kv tot"><span>Total</span><b>${rs(t.total)}</b></div></div>
   ${miniChart(b.items)}
-  <h3 class="h3s">Payments</h3>${(b.payments||[]).length?b.payments.map((p,ix)=>`<div class="kv"><span>${esc(fmtDate(p.date))} · ${esc(p.method||"Cash")}${p.ref?" · "+esc(p.ref):""}</span><span class="kvr"><b>${rs(p.amount)}</b><button type="button" class="ldel" data-pdel="${ix}" aria-label="Remove this payment">×</button></span></div>`).join(""):`<p class="muted" style="margin:0">No payments yet.</p>`}
+  <h3 class="h3s">Payments</h3>${(b.payments||[]).length?b.payments.map((p,ix)=>`<div class="kv"><span>${esc(fmtDate(p.date))} · ${esc(p.method||"Cash")}${p.ref?" · "+esc(p.ref):""}</span><span class="kvr"><b>${rs(p.amount)}</b><button type="button" class="pedit" data-ppedit="${ix}" aria-label="Edit this payment">✎ Edit</button><button type="button" class="ldel" data-pdel="${ix}" aria-label="Remove this payment">×</button></span></div>`).join(""):`<p class="muted" style="margin:0">No payments yet.</p>`}
   <div class="kv tot"><span>Balance</span><b>${rs(t.bal)}</b></div>
   ${t.bal>0?`<label class="fulltick"><input type="checkbox" data-bvfull> Paid in full — ${rs(t.bal)} received</label><form class="payform" id="payForm"><input id="pay-amt" type="number" min="1" inputmode="numeric" value="${t.bal}" aria-label="Payment amount in rupees"><select id="pay-m" aria-label="Payment method"><option>Cash</option><option>Bank transfer</option><option>Easypaisa</option><option>JazzCash</option><option>NayaPay</option><option>SadaPay</option><option>Card</option><option>Other</option></select><button class="btn primary" type="submit">Add payment</button></form>`:""}
   ${b.note?`<p class="muted small">Note: ${esc(b.note)}</p>`:""}
@@ -2588,6 +2591,8 @@ function renderBV(){
 }
 $("bv").addEventListener("click",e=>{
   const t=e.target,b=B[bvId];if(!b)return;
+  const pe=t.closest("[data-ppedit]");if(pe){const id=bvId,ix=+pe.dataset.ppedit,b0=B[id],py=(b0.payments||[])[ix];if(!py)return;const others=(b0.payments||[]).reduce((a,x,i)=>i===ix?a:a+(+x.amount||0),0),maxA=Math.max(0,billCalc(b0).total-others);
+    payAsk({title:"Edit payment · "+(b0.no||"Bill"),sub:(b0.patientName||"")+" · "+fmtDate(py.date),amount:py.amount,max:maxA||0,editable:true,method:py.method||"Cash",ref:py.ref||"",date:py.date}).then(r=>{if(!r)return;const b1=B[id],ps=[...(b1.payments||[])];const np={...ps[ix],amount:r.amount,method:r.method,date:r.date||ps[ix].date};if(r.ref)np.ref=r.ref;else delete np.ref;ps[ix]=np;cset("bills",id,{...b1,payments:ps});if(bvId===id)renderBV();toast("Payment updated · "+rs(r.amount)+" ("+r.method+")")});return}
   const pd=t.closest("[data-pdel]");if(pd){const pays=[...(b.payments||[])];pays.splice(+pd.dataset.pdel,1);cset("bills",bvId,{...b,payments:pays});renderBV();toast("Payment removed");return}
   if(t.closest("[data-bvdel]")){bvConf=true;renderBV();return}
   if(t.closest("[data-bvno]")){bvConf=false;renderBV();return}
@@ -3748,8 +3753,9 @@ let paRes=null,paMax=0,paMethod="";
 function payAsk(o){return new Promise(res=>{paRes=res;paMax=+o.max||0;paMethod="";
   $("pa-title").textContent=o.title||"Payment received";$("pa-sub").textContent=o.sub||"";
   const a=$("pa-amt");a.value=o.amount||"";a.readOnly=!o.editable;a.closest(".field").classList.toggle("ro",!o.editable);
-  $("pa-ref").value="";$("pa-err").hidden=true;
-  $("pa-m").innerHTML=PAY_M.map(m=>`<button type="button" class="pam" data-pam="${esc(m)}" aria-pressed="false">${esc(m)}</button>`).join("");
+  $("pa-ref").value=o.ref||"";$("pa-err").hidden=true;paMethod=o.method&&PAY_M.includes(o.method)?o.method:(o.method?"Other":"");
+  $("pa-datew").hidden=!o.date;$("pa-date").value=o.date||"";
+  $("pa-m").innerHTML=PAY_M.map(m=>`<button type="button" class="pam" data-pam="${esc(m)}" aria-pressed="${m===paMethod}">${esc(m)}</button>`).join("");
   openD($("paydlg"))})}
 function paDone(v){const r=paRes;paRes=null;try{$("paydlg").close()}catch(e){}if(r)r(v)}
 $("pa-m").addEventListener("click",e=>{const b=e.target.closest("[data-pam]");if(!b)return;paMethod=b.dataset.pam;for(const x of $("pa-m").querySelectorAll("[data-pam]"))x.setAttribute("aria-pressed",String(x===b));$("pa-err").hidden=true});
@@ -3757,9 +3763,9 @@ $("pa-cancel").addEventListener("click",()=>paDone(null));
 $("paydlg").addEventListener("close",()=>{if(paRes)paDone(null)});
 $("payAskForm").addEventListener("submit",e=>{e.preventDefault();const amt=Math.round(+$("pa-amt").value||0),err=$("pa-err");
   if(!(amt>0)){err.textContent="Enter the amount received.";err.hidden=false;return}
-  if(paMax&&amt>paMax){err.textContent="That's more than the "+rs(paMax)+" left.";err.hidden=false;return}
+  if(paMax&&amt>paMax){err.textContent="The most you can enter here is "+rs(paMax)+".";err.hidden=false;return}
   if(!paMethod){err.textContent="Choose how it was paid.";err.hidden=false;return}
-  paDone({amount:amt,method:paMethod,ref:$("pa-ref").value.trim()})});
+  paDone({amount:amt,method:paMethod,ref:$("pa-ref").value.trim(),date:$("pa-datew").hidden?"":($("pa-date").value||"")})});
 /* change own password */
 const pwdlg=$("pwdlg");
 $("pwBtn").addEventListener("click",()=>{$("pw-old").value="";$("pw-new").value="";$("pw-err").hidden=true;openD(pwdlg)});
