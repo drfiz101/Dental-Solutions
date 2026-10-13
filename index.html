@@ -994,6 +994,13 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 .vdf b{align-self:center}.vdb{grid-column:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.86rem}.vdb small{color:var(--muted)}.vdq{display:inline-flex;gap:4px}.vdq button{height:32px;padding:0 12px;border:1.5px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font:inherit;font-weight:700;font-size:.82rem}.vdq button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink,#fff)}
 .vdtag{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}.vdtot{margin-top:10px}
 @media (max-width:520px){.vdf{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.vdf>:first-child{grid-column:1/-1}}
+.tooth.tpic{aspect-ratio:auto;background:none!important;border:0!important;border-radius:8px;padding:2px 0!important;flex-direction:column;align-items:center;justify-content:flex-start;gap:1px;color:var(--muted);text-decoration:none!important}
+.tooth.tpic.lower{flex-direction:column-reverse;justify-content:flex-end}.tooth.tpic .tsvg{width:100%;max-width:38px;height:auto;aspect-ratio:44/72;display:block}.tooth.tpic .tn{font-size:.6rem;font-weight:700;line-height:1.1}
+.tooth.tpic:hover{background:var(--accent-soft)!important}.tooth.tpic.sel{outline:2px solid var(--ink);outline-offset:-1px}.tooth.tpic.pl{box-shadow:none}.tooth.tpic.pl .tn{color:#2E6BB8;text-decoration:underline 2px!important;text-underline-offset:2px}
+.tooth.tpic.hx::after{top:auto;bottom:14px;right:2px}.tooth.tpic.lower.hx::after{top:14px;bottom:auto}
+.tbtn.tpb,.tleg.tpb{display:inline-flex;align-items:center;gap:4px;padding-left:4px}.tbtn.tpb.on{border-color:var(--accent);background:var(--accent-soft)}.tsm{width:14px;height:23px;flex:none}
+.jarch{display:none}.tarch{width:100%;max-width:640px;display:block;margin:0 auto}.tarch text{font-size:10px;font-weight:700;fill:var(--muted);font-family:inherit}.tarch text.apl{fill:#2E6BB8;text-decoration:underline}.tarch .amid{font-weight:400}.atooth{cursor:pointer}.atooth:hover rect{fill:var(--accent-soft)}.atooth:focus{outline:none}.atooth:focus-visible rect{stroke:var(--accent);stroke-width:2}
+@media (min-width:1000px){.jrow{display:none!important}.jarch{display:block}}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -2333,7 +2340,33 @@ function markSent(coll,id,field){const st=STORES[coll]();if(st[id])cset(coll,id,
 function renderClinic(){trOpts();if(main==="reports")renderReports();else if(main==="lab")renderLab();else if(main==="dashboard")renderDash();else if(main==="patients")renderPatients();else if(main==="appointments")renderAppts();else if(main==="billing")renderBilling()}
 
 /* --- patients --- */
-const TOOTH_ST={caries:"Caries",filled:"Filled",rct:"Root canal",crown:"Crown",missing:"Missing",extract:"To extract",implant:"Implant"};
+const TOOTH_ST={caries:"Caries",filled:"Filled",rct:"Root canal",crown:"Crown",missing:"Missing",extract:"To extract",implant:"Implant",bridge:"Bridge",veneer:"Veneer",fracture:"Fractured",impacted:"Impacted"};
+/* tooth pictures for the chart */
+const TK=n=>{const d=n%10;return d>=6?"m":d>=4?"p":"i"};
+const T_CR={m:"M5 30 C3 18 6 8 12 6 C16 5 18 9 22 9 C26 9 28 5 32 6 C38 8 41 18 39 30 C37 33 7 33 5 30Z",p:"M9 30 C7 19 10 8 16 6 C19 5 20 8 22 8 C24 8 25 5 28 6 C34 8 37 19 35 30 C33 33 11 33 9 30Z",i:"M12 30 C11 20 13 8 17 5 C20 3 24 3 27 5 C31 8 33 20 32 30 C30 33 14 33 12 30Z"};
+const T_RT={m:"M7 30 C8 44 9 58 13 66 C15 68 17 66 17 62 C18 52 20 44 22 42 C24 44 26 52 27 62 C27 66 29 68 31 66 C35 58 36 44 37 30Z",p:"M11 30 C12 46 16 60 20 67 C21 69 23 69 24 67 C28 60 32 46 33 30Z",i:"M14 30 C15 46 18 60 21 68 C21.6 69.5 22.4 69.5 23 68 C26 60 29 46 30 30Z"};
+const T_CN={m:["M14 31 C14 44 14 54 15 63","M30 31 C30 44 30 54 29 63"],p:["M22 31 C22 45 22 56 22 65"],i:["M22 31 C22 46 22 58 22 66"]};
+function toothG(n,st){const k=TK(n);let g="";const gold=st==="crown"||st==="implant"||st==="bridge";
+  if(st==="missing")return `<path d="${T_RT[k]}" fill="none" stroke="#9FB3AE" stroke-width="1.4" stroke-dasharray="3 3"/><path d="${T_CR[k]}" fill="none" stroke="#9FB3AE" stroke-width="1.4" stroke-dasharray="3 3"/>`;
+  if(st==="implant")g+=`<rect x="18" y="31" width="8" height="34" rx="3" fill="#7C8A92"/>`+[36,42,48,54,60].map(y=>`<path d="M16 ${y} L28 ${y+2}" stroke="#fff" stroke-width="1.6"/>`).join("")+`<rect x="19" y="27" width="6" height="6" fill="#7C8A92"/>`;
+  else if(st==="bridge")g+=`<path d="M0 22 H44" stroke="#9C7414" stroke-width="3"/>`;
+  else g+=`<path d="${T_RT[k]}" fill="#F3EBDD" stroke="#B8A98F" stroke-width="1.2"/>`;
+  if(st==="rct")g+=T_CN[k].map(d=>`<path d="${d}" fill="none" stroke="#D9472B" stroke-width="3" stroke-linecap="round"/>`).join("");
+  g+=`<path d="${T_CR[k]}" fill="${gold?"#D4A63A":st==="veneer"?"#E8F1FF":"#fff"}" stroke="${gold?"#9C7414":st==="veneer"?"#5B8FD9":"#9FB3AE"}" stroke-width="${st==="veneer"?2.4:1.4}"/>`;
+  if(gold)g+=`<path d="${k==="i"?"M15 12 C18 9 26 9 29 12":"M10 14 C16 11 28 11 34 14"}" fill="none" stroke="#FFF3D1" stroke-width="2" stroke-linecap="round" opacity=".8"/>`;
+  if(st==="rct")g+=`<ellipse cx="22" cy="18" rx="${k==="i"?4:7}" ry="4" fill="#5B8FD9"/>`;
+  if(st==="filled")g+=`<path d="${k==="i"?"M17 14 C19 11 25 11 27 14 C27 19 17 19 17 14Z":k==="p"?"M14 14 C17 10 27 10 30 14 C31 20 13 20 14 14Z":"M11 15 C14 10 30 10 33 15 C34 21 10 21 11 15Z"}" fill="#5B8FD9"/>`;
+  if(st==="caries")g+=`<path d="M15 12 C18 8 25 9 26 13 C27 18 19 20 16 17 C14 16 14 13 15 12Z" fill="#4A3424"/><circle cx="30" cy="20" r="2.2" fill="#4A3424"/>`;
+  if(st==="fracture")g+=`<path d="M12 6 L20 14 L15 18 L25 26 L21 30" fill="none" stroke="#C0392B" stroke-width="2.4" stroke-linejoin="round"/>`;
+  if(st==="extract")g+=`<path d="M6 8 L38 64 M38 8 L6 64" stroke="#C0392B" stroke-width="3.2" stroke-linecap="round"/>`;
+  return st==="impacted"?`<g transform="rotate(35 22 40) translate(0 8)">${g}</g>`:g}
+const toothFlip=n=>n>=31&&n<50||n>=71;
+function toothPic(n,st,cls){const g=toothG(n,st);return `<svg class="${cls||"tsvg"}" viewBox="0 0 44 72" aria-hidden="true">${toothFlip(n)?`<g transform="translate(0 72) scale(1 -1)">${g}</g>`:g}</svg>`}
+function toothArch(teeth,sel,TH,PL){const W=640,H=500,cx=W/2;let s="";
+  const place=(arr,up)=>arr.forEach((n,i)=>{const a=Math.PI*(0.05+0.9*(i/15)),rx=250,ry=185,x=cx-rx*Math.cos(a),y=up?240-ry*Math.sin(a):260+ry*Math.sin(a),rot=(a*180/Math.PI-90)*(up?1:-1)+180,lx=cx-(rx+34)*Math.cos(a),ly=up?240-(ry+34)*Math.sin(a):260+(ry+34)*Math.sin(a),st=teeth[n]||"";
+    const g=toothG(n,st);s+=`<g class="atooth" data-tooth="${n}" role="button" tabindex="0" aria-label="Tooth ${n}${st?", "+TOOTH_ST[st]:""}"><g transform="translate(${x} ${y}) rotate(${rot})"><rect x="-18" y="-27" width="36" height="54" rx="8" fill="transparent" ${n===sel?'stroke="var(--ink)" stroke-width="2"':""}/><g transform="translate(-14 -23) scale(.64)">${toothFlip(n)?`<g transform="translate(0 72) scale(1 -1)">${g}</g>`:g}</g></g><text x="${lx}" y="${ly+3}" text-anchor="middle"${PL.has(n)?' class="apl"':""}>${n}${TH[n]?"•":""}</text></g>`});
+  place(UPPER,true);place(LOWER,false);
+  return `<svg class="tarch" viewBox="0 0 ${W} ${H}" role="group" aria-label="Tooth chart">${s}<text x="${cx}" y="${H/2+4}" text-anchor="middle" class="amid">Patient's right ←  → Patient's left</text></svg>`}
 const UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28],LOWER=[48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
 function renderPatients(){
   if(selPat&&P[selPat]){$("patList").hidden=true;$("patDetail").hidden=false;renderPatDetail(selPat);return}
@@ -2355,7 +2388,7 @@ function renderPatDetail(id){setTimeout(loadXThumbs,0);
   const aps=Object.entries(A).filter(([,a])=>a.patientId===id).map(([k,a])=>({id:k,...a})).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
   const bills=Object.entries(B).filter(([,b])=>b.patientId===id).map(([k,b])=>({id:k,...b})).sort((a,b)=>(b.date+(b.createdAt||"")).localeCompare(a.date+(a.createdAt||"")));
   const bal=bills.reduce((s,b)=>s+billCalc(b).bal,0),paid=bills.reduce((s,b)=>s+billCalc(b).paid,0),TH=toothHist(bills);
-  const PL=planTeeth(p);const tooth=n=>{const st=teeth[n]||"";return `<button type="button" class="tooth${n>=31?" lower":""}${st?" "+st:""}${toothSel===n?" sel":""}${TH[n]?" hx":""}${PL.has(n)?" pl":""}" data-tooth="${n}" aria-label="Tooth ${n}${st?", "+TOOTH_ST[st]:""}">${n}</button>`};
+  const PL=planTeeth(p);const tooth=n=>{const st=teeth[n]||"";return `<button type="button" class="tooth tpic${n>=31?" lower":""}${toothSel===n?" sel":""}${TH[n]?" hx":""}${PL.has(n)?" pl":""}" data-tooth="${n}" aria-label="Tooth ${n}${st?", "+TOOTH_ST[st]:""}">${toothPic(n,st)}<span class="tn">${n}</span></button>`};
   $("patDetail").dataset.psec=pSec;$("patDetail").innerHTML=`<div class="pd-back"><button class="btn" data-back>‹ All patients</button></div>
   <div class="card pd-top"><div class="pd-id"><span class="av big">${esc(initials(p.name))}</span><div><h2>${esc(p.name)}</h2><p class="muted">${[p.fileNo,p.age?p.age+" years":"",p.gender,p.cnic?"CNIC "+p.cnic:"",p.ref?"Referred by "+p.ref:""].filter(Boolean).map(esc).join(" · ")}</p><p class="phline"><span class="seltxt">${esc(p.phone||"No phone")}</span>${waNum(p.phone)?` <a class="wa sm" href="${esc(waHref(p.phone,""))}" target="_blank" rel="noopener">${WA_IC}<span>WhatsApp</span></a>`:""}</p>${p.address?`<p class="muted">${esc(p.address)}</p>`:""}</div></div>
     <div class="vact">${p.phone?`<a class="btn callbtn" href="tel:${esc(String(p.phone).replace(/[^0-9+]/g,""))}">Call</a>`:""}<button class="btn" data-pedit>Edit</button><button class="btn" data-plab>Lab case</button><button class="btn" data-pbook>Book appointment</button><button class="btn primary" data-pbill>New bill</button></div></div>
@@ -2363,8 +2396,8 @@ function renderPatDetail(id){setTimeout(loadXThumbs,0);
   <div class="ptabs" role="tablist" aria-label="Patient sections">${[["treat","Treatment"],["chart","Chart"],["xray","X-rays"],["visits","Visits"],["notes","Notes"]].map(([k,n])=>`<button type="button" role="tab" data-psec="${k}" aria-selected="${pSec===k}">${n}</button>`).join("")}</div>
   <div class="pgrid">
     <div class="lcol" style="min-width:0"><div class="card" data-sec="chart"><h3>Tooth chart</h3><p class="muted small" style="margin:-4px 0 10px">Tap a tooth, then choose its condition. Upper jaw on top, patient's right on your left.</p>
-      <div class="jaw"><div class="teeth">${UPPER.map(tooth).join("")}</div><div class="midline"></div><div class="teeth">${LOWER.map(tooth).join("")}</div></div>
-      <div class="tpal">${toothSel?`<b>Tooth ${toothSel}:</b>`+Object.entries(TOOTH_ST).map(([k,v])=>`<button type="button" class="tbtn ${k}${teeth[toothSel]===k?" on":""}" data-tst="${k}">${v}</button>`).join("")+`<button type="button" class="tbtn" data-tst="">Healthy</button><button type="button" class="tbtn plan" data-tpadd="${toothSel}">+ Plan treatment</button>`:Object.entries(TOOTH_ST).map(([k,v])=>`<span class="tleg ${k}">${v}</span>`).join("")+`<span class="tleg hxl">● Treated (has bill)</span><span class="tleg pll">▁ Planned</span>`}</div>
+      <div class="jaw jrow"><div class="teeth">${UPPER.map(tooth).join("")}</div><div class="midline"></div><div class="teeth">${LOWER.map(tooth).join("")}</div></div><div class="jarch">${toothArch(teeth,toothSel,TH,PL)}</div>
+      <div class="tpal">${toothSel?`<b>Tooth ${toothSel}:</b>`+Object.entries(TOOTH_ST).map(([k,v])=>`<button type="button" class="tbtn tpb${teeth[toothSel]===k?" on":""}" data-tst="${k}">${toothPic(toothSel,k,"tsm")}${v}</button>`).join("")+`<button type="button" class="tbtn" data-tst="">Healthy</button><button type="button" class="tbtn plan" data-tpadd="${toothSel}">+ Plan treatment</button>`:Object.entries(TOOTH_ST).map(([k,v])=>`<span class="tleg tpb">${toothPic(16,k,"tsm")}${v}</span>`).join("")+`<span class="tleg hxl">● Treated (has bill)</span><span class="tleg pll">▁ Planned</span>`}</div>
       ${toothSel?`<div class="thist"><h4>Tooth ${toothSel}: treatment history</h4>${(TH[toothSel]||[]).length?TH[toothSel].map(h=>`<button class="kv kvb" data-bopen="${esc(h.id)}"><span>${esc(fmtDate(h.d))} · ${esc(h.t)}</span><small>${esc(h.no||"")}</small></button>`).join(""):`<p class="muted small" style="margin:0">No treatment billed on this tooth yet.</p>`}</div>`:(Object.keys(TH).length?`<div class="txsum"><span class="muted">Treated:</span>${Object.keys(TH).map(Number).sort((a,b)=>a-b).map(n=>`<span><b>${n}</b> ${esc([...new Set(TH[n].map(h=>h.t))].join(", "))}</span>`).join("")}</div>`:"")}
     </div>
     <div data-sec="treat">${propCard(p)}${planCard(p)}</div><div data-sec="xray">${xrCard(p)}</div></div>
@@ -2820,7 +2853,7 @@ function teethText(arr){const set=new Set(arr),all=a=>a.every(n=>set.has(n)),par
   if(all(UPPER)&&all(LOWER)){parts.push("Full mouth");rest=rest.filter(n=>!UPPER.includes(n)&&!LOWER.includes(n))}
   else{if(all(UPPER)){parts.push("Upper arch");rest=rest.filter(n=>!UPPER.includes(n))}if(all(LOWER)){parts.push("Lower arch");rest=rest.filter(n=>!LOWER.includes(n))}}
   return [...parts,...rest.sort((a,b)=>a-b)].join(", ")}
-const TX_MAP=[[/re-?rct|root canal|\brct\b/i,"rct"],[/crown(?!.*(removal|re-?cement))/i,"crown"],[/filling|veneer/i,"filled"],[/extraction|impaction/i,"missing"],[/implant/i,"implant"]];
+const TX_MAP=[[/re-?rct|root canal|\brct\b/i,"rct"],[/bridge|pontic/i,"bridge"],[/veneer/i,"veneer"],[/crown(?!.*(removal|re-?cement))/i,"crown"],[/filling/i,"filled"],[/extraction|impaction/i,"missing"],[/implant/i,"implant"]];
 function chartFromBill(pid,items){const p=P[pid];if(!p)return false;const teeth={...(p.teeth||{})};let ch=false;
   for(const it of items){const m=TX_MAP.find(([re])=>re.test(it.desc||""));if(!m)continue;for(const n of teethOf(it.tooth))if(n<50&&teeth[n]!==m[1]){teeth[n]=m[1];ch=true}}
   if(ch)cset("patients",pid,{...p,teeth});return ch}
