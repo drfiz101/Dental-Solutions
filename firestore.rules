@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+
+    // DENTAL SOLUTIONS OWNER: can approve, lock and create clinics (cannot read clinic data)
+    function isOwner() { return signedIn() && request.auth.token.email in ["fizi101@gmail.com"]; }
+
+    // Al Awan's original email logins (from before Dental Solutions)
+    function isLegacyAlawan() { return signedIn() && request.auth.token.email in ["fizi101@gmail.com", "shaziasami.ss@gmail.com"]; }
+
+    function clinicDoc(c) { return /databases/$(database)/documents/clinics/$(c); }
+    function memberDoc(c) { return /databases/$(database)/documents/clinics/$(c)/members/$(request.auth.uid); }
+    function isMember(c) { return signedIn() && exists(memberDoc(c)) && get(memberDoc(c)).data.active == true; }
+    function isClinicAdmin(c) { return isMember(c) && get(memberDoc(c)).data.role == "admin"; }
+    function isActive(c) { return exists(clinicDoc(c)) && get(clinicDoc(c)).data.status == "active"; }
+
+    // ---------- Clinics ----------
+    match /clinics/{c} {
+      allow get: if isOwner() || isMember(c) || (signedIn() && resource.data.ownerUid == request.auth.uid);
+      allow list: if isOwner();
+      // New registrations start as "pending" until the owner approves
+      allow create: if isOwner()
+        || (signedIn() && c != "alawan" && request.resource.data.ownerUid == request.auth.uid && request.resource.data.status == "pending");
+      // Clinic admins may edit their clinic but not approve or unlock it
+      allow update: if isOwner()
+        || (isClinicAdmin(c) && isActive(c) && request.resource.data.status == resource.data.status && request.resource.data.ownerUid == resource.data.ownerUid);
+      allow delete: if isOwner();
+
+      match /members/{uid} {
+        allow get: if isOwner() || isMember(c) || request.auth.uid == uid;
+        allow list: if isOwner() || isClinicAdmin(c);
+        // The owner can create logins for clinics, but not make himself a member of other clinics
+        allow create: if (isOwner() && (uid != request.auth.uid || c == "alawan"))
+          || (isClinicAdmin(c) && isActive(c))
+          || (signedIn() && request.auth.uid == uid && get(clinicDoc(c)).data.ownerUid == uid && request.resource.data.role == "admin")
+          || (c == "alawan" && request.auth.uid == uid && isLegacyAlawan() && request.resource.data.role == "staff");
+        allow update, delete: if isOwner() || (isClinicAdmin(c) && isActive(c));
+      }
+
+      match /settings/{docId} {
+        allow read: if isMember(c) && isActive(c);
+        allow write: if isClinicAdmin(c) && isActive(c);
+      }
+
+      match /{col}/{docId} {
+        allow read, write: if col in ['items', 'logs', 'patients', 'appts', 'bills', 'labcases', 'photos']
+          && isMember(c) && isActive(c);
+      }
+    }
+
+    // ---------- Username -> current login (used when an admin sets a new password) ----------
+    match /logins/{id} {
+      allow get: if true;
+      allow list, delete: if false;
+      allow create, update: if isClinicAdmin(request.resource.data.code) && isActive(request.resource.data.code)
+        && id == request.resource.data.code + "_" + request.resource.data.username;
+    }
+
+    // ---------- Al Awan Dental Clinic data (kept where it always was) ----------
+    // The two original emails keep working until their Dental Solutions login exists
+    function legacyOnly() { return isLegacyAlawan() && !exists(memberDoc("alawan")); }
+    match /settings/{docId} {
+      allow read: if (isMember("alawan") && isActive("alawan")) || legacyOnly();
+      allow write: if isClinicAdmin("alawan") && isActive("alawan");
+    }
+    // Logins are turned off with "Login allowed", never deleted, so the old email rule can't come back
+    match /{col}/{docId} {
+      allow read, write: if col in ['items', 'logs', 'patients', 'appts', 'bills', 'labcases', 'photos']
+        && ((isMember("alawan") && isActive("alawan")) || legacyOnly());
+    }
+  }
+}

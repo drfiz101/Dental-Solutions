@@ -955,6 +955,8 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 .menubtn{display:inline-flex;align-items:center;gap:6px;font-weight:700}
 :root:not([data-layout="simple"]) #who>#alBtn,:root:not([data-layout="simple"]) #who>#lookBtn,:root:not([data-layout="simple"]) #who>#profBtn,:root:not([data-layout="simple"]) #who>#acBtn,:root:not([data-layout="simple"]) #who>#consoleBtn,:root:not([data-layout="simple"]) #who>#pwBtn,:root:not([data-layout="simple"]) #who>#signOut,:root:not([data-layout="simple"]) #who>#installBtn{display:none!important}
 :root:not([data-layout="simple"]) #who{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.acx{gap:8px;flex-wrap:wrap;margin-top:6px}
 /* more sheet */
 .mehead{display:flex;gap:12px;align-items:center;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:14px}
 .mli{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;padding:0 14px;border:0;border-bottom:1px solid var(--line);background:none;font-size:1rem;text-align:left;color:var(--ink)}
@@ -3659,17 +3661,23 @@ function acCard(p,kind){const isNew=kind==="new",admin=p.role==="admin",me2=p.ui
   return `<div class="acc${admin?" isadmin":""}" data-kind="${kind}" data-uid="${esc(p.uid||"")}">
   ${isNew?`<div><b>New login</b></div><div class="ach new"><input class="ac-n" placeholder="Name, e.g. Bilal" maxlength="40" aria-label="Name"><input class="ac-u" placeholder="Username, e.g. bilal" maxlength="30" autocapitalize="none" spellcheck="false" aria-label="Username"><input class="ac-p" placeholder="Password (6+)" autocomplete="off" aria-label="Password"><select class="ac-r" aria-label="Role"><option value="staff" selected>Staff</option><option value="admin">Admin</option></select></div>`:
   `<div class="ach"><input class="ac-n" value="${esc(p.name||"")}" maxlength="40" aria-label="Name"><input value="${esc(p.username||p.email||"")}" readonly aria-label="Username"><select class="ac-r" aria-label="Role" ${me2||p.owner?"disabled":""}><option value="staff"${admin?"":" selected"}>Staff</option><option value="admin"${admin?" selected":""}>Admin</option></select></div>
-   <div class="acp">${p.owner?`<span class="rolechip">Clinic owner</span>`:""}${me2?`<span class="rolechip">You</span>`:""}${p.active===false?`<span class="offchip">LOGIN TURNED OFF</span>`:""}${!me2&&!p.owner?`<label style="margin-left:auto"><input type="checkbox" class="ac-a" ${p.active===false?"":"checked"}> Login allowed</label>`:""}</div>`}
+   <div class="acp">${p.owner?`<span class="rolechip">Clinic owner</span>`:""}${me2?`<span class="rolechip">You</span>`:""}${p.active===false?`<span class="offchip">LOGIN TURNED OFF</span>`:""}${!me2&&!p.owner?`<label style="margin-left:auto"><input type="checkbox" class="ac-a" ${p.active===false?"":"checked"}> Login allowed</label>`:""}</div>
+   <div class="acp acx">${me2?`<button type="button" class="btn small" data-acmypw>🔑 Change my password</button>`:`<button type="button" class="btn small" data-acpw="${esc(p.uid)}">🔑 Set new password</button>${p.owner?"":`<button type="button" class="btn small danger-outline" data-acdel="${esc(p.uid)}">🗑 Delete login</button>`}`}</div>`}
   <div class="acg"><div class="acp"><span>Quick set:</span>${Object.keys(PRESETS).map(k=>`<button type="button" class="btn small" data-preset="${esc(k)}">${esc(k)}</button>`).join("")}<button type="button" class="btn small" data-preset="__all">Everything</button><button type="button" class="btn small" data-preset="__none">Nothing</button></div>
    ${groups.map(g=>`<h4>${esc(g)}</h4><div class="chks">${PERMS.filter(x=>x.g===g).map(x=>`<label><input type="checkbox" data-perm="${x.k}" ${ps.has(x.k)?"checked":""}> ${esc(x.n)}</label>`).join("")}</div>`).join("")}</div>
   ${isNew?`<button type="button" class="btn small danger-outline" data-acrm style="align-self:flex-start">Cancel</button>`:""}</div>`}
 async function openAccess(){if(!fsRoot){toast("Staff logins are managed in the online app.");return}
-  $("ac-list").innerHTML=`<div class="phload"><div class="spin"></div></div>`;$("ac-err").hidden=true;$("ac-note").innerHTML=`Staff sign in with clinic code <b>${esc(CLINIC)}</b>, their username and password. To change someone's password, turn their login off and create a new one; anyone can change their own password with the <b>Password</b> button.`;openD(acdlg);
-  try{const sn=await memCol().get();acMembers=sn.docs.map(d=>({uid:d.id,...d.data()})).sort((a,b)=>(b.role==="admin")-(a.role==="admin")||String(a.name||"").localeCompare(b.name||""));
+  $("ac-list").innerHTML=`<div class="phload"><div class="spin"></div></div>`;$("ac-err").hidden=true;$("ac-note").innerHTML=`Staff sign in with clinic code <b>${esc(CLINIC)}</b>, their username and password. Tap <b>Set new password</b> on anyone's card to give them a new password (they keep the same username), or <b>Delete login</b> to remove them.`;openD(acdlg);
+  try{const sn=await memCol().get();acMembers=sn.docs.map(d=>({uid:d.id,...d.data()})).filter(m=>!m.deleted&&!m.replacedBy).sort((a,b)=>(b.role==="admin")-(a.role==="admin")||String(a.name||"").localeCompare(b.name||""));
     $("ac-list").innerHTML=acMembers.map(m=>acCard(m,"member")).join("")}catch(e){$("ac-list").innerHTML=`<p class="perr">Couldn't load logins. ${esc(authMsg(e))}</p>`}}
 $("acBtn").addEventListener("click",openAccess);
 $("ac-add").addEventListener("click",()=>{$("ac-list").insertAdjacentHTML("beforeend",acCard({role:"staff",perms:DEF_STAFF},"new"));const el=$("ac-list").lastElementChild;el.scrollIntoView({block:"nearest"});el.querySelector(".ac-n").focus()});
-$("ac-list").addEventListener("click",e=>{const c=e.target.closest(".acc");if(!c)return;
+$("ac-list").addEventListener("click",async e=>{const c=e.target.closest(".acc");if(!c)return;
+  if(e.target.closest("[data-acmypw]")){$("pwBtn").click();return}
+  const dl=e.target.closest("[data-acdel]");if(dl){const m=acMembers.find(x=>x.uid===dl.dataset.acdel);if(!m)return;
+    if(!confirm("Delete the login for "+(m.name||m.username)+"?\n\nThey won't be able to sign in any more. Their past work (bills, appointments) stays."))return;
+    try{const nv={...m,active:false,deleted:true,deletedAt:new Date().toISOString(),deletedBy:myName};delete nv.uid;await memCol().doc(m.uid).set(nv);acMembers=acMembers.filter(x=>x.uid!==m.uid);c.remove();toast((m.name||m.username)+"'s login deleted")}catch(x){toast(authMsg(x))}return}
+  const pw=e.target.closest("[data-acpw]");if(pw){const m=acMembers.find(x=>x.uid===pw.dataset.acpw);if(m)await adminSetPassword(m,c);return}
   if(e.target.closest("[data-acrm]")){c.remove();return}
   const pr=e.target.closest("[data-preset]");if(pr){const k=pr.dataset.preset,set=new Set(k==="__all"?PERMS.map(x=>x.k):k==="__none"?[]:PRESETS[k]);for(const i of c.querySelectorAll("[data-perm]"))i.checked=set.has(i.dataset.perm)}});
 $("ac-list").addEventListener("change",e=>{const r=e.target.closest(".ac-r");if(r)r.closest(".acc").classList.toggle("isadmin",r.value==="admin")});
@@ -3685,6 +3693,26 @@ $("acForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("
     acdlg.close();toast("Logins saved")}
   catch(x){err.textContent=x&&x.msg?x.msg:authMsg(x);err.hidden=false}
   finally{sb.disabled=false;sb.textContent="Save access"}});
+/* admin sets a new password for someone: a fresh login under the same username, old one switched off */
+async function adminSetPassword(m,card){const nm=m.name||m.username;
+  if(String(m.username||"").includes("@")){if(!confirm("Send a password reset link to "+m.username+"?"))return;try{await firebase.auth().sendPasswordResetEmail(m.username);toast("Reset link sent to "+m.username)}catch(x){toast(authMsg(x))}return}
+  const pw=prompt("New password for "+nm+" (at least 6 characters)\n\nTell them this password. Their username stays: "+m.username);if(pw===null)return;
+  if(String(pw).length<6){toast("Password must be at least 6 characters.");return}
+  const btn=card&&card.querySelector("[data-acpw]");if(btn){btn.disabled=true;btn.textContent="Saving…"}
+  try{const email=`${m.username}.r${Date.now().toString(36)}@${CLINIC}.${USER_DOMAIN}`;let uid2;
+    try{uid2=await makeLogin(email,pw)}catch(x){throw {msg:authMsg(x)}}
+    try{await fsRoot.collection("logins").doc(CLINIC+"_"+m.username).set({code:CLINIC,username:m.username,email,uid:uid2,updatedAt:new Date().toISOString(),by:myName})}
+    catch(x){throw {msg:"Couldn't save the new password. Please publish the updated Firebase rules first (see the setup message), then try again."}}
+    const base={...m};delete base.uid;
+    await memCol().doc(uid2).set({...base,active:true,replaces:m.uid,pwChangedAt:new Date().toISOString(),pwChangedBy:myName});
+    await memCol().doc(m.uid).set({...base,active:false,replacedBy:uid2});
+    try{const ph=await getPhoto("user_"+m.uid);if(ph)await db.collection("photos").doc("user_"+uid2).set({data:ph,createdAt:new Date().toISOString()})}catch(x){}
+    acMembers=acMembers.map(x=>x.uid===m.uid?{...base,uid:uid2,active:true}:x);if(card){card.dataset.uid=uid2;for(const b of card.querySelectorAll("[data-acpw],[data-acdel]")){if(b.dataset.acpw)b.dataset.acpw=uid2;if(b.dataset.acdel)b.dataset.acdel=uid2}}
+    toast("New password set for "+nm+". Username stays "+m.username)}
+  catch(x){toast(x&&x.msg?x.msg:authMsg(x))}
+  finally{if(btn){btn.disabled=false;btn.textContent="🔑 Set new password"}}}
+async function loginEmailFor(user,code){const def=userEmail(user,code);if(user.includes("@")||!code||!fsRoot)return def;
+  try{const d=await fsRoot.collection("logins").doc(code+"_"+user.toLowerCase()).get();const v=d&&d.exists&&d.data();if(v&&v.email)return v.email}catch(e){}return def}
 /* change own password */
 const pwdlg=$("pwdlg");
 $("pwBtn").addEventListener("click",()=>{$("pw-old").value="";$("pw-new").value="";$("pw-err").hidden=true;openD(pwdlg)});
@@ -3903,6 +3931,7 @@ async function enterClinic(u,seq){
   let cs=null;
   if(code==="alawan"&&isSuper()){try{cs=await cref.get()}catch(e){cs=null}if(!cs||!cs.exists){await cref.set({name:"Al Awan Dental Clinic",city:"",phone:"0311 0053535",ownerName:"Dr Faizan Malik",ownerUid:u.uid,ownerUser:em,status:"active",legacy:true,createdAt:new Date().toISOString(),approvedAt:new Date().toISOString()})}}
   let ms=null;try{ms=await cref.collection("members").doc(u.uid).get()}catch(e){ms=null}
+  if(ms&&ms.exists&&ms.data()&&(ms.data().deleted||ms.data().replacedBy||ms.data().active===false)){const md=ms.data();showGate(`<h2>${md.replacedBy?"Your password was changed":"Login turned off"}</h2><p class="muted">${md.replacedBy?"Your clinic admin set a new password for you. Sign in again with your username and the new password.":"This login has been turned off or removed by your clinic admin. Ask them if you need access."}</p><div class="row"><button class="btn primary" data-gout>Sign out</button></div>`);return}
   if(seq!==authSeq)return;
   if((!ms||!ms.exists)&&code==="alawan"&&LEGACY_ALAWAN.includes(em)){await cref.collection("members").doc(u.uid).set({username:em,name:em==="fizi101@gmail.com"?"Dr Faizan Malik":em==="shaziasami.ss@gmail.com"?"Dr Shazia Sami":em,role:isSuper()?"admin":"staff",perms:isSuper()?[]:PRESETS["Dentist"],active:true,owner:isSuper(),createdAt:new Date().toISOString()});ms=await cref.collection("members").doc(u.uid).get()}
   try{cs=await cref.get()}catch(e){cs=null}
@@ -4132,7 +4161,7 @@ $("loginForm").addEventListener("submit",async e=>{e.preventDefault();const err=
   const remember=$("lremember").checked;lsSet("ds-remember",remember?"1":"0");lsSet("ds-user",remember?user:null);
   roleCheck=true;lsSet("ds-code",code||null);$("loginBtn").disabled=true;$("loginBtn").textContent="Signing in…";
   try{try{await firebase.auth().setPersistence(remember?firebase.auth.Auth.Persistence.LOCAL:firebase.auth.Auth.Persistence.SESSION)}catch(e){}
-    await firebase.auth().signInWithEmailAndPassword(userEmail(user,code),pw);if(!remember)$("lp").value=""}
+    await firebase.auth().signInWithEmailAndPassword(await loginEmailFor(user,code),pw);if(!remember)$("lp").value=""}
   catch(x){err.textContent=/user-not-found|wrong-password|invalid-credential|invalid-login|invalid-email/.test(x.code||"")?"Clinic code, username or password is wrong. Try again.":x.code==="auth/network-request-failed"?"No internet connection. Connect and try again.":x.code==="auth/too-many-requests"?"Too many tries. Wait a few minutes and try again.":"Couldn't sign in ("+(x.code||"error")+")";err.hidden=false}
   finally{$("loginBtn").disabled=false;$("loginBtn").textContent="Sign in"}
 });
