@@ -962,6 +962,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 .pam{min-height:48px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-weight:700;font-size:.95rem;color:var(--ink)}
 .duprow{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-top:8px;background:var(--surface)}.duprow b{display:block}.dupact{display:flex;flex-direction:column;gap:8px;margin-top:16px}.dupact .btn{width:100%;min-height:46px}
 .cndel{display:flex;flex-direction:column;gap:6px;width:100%;padding:10px 12px;border:1.5px solid var(--bad,#c0392b);border-radius:12px;background:var(--surface)}.cndel .row{display:flex;gap:8px;justify-content:flex-end}
+.cndone{border:1.5px solid var(--accent);border-radius:14px;padding:12px 14px;margin:10px 0;background:var(--surface)}.cndone h3{margin:0 0 6px}.cndone pre{white-space:pre-wrap;font:inherit;font-size:.9rem;margin:8px 0;padding:10px;border-radius:10px;background:var(--bg,#f3f6f5)}.cndone .row{display:flex;gap:8px;flex-wrap:wrap}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -1499,6 +1500,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
   <h2>Dental Solutions · Owner console</h2>
   <p class="muted small" style="margin:0">Approve, lock and manage clinics. You can't see any clinic's patients or money from here.</p>
   <div class="cnbar"><div class="seg" id="cn-f"><button data-cf="pending" aria-pressed="true">Waiting</button><button data-cf="active">Active</button><button data-cf="locked">Locked</button><button data-cf="deleted">Deleted</button><button data-cf="all">All</button></div><button class="btn small primary" id="cn-new">+ Create clinic</button></div>
+  <div id="cn-done" class="cndone" hidden></div>
   <div id="cn-list" class="cnlist"></div>
   <form id="cnForm" class="cnform" novalidate hidden>
     <h3 id="cnfT">Create clinic</h3>
@@ -3660,6 +3662,13 @@ $("m-pdf").addEventListener("click",()=>{const [f,t]=rpRange("month",monthKey+"-
 /* ================= DENTAL SOLUTIONS: clinics, members, access ================= */
 const SUPER_EMAILS=["fizi101@gmail.com"];
 const DS_CONTACT="+923459148761";
+const APP_URL="https://drfiz101.github.io/Dental-Solutions/";
+const appLink=code=>APP_URL+(code?"?c="+encodeURIComponent(code):"");
+function clinicMsg(c,o){o=o||{};const active=(c.status||"active")==="active";
+  return `Assalam o Alaikum${c.ownerName||o.owner?" "+(o.owner||c.ownerName):""},\n\n${o.fresh?`Welcome to *Dental Solutions*! Your clinic *${c.name||c.id}* is ready to use.`:`Your clinic *${c.name||c.id}* is ${active?"active":"registered"} on *Dental Solutions*.`}\n\n📲 Open the app: ${appLink(c.id)}\n🏥 Clinic code: *${c.id}*${o.user?`\n👤 Username: *${o.user}*`:c.ownerUser?`\n👤 Username: *${c.ownerUser}*`:""}${o.pw?`\n🔑 Password: *${o.pw}*`:""}\n\nOpen the link on your phone and tap *Add to Home Screen* to install it like an app.${o.pw?"\nPlease change your password after signing in (Menu → Change password).":""}\n\nWarm regards,\nTeam Dental Solutions`}
+function cnShowDone(c,o){const t=clinicMsg(c,o),box=$("cn-done"),wa=c.phone&&waNum(c.phone)?waHref(c.phone,t):"https://wa.me/?text="+encodeURIComponent(t);
+  box.innerHTML=`<h3>✓ ${o.fresh?"Clinic created":"Login created"} · send the details</h3><p class="muted small" style="margin:0">${c.phone&&waNum(c.phone)?"WhatsApp opens with "+esc(c.phone)+" and this message ready to send.":"WhatsApp opens so you can choose who to send it to."}</p><pre>${esc(t)}</pre><div class="row"><a class="wa" target="_blank" rel="noopener" href="${esc(wa)}">${WA_IC}<span>Send on WhatsApp</span></a><button type="button" class="btn" data-cndcopy>Copy message</button><button type="button" class="btn" data-cndclose>Done</button></div>`;
+  box.hidden=false;box.dataset.msg=t;box.scrollIntoView({block:"nearest"})}
 const USER_DOMAIN="dentalsolutions.app";
 let CLINIC=null,CDOC=null,MEM=null,fsRoot=null,memUnsub=null,cdocUnsub=null;
 const isSuper=()=>{try{const fb=window.firebase;return !!(fb&&fb.apps&&fb.apps.length&&fb.auth().currentUser&&SUPER_EMAILS.includes(String(fb.auth().currentUser.email||"").toLowerCase()))}catch(e){return false}};
@@ -3831,14 +3840,15 @@ function renderConsole(){for(const b of document.querySelectorAll("[data-cf]"))b
   const list=cnRows.filter(c=>cnF==="all"?c.status!=="deleted":(c.status||"pending")===cnF).sort((a,b)=>String(b.createdAt||"").localeCompare(a.createdAt||""));
   const st={pending:["Waiting for approval","warn"],active:["Active","ok"],locked:["Locked","bad"],deleted:["Deleted","bad"]};
   $("cn-list").innerHTML=list.length?list.map(c=>{const s2=st[c.status||"pending"]||st.pending;return `<div class="cnr"><div><b>${esc(c.name||c.id)}</b> <span class="chip2 ${s2[1]}">${s2[0]}</span><small>Code <b>${esc(c.id)}</b>${c.city?" · "+esc(c.city):""}${c.phone?" · "+esc(c.phone):""}${c.ownerName?" · "+esc(c.ownerName):""}${c.ownerUser?" ("+esc(c.ownerUser)+")":""}</small><small>Registered ${esc(fmtDate(String(c.createdAt||"").slice(0,10)))}${c.approvedAt?" · approved "+esc(fmtDate(String(c.approvedAt).slice(0,10))):""}</small></div>
-    <div class="acts2">${c.status==="deleted"?`<small>Deleted ${esc(fmtDate(String(c.deletedAt||"").slice(0,10)))} · no one can sign in. The clinic code stays reserved.</small><button class="btn small primary" data-cnrestore="${esc(c.id)}">Restore</button>`:cnDel===c.id?`<div class="cndel"><b>Delete ${esc(c.name||c.id)}?</b><small>Nobody at this clinic will be able to sign in, and it disappears from your list. You can restore it later from the Deleted tab.</small><label class="field"><span class="small">Type the clinic code <b>${esc(c.id)}</b> to confirm</span><input data-cndelcode autocomplete="off" autocapitalize="none"></label><div class="row"><button class="btn small" data-cndelno>Cancel</button><button class="btn small danger" data-cndelyes="${esc(c.id)}">Delete clinic</button></div></div>`:`${c.status!=="active"?`<button class="btn small primary" data-cnst="active" data-c="${esc(c.id)}">${c.status==="locked"?"Unlock":"Approve"}</button>`:`<button class="btn small" data-cnst="locked" data-c="${esc(c.id)}">Lock</button>`}${c.phone&&waNum(c.phone)?`<a class="wa sm" target="_blank" rel="noopener" href="${esc(waHref(c.phone,`Assalam o Alaikum ${c.ownerName||""},\n\nYour clinic *${c.name}* is ${c.status==="active"?"now active":"registered"} on Dental Solutions.\nSign in with clinic code: *${c.id}*`))}">${WA_IC}<span>WhatsApp</span></a>`:""}<button class="btn small" data-cnren="${esc(c.id)}">✎ Edit</button><button class="btn small" data-cnadm="${esc(c.id)}">New admin login</button>${c.id==="alawan"?"":`<button class="btn small danger" data-cndel="${esc(c.id)}">🗑 Delete</button>`}`}</div></div>`}).join(""):`<p class="muted" style="margin:6px 0">No clinics here.</p>`}
-function openConsole(){if(!fsRoot||!isSuper())return;openD(cndlg);$("cnForm").hidden=true;$("cn-list").innerHTML=`<div class="phload"><div class="spin"></div></div>`;
+    <div class="acts2">${c.status==="deleted"?`<small>Deleted ${esc(fmtDate(String(c.deletedAt||"").slice(0,10)))} · no one can sign in. The clinic code stays reserved.</small><button class="btn small primary" data-cnrestore="${esc(c.id)}">Restore</button>`:cnDel===c.id?`<div class="cndel"><b>Delete ${esc(c.name||c.id)}?</b><small>Nobody at this clinic will be able to sign in, and it disappears from your list. You can restore it later from the Deleted tab.</small><label class="field"><span class="small">Type the clinic code <b>${esc(c.id)}</b> to confirm</span><input data-cndelcode autocomplete="off" autocapitalize="none"></label><div class="row"><button class="btn small" data-cndelno>Cancel</button><button class="btn small danger" data-cndelyes="${esc(c.id)}">Delete clinic</button></div></div>`:`${c.status!=="active"?`<button class="btn small primary" data-cnst="active" data-c="${esc(c.id)}">${c.status==="locked"?"Unlock":"Approve"}</button>`:`<button class="btn small" data-cnst="locked" data-c="${esc(c.id)}">Lock</button>`}${c.phone&&waNum(c.phone)?`<a class="wa sm" target="_blank" rel="noopener" href="${esc(waHref(c.phone,clinicMsg(c)))}">${WA_IC}<span>WhatsApp</span></a>`:""}<button class="btn small" data-cnlink="${esc(c.id)}">🔗 Copy link</button><button class="btn small" data-cnren="${esc(c.id)}">✎ Edit</button><button class="btn small" data-cnadm="${esc(c.id)}">New admin login</button>${c.id==="alawan"?"":`<button class="btn small danger" data-cndel="${esc(c.id)}">🗑 Delete</button>`}`}</div></div>`}).join(""):`<p class="muted" style="margin:6px 0">No clinics here.</p>`}
+function openConsole(){if(!fsRoot||!isSuper())return;openD(cndlg);$("cn-done").hidden=true;$("cnForm").hidden=true;$("cn-list").innerHTML=`<div class="phload"><div class="spin"></div></div>`;
   if(cnUnsub)cnUnsub();cnUnsub=fsRoot.collection("clinics").onSnapshot(sn=>{cnRows=sn.docs.map(d=>({id:d.id,...d.data()}));renderConsole()},e=>{$("cn-list").innerHTML=`<p class="perr">Couldn't load clinics. ${esc(authMsg(e))}</p>`})}
 cndlg.addEventListener("close",()=>{if(cnUnsub){cnUnsub();cnUnsub=null}});
 $("consoleBtn").addEventListener("click",openConsole);
 $("cn-f").addEventListener("click",e=>{const b=e.target.closest("[data-cf]");if(b){cnF=b.dataset.cf;renderConsole()}});
 $("cn-list").addEventListener("click",async e=>{const t=e.target;
   const sb=t.closest("[data-cnst]");if(sb){const id=sb.dataset.c,v=sb.dataset.cnst;try{await fsRoot.collection("clinics").doc(id).update({status:v,...(v==="active"?{approvedAt:new Date().toISOString()}:{}),updatedBy:firebase.auth().currentUser.email});toast(v==="active"?"Clinic is active":"Clinic locked")}catch(x){toast(authMsg(x))}return}
+  const lk=t.closest("[data-cnlink]");if(lk){const c=cnRows.find(x=>x.id===lk.dataset.cnlink)||{id:lk.dataset.cnlink};copyText(clinicMsg(c),"Invite with app link copied");return}
   const dl=t.closest("[data-cndel]");if(dl){cnDel=dl.dataset.cndel;renderConsole();const i=$("cn-list").querySelector("[data-cndelcode]");if(i)i.focus();return}
   if(t.closest("[data-cndelno]")){cnDel=null;renderConsole();return}
   const dy=t.closest("[data-cndelyes]");if(dy){const id=dy.dataset.cndelyes,i=$("cn-list").querySelector("[data-cndelcode]");if(id==="alawan")return;
@@ -3851,7 +3861,8 @@ $("cn-list").addEventListener("click",async e=>{const t=e.target;
 function showCnForm(title,v){$("cnfT").textContent=title;const f=$("cnForm");f.hidden=false;const k=cnMode.kind;
   for(const [id,show] of [["cn-name",k!=="admin"],["cn-code",k==="create"],["cn-city",k!=="admin"],["cn-phone",k!=="admin"],["cn-owner",true],["cn-user",k!=="rename"],["cn-pw",k!=="rename"]]){const el=$(id);el.closest(".field").hidden=!show;el.value=v[id.slice(3)]||""}
   $("cn-err").hidden=true;$("cn-save").textContent=k==="create"?"Create clinic":k==="rename"?"Save":"Create login";f.scrollIntoView({block:"nearest"});$(k==="admin"?"cn-owner":"cn-name").focus()}
-$("cn-new").addEventListener("click",()=>{cnMode={kind:"create"};showCnForm("Create clinic",{})});
+$("cn-done").addEventListener("click",e=>{if(e.target.closest("[data-cndcopy]"))copyText($("cn-done").dataset.msg||"","Message copied");if(e.target.closest("[data-cndclose]"))$("cn-done").hidden=true});
+$("cn-new").addEventListener("click",()=>{$("cn-done").hidden=true;cnMode={kind:"create"};showCnForm("Create clinic",{})});
 $("cn-cancel").addEventListener("click",()=>{$("cnForm").hidden=true});
 $("cn-name").addEventListener("input",()=>{if(cnMode&&cnMode.kind==="create"&&!$("cn-code").dataset.touched)$("cn-code").value=slugCode($("cn-name").value)});
 $("cn-code").addEventListener("input",()=>{$("cn-code").dataset.touched="1"});
@@ -3867,7 +3878,8 @@ $("cnForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("
       const cid=k==="create"?code:cnMode.id,uid=await makeLogin(userEmail(u,cid),pw);
       if(k==="create")await ref.set({name,city:$("cn-city").value.trim(),phone:$("cn-phone").value.trim(),ownerName:owner,ownerUser:u,ownerUid:uid,status:"active",createdAt:new Date().toISOString(),approvedAt:new Date().toISOString(),createdBy:firebase.auth().currentUser.email});
       await ref.collection("members").doc(uid).set({username:u,name:owner||u,role:"admin",perms:[],active:true,owner:k==="create",createdAt:new Date().toISOString(),by:"Dental Solutions"});
-      toast(k==="create"?`Clinic created. Sign in with code ${cid}, username ${u}`:`Admin login ${u} created`)}
+      toast(k==="create"?`Clinic created. Sign in with code ${cid}, username ${u}`:`Admin login ${u} created`);
+      const cRow=k==="create"?{id:cid,name,phone:$("cn-phone").value.trim(),ownerName:owner,status:"active"}:{...(cnRows.find(x=>x.id===cid)||{id:cid})};cnShowDone(cRow,{fresh:k==="create",user:u,pw,owner:owner||cRow.ownerName})}
     $("cnForm").hidden=true}
   catch(x){fail(authMsg(x))}finally{b.disabled=false;b.textContent=old}});
 
@@ -4263,7 +4275,7 @@ for(const ev of ["pointerdown","keydown","wheel","touchstart"])window.addEventLi
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&aoUid)aoCheck()});
 $("aoStay").addEventListener("click",()=>{aoTouch(true);$("aoBar").hidden=true});
 /* sign in */
-$("lcode").value=lsGet("ds-code")||"";$("lremember").checked=lsGet("ds-remember")!=="0";$("le").value=lsGet("ds-remember")!=="0"?(lsGet("ds-user")||""):"";
+$("lcode").value=lsGet("ds-code")||"";try{const qc=new URLSearchParams(location.search).get("c");if(qc){$("lcode").value=slugCode(qc);history.replaceState(null,"",location.pathname)}}catch(e){}$("lremember").checked=lsGet("ds-remember")!=="0";$("le").value=lsGet("ds-remember")!=="0"?(lsGet("ds-user")||""):"";
 $("lrole").addEventListener("click",e=>{const b=e.target.closest("[data-lr]");if(!b)return;wantRole=b.dataset.lr;for(const x of document.querySelectorAll("[data-lr]"))x.setAttribute("aria-pressed",String(x===b));lsSet("aa-lr",wantRole)});
 if(lsGet("aa-lr")==="admin")document.querySelector('[data-lr="admin"]').click();
 $("ltab").addEventListener("click",e=>{const b=e.target.closest("[data-lt]");if(!b)return;for(const x of document.querySelectorAll("[data-lt]"))x.setAttribute("aria-pressed",String(x===b));$("loginForm").hidden=b.dataset.lt!=="in";$("regForm").hidden=b.dataset.lt!=="reg";$("loginErr").hidden=true});
