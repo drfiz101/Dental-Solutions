@@ -989,6 +989,11 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 .shl{display:flex;flex-direction:column;gap:8px}.shi{border:1px solid var(--line);border-radius:12px;padding:10px 12px}.shi.tot{background:var(--accent-soft)}.shh{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}.shh span{color:var(--muted);font-size:.8rem}.shg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:6px;font-weight:700;font-variant-numeric:tabular-nums;font-size:.9rem}.shg small{display:block;font-weight:400;color:var(--muted);font-size:.72rem}.shg .shd{color:#B7791F}.shg .shc{color:var(--ok,#276B43)}@media (max-width:520px){.shg{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .shtw{overflow-x:auto}.shtb{width:100%;border-collapse:collapse;font-size:.86rem;font-variant-numeric:tabular-nums}.shtb th{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:right;padding:6px 4px;border-bottom:1px solid var(--line)}.shtb td{text-align:right;padding:8px 4px;border-bottom:1px solid var(--line);white-space:nowrap}.shtb th:first-child,.shtb td:first-child{text-align:left;white-space:normal}.shtb td small{display:block;color:var(--muted);font-size:.74rem}.shtb .shd{color:#B7791F;font-weight:700}.shtb .shc{color:var(--ok,#276B43);font-weight:700}.shtb tr.sum td{font-weight:700;border-bottom:0}
 .bvsh{margin-top:12px;border-radius:14px;background:var(--accent-soft);padding:10px 12px}.bvsh h4{margin:0 0 6px;font-size:.8rem}.bvsh select{width:100%;height:42px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;padding:0 8px}
+.vdl{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 10px;align-items:start}.vdl.off{opacity:.6}
+.vdl>input[type=checkbox]{width:20px;height:20px;margin-top:3px;accent-color:var(--accent)}.vdf{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:6px}.vdf input{min-width:0;height:40px;border:1.5px solid var(--line);border-radius:10px;padding:0 8px;font:inherit;background:var(--surface);color:var(--ink)}
+.vdf b{align-self:center}.vdb{grid-column:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.86rem}.vdb small{color:var(--muted)}.vdq{display:inline-flex;gap:4px}.vdq button{height:32px;padding:0 12px;border:1.5px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font:inherit;font-weight:700;font-size:.82rem}.vdq button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink,#fff)}
+.vdtag{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}.vdtot{margin-top:10px}
+@media (max-width:520px){.vdf{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.vdf>:first-child{grid-column:1/-1}}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -1256,6 +1261,17 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
   <div class="actions"><button type="button" class="btn small" id="lookReset">Back to original look</button><span></span></div>
 </div></dialog>
 <button type="button" class="fab" id="fabPat" aria-label="Add patient"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button type="button" class="fab" id="fabAp" aria-label="Book appointment"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<dialog id="vddlg" class="wide"><form class="dlg" id="vdForm" novalidate>
+  <h2 id="vd-t">✓ Visit done</h2>
+  <p class="muted" id="vd-sub" style="margin:0"></p>
+  <h3 class="h3s" style="margin-top:12px">Work done today</h3>
+  <p class="muted small" style="margin:0 0 6px">Ticked work is saved to the patient's chart and treatment record.</p>
+  <div id="vd-list"></div>
+  <button type="button" class="btn small" id="vd-add" style="margin-top:8px">+ Add more work done</button>
+  <div id="vd-tot" class="vdtot"></div>
+  <p class="perr" id="vd-err" hidden></p>
+  <div class="actions"><button type="button" class="btn" id="vd-skip">Just mark done</button><div><button type="button" class="btn" id="vd-cancel">Cancel</button><button type="submit" class="btn primary" id="vd-save">Save</button></div></div>
+</form></dialog>
 <dialog id="shdlg"><form class="dlg" id="shForm" novalidate>
   <h2>Dentist shares</h2>
   <p class="muted small" style="margin:0">🔒 Share of what each dentist's patients pay. The rest is clinic profit. Lab fees are split 50/50 between the dentist who treated the patient and the clinic.</p>
@@ -2627,7 +2643,45 @@ $("apView").addEventListener("click",e=>{
   const na=t.closest("[data-newap]");if(na)return openAp(null,{chair:na.dataset.newap,date:apDate});
   const fr=t.closest("[data-free]");if(fr){const [c,tm]=fr.dataset.free.split("|");return openAp(null,{chair:c,date:apDate,time:tm})}
 });
-$("apView").addEventListener("change",e=>{const s=e.target.closest("[data-st]");if(!s)return;const a=A[s.dataset.st];s.blur();cset("appts",s.dataset.st,{...a,status:s.value});if(s.value==="noshow")toast("Marked no-show. You can send a 'missed visit' WhatsApp.");if(s.value==="done")toast("Marked done. Tap Bill to charge for the treatment.")});
+/* ===== visit done: update chart + make bill ===== */
+let vdAp=null,vdLines=[];
+const vdMatch=(a,b)=>{const tk=x=>String(x||"").toLowerCase().replace(/\brct\b/g,"root canal").split(/[^a-z]+/).filter(w=>w.length>2&&!["per","with","the","and","tooth","arch","visit"].includes(w));const A1=tk(a),B1=new Set(tk(b));return A1.length&&A1.some(w=>B1.has(w))};
+function visitDone(id){const a=A[id];if(!a)return;const p=P[a.patientId];vdAp=id;vdLines=[];
+  const pl=p?planOf(p):emptyPlan(),pend=pl.items.filter(i=>!i.done),tr=String(a.treatment||"").replace(/^(trial|fitting):\s*/i,"").trim(),hit=pend.filter(i=>tr&&vdMatch(tr,i.tr));
+  for(const i of pend)vdLines.push({key:nid("v"),src:"plan",planId:i.id,desc:i.tr,tooth:i.tooth||"",qty:+i.qty||1,price:itemNet(pl,i),done:hit.includes(i),bill:true,billed:i.billNo||""});
+  if(!hit.length&&tr){const pr=priceFor(tr);vdLines.unshift({key:nid("v"),src:"ap",desc:tr,tooth:"",qty:1,price:pr?+pr.p||0:0,done:true,bill:true})}
+  $("vd-t").textContent="✓ Visit done · "+(a.patientName||"Patient");$("vd-sub").textContent=`${fmtDate(a.date)}, ${fmtTime(a.time)} · Chair ${a.chair||""}${a.dentist?" · "+a.dentist:""}${a.treatment?" · booked for "+a.treatment:""}`;
+  $("vd-err").hidden=true;vdRender();openD($("vddlg"))}
+function vdRender(){const canB=can("bill_edit");trOpts();
+  $("vd-list").innerHTML=vdLines.length?vdLines.map(l=>`<div class="vdl${l.done?"":" off"}" data-vk="${l.key}"><input type="checkbox" data-vdone ${l.done?"checked":""} aria-label="Done: ${esc(l.desc||"work")}"><div class="vdf">${l.src==="plan"?`<b>${esc(l.desc)} <span class="vdtag">From plan</span></b><input data-vf="tooth" placeholder="Tooth" value="${esc(l.tooth)}" aria-label="Tooth">`:`<input data-vf="desc" list="tr-list" placeholder="Treatment" value="${esc(l.desc)}" aria-label="Treatment"><input data-vf="tooth" placeholder="Tooth" value="${esc(l.tooth)}" aria-label="Tooth">`}<input data-vf="price" type="number" min="0" inputmode="numeric" placeholder="Rs" value="${l.price||""}" aria-label="Price in rupees"${l.billed?" disabled":""}></div>
+    ${canB&&l.done?`<div class="vdb">${l.billed?`<small>Already on bill ${esc(l.billed)}</small>`:l.src==="new"?`<span>Add to the bill?</span><span class="vdq"><button type="button" data-vbill="1" aria-pressed="${l.bill===true}">Yes, add</button><button type="button" data-vbill="0" aria-pressed="${l.bill===false}">No</button></span>`:`<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-vbillc ${l.bill?"checked":""}> Add to the bill</label>`}</div>`:""}</div>`).join(""):`<p class="muted small">Nothing booked for this visit. Tap <b>+ Add more work done</b>.</p>`;
+  const bl=vdLines.filter(l=>l.done&&l.bill===true&&!l.billed&&l.desc),tot=bl.reduce((a,l)=>a+(+l.price||0)*(+l.qty||1),0);
+  $("vd-tot").innerHTML=canB?(bl.length?`<div class="kv tot"><span>New bill · ${pl(bl.length,"item")}</span><b>${rs(tot)}</b></div>`:`<p class="muted small" style="margin:0">No bill will be made.</p>`):"";
+  $("vd-save").textContent=canB&&bl.length?"Save & make bill":"Save"}
+const vdL=el=>{const r=el.closest("[data-vk]");return r&&vdLines.find(l=>l.key===r.dataset.vk)};
+$("vd-list").addEventListener("input",e=>{const l=vdL(e.target),f=e.target.dataset.vf;if(!l||!f)return;if(f==="desc"){l.desc=e.target.value;const pr=S().prices.find(x=>x.n===l.desc);if(pr&&+pr.p>0){l.price=+pr.p;const pe=e.target.closest(".vdf").querySelector('[data-vf="price"]');pe.value=pr.p}}else if(f==="price")l.price=+e.target.value||0;else l.tooth=e.target.value;
+  const bl=vdLines.filter(x=>x.done&&x.bill===true&&!x.billed&&x.desc),tot=bl.reduce((a,x)=>a+(+x.price||0)*(+x.qty||1),0);if(can("bill_edit"))$("vd-tot").innerHTML=bl.length?`<div class="kv tot"><span>New bill · ${pl(bl.length,"item")}</span><b>${rs(tot)}</b></div>`:`<p class="muted small" style="margin:0">No bill will be made.</p>`});
+$("vd-list").addEventListener("change",e=>{const l=vdL(e.target);if(!l)return;if(e.target.matches("[data-vdone]")){l.done=e.target.checked;vdRender()}else if(e.target.matches("[data-vbillc]")){l.bill=e.target.checked;vdRender()}});
+$("vd-list").addEventListener("click",e=>{const b=e.target.closest("[data-vbill]");if(!b)return;const l=vdL(b);if(!l)return;l.bill=b.dataset.vbill==="1";vdRender()});
+$("vd-add").addEventListener("click",()=>{vdLines.push({key:nid("v"),src:"new",desc:"",tooth:"",qty:1,price:0,done:true,bill:null});vdRender();const r=$("vd-list").lastElementChild;if(r){const i=r.querySelector('[data-vf="desc"]');if(i)i.focus()}});
+$("vd-cancel").addEventListener("click",()=>{vdAp=null;$("vddlg").close();renderAppts()});
+$("vddlg").addEventListener("close",()=>{if(vdAp){vdAp=null;try{renderAppts()}catch(e){}}});
+$("vd-skip").addEventListener("click",()=>{const id=vdAp,a=A[id];vdAp=null;$("vddlg").close();if(a)cset("appts",id,{...a,status:"done",doneAt:new Date().toISOString()});toast("Marked done")});
+$("vdForm").addEventListener("submit",e=>{e.preventDefault();const id=vdAp,a=A[id],err=$("vd-err");if(!a)return;const canB=can("bill_edit");
+  const done=vdLines.filter(l=>l.done&&String(l.desc||"").trim());
+  if(canB&&done.some(l=>l.src==="new"&&l.bill===null)){err.textContent="For the work you added, choose Yes or No for adding it to the bill.";err.hidden=false;return}
+  const today=ymd(new Date()),pid=a.patientId,p=P[pid];
+  const billL=canB?done.filter(l=>l.bill===true&&!l.billed):[];let billId=null,billNo="";
+  if(billL.length){billId=nid("b");billNo=nextBillNo(today);
+    cset("bills",billId,{no:billNo,createdAt:new Date().toISOString(),...me,patientId:pid,patientName:a.patientName||(p&&p.name)||"",phone:(p&&p.phone)||a.phone||"",date:today,items:billL.map(l=>({desc:l.desc.trim(),tooth:l.tooth||"",qty:+l.qty||1,price:+l.price||0})),discount:0,note:"Visit "+fmtDate(a.date)+(a.treatment?" · "+a.treatment:""),apId:id,...(a.dentist?{dentist:a.dentist}:{}),payments:[]})}
+  if(p&&done.length){const pl=planOf(P[pid]),inBill=l=>billL.includes(l);
+    const items=pl.items.map(i=>{const l=done.find(x=>x.src==="plan"&&x.planId===i.id);if(!l)return i;return {...i,done:true,doneOn:today,tooth:l.tooth||i.tooth||"",...(inBill(l)?{billNo,billId}:{})}});
+    for(const l of done.filter(x=>x.src!=="plan"))items.push({id:nid("tp"),tr:l.desc.trim(),tooth:l.tooth||"",qty:+l.qty||1,price:+l.price||0,phase:2,note:"",done:true,doneOn:today,fromAp:id,...(inBill(l)?{billNo,billId}:{})});
+    cset("patients",pid,{...P[pid],plan:{...pl,items,updatedAt:new Date().toISOString(),createdAt:pl.createdAt||new Date().toISOString()}});
+    chartFromBill(pid,done.map(l=>({desc:l.desc,tooth:l.tooth})))}
+  cset("appts",id,{...A[id],status:"done",doneAt:new Date().toISOString()});vdAp=null;$("vddlg").close();
+  if(billId){toast("Visit done · chart updated · bill "+billNo+" made");openBillView(billId)}else toast(done.length?"Visit done · chart updated":"Marked done")});
+$("apView").addEventListener("change",e=>{const s=e.target.closest("[data-st]");if(!s)return;const a=A[s.dataset.st];s.blur();if(s.value==="done"&&a.status!=="done"&&a.patientId&&P[a.patientId]){visitDone(s.dataset.st);return}cset("appts",s.dataset.st,{...a,status:s.value});if(s.value==="noshow")toast("Marked no-show. You can send a 'missed visit' WhatsApp.");if(s.value==="done")toast("Marked done. Tap Bill to charge for the treatment.")});
 
 /* --- billing --- */
 function renderBilling(){
