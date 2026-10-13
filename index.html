@@ -961,6 +961,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 .pamethods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .pam{min-height:48px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-weight:700;font-size:.95rem;color:var(--ink)}
 .duprow{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-top:8px;background:var(--surface)}.duprow b{display:block}.dupact{display:flex;flex-direction:column;gap:8px;margin-top:16px}.dupact .btn{width:100%;min-height:46px}
+.cndel{display:flex;flex-direction:column;gap:6px;width:100%;padding:10px 12px;border:1.5px solid var(--bad,#c0392b);border-radius:12px;background:var(--surface)}.cndel .row{display:flex;gap:8px;justify-content:flex-end}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -1497,7 +1498,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 <dialog id="cndlg" class="wide"><div class="dlg">
   <h2>Dental Solutions · Owner console</h2>
   <p class="muted small" style="margin:0">Approve, lock and manage clinics. You can't see any clinic's patients or money from here.</p>
-  <div class="cnbar"><div class="seg" id="cn-f"><button data-cf="pending" aria-pressed="true">Waiting</button><button data-cf="active">Active</button><button data-cf="locked">Locked</button><button data-cf="all">All</button></div><button class="btn small primary" id="cn-new">+ Create clinic</button></div>
+  <div class="cnbar"><div class="seg" id="cn-f"><button data-cf="pending" aria-pressed="true">Waiting</button><button data-cf="active">Active</button><button data-cf="locked">Locked</button><button data-cf="deleted">Deleted</button><button data-cf="all">All</button></div><button class="btn small primary" id="cn-new">+ Create clinic</button></div>
   <div id="cn-list" class="cnlist"></div>
   <form id="cnForm" class="cnform" novalidate hidden>
     <h3 id="cnfT">Create clinic</h3>
@@ -3825,12 +3826,12 @@ $("pwForm").addEventListener("submit",async e=>{e.preventDefault();const u=fireb
   try{await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,$("pw-old").value));await u.updatePassword($("pw-new").value);pwdlg.close();toast("Password changed")}
   catch(x){err.textContent=/wrong-password|invalid-credential/.test(x.code||"")?"Current password is wrong.":authMsg(x);err.hidden=false}});
 /* owner console */
-const cndlg=$("cndlg");let cnF="pending",cnRows=[],cnUnsub=null,cnMode=null;
+const cndlg=$("cndlg");let cnDel=null,cnF="pending",cnRows=[],cnUnsub=null,cnMode=null;
 function renderConsole(){for(const b of document.querySelectorAll("[data-cf]"))b.setAttribute("aria-pressed",String(b.dataset.cf===cnF));
-  const list=cnRows.filter(c=>cnF==="all"||(c.status||"pending")===cnF).sort((a,b)=>String(b.createdAt||"").localeCompare(a.createdAt||""));
-  const st={pending:["Waiting for approval","warn"],active:["Active","ok"],locked:["Locked","bad"]};
+  const list=cnRows.filter(c=>cnF==="all"?c.status!=="deleted":(c.status||"pending")===cnF).sort((a,b)=>String(b.createdAt||"").localeCompare(a.createdAt||""));
+  const st={pending:["Waiting for approval","warn"],active:["Active","ok"],locked:["Locked","bad"],deleted:["Deleted","bad"]};
   $("cn-list").innerHTML=list.length?list.map(c=>{const s2=st[c.status||"pending"]||st.pending;return `<div class="cnr"><div><b>${esc(c.name||c.id)}</b> <span class="chip2 ${s2[1]}">${s2[0]}</span><small>Code <b>${esc(c.id)}</b>${c.city?" · "+esc(c.city):""}${c.phone?" · "+esc(c.phone):""}${c.ownerName?" · "+esc(c.ownerName):""}${c.ownerUser?" ("+esc(c.ownerUser)+")":""}</small><small>Registered ${esc(fmtDate(String(c.createdAt||"").slice(0,10)))}${c.approvedAt?" · approved "+esc(fmtDate(String(c.approvedAt).slice(0,10))):""}</small></div>
-    <div class="acts2">${c.status!=="active"?`<button class="btn small primary" data-cnst="active" data-c="${esc(c.id)}">${c.status==="locked"?"Unlock":"Approve"}</button>`:`<button class="btn small" data-cnst="locked" data-c="${esc(c.id)}">Lock</button>`}${c.phone&&waNum(c.phone)?`<a class="wa sm" target="_blank" rel="noopener" href="${esc(waHref(c.phone,`Assalam o Alaikum ${c.ownerName||""},\n\nYour clinic *${c.name}* is ${c.status==="active"?"now active":"registered"} on Dental Solutions.\nSign in with clinic code: *${c.id}*`))}">${WA_IC}<span>WhatsApp</span></a>`:""}<button class="btn small" data-cnren="${esc(c.id)}">Rename</button><button class="btn small" data-cnadm="${esc(c.id)}">New admin login</button></div></div>`}).join(""):`<p class="muted" style="margin:6px 0">No clinics here.</p>`}
+    <div class="acts2">${c.status==="deleted"?`<small>Deleted ${esc(fmtDate(String(c.deletedAt||"").slice(0,10)))} · no one can sign in. The clinic code stays reserved.</small><button class="btn small primary" data-cnrestore="${esc(c.id)}">Restore</button>`:cnDel===c.id?`<div class="cndel"><b>Delete ${esc(c.name||c.id)}?</b><small>Nobody at this clinic will be able to sign in, and it disappears from your list. You can restore it later from the Deleted tab.</small><label class="field"><span class="small">Type the clinic code <b>${esc(c.id)}</b> to confirm</span><input data-cndelcode autocomplete="off" autocapitalize="none"></label><div class="row"><button class="btn small" data-cndelno>Cancel</button><button class="btn small danger" data-cndelyes="${esc(c.id)}">Delete clinic</button></div></div>`:`${c.status!=="active"?`<button class="btn small primary" data-cnst="active" data-c="${esc(c.id)}">${c.status==="locked"?"Unlock":"Approve"}</button>`:`<button class="btn small" data-cnst="locked" data-c="${esc(c.id)}">Lock</button>`}${c.phone&&waNum(c.phone)?`<a class="wa sm" target="_blank" rel="noopener" href="${esc(waHref(c.phone,`Assalam o Alaikum ${c.ownerName||""},\n\nYour clinic *${c.name}* is ${c.status==="active"?"now active":"registered"} on Dental Solutions.\nSign in with clinic code: *${c.id}*`))}">${WA_IC}<span>WhatsApp</span></a>`:""}<button class="btn small" data-cnren="${esc(c.id)}">✎ Edit</button><button class="btn small" data-cnadm="${esc(c.id)}">New admin login</button>${c.id==="alawan"?"":`<button class="btn small danger" data-cndel="${esc(c.id)}">🗑 Delete</button>`}`}</div></div>`}).join(""):`<p class="muted" style="margin:6px 0">No clinics here.</p>`}
 function openConsole(){if(!fsRoot||!isSuper())return;openD(cndlg);$("cnForm").hidden=true;$("cn-list").innerHTML=`<div class="phload"><div class="spin"></div></div>`;
   if(cnUnsub)cnUnsub();cnUnsub=fsRoot.collection("clinics").onSnapshot(sn=>{cnRows=sn.docs.map(d=>({id:d.id,...d.data()}));renderConsole()},e=>{$("cn-list").innerHTML=`<p class="perr">Couldn't load clinics. ${esc(authMsg(e))}</p>`})}
 cndlg.addEventListener("close",()=>{if(cnUnsub){cnUnsub();cnUnsub=null}});
@@ -3838,10 +3839,17 @@ $("consoleBtn").addEventListener("click",openConsole);
 $("cn-f").addEventListener("click",e=>{const b=e.target.closest("[data-cf]");if(b){cnF=b.dataset.cf;renderConsole()}});
 $("cn-list").addEventListener("click",async e=>{const t=e.target;
   const sb=t.closest("[data-cnst]");if(sb){const id=sb.dataset.c,v=sb.dataset.cnst;try{await fsRoot.collection("clinics").doc(id).update({status:v,...(v==="active"?{approvedAt:new Date().toISOString()}:{}),updatedBy:firebase.auth().currentUser.email});toast(v==="active"?"Clinic is active":"Clinic locked")}catch(x){toast(authMsg(x))}return}
-  const rn=t.closest("[data-cnren]");if(rn){const c=cnRows.find(x=>x.id===rn.dataset.cnren);cnMode={kind:"rename",id:c.id};showCnForm("Rename clinic",{name:c.name,city:c.city,phone:c.phone});return}
+  const dl=t.closest("[data-cndel]");if(dl){cnDel=dl.dataset.cndel;renderConsole();const i=$("cn-list").querySelector("[data-cndelcode]");if(i)i.focus();return}
+  if(t.closest("[data-cndelno]")){cnDel=null;renderConsole();return}
+  const dy=t.closest("[data-cndelyes]");if(dy){const id=dy.dataset.cndelyes,i=$("cn-list").querySelector("[data-cndelcode]");if(id==="alawan")return;
+    if(!i||i.value.trim().toLowerCase()!==id){toast("Type the clinic code "+id+" to confirm");if(i)i.focus();return}
+    try{const c=cnRows.find(x=>x.id===id)||{};await fsRoot.collection("clinics").doc(id).update({status:"deleted",statusBefore:c.status||"pending",deletedAt:new Date().toISOString(),updatedBy:firebase.auth().currentUser.email});cnDel=null;toast((c.name||id)+" deleted")}catch(x){toast(authMsg(x))}return}
+  const rs2=t.closest("[data-cnrestore]");if(rs2){const id=rs2.dataset.cnrestore,c=cnRows.find(x=>x.id===id)||{};const back=c.statusBefore&&c.statusBefore!=="deleted"?c.statusBefore:"active";
+    try{await fsRoot.collection("clinics").doc(id).update({status:back,deletedAt:null,updatedBy:firebase.auth().currentUser.email});toast((c.name||id)+" restored");cnF=back;renderConsole()}catch(x){toast(authMsg(x))}return}
+  const rn=t.closest("[data-cnren]");if(rn){const c=cnRows.find(x=>x.id===rn.dataset.cnren);cnMode={kind:"rename",id:c.id};showCnForm("Edit "+(c.name||c.id),{name:c.name,city:c.city,phone:c.phone,owner:c.ownerName});return}
   const ad=t.closest("[data-cnadm]");if(ad){const c=cnRows.find(x=>x.id===ad.dataset.cnadm);cnMode={kind:"admin",id:c.id};showCnForm("New admin login for "+(c.name||c.id),{});return}});
 function showCnForm(title,v){$("cnfT").textContent=title;const f=$("cnForm");f.hidden=false;const k=cnMode.kind;
-  for(const [id,show] of [["cn-name",k!=="admin"],["cn-code",k==="create"],["cn-city",k!=="admin"],["cn-phone",k!=="admin"],["cn-owner",k!=="rename"],["cn-user",k!=="rename"],["cn-pw",k!=="rename"]]){const el=$(id);el.closest(".field").hidden=!show;el.value=v[id.slice(3)]||""}
+  for(const [id,show] of [["cn-name",k!=="admin"],["cn-code",k==="create"],["cn-city",k!=="admin"],["cn-phone",k!=="admin"],["cn-owner",true],["cn-user",k!=="rename"],["cn-pw",k!=="rename"]]){const el=$(id);el.closest(".field").hidden=!show;el.value=v[id.slice(3)]||""}
   $("cn-err").hidden=true;$("cn-save").textContent=k==="create"?"Create clinic":k==="rename"?"Save":"Create login";f.scrollIntoView({block:"nearest"});$(k==="admin"?"cn-owner":"cn-name").focus()}
 $("cn-new").addEventListener("click",()=>{cnMode={kind:"create"};showCnForm("Create clinic",{})});
 $("cn-cancel").addEventListener("click",()=>{$("cnForm").hidden=true});
@@ -3854,7 +3862,7 @@ $("cnForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("
   if(k!=="rename"){if(!okUser(u))return fail("Username can use 3–30 letters, numbers, dots or dashes.");if(pw.length<6)return fail("Password must be at least 6 characters.")}
   b.disabled=true;b.textContent="Saving…";
   try{const ref=fsRoot.collection("clinics").doc(k==="create"?code:cnMode.id);
-    if(k==="rename"){await ref.update({name,city:$("cn-city").value.trim(),phone:$("cn-phone").value.trim()});toast("Saved")}
+    if(k==="rename"){await ref.update({name,city:$("cn-city").value.trim(),phone:$("cn-phone").value.trim(),ownerName:owner});toast("Clinic details saved")}
     else{if(k==="create"){const ex=await ref.get();if(ex.exists)return fail("That clinic code is already used.")}
       const cid=k==="create"?code:cnMode.id,uid=await makeLogin(userEmail(u,cid),pw);
       if(k==="create")await ref.set({name,city:$("cn-city").value.trim(),phone:$("cn-phone").value.trim(),ownerName:owner,ownerUser:u,ownerUid:uid,status:"active",createdAt:new Date().toISOString(),approvedAt:new Date().toISOString(),createdBy:firebase.auth().currentUser.email});
@@ -4048,7 +4056,7 @@ async function enterClinic(u,seq){
   cdocUnsub=cref.onSnapshot(sn=>{const was=CDOC&&CDOC.status;CDOC=sn.data()||{};if(seq!==authSeq)return;
     if(CDOC.status!=="active"){if(CLINIC){leaveClinic()}
       const wa=`https://wa.me/${DS_CONTACT.replace(/\D/g,"")}?text=${encodeURIComponent(`Assalam o Alaikum, please approve my clinic on Dental Solutions.\nClinic: ${CDOC.name||code}\nCode: ${code}`)}`;
-      showGate(CDOC.status==="locked"?`<h2>${esc(CDOC.name||code)} is locked</h2><p class="muted">This clinic's account is locked. Contact Dental Solutions to unlock it.</p><div class="row"><a class="wa" href="${esc(wa)}" target="_blank" rel="noopener">${WA_IC}<span>Contact Dental Solutions</span></a><button class="btn" data-gout>Sign out</button>${isSuper()?`<button class="btn" data-gconsole>Owner console</button>`:""}</div>`
+      showGate(CDOC.status==="deleted"?`<h2>${esc(CDOC.name||code)} is closed</h2><p class="muted">This clinic's account has been closed. Contact Dental Solutions if this is a mistake.</p><div class="row"><a class="wa" href="${esc(wa)}" target="_blank" rel="noopener">${WA_IC}<span>Contact Dental Solutions</span></a><button class="btn" data-gout>Sign out</button>${isSuper()?`<button class="btn" data-gconsole>Owner console</button>`:""}</div>`:CDOC.status==="locked"?`<h2>${esc(CDOC.name||code)} is locked</h2><p class="muted">This clinic's account is locked. Contact Dental Solutions to unlock it.</p><div class="row"><a class="wa" href="${esc(wa)}" target="_blank" rel="noopener">${WA_IC}<span>Contact Dental Solutions</span></a><button class="btn" data-gout>Sign out</button>${isSuper()?`<button class="btn" data-gconsole>Owner console</button>`:""}</div>`
         :`<h2>Thank you! ${esc(CDOC.name||code)} is registered</h2><p class="muted">Your clinic is waiting for approval by Dental Solutions. This page opens your clinic automatically once it's approved.</p><p>Clinic code: <b>${esc(code)}</b> · Your username: <b>${esc((ms.data()||{}).username||"")}</b></p><div class="row"><a class="wa" href="${esc(wa)}" target="_blank" rel="noopener">${WA_IC}<span>Ask for approval</span></a><button class="btn" data-gout>Sign out</button>${isSuper()?`<button class="btn" data-gconsole>Owner console</button>`:""}</div>`);
       return}
     if(!CLINIC)openWorkspace(u,code,ms.data(),seq);else render()},()=>{});
