@@ -960,6 +960,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 
 .pamethods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .pam{min-height:48px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-weight:700;font-size:.95rem;color:var(--ink)}
+.bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
 
@@ -1247,6 +1248,8 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
   <p class="muted" id="pa-sub" style="margin:0"></p>
   <div class="field"><label for="pa-amt">Amount (Rs)</label><input id="pa-amt" type="number" min="1" inputmode="numeric"></div>
   <div class="field"><label>How was it paid?</label><div class="pamethods" id="pa-m" role="group" aria-label="Payment method"></div></div>
+  <div class="field" id="pa-bankw" hidden><label for="pa-bank">Which bank?</label><select id="pa-bank"></select>
+    <div class="bankadd" id="pa-bankadd" hidden><input id="pa-banknew" maxlength="40" placeholder="Bank name, e.g. Khushhali Bank" autocomplete="off" aria-label="New bank name"><button type="button" class="btn primary" id="pa-bankok">Add</button></div></div>
   <div class="field" id="pa-datew" hidden><label for="pa-date">Date received</label><input id="pa-date" type="date"></div>
   <div class="field" id="pa-refw"><label for="pa-ref">Transaction ID / reference (optional)</label><input id="pa-ref" maxlength="60" placeholder="e.g. TID 0123456789" autocomplete="off"></div>
   <p class="perr" id="pa-err" hidden></p>
@@ -1296,6 +1299,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
   <div class="field"><label>Treatments</label><div class="lhead"><span>Treatment</span><span>Teeth</span><span>Qty</span><span>Price</span><span></span></div><div class="lines" id="b-lines"></div><button type="button" class="btn small" id="b-add" style="align-self:flex-start;margin-top:6px">+ Add treatment</button></div>
   <div class="grid2"><div class="field"><label for="b-disc">Discount (Rs)</label><input id="b-disc" type="number" min="0" inputmode="numeric"></div><div class="field"><label for="b-note">Note</label><input id="b-note" maxlength="120" placeholder="Optional"></div></div>
   <div class="grid2" id="b-paywrap"><div class="field"><label for="b-pay">Paid now (Rs)</label><input id="b-pay" type="number" min="0" inputmode="numeric"></div><div class="field"><label for="b-meth">Method</label><select id="b-meth"><option>Cash</option><option>Bank transfer</option><option>Easypaisa</option><option>JazzCash</option><option>NayaPay</option><option>SadaPay</option><option>Card</option><option>Other</option></select></div></div>
+  <div class="field" id="b-bankw" hidden><label for="b-bank">Bank</label><select id="b-bank" data-banksel></select></div>
   <div class="totbox" id="b-tot"></div>
   <p class="perr" id="b-err" hidden></p>
   <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save bill</button></div></div>
@@ -2553,7 +2557,7 @@ function openBill(id,pre){
   $("bT").textContent=id?"Edit bill "+(b.no||""):"New bill";
   $("b-pat").value=b.patientId&&P[b.patientId]?patLabel(P[b.patientId]):(b.patientName||"");
   $("b-d").value=b.date;$("b-lines").innerHTML=(b.items&&b.items.length?b.items:[{}]).map(lineHTML).join("");
-  $("b-disc").value=b.discount||"";$("b-note").value=b.note||"";$("b-pay").value="";$("b-paywrap").hidden=!!id;$("b-err").hidden=true;
+  $("b-disc").value=b.discount||"";$("b-note").value=b.note||"";$("b-pay").value="";$("b-paywrap").hidden=!!id;$("b-bank").innerHTML="";bankSync("b-meth","b-bank","b-bankw");if(id)$("b-bankw").hidden=true;$("b-err").hidden=true;
   billTotals();openD(bdlg);
 }
 const readLines=()=>[...$("b-lines").querySelectorAll(".line")].map(r=>({desc:r.querySelector(".l-t").value.trim(),tooth:r.querySelector(".l-th").value.trim(),qty:Math.max(1,+r.querySelector(".l-q").value||1),price:+r.querySelector(".l-p").value||0})).filter(l=>l.desc||l.price);
@@ -2570,7 +2574,7 @@ $("bForm").addEventListener("submit",e=>{
   const base=bEdit?B[bEdit]:{no:nextBillNo(date),createdAt:new Date().toISOString(),payments:[],...me};
   const doc={...base,patientId:pid,patientName:p.name,phone:p.phone||"",date,items,discount:+$("b-disc").value||0,note:$("b-note").value.trim()};
   if(bFromAp)doc.apId=bFromAp;
-  const pay=+$("b-pay").value||0;if(!bEdit&&pay>0)doc.payments=[{date:ymd(new Date()),amount:pay,method:$("b-meth").value,...me}];
+  const pay=+$("b-pay").value||0;if(!bEdit&&pay>0)doc.payments=[{date:ymd(new Date()),amount:pay,method:$("b-meth").value,...($("b-meth").value==="Bank transfer"&&$("b-bank").value&&$("b-bank").value!=="+"?{bank:$("b-bank").value}:{}),...me}];
   const id=bEdit||nid("b");cset("bills",id,doc);const chg=chartFromBill(pid,items);if(!bEdit&&bPlanIds&&bPlanIds.pid===pid){const pp=P[pid],pl=planOf(pp);cset("patients",pid,{...pp,plan:{...pl,items:pl.items.map(i=>bPlanIds.ids.includes(i.id)?{...i,billNo:doc.no,billId:id}:i)}})}bPlanIds=null;bdlg.close();openBillView(id);if(chg)toast("Bill saved · tooth chart updated");
 });
 const bvdlg=$("bvdlg");let bvId=null,bvConf=false,bvSent=false;
@@ -2580,9 +2584,9 @@ function renderBV(){
   $("bv").innerHTML=`<div class="bvh"><div><h2>${esc(b.no||"Bill")}</h2><p class="muted" style="margin:2px 0 0">${esc(fmtDate(b.date))} · <button class="linkbtn" data-gopat="${esc(b.patientId)}">${esc(b.patientName)}</button>${b.phone?" · "+esc(b.phone):""}</p></div><span class="chip2 ${t.bal>0?"warn":"ok"}">${t.bal>0?"Due "+rs(t.bal):"Paid in full"}</span></div>
   <div>${(b.items||[]).map(i=>`<div class="kv"><span>${esc(i.desc)}${i.tooth?` <small class="muted">· tooth ${esc(i.tooth)}</small>`:""}${(+i.qty||1)>1?` <small class="muted">× ${esc(i.qty)}</small>`:""}</span><b>${rs((+i.qty||1)*(+i.price||0))}</b></div>`).join("")}${b.discount?`<div class="kv"><span>Discount</span><b>− ${rs(b.discount)}</b></div>`:""}<div class="kv tot"><span>Total</span><b>${rs(t.total)}</b></div></div>
   ${miniChart(b.items)}
-  <h3 class="h3s">Payments</h3>${(b.payments||[]).length?b.payments.map((p,ix)=>`<div class="kv"><span>${esc(fmtDate(p.date))} · ${esc(p.method||"Cash")}${p.ref?" · "+esc(p.ref):""}</span><span class="kvr"><b>${rs(p.amount)}</b><button type="button" class="pedit" data-ppedit="${ix}" aria-label="Edit this payment">✎ Edit</button><button type="button" class="ldel" data-pdel="${ix}" aria-label="Remove this payment">×</button></span></div>`).join(""):`<p class="muted" style="margin:0">No payments yet.</p>`}
+  <h3 class="h3s">Payments</h3>${(b.payments||[]).length?b.payments.map((p,ix)=>`<div class="kv"><span>${esc(fmtDate(p.date))} · ${esc(payLbl(p))}${p.ref?" · "+esc(p.ref):""}</span><span class="kvr"><b>${rs(p.amount)}</b><button type="button" class="pedit" data-ppedit="${ix}" aria-label="Edit this payment">✎ Edit</button><button type="button" class="ldel" data-pdel="${ix}" aria-label="Remove this payment">×</button></span></div>`).join(""):`<p class="muted" style="margin:0">No payments yet.</p>`}
   <div class="kv tot"><span>Balance</span><b>${rs(t.bal)}</b></div>
-  ${t.bal>0?`<label class="fulltick"><input type="checkbox" data-bvfull> Paid in full — ${rs(t.bal)} received</label><form class="payform" id="payForm"><input id="pay-amt" type="number" min="1" inputmode="numeric" value="${t.bal}" aria-label="Payment amount in rupees"><select id="pay-m" aria-label="Payment method"><option>Cash</option><option>Bank transfer</option><option>Easypaisa</option><option>JazzCash</option><option>NayaPay</option><option>SadaPay</option><option>Card</option><option>Other</option></select><button class="btn primary" type="submit">Add payment</button></form>`:""}
+  ${t.bal>0?`<label class="fulltick"><input type="checkbox" data-bvfull> Paid in full — ${rs(t.bal)} received</label><form class="payform" id="payForm"><input id="pay-amt" type="number" min="1" inputmode="numeric" value="${t.bal}" aria-label="Payment amount in rupees"><select id="pay-m" aria-label="Payment method"><option>Cash</option><option>Bank transfer</option><option>Easypaisa</option><option>JazzCash</option><option>NayaPay</option><option>SadaPay</option><option>Card</option><option>Other</option></select><select id="pay-bank" data-banksel aria-label="Bank" hidden></select><button class="btn primary" type="submit">Add payment</button></form>`:""}
   ${b.note?`<p class="muted small">Note: ${esc(b.note)}</p>`:""}
   <div class="vact prt">${canPrint?`<button type="button" class="btn" data-bvprint><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>Print bill</button>`:""}<button type="button" class="btn" data-bvpdf><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Download PDF</button></div>
   ${ok?`<div class="vact">${bvSent?`<a class="wa" href="${esc(waHref(b.phone,fillT(S().templates.receipt,billVars(b))))}" target="_blank" rel="noopener" data-bvsent>${WA_IC}<span>Open patient chat &amp; attach PDF</span></a>`:`<button type="button" class="wa" data-bvsend>${WA_IC}<span>Send PDF receipt</span></button>`}${t.bal>0?`<a class="wa" href="${esc(waHref(b.phone,fillT(S().templates.due,billVars(b))))}" target="_blank" rel="noopener">${WA_IC}<span>Balance reminder</span></a>`:""}</div>`:""}
@@ -2592,7 +2596,7 @@ function renderBV(){
 $("bv").addEventListener("click",e=>{
   const t=e.target,b=B[bvId];if(!b)return;
   const pe=t.closest("[data-ppedit]");if(pe){const id=bvId,ix=+pe.dataset.ppedit,b0=B[id],py=(b0.payments||[])[ix];if(!py)return;const others=(b0.payments||[]).reduce((a,x,i)=>i===ix?a:a+(+x.amount||0),0),maxA=Math.max(0,billCalc(b0).total-others);
-    payAsk({title:"Edit payment · "+(b0.no||"Bill"),sub:(b0.patientName||"")+" · "+fmtDate(py.date),amount:py.amount,max:maxA||0,editable:true,method:py.method||"Cash",ref:py.ref||"",date:py.date}).then(r=>{if(!r)return;const b1=B[id],ps=[...(b1.payments||[])];const np={...ps[ix],amount:r.amount,method:r.method,date:r.date||ps[ix].date};if(r.ref)np.ref=r.ref;else delete np.ref;ps[ix]=np;cset("bills",id,{...b1,payments:ps});if(bvId===id)renderBV();toast("Payment updated · "+rs(r.amount)+" ("+r.method+")")});return}
+    payAsk({title:"Edit payment · "+(b0.no||"Bill"),sub:(b0.patientName||"")+" · "+fmtDate(py.date),amount:py.amount,max:maxA||0,editable:true,method:py.method||"Cash",bank:py.bank||"",ref:py.ref||"",date:py.date}).then(r=>{if(!r)return;const b1=B[id],ps=[...(b1.payments||[])];const np={...ps[ix],amount:r.amount,method:r.method,date:r.date||ps[ix].date};if(r.ref)np.ref=r.ref;else delete np.ref;if(r.bank)np.bank=r.bank;else delete np.bank;ps[ix]=np;cset("bills",id,{...b1,payments:ps});if(bvId===id)renderBV();toast("Payment updated · "+rs(r.amount)+" ("+payLbl(r)+")")});return}
   const pd=t.closest("[data-pdel]");if(pd){const pays=[...(b.payments||[])];pays.splice(+pd.dataset.pdel,1);cset("bills",bvId,{...b,payments:pays});renderBV();toast("Payment removed");return}
   if(t.closest("[data-bvdel]")){bvConf=true;renderBV();return}
   if(t.closest("[data-bvno]")){bvConf=false;renderBV();return}
@@ -2605,8 +2609,8 @@ $("bv").addEventListener("click",e=>{
 });
 $("bv").addEventListener("change",async e=>{const f=e.target.closest("[data-bvfull]");if(!f||!f.checked)return;f.checked=false;const id=bvId,b=B[id],bal=billCalc(b).bal;if(bal<=0)return;
   const r=await payAsk({title:"Paid in full · "+(b.no||"Bill"),sub:(b.patientName||"")+" · "+rs(bal),amount:bal,max:bal,editable:false});if(!r)return;
-  const b2=B[id];cset("bills",id,{...b2,payments:[...(b2.payments||[]),{date:ymd(new Date()),amount:r.amount,method:r.method,...(r.ref?{ref:r.ref}:{}),...me}]});if(bvId===id)renderBV();toast("✓ Paid in full · "+rs(r.amount)+" ("+r.method+")")});
-$("bv").addEventListener("submit",e=>{if(e.target.id!=="payForm")return;e.preventDefault();const amt=+$("pay-amt").value;if(!(amt>0))return;const b=B[bvId];cset("bills",bvId,{...b,payments:[...(b.payments||[]),{date:ymd(new Date()),amount:amt,method:$("pay-m").value,...me}]});renderBV();toast("Payment added")});
+  const b2=B[id];cset("bills",id,{...b2,payments:[...(b2.payments||[]),{date:ymd(new Date()),amount:r.amount,method:r.method,...(r.bank?{bank:r.bank}:{}),...(r.ref?{ref:r.ref}:{}),...me}]});if(bvId===id)renderBV();toast("✓ Paid in full · "+rs(r.amount)+" ("+payLbl(r)+")")});
+$("bv").addEventListener("submit",e=>{if(e.target.id!=="payForm")return;e.preventDefault();const amt=+$("pay-amt").value;if(!(amt>0))return;const b=B[bvId];cset("bills",bvId,{...b,payments:[...(b.payments||[]),{date:ymd(new Date()),amount:amt,method:$("pay-m").value,...($("pay-m").value==="Bank transfer"&&$("pay-bank").value&&$("pay-bank").value!=="+"?{bank:$("pay-bank").value}:{}),...me}]});renderBV();toast("Payment added")});
 /* full treatment list, grouped by specialty */
 const TX_MASTER=[
 ["Consultation & diagnosis",["Consultation / examination","Consultation / examination with X-ray","Specialist consultation","Emergency visit","Follow-up visit","Periapical X-ray (per film)","Bitewing X-ray","OPG (full mouth X-ray)","Lateral cephalogram","CBCT scan — single area","CBCT scan — full mouth","Intraoral photographs","Study models / impressions","Digital smile design","Oral cancer screening","Pulp vitality test"]],
@@ -2930,7 +2934,7 @@ ${den?`<div><span>Dentist</span>${esc(den)}</div>`:""}${ap?`<div><span>Visit</sp
 <table><thead><tr><th style="width:34px">#</th><th>Treatment</th><th>Teeth</th><th class="r" style="width:50px">Qty</th><th class="r" style="width:100px">Rate</th><th class="r" style="width:110px">Amount</th></tr></thead><tbody>
 ${(b.items||[]).map((it,i)=>`<tr><td>${i+1}</td><td>${esc(it.desc)}</td><td>${esc(it.tooth||"—")}</td><td class="r">${+it.qty||1}</td><td class="r">${rs(it.price)}</td><td class="r">${rs((+it.qty||1)*(+it.price||0))}</td></tr>`).join("")}
 </tbody></table>
-<div class="bot"><div>${chart}${(b.payments||[]).length?`<div class="pay" style="margin-top:${chart?14:0}px"><h4>Payments received</h4>${b.payments.map(x=>`<div><span>${esc(fmtDate(x.date))} · ${esc(x.method||"Cash")}${x.ref?" · "+esc(x.ref):""}</span><b>${rs(x.amount)}</b></div>`).join("")}</div>`:""}</div>
+<div class="bot"><div>${chart}${(b.payments||[]).length?`<div class="pay" style="margin-top:${chart?14:0}px"><h4>Payments received</h4>${b.payments.map(x=>`<div><span>${esc(fmtDate(x.date))} · ${esc(payLbl(x))}${x.ref?" · "+esc(x.ref):""}</span><b>${rs(x.amount)}</b></div>`).join("")}</div>`:""}</div>
 <div class="tot"><div><span>Subtotal</span><span>${rs(t.sub)}</span></div>${b.discount?`<div><span>Discount</span><span>− ${rs(b.discount)}</span></div>`:""}<div class="g"><span>Total</span><span>${rs(t.total)}</span></div><div><span>Paid</span><span>${rs(t.paid)}</span></div><div class="bal${t.bal>0?"":" z"}"><span>Balance</span><span>${rs(t.bal)}</span></div></div></div>
 ${b.note?`<p class="note"><b>Note:</b> ${esc(b.note)}</p>`:""}
 <div class="ft"><div class="thx"><b>Thank you for choosing ${esc(c.name)}.</b>For appointments or queries, call or WhatsApp ${esc(c.phone)}.</div><div class="sig cg">Computer-generated bill.<br>No signature required.</div></div>
@@ -2968,7 +2972,7 @@ function planBillInner(pid){const p=P[pid]||{},pl=planOf(p),cl=planCalc(pl),c=S(
 <div class="ttl"><h1>TREATMENT BILL</h1><p>File no. <b>${esc(p.fileNo||"—")}</b></p><p>Date: <b>${esc(fmtDate(today))}</b></p><span class="st ${bal>0?"due":"paid"}">${bal>0?"Balance due":"Paid in full"}</span></div></div>
 <div class="pt"><div><span>Patient</span><b>${esc(p.name||"")}</b></div><div><span>Mobile</span>${esc(p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div>${pl.dentist?`<div><span>Dentist</span>${esc(pl.dentist)}</div>`:""}</div>
 <table><thead><tr><th style="width:30px">#</th><th>Treatment</th><th style="width:90px">Teeth</th><th class="r" style="width:40px">Qty</th><th class="r" style="width:84px">Rate</th><th class="r" style="width:96px">Cost</th><th class="r" style="width:110px">Status</th></tr></thead><tbody>${rows}</tbody></table>
-<div class="bot"><div>${pays.length?`<div class="pay"><h4>Payments received</h4>${pays.map(x=>`<div><span>${esc(fmtDate(x.date))} · ${esc(x.method||"Cash")}${x.no?" · "+esc(x.no):""}</span><b>${rs(x.amount)}</b></div>`).join("")}</div>`:""}</div>
+<div class="bot"><div>${pays.length?`<div class="pay"><h4>Payments received</h4>${pays.map(x=>`<div><span>${esc(fmtDate(x.date))} · ${esc(payLbl(x))}${x.no?" · "+esc(x.no):""}</span><b>${rs(x.amount)}</b></div>`).join("")}</div>`:""}</div>
 <div class="tot"><div><span>Total treatment cost</span><span>${rs(cl.sub)}</span></div>${cl.phases.filter(g=>g.disc).map(g=>`<div><span>Discount · Phase ${g.ph}</span><span>− ${rs(g.disc)}</span></div>`).join("")}${cl.legacy?`<div><span>Discount</span><span>− ${rs(cl.legacy)}</span></div>`:""}${cl.disc?`<div><span><b>Total discount</b></span><span><b>− ${rs(cl.disc)}</b></span></div>`:""}<div class="g"><span>Net total</span><span>${rs(cl.total)}</span></div><div><span>Paid</span><span>${rs(paid)}</span></div><div class="bal${bal>0?"":" z"}"><span>Balance</span><span>${rs(bal)}</span></div></div></div>
 <div class="ft"><div class="thx"><b>Thank you for choosing ${esc(c.name)}.</b>For appointments or queries, call or WhatsApp ${esc(c.phone)}.</div><div class="sig cg">Computer-generated bill.<br>No signature required.</div></div>
 <p class="gen">Computer-generated treatment bill · ${esc(p.name||"")} · printed ${esc(fmtDate(today))}</p></div>`}
@@ -3071,12 +3075,12 @@ function tpPaidTick(el){const pid=selPat,p=P[pid],pl=planOf(p),it=pl.items.find(
   cdel("bills",it.billId);const pp=P[pid],l=planOf(pp);cset("patients",pid,{...pp,plan:{...l,items:l.items.map(i=>{if(i.id!==it.id)return i;const u={...i};delete u.billNo;delete u.billId;delete u.autoBill;return u}),updatedAt:new Date().toISOString()}});toast("Marked not paid")}
 async function tpPayFlow(it,left,editable){const pid=selPat,p=P[pid];const r=await payAsk({title:"Payment for "+it.tr,sub:(p?p.name+" · ":"")+(editable?"Full amount "+rs(left)+" — or enter a smaller amount for an advance.":"Full payment "+rs(left)),amount:left,max:left,editable});
   if(!r)return;const today=ymd(new Date()),pl=planOf(P[pid]),cur=pl.items.find(i=>i.id===it.id)||it,b=cur.billId&&B[cur.billId],amt=r.amount,net=itemNet(pl,cur);
-  const pay={date:today,amount:amt,method:r.method,...(r.ref?{ref:r.ref}:{}),auto:cur.id,...me};
-  if(b){cset("bills",cur.billId,{...b,payments:[...(b.payments||[]),pay]});const bl=billCalc(B[cur.billId]).bal;toast(rs(amt)+" received ("+r.method+") · "+(b.no||"")+(bl>0?" · "+rs(bl)+" left":" · fully paid"));return}
+  const pay={date:today,amount:amt,method:r.method,...(r.bank?{bank:r.bank}:{}),...(r.ref?{ref:r.ref}:{}),auto:cur.id,...me};
+  if(b){cset("bills",cur.billId,{...b,payments:[...(b.payments||[]),pay]});const bl=billCalc(B[cur.billId]).bal;toast(rs(amt)+" received ("+payLbl(r)+") · "+(b.no||"")+(bl>0?" · "+rs(bl)+" left":" · fully paid"));return}
   const id=nid("b"),no=nextBillNo(today);
   cset("bills",id,{no,createdAt:new Date().toISOString(),...me,patientId:pid,patientName:P[pid].name,phone:P[pid].phone||"",date:today,items:[{desc:cur.tr,tooth:cur.tooth||"",qty:+cur.qty||1,price:+cur.price||0}],discount:Math.max(0,itAmt(cur)-net),note:"Treatment plan",autoItem:cur.id,payments:[pay]});
   const pp=P[pid],l=planOf(pp);cset("patients",pid,{...pp,plan:{...l,items:l.items.map(i=>i.id===cur.id?{...i,billNo:no,billId:id}:i),updatedAt:new Date().toISOString()}});
-  toast(rs(amt)+" received ("+r.method+") · "+no+(amt<left?" · "+rs(left-amt)+" left":" · fully paid"))}
+  toast(rs(amt)+" received ("+payLbl(r)+") · "+no+(amt<left?" · "+rs(left-amt)+" left":" · fully paid"))}
 function planPaid(pl){const ids=[...new Set(pl.items.filter(i=>i.billId&&B[i.billId]).map(i=>i.billId))];return ids.reduce((a,id)=>a+billCalc(B[id]).paid,0)}
 function planCard(p){const tp=planOf(p);if(!tp.items.length)return "";const c=planCalc(tp),pct=c.total?Math.round(c.done/c.total*100):0,unb=tp.items.filter(i=>i.done&&!i.billNo).length;
   return `<div class="card tpcard tpactive" style="margin-top:12px"><div class="dh"><div><h3>Treatment plan</h3><p class="muted small" style="margin:2px 0 0">Tick <b>Done</b> when the treatment is done or fitted. Tick <b>Paid</b> when the patient has paid for it.</p></div><button class="btn small" data-tpadd2>+ Add</button></div>
@@ -3429,7 +3433,7 @@ const inR=(d,f,t)=>!!d&&d>=f&&d<=t;
 const expList=()=>Object.entries(logs).filter(([,l])=>l.kind==="expense").map(([id,l])=>({id,...l}));
 function repData(per,f,t){
   const bills=Object.entries(B).map(([id,b])=>({id,...b})),pays=[];
-  for(const b of bills)for(const x of b.payments||[])if(inR(x.date,f,t)){const ap=b.apId&&A[b.apId];pays.push({date:x.date,amount:+x.amount||0,method:x.method||"Cash",patient:b.patientName||"",no:b.no||"",dentist:(ap&&ap.dentist)||""})}
+  for(const b of bills)for(const x of b.payments||[])if(inR(x.date,f,t)){const ap=b.apId&&A[b.apId];pays.push({date:x.date,amount:+x.amount||0,method:payLbl(x),patient:b.patientName||"",no:b.no||"",dentist:(ap&&ap.dentist)||""})}
   const bIn=bills.filter(b=>inR(b.date,f,t)),billed=bIn.reduce((s,b)=>s+billCalc(b).total,0),disc=bIn.reduce((s,b)=>s+Math.min(+b.discount||0,billCalc(b).sub),0);
   const tr={};for(const b of bIn)for(const it of b.items||[]){const k=it.desc||"Other";tr[k]=tr[k]||{n:0,amt:0};tr[k].n+=+it.qty||1;tr[k].amt+=(+it.qty||1)*(+it.price||0)}
   const byDent={};for(const b of bIn){const ap=b.apId&&A[b.apId],k=(ap&&ap.dentist)||"Not assigned";byDent[k]=(byDent[k]||0)+billCalc(b).total}
@@ -3617,7 +3621,7 @@ function stInner(){const d=stData(),c=S().clinic,logo=(document.querySelector(".
     kp=`<div class="kp"><div><small>Total billed</small><b>${rs(tot)}</b><span>${pl(all.length,"bill")}</span></div><div class="in"><small>Received</small><b>${rs(rec)}</b><span>${pl(d.paid.length,"bill")} paid in full</span></div><div class="pdk"><small>Balance due</small><b>${rs(due)}</b><span>${pl(d.pend.length,"bill")} pending</span></div></div>`;
     const H=["Date","Bill no.",...(p?[]:["Patient"]),"Treatment","Total","Paid","Balance"],row=b=>{const k=billCalc(b);return [esc(fmtDate(b.date)),esc(b.no||""),...(p?[]:[esc(b.patientName||"")+(b.phone?`<small>${esc(b.phone)}</small>`:"")]),esc((b.items||[]).map(i=>i.desc+(i.tooth?" ("+i.tooth+")":"")).join(", ")),rs(k.total),rs(k.paid),rs(k.bal)]},F=a=>["Total","",...(p?[]:[""]),"",rs(sumOf(a,b=>billCalc(b).total)),rs(sumOf(a,b=>billCalc(b).paid)),rs(sumOf(a,b=>billCalc(b).bal))];
     body=sec("Pending — balance due","pend",rs(due),tb(H,d.pend.map(row),d.pend.length?F(d.pend):null))+sec("Paid in full","paid",rs(sumOf(d.paid,b=>billCalc(b).total)),tb(H,d.paid.map(row),d.paid.length?F(d.paid):null));
-    if(p){const pays=all.flatMap(b=>(b.payments||[]).map(x=>({...x,no:b.no}))).sort((a,b)=>a.date.localeCompare(b.date));body+=`<h3 class="sh">Payments received</h3><div class="wide">${tb(["Date","Bill no.","Method","Amount"],pays.map(x=>[esc(fmtDate(x.date)),esc(x.no||""),esc(x.method||"Cash"),rs(x.amount)]),pays.length?["Total","","",rs(sumOf(pays,x=>x.amount))]:null)}</div>`}
+    if(p){const pays=all.flatMap(b=>(b.payments||[]).map(x=>({...x,no:b.no}))).sort((a,b)=>a.date.localeCompare(b.date));body+=`<h3 class="sh">Payments received</h3><div class="wide">${tb(["Date","Bill no.","Method","Amount"],pays.map(x=>[esc(fmtDate(x.date)),esc(x.no||""),esc(payLbl(x)),rs(x.amount)]),pays.length?["Total","","",rs(sumOf(pays,x=>x.amount))]:null)}</div>`}
     if(!p&&d.pend.length){const pp={};for(const b of d.pend){const k=b.patientId||b.patientName;pp[k]=pp[k]||{n:b.patientName,ph:b.phone||"",bal:0,c:0};pp[k].bal+=billCalc(b).bal;pp[k].c++}
       body=`<h3 class="sh">Patients with a balance</h3><div class="wide">${tb(["Patient","Mobile","Bills","Balance"],Object.values(pp).sort((a,b)=>b.bal-a.bal).map(x=>[esc(x.n),esc(x.ph),x.c,rs(x.bal)]))}</div>`+body}}
   return `<div class="inv stm"><style>${INV_CSS}
@@ -3749,23 +3753,46 @@ async function loginEmailFor(user,code){const def=userEmail(user,code);if(user.i
   try{const d=await fsRoot.collection("logins").doc(code+"_"+user.toLowerCase()).get();const v=d&&d.exists&&d.data();if(v&&v.email)return v.email}catch(e){}return def}
 /* ask how a payment was made */
 const PAY_M=["Cash","Bank transfer","Easypaisa","JazzCash","NayaPay","SadaPay","Card","Other"];
+const BANKS_PK=["HBL","Meezan Bank","UBL","MCB Bank","Allied Bank","Askari Bank","Bank Alfalah","Faysal Bank","Bank AL Habib","Habib Metropolitan","Standard Chartered","National Bank (NBP)","The Bank of Punjab","JS Bank","Soneri Bank","Dubai Islamic Bank","BankIslami","Al Baraka Bank","MCB Islamic","Sindh Bank","Bank of Khyber","Silkbank","Summit Bank","First Women Bank","U Bank","Mobilink Microfinance","Khushhali Bank","Telenor Microfinance"];
+function myBanks(){let l=[];try{l=JSON.parse(localStorage.getItem("ds-banks")||"[]")}catch(e){}return [...new Set([...(Array.isArray(SET.banks)?SET.banks:[]),...(Array.isArray(l)?l:[])])].filter(b=>b&&!BANKS_PK.includes(b))}
+function bankOpts(sel){const mine=myBanks(),all=[...BANKS_PK,...mine];if(sel&&!all.includes(sel))mine.push(sel);
+  return `<option value="">Choose bank…</option><optgroup label="Banks">${BANKS_PK.map(b=>`<option${b===sel?" selected":""}>${esc(b)}</option>`).join("")}</optgroup>${mine.length?`<optgroup label="Added by you">${mine.map(b=>`<option${b===sel?" selected":""}>${esc(b)}</option>`).join("")}</optgroup>`:""}<option value="+">+ Add other bank…</option>`}
+function addBank(name){name=String(name||"").trim().replace(/\s+/g," ").slice(0,40);if(!name)return "";
+  const hit=[...BANKS_PK,...myBanks()].find(b=>b.toLowerCase()===name.toLowerCase());if(hit)return hit;
+  let l=[];try{l=JSON.parse(localStorage.getItem("ds-banks")||"[]")}catch(e){}if(!Array.isArray(l))l=[];l.push(name);try{localStorage.setItem("ds-banks",JSON.stringify(l))}catch(e){}
+  if(myRole()==="admin")saveSet({...SET,banks:[...(Array.isArray(SET.banks)?SET.banks:[]),name]});else SET={...SET,banks:[...(Array.isArray(SET.banks)?SET.banks:[]),name]};
+  toast(name+" added to banks");return name}
+const payLbl=p=>(p&&p.method||"Cash")+(p&&p.bank&&p.method==="Bank transfer"?" ("+p.bank+")":"");
+function paBankShow(){const on=paMethod==="Bank transfer";$("pa-bankw").hidden=!on;if(!on)$("pa-bankadd").hidden=true}
+$("pa-bank").addEventListener("change",()=>{const v=$("pa-bank").value;$("pa-bankadd").hidden=v!=="+";if(v==="+"){$("pa-banknew").value="";$("pa-banknew").focus()}$("pa-err").hidden=true});
+function paBankAdd(){const n=addBank($("pa-banknew").value);if(!n){$("pa-banknew").focus();return}$("pa-bank").innerHTML=bankOpts(n);$("pa-bankadd").hidden=true}
+$("pa-bankok").addEventListener("click",paBankAdd);
+$("pa-banknew").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();paBankAdd()}});
+/* bank pickers in the bill forms */
+function bankSync(methId,bankId,wrapId){const on=$(methId)&&$(methId).value==="Bank transfer",bs=$(bankId);if(!bs)return;if(on&&!bs.options.length)bs.innerHTML=bankOpts("");(wrapId?$(wrapId):bs).hidden=!on}
+document.addEventListener("change",e=>{const t=e.target;if(!t||!t.id)return;
+  if(t.id==="b-meth")bankSync("b-meth","b-bank","b-bankw");
+  if(t.id==="pay-m")bankSync("pay-m","pay-bank");
+  if(t.matches("[data-banksel]")&&t.value==="+"){const n=addBank(prompt("Name of the bank:")||"");t.innerHTML=bankOpts(n)}});
 let paRes=null,paMax=0,paMethod="";
 function payAsk(o){return new Promise(res=>{paRes=res;paMax=+o.max||0;paMethod="";
   $("pa-title").textContent=o.title||"Payment received";$("pa-sub").textContent=o.sub||"";
   const a=$("pa-amt");a.value=o.amount||"";a.readOnly=!o.editable;a.closest(".field").classList.toggle("ro",!o.editable);
   $("pa-ref").value=o.ref||"";$("pa-err").hidden=true;paMethod=o.method&&PAY_M.includes(o.method)?o.method:(o.method?"Other":"");
   $("pa-datew").hidden=!o.date;$("pa-date").value=o.date||"";
+  $("pa-bank").innerHTML=bankOpts(o.bank||"");$("pa-bankadd").hidden=true;paBankShow();
   $("pa-m").innerHTML=PAY_M.map(m=>`<button type="button" class="pam" data-pam="${esc(m)}" aria-pressed="${m===paMethod}">${esc(m)}</button>`).join("");
   openD($("paydlg"))})}
 function paDone(v){const r=paRes;paRes=null;try{$("paydlg").close()}catch(e){}if(r)r(v)}
-$("pa-m").addEventListener("click",e=>{const b=e.target.closest("[data-pam]");if(!b)return;paMethod=b.dataset.pam;for(const x of $("pa-m").querySelectorAll("[data-pam]"))x.setAttribute("aria-pressed",String(x===b));$("pa-err").hidden=true});
+$("pa-m").addEventListener("click",e=>{const b=e.target.closest("[data-pam]");if(!b)return;paMethod=b.dataset.pam;for(const x of $("pa-m").querySelectorAll("[data-pam]"))x.setAttribute("aria-pressed",String(x===b));$("pa-err").hidden=true;paBankShow()});
 $("pa-cancel").addEventListener("click",()=>paDone(null));
 $("paydlg").addEventListener("close",()=>{if(paRes)paDone(null)});
 $("payAskForm").addEventListener("submit",e=>{e.preventDefault();const amt=Math.round(+$("pa-amt").value||0),err=$("pa-err");
   if(!(amt>0)){err.textContent="Enter the amount received.";err.hidden=false;return}
   if(paMax&&amt>paMax){err.textContent="The most you can enter here is "+rs(paMax)+".";err.hidden=false;return}
   if(!paMethod){err.textContent="Choose how it was paid.";err.hidden=false;return}
-  paDone({amount:amt,method:paMethod,ref:$("pa-ref").value.trim(),date:$("pa-datew").hidden?"":($("pa-date").value||"")})});
+  let bank="";if(paMethod==="Bank transfer"){bank=$("pa-bank").value;if(bank==="+"){bank=addBank($("pa-banknew").value)}if(!bank){err.textContent="Choose which bank it came to.";err.hidden=false;return}}
+  paDone({amount:amt,method:paMethod,bank,ref:$("pa-ref").value.trim(),date:$("pa-datew").hidden?"":($("pa-date").value||"")})});
 /* change own password */
 const pwdlg=$("pwdlg");
 $("pwBtn").addEventListener("click",()=>{$("pw-old").value="";$("pw-new").value="";$("pw-err").hidden=true;openD(pwdlg)});
