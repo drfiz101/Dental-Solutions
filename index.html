@@ -1499,7 +1499,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 <dialog id="cndlg" class="wide"><div class="dlg">
   <h2>Dental Solutions · Owner console</h2>
   <p class="muted small" style="margin:0">Approve, lock and manage clinics. You can't see any clinic's patients or money from here.</p>
-  <div class="cnbar"><div class="seg" id="cn-f"><button data-cf="pending" aria-pressed="true">Waiting</button><button data-cf="active">Active</button><button data-cf="locked">Locked</button><button data-cf="deleted">Deleted</button><button data-cf="all">All</button></div><button class="btn small primary" id="cn-new">+ Create clinic</button></div>
+  <div class="cnbar"><div class="seg" id="cn-f"><button data-cf="pending" aria-pressed="true">Waiting</button><button data-cf="active">Active</button><button data-cf="locked">Locked</button><button data-cf="all">All</button></div><button class="btn small primary" id="cn-new">+ Create clinic</button></div>
   <div id="cn-done" class="cndone" hidden></div>
   <div id="cn-list" class="cnlist"></div>
   <form id="cnForm" class="cnform" novalidate hidden>
@@ -3837,10 +3837,10 @@ $("pwForm").addEventListener("submit",async e=>{e.preventDefault();const u=fireb
 /* owner console */
 const cndlg=$("cndlg");let cnDel=null,cnF="pending",cnRows=[],cnUnsub=null,cnMode=null;
 function renderConsole(){for(const b of document.querySelectorAll("[data-cf]"))b.setAttribute("aria-pressed",String(b.dataset.cf===cnF));
-  const list=cnRows.filter(c=>cnF==="all"?c.status!=="deleted":(c.status||"pending")===cnF).sort((a,b)=>String(b.createdAt||"").localeCompare(a.createdAt||""));
-  const st={pending:["Waiting for approval","warn"],active:["Active","ok"],locked:["Locked","bad"],deleted:["Deleted","bad"]};
+  const list=cnRows.filter(c=>cnF==="all"||(c.status||"pending")===cnF).sort((a,b)=>String(b.createdAt||"").localeCompare(a.createdAt||""));
+  const st={pending:["Waiting for approval","warn"],active:["Active","ok"],locked:["Locked","bad"],deleted:["Not fully deleted","bad"]};
   $("cn-list").innerHTML=list.length?list.map(c=>{const s2=st[c.status||"pending"]||st.pending;return `<div class="cnr"><div><b>${esc(c.name||c.id)}</b> <span class="chip2 ${s2[1]}">${s2[0]}</span><small>Code <b>${esc(c.id)}</b>${c.city?" · "+esc(c.city):""}${c.phone?" · "+esc(c.phone):""}${c.ownerName?" · "+esc(c.ownerName):""}${c.ownerUser?" ("+esc(c.ownerUser)+")":""}</small><small>Registered ${esc(fmtDate(String(c.createdAt||"").slice(0,10)))}${c.approvedAt?" · approved "+esc(fmtDate(String(c.approvedAt).slice(0,10))):""}</small></div>
-    <div class="acts2">${c.status==="deleted"?`<small>Deleted ${esc(fmtDate(String(c.deletedAt||"").slice(0,10)))} · no one can sign in. The clinic code stays reserved.</small><button class="btn small primary" data-cnrestore="${esc(c.id)}">Restore</button>`:cnDel===c.id?`<div class="cndel"><b>Delete ${esc(c.name||c.id)}?</b><small>Nobody at this clinic will be able to sign in, and it disappears from your list. You can restore it later from the Deleted tab.</small><label class="field"><span class="small">Type the clinic code <b>${esc(c.id)}</b> to confirm</span><input data-cndelcode autocomplete="off" autocapitalize="none"></label><div class="row"><button class="btn small" data-cndelno>Cancel</button><button class="btn small danger" data-cndelyes="${esc(c.id)}">Delete clinic</button></div></div>`:`${c.status!=="active"?`<button class="btn small primary" data-cnst="active" data-c="${esc(c.id)}">${c.status==="locked"?"Unlock":"Approve"}</button>`:`<button class="btn small" data-cnst="locked" data-c="${esc(c.id)}">Lock</button>`}${c.phone&&waNum(c.phone)?`<a class="wa sm" target="_blank" rel="noopener" href="${esc(waHref(c.phone,clinicMsg(c)))}">${WA_IC}<span>WhatsApp</span></a>`:""}<button class="btn small" data-cnlink="${esc(c.id)}">🔗 Copy link</button><button class="btn small" data-cnren="${esc(c.id)}">✎ Edit</button><button class="btn small" data-cnadm="${esc(c.id)}">New admin login</button>${c.id==="alawan"?"":`<button class="btn small danger" data-cndel="${esc(c.id)}">🗑 Delete</button>`}`}</div></div>`}).join(""):`<p class="muted" style="margin:6px 0">No clinics here.</p>`}
+    <div class="acts2">${c.status==="deleted"?`<small>Deleting was not finished. Nobody can sign in to this clinic.</small><button class="btn small danger" data-cnwipe="${esc(c.id)}">Finish deleting</button>`:cnDel===c.id?`<div class="cndel"><b>Delete ${esc(c.name||c.id)}?</b><small>This <b>permanently deletes</b> the clinic with all its patients, appointments, bills, lab work, stock, settings and staff logins. <b>It cannot be undone.</b></small><label class="field"><span class="small">Type the clinic code <b>${esc(c.id)}</b> to confirm</span><input data-cndelcode autocomplete="off" autocapitalize="none"></label><div class="row"><button class="btn small" data-cndelno>Cancel</button><button class="btn small danger" data-cndelyes="${esc(c.id)}">Delete forever</button></div></div>`:`${c.status!=="active"?`<button class="btn small primary" data-cnst="active" data-c="${esc(c.id)}">${c.status==="locked"?"Unlock":"Approve"}</button>`:`<button class="btn small" data-cnst="locked" data-c="${esc(c.id)}">Lock</button>`}${c.phone&&waNum(c.phone)?`<a class="wa sm" target="_blank" rel="noopener" href="${esc(waHref(c.phone,clinicMsg(c)))}">${WA_IC}<span>WhatsApp</span></a>`:""}<button class="btn small" data-cnlink="${esc(c.id)}">🔗 Copy link</button><button class="btn small" data-cnren="${esc(c.id)}">✎ Edit</button><button class="btn small" data-cnadm="${esc(c.id)}">New admin login</button>${c.id==="alawan"?"":`<button class="btn small danger" data-cndel="${esc(c.id)}">🗑 Delete</button>`}`}</div></div>`}).join(""):`<p class="muted" style="margin:6px 0">No clinics here.</p>`}
 function openConsole(){if(!fsRoot||!isSuper())return;openD(cndlg);$("cn-done").hidden=true;$("cnForm").hidden=true;$("cn-list").innerHTML=`<div class="phload"><div class="spin"></div></div>`;
   if(cnUnsub)cnUnsub();cnUnsub=fsRoot.collection("clinics").onSnapshot(sn=>{cnRows=sn.docs.map(d=>({id:d.id,...d.data()}));renderConsole()},e=>{$("cn-list").innerHTML=`<p class="perr">Couldn't load clinics. ${esc(authMsg(e))}</p>`})}
 cndlg.addEventListener("close",()=>{if(cnUnsub){cnUnsub();cnUnsub=null}});
@@ -3853,11 +3853,25 @@ $("cn-list").addEventListener("click",async e=>{const t=e.target;
   if(t.closest("[data-cndelno]")){cnDel=null;renderConsole();return}
   const dy=t.closest("[data-cndelyes]");if(dy){const id=dy.dataset.cndelyes,i=$("cn-list").querySelector("[data-cndelcode]");if(id==="alawan")return;
     if(!i||i.value.trim().toLowerCase()!==id){toast("Type the clinic code "+id+" to confirm");if(i)i.focus();return}
-    try{const c=cnRows.find(x=>x.id===id)||{};await fsRoot.collection("clinics").doc(id).update({status:"deleted",statusBefore:c.status||"pending",deletedAt:new Date().toISOString(),updatedBy:firebase.auth().currentUser.email});cnDel=null;toast((c.name||id)+" deleted")}catch(x){toast(authMsg(x))}return}
-  const rs2=t.closest("[data-cnrestore]");if(rs2){const id=rs2.dataset.cnrestore,c=cnRows.find(x=>x.id===id)||{};const back=c.statusBefore&&c.statusBefore!=="deleted"?c.statusBefore:"active";
-    try{await fsRoot.collection("clinics").doc(id).update({status:back,deletedAt:null,updatedBy:firebase.auth().currentUser.email});toast((c.name||id)+" restored");cnF=back;renderConsole()}catch(x){toast(authMsg(x))}return}
+    wipeClinic(id,dy);return}
+  const wp=t.closest("[data-cnwipe]");if(wp){wipeClinic(wp.dataset.cnwipe,wp);return}
   const rn=t.closest("[data-cnren]");if(rn){const c=cnRows.find(x=>x.id===rn.dataset.cnren);cnMode={kind:"rename",id:c.id};showCnForm("Edit "+(c.name||c.id),{name:c.name,city:c.city,phone:c.phone,owner:c.ownerName});return}
   const ad=t.closest("[data-cnadm]");if(ad){const c=cnRows.find(x=>x.id===ad.dataset.cnadm);cnMode={kind:"admin",id:c.id};showCnForm("New admin login for "+(c.name||c.id),{});return}});
+async function wipeClinic(id,btn){if(id==="alawan"||!fsRoot)return;
+  if(navigator.onLine===false){toast("Connect to the internet to delete a clinic.");return}
+  const c=cnRows.find(x=>x.id===id)||{id},ref=fsRoot.collection("clinics").doc(id),lbl=btn?btn.textContent:"";
+  const say=t=>{if(btn)btn.textContent=t};if(btn)btn.disabled=true;
+  try{say("Deleting…");
+    if(c.status!=="deleted")await ref.update({status:"deleted",deletedAt:new Date().toISOString(),updatedBy:firebase.auth().currentUser.email});
+    const users=[];let n=0;
+    for(const col of ["patients","appts","bills","labcases","photos","items","logs","settings","members"]){
+      const sn=await ref.collection(col).get();const docs=sn.docs;
+      if(col==="members")for(const d of docs){const u=(d.data()||{}).username;if(u)users.push(String(u).toLowerCase())}
+      for(let k=0;k<docs.length;k+=40){await Promise.all(docs.slice(k,k+40).map(d=>d.ref.delete()));n+=Math.min(40,docs.length-k);say("Deleting… "+n)}}
+    for(const u of users){try{await fsRoot.collection("logins").doc(id+"_"+u).delete()}catch(e){}}
+    await ref.delete();cnDel=null;toast((c.name||id)+" permanently deleted");renderConsole()}
+  catch(x){if(btn){btn.disabled=false;btn.textContent=lbl}cnDel=null;renderConsole();
+    toast(/permission/.test((x&&x.code)||"")?"Couldn't finish deleting. Publish the new Firebase rules, then tap Finish deleting.":"Couldn't finish deleting: "+authMsg(x))}}
 function showCnForm(title,v){$("cnfT").textContent=title;const f=$("cnForm");f.hidden=false;const k=cnMode.kind;
   for(const [id,show] of [["cn-name",k!=="admin"],["cn-code",k==="create"],["cn-city",k!=="admin"],["cn-phone",k!=="admin"],["cn-owner",true],["cn-user",k!=="rename"],["cn-pw",k!=="rename"]]){const el=$(id);el.closest(".field").hidden=!show;el.value=v[id.slice(3)]||""}
   $("cn-err").hidden=true;$("cn-save").textContent=k==="create"?"Create clinic":k==="rename"?"Save":"Create login";f.scrollIntoView({block:"nearest"});$(k==="admin"?"cn-owner":"cn-name").focus()}

@@ -15,6 +15,8 @@ service cloud.firestore {
     function isMember(c) { return signedIn() && exists(memberDoc(c)) && get(memberDoc(c)).data.active == true; }
     function isClinicAdmin(c) { return isMember(c) && get(memberDoc(c)).data.role == "admin"; }
     function isActive(c) { return exists(clinicDoc(c)) && get(clinicDoc(c)).data.status == "active"; }
+    // The owner may clear out a clinic only after marking it "deleted"
+    function beingDeleted(c) { return isOwner() && exists(clinicDoc(c)) && get(clinicDoc(c)).data.status == "deleted"; }
 
     // ---------- Clinics ----------
     match /clinics/{c} {
@@ -47,13 +49,16 @@ service cloud.firestore {
       match /{col}/{docId} {
         allow read, write: if col in ['items', 'logs', 'patients', 'appts', 'bills', 'labcases', 'photos']
           && isMember(c) && isActive(c);
+        // Permanent delete of a whole clinic by the Dental Solutions owner
+        allow read, delete: if beingDeleted(c);
       }
     }
 
     // ---------- Username -> current login (used when an admin sets a new password) ----------
     match /logins/{id} {
       allow get: if true;
-      allow list, delete: if false;
+      allow list: if false;
+      allow delete: if isOwner();
       allow create, update: if isClinicAdmin(request.resource.data.code) && isActive(request.resource.data.code)
         && id == request.resource.data.code + "_" + request.resource.data.username;
     }
