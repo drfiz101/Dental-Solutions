@@ -960,6 +960,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 
 .pamethods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .pam{min-height:48px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-weight:700;font-size:.95rem;color:var(--ink)}
+.duprow{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-top:8px;background:var(--surface)}.duprow b{display:block}.dupact{display:flex;flex-direction:column;gap:8px;margin-top:16px}.dupact .btn{width:100%;min-height:46px}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -1254,6 +1255,11 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
   <div class="field" id="pa-refw"><label for="pa-ref">Transaction ID / reference (optional)</label><input id="pa-ref" maxlength="60" placeholder="e.g. TID 0123456789" autocomplete="off"></div>
   <p class="perr" id="pa-err" hidden></p>
   <div class="actions"><span></span><div><button type="button" class="btn" id="pa-cancel">Cancel</button><button type="submit" class="btn primary">Save payment</button></div></div>
+</form></dialog>
+<dialog id="dupdlg"><form class="dlg" id="dupForm" method="dialog">
+  <h2 id="dup-t">Already registered</h2>
+  <div id="dup-body"></div>
+  <div class="dupact" id="dup-act"></div>
 </form></dialog>
 <dialog id="rsdlg"><form class="dlg" id="rsForm" novalidate>
   <h2>Reschedule appointment</h2>
@@ -2342,12 +2348,12 @@ function openPat(id,pre){
   $("pt-del").hidden=!id;$("pt-conf").hidden=true;$("pt-err").hidden=true;delete $("pt-err").dataset.ok;
   openD(patdlg);$("pt-name").focus();
 }
-$("patForm").addEventListener("submit",e=>{
+let patOk=false;
+$("patForm").addEventListener("submit",async e=>{
   e.preventDefault();const err=$("pt-err"),name=$("pt-name").value.trim(),phone=readPhone("pt-phone");
   if(!name){err.textContent="Enter the patient's name.";err.hidden=false;return}
   if(phone&&!waNum(phone)){err.textContent="Check the mobile number, for example 0311 0053535, or choose the right country.";err.hidden=false;return}
-  const dup=!patEdit&&phone&&Object.values(P).find(p=>waNum(p.phone)===waNum(phone));
-  if(dup&&!err.dataset.ok){err.textContent=`${dup.name} (${dup.fileNo||""}) already has this number. Tap Save again to register anyway.`;err.hidden=false;err.dataset.ok="1";return}
+  if(!patEdit){const r=await dupCheck(name,phone);if(!r)return;if(r.startsWith("open:")){const id=r.slice(5);patdlg.close();main="patients";selPat=id;toothSel=null;render();toast("Opened "+(P[id]&&P[id].name||"patient"));return}}
   const base=patEdit?P[patEdit]:{createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[]};
   const doc={...base,name,phone,age:$("pt-age").value?+$("pt-age").value:null,gender:$("pt-gender").value,cnic:$("pt-cnic").value.trim(),address:$("pt-addr").value.trim(),alerts:$("pt-alert").value.trim(),ref:$("pt-ref").value.trim()};
   const id=patEdit||nid("p");
@@ -2403,14 +2409,12 @@ $("ap-chair").addEventListener("click",e=>{const b=e.target.closest("[data-ch]")
 for(const f of ["ap-d","ap-dur","ap-dent"])$(f).addEventListener("change",()=>{apTimes($("ap-t").value);apClash()});
 $("ap-t").addEventListener("change",apClash);
 $("ap-pat").addEventListener("input",e=>{if(apNew)return;const v=e.target.value.trim(),id=findPat(v);$("ap-newp").hidden=!!id||v.length<2;if(!id&&v.length>=2){$("ap-newmsg").textContent="Not registered yet. Fill in the details below to add them as a new patient.";if(/\d{4}/.test(v))$("ap-nphone").value=v;else $("ap-nname").value=v}});
-$("apForm").addEventListener("submit",e=>{
+$("apForm").addEventListener("submit",async e=>{
   e.preventDefault();const err=$("ap-err");let pid=apNew?null:findPat($("ap-pat").value);
   if(!pid){const n=$("ap-nname").value.trim(),ph=readPhone("ap-nphone");
     if(!n){err.textContent="Choose a patient from the list, or type a new patient's name and mobile number.";err.hidden=false;$("ap-newp").hidden=false;return}
     if(!waNum(ph)){err.textContent="Enter the new patient's mobile number so WhatsApp messages can be sent.";err.hidden=false;$("ap-newp").hidden=false;$("ap-nphone").focus();return}
-    const dupP=Object.entries(P).find(([,x])=>waNum(x.phone)===waNum(ph));
-    if(dupP&&!err.dataset.dup){err.textContent=`${dupP[1].name} (${dupP[1].fileNo||""}) already has this number. Tap Save again to register a new patient anyway, or choose them from the list.`;err.hidden=false;err.dataset.dup="1";return}
-    delete err.dataset.dup;
+    {const r=await dupCheck(n,ph);if(!r)return;if(r.startsWith("open:")){const id=r.slice(5);setApNew(false);$("ap-pat").value=patLabel(P[id]);$("ap-newp").hidden=true;err.hidden=true;toast("Chose "+P[id].name+" · tap Save to book");return}}
     pid=nid("p");cset("patients",pid,{name:n,phone:ph,age:$("ap-nage").value?+$("ap-nage").value:null,gender:$("ap-ngender").value,alerts:$("ap-nalert").value.trim(),createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[]})}
   const p=P[pid],d=$("ap-d").value,t=$("ap-t").value;
   if(!d||!t){err.textContent="Choose the date and time.";err.hidden=false;return}
@@ -3751,6 +3755,27 @@ async function adminSetPassword(m,card){const nm=m.name||m.username;
   finally{if(btn){btn.disabled=false;btn.textContent="🔑 Set new password"}}}
 async function loginEmailFor(user,code){const def=userEmail(user,code);if(user.includes("@")||!code||!fsRoot)return def;
   try{const d=await fsRoot.collection("logins").doc(code+"_"+user.toLowerCase()).get();const v=d&&d.exists&&d.data();if(v&&v.email)return v.email}catch(e){}return def}
+/* stop duplicate patients */
+const nmKey=n=>String(n||"").toLowerCase().replace(/[.,]/g," ").replace(/^\s*(mr|mrs|ms|miss|dr|master|baby)\s+/,"").replace(/\s+/g," ").trim();
+let dupRes=null;
+function dupDone(v){const r=dupRes;dupRes=null;try{$("dupdlg").close()}catch(e){}if(r)r(v)}
+function dupCheck(name,phone){const nk=nmKey(name),ph=phone&&waNum(phone)?waNum(phone):"",all=Object.entries(P);
+  const sameNum=ph?all.filter(([,x])=>x.phone&&waNum(x.phone)===ph):[],sameBoth=sameNum.filter(([,x])=>nmKey(x.name)===nk);
+  const row=([k,x])=>`<div class="duprow"><div style="flex:1;min-width:0"><b>${esc(x.name||"")}</b><span class="muted small">${esc(x.fileNo||"")}${x.phone?" · "+esc(x.phone):""}${x.age?" · "+esc(x.age)+" yrs":""}</span></div></div>`;
+  let kind="",t="",body="",act="";
+  if(sameBoth.length){kind="same";t="Patient already registered";const [k,x]=sameBoth[0];
+    body=`<p style="margin:0">This patient is already in your list with the same name and number:</p>${row(sameBoth[0])}<p class="muted small" style="margin:8px 0 0">No new file was made.</p>`;
+    act=`<button type="button" class="btn primary" data-dup="open:${k}">Open ${esc(x.name)}</button><button type="button" class="btn" data-dup="">Cancel</button>`}
+  else if(sameNum.length){kind="num";t="Number already registered";
+    body=`<p style="margin:0">This number <b>${esc(phone)}</b> is already registered to ${sameNum.length>1?"these patients":"another patient"}:</p>${sameNum.map(row).join("")}<p style="margin:12px 0 0"><b>Do you wish to add the same number to a new patient, ${esc(name)}?</b></p><p class="muted small" style="margin:4px 0 0">For example a family member who shares one phone.</p>`;
+    act=`<button type="button" class="btn primary" data-dup="add">Yes, add ${esc(name)} as a new patient</button>${sameNum.slice(0,2).map(([k,x])=>`<button type="button" class="btn" data-dup="open:${k}">No, open ${esc(x.name)}</button>`).join("")}<button type="button" class="btn" data-dup="">Cancel</button>`}
+  else{const nm=all.filter(([,x])=>nmKey(x.name)===nk);if(nk&&nm.length){kind="name";t="Same name already registered";
+    body=`<p style="margin:0">A patient named <b>${esc(name)}</b> is already in your list${nm.length>1?" ("+nm.length+" files)":""}:</p>${nm.slice(0,3).map(row).join("")}<p style="margin:12px 0 0"><b>Is this the same person?</b></p>`;
+    act=`${nm.slice(0,2).map(([k,x])=>`<button type="button" class="btn primary" data-dup="open:${k}">Yes, open ${esc(x.fileNo||x.name)}</button>`).join("")}<button type="button" class="btn" data-dup="add">No, add a new patient</button><button type="button" class="btn" data-dup="">Cancel</button>`}}
+  if(!kind)return Promise.resolve("add");
+  return new Promise(res=>{dupRes=res;$("dup-t").textContent=t;$("dup-body").innerHTML=body;$("dup-act").innerHTML=act;openD($("dupdlg"))})}
+$("dup-act").addEventListener("click",e=>{const b=e.target.closest("[data-dup]");if(b)dupDone(b.dataset.dup||null)});
+$("dupdlg").addEventListener("close",()=>{if(dupRes)dupDone(null)});
 /* ask how a payment was made */
 const PAY_M=["Cash","Bank transfer","Easypaisa","JazzCash","NayaPay","SadaPay","Card","Other"];
 const BANKS_PK=["HBL","Meezan Bank","UBL","MCB Bank","Allied Bank","Askari Bank","Bank Alfalah","Faysal Bank","Bank AL Habib","Habib Metropolitan","Standard Chartered","National Bank (NBP)","The Bank of Punjab","JS Bank","Soneri Bank","Dubai Islamic Bank","BankIslami","Al Baraka Bank","MCB Islamic","Sindh Bank","Bank of Khyber","Silkbank","Summit Bank","First Women Bank","U Bank","Mobilink Microfinance","Khushhali Bank","Telenor Microfinance"];
