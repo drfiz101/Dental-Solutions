@@ -656,7 +656,7 @@ body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
 .rpnav{display:flex;align-items:center;gap:8px}.rpnav b{min-width:150px;text-align:center;color:var(--mod)}
 .rgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}.rgrid>.card{margin:0;min-width:0}
-.r-k{grid-column:1/-1}.r-tr{grid-column:1/-1}.r-in,.r-ex{grid-column:span 6}.r-pt,.r-out{grid-column:span 6}.r-oe{grid-column:span 6}.r-tx{grid-column:span 6}
+.r-k{grid-column:1/-1}.r-sh{grid-column:1/-1}.r-sh .shl{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}.r-sh .shg{grid-template-columns:repeat(2,minmax(0,1fr))}.shg>div{white-space:nowrap}.r-tr{grid-column:1/-1}.r-in,.r-ex{grid-column:span 6}.r-pt,.r-out{grid-column:span 6}.r-oe{grid-column:span 6}.r-tx{grid-column:span 6}
 @media (max-width:900px){.rgrid>.card{grid-column:1/-1!important}}
 .rkpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .rkpi{border-radius:12px;padding:12px 14px;background:var(--c-dash-soft);display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -3538,7 +3538,7 @@ function repData(per,f,t){
   for(const b of bills)for(const x of b.payments||[])if(inR(x.date,f,t)){const ap=b.apId&&A[b.apId];pays.push({date:x.date,amount:+x.amount||0,method:payLbl(x),patient:b.patientName||"",no:b.no||"",dentist:(ap&&ap.dentist)||""})}
   const bIn=bills.filter(b=>inR(b.date,f,t)),billed=bIn.reduce((s,b)=>s+billCalc(b).total,0),disc=bIn.reduce((s,b)=>s+Math.min(+b.discount||0,billCalc(b).sub),0);
   const tr={};for(const b of bIn)for(const it of b.items||[]){const k=it.desc||"Other";tr[k]=tr[k]||{n:0,amt:0};tr[k].n+=+it.qty||1;tr[k].amt+=(+it.qty||1)*(+it.price||0)}
-  const byDent={};for(const b of bIn){const ap=b.apId&&A[b.apId],k=(ap&&ap.dentist)||"Not assigned";byDent[k]=(byDent[k]||0)+billCalc(b).total}
+  const byDent={};for(const b of bIn){const k=billDentist(b)||"Not assigned";byDent[k]=(byDent[k]||0)+billCalc(b).total}
   const byMeth={};for(const x of pays)byMeth[x.method]=(byMeth[x.method]||0)+x.amount;
   const income=pays.reduce((s,x)=>s+x.amount,0);
   const buys=logList().filter(l=>l.kind==="purchase"&&inR(l.date,f,t)),mat=buys.reduce((s,l)=>s+(+l.total||0),0),matPend=buys.filter(l=>l.paid===false).reduce((s,l)=>s+(+l.total||0),0);
@@ -3607,7 +3607,6 @@ function renderReports(){
     <div class="rsec"><h4>By payment method</h4>${r.byMeth.length?r.byMeth.map(([k,v])=>rl(esc(k),rs(v))).join(""):`<p class="muted small" style="margin:0">No payments received.</p>`}</div>
     <div class="rsec"><h4>Billed by dentist</h4>${r.byDent.length?r.byDent.map(([k,v])=>rl(esc(k),rs(v))).join(""):`<p class="muted small" style="margin:0">No bills.</p>`}</div>
     <div class="rsec"><h4>Top treatments</h4>${r.tr.length?r.tr.slice(0,8).map(([k,v])=>`<div class="rl"><span>${esc(k)}<small>× ${v.n}</small>${meter(v.amt,mxTr)}</span><b>${rs(v.amt)}</b></div>`).join(""):`<p class="muted small" style="margin:0">No treatments billed.</p>`}</div></div>
-  ${sharesCard(f,t)}
   <div class="card r-ex"><h3>Expenses</h3>
     ${rl("Materials &amp; supplies",rs(r.mat),"",r.matPend?`<span class="pend">${rs(r.matPend)} unpaid</span>`:pl(r.buys.length,"purchase"))}
     ${rl("Lab work",rs(r.lab),"",r.labPend?`<span class="pend">${rs(r.labPend)} unpaid</span>`:pl(r.cases.length,"case"))}
@@ -3616,6 +3615,7 @@ function renderReports(){
     ${r.byLab.length?`<div class="rsec"><h4>By lab</h4>${r.byLab.map(([k,v])=>rl(esc(k),rs(v.amt),"",`${pl(v.n,"case")}${v.pend?` · <span class="pend">${rs(v.pend)} unpaid</span>`:""}`)).join("")}</div>`:""}
     ${r.bySup.length?`<div class="rsec"><h4>By supplier</h4>${r.bySup.slice(0,6).map(([k,v])=>rl(esc(k),rs(v))).join("")}</div>`:""}
     ${r.lbills.length?`<div class="rsec"><h4>Lab bills uploaded</h4>${r.lbills.map(b=>rl(esc(b.lab)+(b.billNo?" · "+esc(b.billNo):""),rs(b.amount),"",fmtDate(b.date)+(b.paid===false?' · <span class="pend">pending</span>':" · paid"))).join("")}<p class="muted small" style="margin:4px 0 0">Shown for reference; lab work above uses each case's charge.</p></div>`:""}</div>
+  ${sharesCard(f,t)}
   <div class="card r-pt"><h3>Patients &amp; appointments</h3>${rl("New patients registered",r.newPat)}${rl("Appointments booked",r.nAp)}${rl("Visits completed",r.apDone)}${rl("No-shows",r.apNo,r.apNo?"":"")}${rl("Cancelled",r.apCan)}${rl("Average bill",r.nBills?rs(r.billed/r.nBills):"—")}</div>
   <div class="card r-out"><div class="dh"><h3>Still to be paid (today)</h3></div>
     ${rl("Patients owe the clinic",`<span class="pend">${rs(r.duesTot)}</span>`,"",pl(r.dues.length,"patient"))}
