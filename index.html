@@ -1250,7 +1250,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 <button type="button" class="fab" id="fabPat" aria-label="Add patient"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button type="button" class="fab" id="fabAp" aria-label="Book appointment"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 <dialog id="ncdlg"><div class="dlg">
   <h2 id="nc-t">Notification centre</h2>
-  <p class="muted small" style="margin:0">Changes made by your team: appointments, bills, payments, patients, lab and stock.</p>
+  <p class="muted small" style="margin:0" id="nc-sub">Changes made by your team.</p>
   <div class="ncf" id="nc-f" role="group" aria-label="Filter"></div>
   <div class="nclist" id="nc-list"></div>
   <div class="actions"><button type="button" class="btn" id="nc-all">See all activity</button><button type="button" class="btn primary" data-close>OK</button></div>
@@ -2193,6 +2193,8 @@ function W(p,msg){syncPending++;netUI();return p.then(()=>{},e=>{toast((typeof m
 /* ===== activity feed (notification centre) ===== */
 const ACT_C={appt:["📅","Appointments"],bill:["🧾","Bills"],pat:["🧑","Patients"],lab:["🧪","Lab"],stock:["📦","Stock"]};
 let actLast={};
+const ACT_PERM={appt:"tab_appointments",bill:"tab_billing",pat:"tab_patients",lab:"tab_lab",stock:"tab_inventory"};
+const actCats=()=>Object.keys(ACT_C).filter(k=>myRole()==="admin"||can(ACT_PERM[k]));
 function actLog(cat,text){if(!text)return;const k=cat+"|"+text,now=Date.now();if(actLast[k]&&now-actLast[k]<10*60000)return;actLast[k]=now;
   const doc={kind:"act",cat,text,date:ymd(new Date()),at:new Date().toISOString(),who:myName||"",...me};
   if(!db){logs["local-"+now+"-"+Math.random().toString(36).slice(2)]=doc;return}
@@ -2214,23 +2216,23 @@ function actDescribe(coll,o,n){const nm=x=>(x&&(x.patientName||x.name))||"patien
   return null}
 function actList(){const out=[];for(const [id,l] of Object.entries(logs)){if(l.kind==="act")out.push({id,cat:l.cat,text:l.text,at:l.at||l.date,who:l.who||l.by||"",uid:l.uid});
     else if(["used","added","purchase"].includes(l.kind)&&l.itemId){const v={used:"Used",added:"Added to stock",purchase:"Bought"}[l.kind];out.push({id,cat:"stock",text:`${v} ${l.qty} ${l.unit||""} ${l.name||""}${l.kind==="purchase"&&l.total?" · "+rs(l.total):""}`.replace(/\s+/g," "),at:l.at||l.date,who:l.who||byName(l),uid:l.uid})}}
-  return out.sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
+  const ok=new Set(actCats());return out.filter(a=>ok.has(a.cat)).sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
 const actKey=()=>"ds-actseen-"+((me&&me.uid)||"x")+"-"+(CLINIC||"alawan");
 function actSeen(){try{return localStorage.getItem(actKey())||""}catch(e){return ""}}
 function actMarkSeen(){try{localStorage.setItem(actKey(),new Date().toISOString())}catch(e){}actBadge()}
 function actUnread(){const s=actSeen();return actList().filter(a=>a.uid!==(me&&me.uid)&&(!s||String(a.at)>s))}
-function actBadge(){const b=$("ncBtn");if(!b)return;const adm=myRole()==="admin";b.hidden=!adm;if(!adm)return;const n=actUnread().length;const c=b.querySelector(".ncn");c.textContent=n>99?"99+":n;c.hidden=!n}
+function actBadge(){const b=$("ncBtn");if(!b)return;const on=actCats().length>0;b.hidden=!on;if(!on)return;const n=actUnread().length;const c=b.querySelector(".ncn");c.textContent=n>99?"99+":n;c.hidden=!n}
 const agoTx=t=>{const d=(Date.now()-Date.parse(t))/60000;if(!(d>=0))return "";if(d<1)return "just now";if(d<60)return Math.round(d)+" min ago";if(d<24*60)return Math.round(d/60)+" h ago";return new Date(t).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" "+new Date(t).toLocaleTimeString("en-GB",{hour:"numeric",minute:"2-digit",hour12:true})};
 let ncF="all",ncOnlyNew=false;
 function ncRender(){const seen=actSeen(),all=actList(),list=(ncOnlyNew?actUnread():all).filter(a=>ncF==="all"||a.cat===ncF).slice(0,150);
-  $("nc-f").innerHTML=[["all","All"],...Object.entries(ACT_C).map(([k,[i,n]])=>[k,i+" "+n])].map(([k,n])=>`<button type="button" data-ncf="${k}" aria-pressed="${ncF===k}">${n}</button>`).join("");
-  $("nc-t").textContent=ncOnlyNew?"While you were away":"Notification centre";
+  $("nc-f").innerHTML=[["all","All"],...Object.entries(ACT_C).filter(([k])=>actCats().includes(k)).map(([k,[i,n]])=>[k,i+" "+n])].map(([k,n])=>`<button type="button" data-ncf="${k}" aria-pressed="${ncF===k}">${n}</button>`).join("");
+  $("nc-t").textContent=ncOnlyNew?"While you were away":"Notification centre";$("nc-sub").textContent="Changes made by your team"+(myRole()==="admin"?".":" in the parts of the app you have access to.");
   let day="";$("nc-list").innerHTML=list.length?list.map(a=>{const d=String(a.at).slice(0,10),h=d!==day?`<h4 class="ncd">${d===ymd(new Date())?"Today":esc(fmtDate(d))}</h4>`:"";day=d;const isNew=a.uid!==(me&&me.uid)&&(!seen||String(a.at)>seen);
     return h+`<div class="nci${isNew?" new":""}"><span class="ncic" aria-hidden="true">${(ACT_C[a.cat]||["•"])[0]}</span><div><div>${esc(a.text)}</div><small>${esc(a.who||"")}${a.who?" · ":""}${esc(agoTx(a.at))}</small></div></div>`}).join(""):`<p class="muted" style="margin:10px 0">${ncOnlyNew?"Nothing new.":"No activity yet. Changes made by you and your team will show here."}</p>`;
   $("nc-all").hidden=!ncOnlyNew}
 function openNC(onlyNew){ncOnlyNew=!!onlyNew;ncF="all";ncRender();openD($("ncdlg"))}
 let actPopDone=false;
-function actPopCheck(){if(actPopDone||myRole()!=="admin")return;actPopDone=true;if(!actSeen()){actMarkSeen();return}const n=actUnread().length;if(n)openNC(true)}
+function actPopCheck(){if(actPopDone||!actCats().length)return;actPopDone=true;if(!actSeen()){actMarkSeen();return}const n=actUnread().length;if(n)openNC(true)}
 async function cset(coll,id,doc){try{const d=actDescribe(coll,STORES[coll]()[id],doc);if(d)actLog(d[0],d[1])}catch(e){}STORES[coll]()[id]=doc;render();if(!db)return;W(db.collection(coll).doc(id).set(doc),e=>/permission|invalid_argument/.test((e&&e.code)||"")?"This account can't change clinic records.":"Couldn't save.")}
 async function cdel(coll,id){try{const d=actDescribe(coll,STORES[coll]()[id],null);if(d)actLog(d[0],d[1])}catch(e){}delete STORES[coll]()[id];render();if(!db)return;W(db.collection(coll).doc(id).delete(),"Couldn't delete.")}
 async function saveSet(next){SET=next;render();if(!db)return;W(db.collection("settings").doc("main").set(next),"Couldn't save settings.")}
