@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>How to use Dental Solutions</title>
+<meta name="description" content="Step-by-step guide for clinic owners, admins and staff using the Dental Solutions app.">
+<meta name="theme-color" content="#1D5F53">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap">
+<style>
+:root{--bg:#F3F6F5;--surface:#fff;--ink:#13302B;--muted:#5A6F6A;--line:#DDE6E3;--accent:#1D5F53;--accent-soft:#E2EFEB;--warn-bg:#FBEFD9;--warn:#8A5200;--ok-bg:#E3F2E8;--ok:#276B43;--bad:#A4231B;--wa:#1B7A45}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1716;--surface:#16211F;--ink:#E6EFEC;--muted:#9DB0AB;--line:#2A3A37;--accent:#5FB8A5;--accent-soft:#1D2F2B;--warn-bg:#2E2412;--warn:#E8B96A;--ok-bg:#16291D;--ok:#7FD39B;--bad:#F08A80}}
+:root[data-theme="dark"]{--bg:#0E1716;--surface:#16211F;--ink:#E6EFEC;--muted:#9DB0AB;--line:#2A3A37;--accent:#5FB8A5;--accent-soft:#1D2F2B;--warn-bg:#2E2412;--warn:#E8B96A;--ok-bg:#16291D;--ok:#7FD39B;--bad:#F08A80}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,sans-serif;font-size:17px;line-height:1.55}
+a{color:var(--accent)}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.2;margin:0}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px 80px}
+header.hero{background:var(--accent);color:#fff;padding:28px 16px 30px}
+header.hero .in{max-width:760px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;opacity:.9}
+.brand svg{width:22px;height:22px}
+header.hero h1{font-size:2rem;margin-top:12px}
+header.hero p{margin:8px 0 0;opacity:.92;max-width:34em}
+.openbtn{display:inline-flex;align-items:center;gap:8px;margin-top:16px;background:#fff;color:#1D5F53;font-weight:700;text-decoration:none;padding:11px 18px;border-radius:999px}
+nav.roles{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 0 10px;border-bottom:1px solid var(--line)}
+nav.roles .in{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+nav.roles a{flex:none;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);padding:8px 14px;border-radius:999px;font-weight:700;font-size:.9rem}
+nav.roles a:hover{border-color:var(--accent);color:var(--accent)}
+section{padding-top:28px;scroll-margin-top:64px}[id^="d-"]{scroll-margin-top:80px}
+section>h2{font-size:1.5rem}
+section>.lead{color:var(--muted);margin:6px 0 14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-top:12px}
+.card h3{font-size:1.1rem;display:flex;align-items:center;gap:10px}
+.card h3 .ic{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+.card h3 .ic svg{width:19px;height:19px}
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:12px 0 0}
+ol.steps>li{counter-increment:s;position:relative;padding:0 0 12px 40px}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;display:grid;place-items:center}
+ol.steps>li:last-child{padding-bottom:0}
+ul.list{margin:10px 0 0;padding-left:20px}
+ul.list li{margin-bottom:6px}
+.b{display:inline-block;padding:1px 8px;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.92em;white-space:nowrap}
+.tip{margin-top:12px;padding:10px 14px;border-radius:12px;background:var(--ok-bg);color:var(--ok);font-size:.95rem}
+.warn{margin-top:12px;padding:10px 14px;border-radius:12px;background:var(--warn-bg);color:var(--warn);font-size:.95rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.tile b{display:block;margin-bottom:2px}
+.tile span{color:var(--muted);font-size:.92rem}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.93rem;background:var(--surface);border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--accent-soft);color:var(--accent)}
+tr:last-child td{border-bottom:0}
+.tw{overflow-x:auto}
+details{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-top:10px;padding:0 16px}
+details summary{cursor:pointer;font-weight:700;padding:13px 0;list-style:none;display:flex;justify-content:space-between;gap:10px}
+details summary::after{content:"+";color:var(--accent);font-size:1.3rem;line-height:1}
+details[open] summary::after{content:"–"}
+details>div{padding-bottom:14px;color:var(--ink)}
+footer{margin-top:40px;color:var(--muted);font-size:.9rem;text-align:center}
+@media (max-width:520px){header.hero h1{font-size:1.65rem}body{font-size:16px}}
+@media print{nav.roles,.openbtn{display:none}header.hero{background:none;color:#000}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="in">
+  <div class="brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3c-2.5 0-4 2-4 5 0 4 2 6 3 10 .4 1.6 1 3 2 3s1.3-1.5 1.6-3c.3-1.4.8-3 2.4-3s2.1 1.6 2.4 3c.3 1.5.6 3 1.6 3s1.6-1.4 2-3c1-4 3-6 3-10 0-3-1.5-5-4-5-2 0-3 1-5 1S9 3 7 3z"/></svg>Dental Solutions</div>
+  <h1>How to use the app</h1>
+  <p>A simple guide for clinic owners, admins and staff. Read the part for your role, then keep this page for quick help.</p>
+  <a class="openbtn" href="./">Open the app →</a>
+</div></header>
+
+<nav class="roles" aria-label="Guide sections"><div class="wrap in" style="padding-bottom:0">
+  <a href="#start">Getting started</a><a href="#owner">Clinic owner</a><a href="#admin">Admin</a><a href="#staff">Staff</a><a href="#daily">Daily work</a><a href="#tips">Tips</a><a href="#faq">Questions</a>
+</div></nav>
+
+<main class="wrap">
+
+<section id="start">
+  <h2>Getting started</h2>
+  <p class="lead">Everyone does this once on their own phone.</p>
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></span>Sign in</h3>
+    <ol class="steps">
+      <li>Open the app link your clinic sent you on WhatsApp.</li>
+      <li>Enter the <span class="b">Clinic code</span> (for example <i>alawan</i>). If you used your clinic's link, it is already filled in.</li>
+      <li>Enter your <span class="b">Username</span> and <span class="b">Password</span>, then tap <span class="b">Sign in</span>.</li>
+    </ol>
+    <div class="tip">The phone remembers your clinic code and username, so next time you only type your password.</div>
+  </div>
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></span>Install it like an app</h3>
+    <ul class="list">
+      <li><b>iPhone (Safari):</b> tap the Share button <span class="b">⬆</span> → <span class="b">Add to Home Screen</span>.</li>
+      <li><b>Android (Chrome):</b> tap <span class="b">⋮</span> → <span class="b">Install app</span> or <span class="b">Add to Home screen</span>.</li>
+    </ul>
+    <div class="tip">Once installed, it opens full-screen from your home screen and works even when the internet is slow.</div>
+  </div>
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>Change your password</h3>
+    <p style="margin:8px 0 0">Open <span class="b">Menu</span> → <span class="b">Change password</span>. Do this after your first sign-in if someone else set your password.</p>
+  </div>
+</section>
+
+<section id="owner">
+  <h2>For the clinic owner</h2>
+  <p class="lead">Set up your clinic once. This takes about 15 minutes.</p>
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg></span>Register your clinic</h3>
+    <ol class="steps">
+      <li>On the sign-in screen, choose <span class="b">Register a clinic</span>.</li>
+      <li>Fill in the clinic name, a short clinic code (letters and numbers only), city, phone, your name, a username and a password.</li>
+      <li>Tap <span class="b">Register clinic</span>. Your clinic waits for approval by Dental Solutions, and then opens by itself.</li>
+    </ol>
+    <div class="tip">If Dental Solutions created the clinic for you, skip this. Just sign in with the details they sent on WhatsApp.</div>
+  </div>
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>First-day setup checklist</h3>
+    <ol class="steps">
+      <li><b>Clinic profile:</b> <span class="b">Menu</span> → <span class="b">Clinic profile &amp; WhatsApp messages</span>. Add your logo, phone, tagline, opening days and hours, and appointment length. Bills and messages use these details.</li>
+      <li><b>Dentists:</b> in <span class="b">Appointments</span> → <span class="b">Team</span>, add your dentists so you can choose them when booking.</li>
+      <li><b>Treatment prices:</b> <span class="b">Menu</span> → <span class="b">Treatment prices</span>. Enter your price for each procedure. Bills and treatment plans fill these in automatically.</li>
+      <li><b>Labs:</b> in <span class="b">Lab</span> → <span class="b">Labs</span>, add the labs you use, with their WhatsApp number and usual turnaround days.</li>
+      <li><b>Stock:</b> in the <span class="b">Inventory</span> tab, add the materials you keep and the minimum level for each one.</li>
+      <li><b>Staff:</b> add your team (see <a href="#admin">Admin</a> below).</li>
+    </ol>
+  </div>
+</section>
+
+<section id="admin">
+  <h2>For admins</h2>
+  <p class="lead">Admins can see everything and manage the team. The clinic owner is always an admin.</p>
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6.5 7-6.5M18 11v6M15 14h6"/></svg></span>Add a staff member</h3>
+    <ol class="steps">
+      <li>Open <span class="b">Menu</span> → <span class="b">Staff access</span> → <span class="b">+ Add</span>.</li>
+      <li>Type their name, a username (for example <i>bilal</i>) and a starting password.</li>
+      <li>Choose a role: <span class="b">Admin</span> (full access) or <span class="b">Staff</span>.</li>
+      <li>For staff, tap a quick set (<span class="b">Receptionist</span>, <span class="b">Dental assistant</span> or <span class="b">Dentist</span>), then tick or untick anything you want to change.</li>
+      <li>Tap <span class="b">Save</span>. Give them the clinic code, their username and password.</li>
+    </ol>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Quick set</th><th>What they can do</th></tr></thead>
+    <tbody>
+      <tr><td><b>Receptionist</b></td><td>Patients, appointments, bills and payments, PDFs and WhatsApp</td></tr>
+      <tr><td><b>Dental assistant</b></td><td>Patients, appointments, lab cases, stock counts and purchases</td></tr>
+      <tr><td><b>Dentist</b></td><td>Patients, treatment plans, appointments, bills, lab cases and stock counts</td></tr>
+      <tr><td><b>Admin</b></td><td>Everything, including income, reports, prices, settings and the team</td></tr>
+    </tbody>
+  </table></div>
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 7a4 4 0 1 1-4 4"/><path d="M11 11 3 19v2h3l1-1v-2h2v-2h2l1.5-1.5"/></svg></span>Manage the team</h3>
+    <ul class="list">
+      <li><b>Edit access:</b> change ticks on their card and tap <span class="b">Save</span>.</li>
+      <li><b>Forgotten password:</b> tap <span class="b">🔑 Set new password</span> on their card. Their username stays the same.</li>
+      <li><b>Someone leaves:</b> untick <span class="b">Login allowed</span>, or delete the login. Their past work stays in the records.</li>
+    </ul>
+    <div class="warn">Money figures (income and profit) are only visible to staff who have the <b>"See income &amp; profit"</b> tick.</div>
+  </div>
+</section>
+
+<section id="staff">
+  <h2>For staff</h2>
+  <p class="lead">You only see the tabs your admin has given you. If something is missing, ask your admin.</p>
+  <div class="grid">
+    <div class="tile"><b>Dashboard</b><span>Today's patients for both chairs, the clock and quick buttons.</span></div>
+    <div class="tile"><b>Patients</b><span>Search by name or phone, open a file, add notes and X-rays.</span></div>
+    <div class="tile"><b>Appointments</b><span>Book, move, confirm and mark patients as arrived.</span></div>
+    <div class="tile"><b>Billing</b><span>Make bills, take payments, send invoices on WhatsApp.</span></div>
+    <div class="tile"><b>Lab</b><span>Track crowns, dentures and other work at the lab.</span></div>
+    <div class="tile"><b>Inventory</b><span>Count stock, record purchases, see what is running low.</span></div>
+  </div>
+  <div class="tip">Everything you save shows up on every other phone in the clinic within seconds.</div>
+</section>
+
+<section id="daily">
+  <h2>Daily work, step by step</h2>
+  <p class="lead">The tasks you will do most often.</p>
+
+  <div class="card">
+    <h3 id="d-patient"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="8" r="4"/><path d="M3 21c0-4 3-6.5 7-6.5M18 14v6M15 17h6"/></svg></span>Register a new patient</h3>
+    <ol class="steps">
+      <li>Tap <span class="b">New patient</span> on the dashboard, or <span class="b">+</span> in Patients.</li>
+      <li>Enter the name and WhatsApp number. Add age, gender and any medical alerts (for example <i>Diabetic</i>, <i>On blood thinners</i>).</li>
+      <li>Tap <span class="b">Save</span>. A file number is given automatically.</li>
+    </ol>
+    <div class="tip">If the patient is already registered, the app tells you and offers to open their file. If the number belongs to someone else (for example a family member), it asks before adding the same number again.</div>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span><span id="d-book"></span>Book an appointment</h3>
+    <ol class="steps">
+      <li>Tap <span class="b">Book</span>, or tap a free time under Chair 1 or Chair 2.</li>
+      <li>Type the patient's name or phone and pick them, or tap <span class="b">+ New patient</span>.</li>
+      <li>Choose the date, time, chair, dentist and treatment. Busy times are blocked automatically.</li>
+      <li>Tap <span class="b">Save</span>, then send the confirmation on WhatsApp.</li>
+    </ol>
+    <ul class="list">
+      <li><b>Change the time:</b> open the appointment → <span class="b">Reschedule</span>, pick the new date and time.</li>
+      <li><b>Status:</b> mark the patient as arrived, done or no-show as the day goes on.</li>
+      <li><b>Reminders:</b> the day before, find <span class="b">WhatsApp reminders for tomorrow</span> on the dashboard and tap <span class="b">Send reminder</span> for each patient.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3c-3 0-5 2-5 5 0 4 2 5 2.5 9 .3 2 .8 4 2.5 4s2.2-2 2.5-4c.5-4 2.5-5 2.5-9 0-3-2-5-5-5z"/></svg></span><span id="d-plan"></span>Treatment plan</h3>
+    <ol class="steps">
+      <li>Open the patient → <span class="b">Treatment plan</span> → add procedures. Prices fill in from your price list, and you can tap teeth on the chart.</li>
+      <li>Add a discount if needed and share the plan as a PDF proposal on WhatsApp.</li>
+      <li>When a procedure is finished, tick <span class="b">Done</span>.</li>
+      <li>When it is paid, tick <span class="b">Paid</span>. The app asks how it was paid and makes the bill for you.</li>
+    </ol>
+    <div class="tip"><b>Done</b> and <b>Paid</b> are separate. For example, a denture can be paid in advance but not fitted yet.</div>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></span><span id="d-bill"></span>Bills and payments</h3>
+    <ol class="steps">
+      <li>Tap <span class="b">New bill</span>, choose the patient and add treatments. Prices fill in automatically.</li>
+      <li>If they pay now, enter the amount and how they paid: Cash, Bank transfer, Easypaisa, JazzCash, NayaPay, SadaPay or Card. For bank transfers, pick the bank (or <span class="b">+ Add other bank</span>).</li>
+      <li>Tap <span class="b">Save</span>, then <span class="b">WhatsApp</span> or <span class="b">PDF</span> to send the invoice.</li>
+    </ol>
+    <ul class="list">
+      <li><b>Part payment later:</b> open the bill → enter the amount → <span class="b">Add payment</span>.</li>
+      <li><b>Paid in full:</b> tick <span class="b">Paid in full</span> on the bill.</li>
+      <li><b>Wrong payment method or amount:</b> tap <span class="b">✎ Edit</span> next to that payment.</li>
+      <li><b>Who owes money:</b> Dashboard → <span class="b">Patients owe</span>.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/></svg></span><span id="d-lab"></span>Lab work</h3>
+    <ol class="steps">
+      <li>In <span class="b">Lab</span>, tap <span class="b">+ New lab case</span>. Choose the patient, lab, work type, teeth and shade.</li>
+      <li>The due date is set from the lab's turnaround. Send the case details to the lab on WhatsApp.</li>
+      <li>Update the status as it moves: <span class="b">At lab</span> → <span class="b">Trial</span> → <span class="b">Back from lab</span> → <span class="b">Fitted</span>.</li>
+    </ol>
+    <div class="tip">Late cases are highlighted, and you get a sound alert on the day a case is due back.</div>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg></span><span id="d-stock"></span>Stock</h3>
+    <ul class="list">
+      <li>Tap <span class="b">−</span> or <span class="b">+</span> on an item when you use or receive it.</li>
+      <li>Items below their minimum level show as <b>low</b>. Use the list to reorder.</li>
+      <li>Record purchases and vendor bills so spending shows in Reports.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span id="d-reports"></span>Reports (admins)</h3>
+    <p style="margin:8px 0 0">Choose a date range to see income, payments by method and bank, billing by dentist, lab costs, expenses and profit. Tap <span class="b">PDF</span> to save or share the report.</p>
+  </div>
+</section>
+
+<section id="tips">
+  <h2>Handy features</h2>
+  <div class="grid">
+    <div class="tile"><b>Works offline</b><span>Keep working with no internet. The chip at the top shows "Saving…" and everything uploads when you are back online.</span></div>
+    <div class="tile"><b>Swipe to delete</b><span>Swipe a patient, bill or appointment to the left, then confirm with the bin button.</span></div>
+    <div class="tile"><b>Alerts &amp; sounds</b><span>Menu → Alerts. Get a chime before appointments, when lab work is due, and when someone books a new patient.</span></div>
+    <div class="tile"><b>Simple layout</b><span>Use the switch at the top for big buttons and tabs at the bottom. Turn it off for the Classic layout.</span></div>
+    <div class="tile"><b>Customise home</b><span>Tap <i>Customise home</i> to reorder, hide or add dashboard widgets.</span></div>
+    <div class="tile"><b>Appearance</b><span>Menu → Appearance. Change colours, background, tab style and text size.</span></div>
+    <div class="tile"><b>Your photo</b><span>Menu → My photo, so your team can see who made each entry.</span></div>
+    <div class="tile"><b>WhatsApp messages</b><span>Every message starts with Salam and ends with your clinic's name. Admins can edit the wording in Clinic profile.</span></div>
+  </div>
+</section>
+
+<section id="faq">
+  <h2>Common questions</h2>
+  <details><summary>I forgot my password</summary><div>Ask your clinic admin to tap <b>🔑 Set new password</b> on your card in Staff access. If you are the owner, contact Dental Solutions on WhatsApp.</div></details>
+  <details><summary>I can't see a tab or button</summary><div>Your admin has not given you that permission. Ask them to tick it in <b>Staff access</b>.</div></details>
+  <details><summary>The app looks old or a new feature is missing</summary><div>Close the app completely and open it again. It updates itself when it opens.</div></details>
+  <details><summary>The app won't open</summary><div>If you see a <b>Repair app</b> button, tap it. It clears the old copy and loads a fresh one. Your clinic data is safe because it is stored online.</div></details>
+  <details><summary>Is our patient data private?</summary><div>Yes. Each clinic only sees its own patients and money. Staff only see what their admin allows. Not even Dental Solutions can open your patients or bills.</div></details>
+  <details><summary>Can two people use it at the same time?</summary><div>Yes. Reception, dentists and assistants can all use it on their own phones together. Changes appear on everyone's screen within seconds.</div></details>
+</section>
+
+<footer>Need help? WhatsApp Dental Solutions: <a href="https://wa.me/923459148761">+92 345 9148761</a></footer>
+</main>
+</body>
+</html>
