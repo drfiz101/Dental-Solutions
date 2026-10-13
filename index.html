@@ -2339,7 +2339,7 @@ function markSent(coll,id,field){const st=STORES[coll]();if(st[id])cset(coll,id,
 function renderClinic(){trOpts();if(main==="reports")renderReports();else if(main==="lab")renderLab();else if(main==="dashboard")renderDash();else if(main==="patients")renderPatients();else if(main==="appointments")renderAppts();else if(main==="billing")renderBilling()}
 
 /* --- patients --- */
-const TOOTH_ST={caries:"Caries",filled:"Filled",rct:"Root canal",crown:"Crown",missing:"Missing",extract:"To extract",implant:"Implant",bridge:"Bridge",veneer:"Veneer",fracture:"Fractured",impacted:"Impacted"};
+const TOOTH_ST={caries:"Caries",filled:"Filled",rct:"Root canal",crown:"Crown",missing:"Missing",extract:"To extract",implant:"Implant",crownoff:"Crown removed",bridge:"Bridge",veneer:"Veneer",fracture:"Fractured",impacted:"Impacted"};
 /* tooth pictures for the chart */
 const TK=n=>{const d=n%10;return d>=6?"m":d>=4?"p":"i"};
 const T_CR={m:"M5 30 C3 18 6 8 12 6 C16 5 18 9 22 9 C26 9 28 5 32 6 C38 8 41 18 39 30 C37 33 7 33 5 30Z",p:"M9 30 C7 19 10 8 16 6 C19 5 20 8 22 8 C24 8 25 5 28 6 C34 8 37 19 35 30 C33 33 11 33 9 30Z",i:"M12 30 C11 20 13 8 17 5 C20 3 24 3 27 5 C31 8 33 20 32 30 C30 33 14 33 12 30Z"};
@@ -2351,6 +2351,7 @@ function toothG(n,st){const k=TK(n);let g="";const gold=st==="crown"||st==="impl
   else if(st==="bridge")g+=`<path d="M0 22 H44" stroke="#9C7414" stroke-width="3"/>`;
   else g+=`<path d="${T_RT[k]}" fill="#F3EBDD" stroke="#B8A98F" stroke-width="1.2"/>`;
   if(st==="rct")g+=T_CN[k].map(d=>`<path d="${d}" fill="none" stroke="#D9472B" stroke-width="3" stroke-linecap="round"/>`).join("");
+  if(st==="crownoff")return g+`<path d="${T_CR[k]}" fill="none" stroke="#D4A63A" stroke-width="1.6" stroke-dasharray="3 2.5"/><g transform="translate(22 31) scale(.66 .62) translate(-22 -31)"><path d="${T_CR[k]}" fill="#F1E9DA" stroke="#B8A98F" stroke-width="1.8"/></g><path d="M31 6 L37 2 M34 9 L40 6" stroke="#9C7414" stroke-width="1.6" stroke-linecap="round"/>`;
   g+=`<path d="${T_CR[k]}" fill="${gold?"#D4A63A":st==="veneer"?"#E8F1FF":"#fff"}" stroke="${gold?"#9C7414":st==="veneer"?"#5B8FD9":"#9FB3AE"}" stroke-width="${st==="veneer"?2.4:1.4}"/>`;
   if(gold)g+=`<path d="${k==="i"?"M15 12 C18 9 26 9 29 12":"M10 14 C16 11 28 11 34 14"}" fill="none" stroke="#FFF3D1" stroke-width="2" stroke-linecap="round" opacity=".8"/>`;
   if(st==="rct")g+=`<ellipse cx="22" cy="18" rx="${k==="i"?4:7}" ry="4" fill="#5B8FD9"/>`;
@@ -2852,7 +2853,7 @@ function teethText(arr){const set=new Set(arr),all=a=>a.every(n=>set.has(n)),par
   if(all(UPPER)&&all(LOWER)){parts.push("Full mouth");rest=rest.filter(n=>!UPPER.includes(n)&&!LOWER.includes(n))}
   else{if(all(UPPER)){parts.push("Upper arch");rest=rest.filter(n=>!UPPER.includes(n))}if(all(LOWER)){parts.push("Lower arch");rest=rest.filter(n=>!LOWER.includes(n))}}
   return [...parts,...rest.sort((a,b)=>a-b)].join(", ")}
-const TX_MAP=[[/re-?rct|root canal|\brct\b/i,"rct"],[/bridge|pontic/i,"bridge"],[/veneer/i,"veneer"],[/crown(?!.*(removal|re-?cement))/i,"crown"],[/filling/i,"filled"],[/extraction|impaction/i,"missing"],[/implant/i,"implant"]];
+const TX_MAP=[[/re-?rct|root canal|\brct\b/i,"rct"],[/bridge|pontic/i,"bridge"],[/crown\s*(removal|removed|off)|remov\w*\s+(of\s+)?crown/i,"crownoff"],[/veneer/i,"veneer"],[/crown(?!.*(removal|re-?cement))/i,"crown"],[/filling/i,"filled"],[/extraction|impaction/i,"missing"],[/implant/i,"implant"]];
 function chartFromBill(pid,items){const p=P[pid];if(!p)return false;const teeth={...(p.teeth||{})};let ch=false;
   for(const it of items){const m=TX_MAP.find(([re])=>re.test(it.desc||""));if(!m)continue;for(const n of teethOf(it.tooth))if(n<50&&teeth[n]!==m[1]){teeth[n]=m[1];ch=true}}
   if(ch)cset("patients",pid,{...p,teeth});return ch}
