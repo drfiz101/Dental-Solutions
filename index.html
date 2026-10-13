@@ -855,10 +855,11 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 16.66%,var(-
 .morebtn,.mebtn,.fab,.ptabs,.schips,.seg3,.d-simple,.callbtn{display:none!important}
 :root[data-layout="simple"] .morebtn{display:flex!important}
 :root[data-layout="simple"] .mebtn{display:inline-grid!important;place-items:center;width:44px;height:44px;border-radius:22px;border:1px solid var(--line);background:var(--surface);color:var(--accent);font-weight:700;font-size:.9rem;padding:0}
-:root[data-layout="simple"] #who>*:not(#meBtn):not(#layTog){display:none!important}
+:root[data-layout="simple"] #who>*:not(#meBtn):not(#layTog):not(#ncBtn){display:none!important}
+:root[data-layout="simple"] #ncBtn{order:-2;width:44px;height:44px;border-radius:22px}
 :root[data-layout="simple"] #who{display:flex;align-items:center;gap:8px}
 :root[data-layout="simple"] #who{position:absolute;top:14px;right:14px;z-index:3}
-:root[data-layout="simple"] header.top{padding:12px 120px 12px 14px!important;align-items:center}
+:root[data-layout="simple"] header.top{padding:12px 168px 12px 14px!important;align-items:center}
 :root[data-layout="simple"] #layTog{order:-1;padding:0 6px;height:44px}:root[data-layout="simple"] #layTog .lt{display:none}
 :root[data-layout="simple"] .bname{overflow:hidden;text-overflow:ellipsis}
 :root[data-layout="simple"] header.top::after{display:none}
@@ -975,6 +976,11 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 .hlpnow{display:flex;justify-content:center;margin-top:12px;min-height:48px;align-items:center;text-decoration:none}
 .hlplist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.hlplist a{display:flex;align-items:center;gap:8px;min-height:46px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);text-decoration:none;font-weight:700;font-size:.9rem}.hlplist a:hover{border-color:var(--accent);color:var(--accent)}
 #helpBtn{width:34px;height:34px;padding:0;border-radius:50%;font-weight:700;font-size:1rem;flex:none}
+#ncBtn{position:relative;width:38px;height:34px;padding:0;display:inline-grid;place-items:center;flex:none}#ncBtn svg{width:19px;height:19px}
+.ncn{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#C0392B;color:#fff;font-size:.7rem;font-weight:700;display:grid;place-items:center;line-height:1}
+.ncf{display:flex;gap:6px;overflow-x:auto;margin:10px 0 4px;scrollbar-width:none}.ncf button{flex:none;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font:inherit;font-size:.82rem;font-weight:700}.ncf button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink,#fff);border-color:var(--accent)}
+.nclist{max-height:60vh;overflow-y:auto;margin-top:6px}.ncd{margin:12px 0 4px;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.nci{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border-radius:12px;border:1px solid var(--line);margin-bottom:6px;background:var(--surface)}.nci.new{border-color:var(--accent);background:var(--accent-soft)}.nci small{color:var(--muted)}.ncic{font-size:1.1rem;line-height:1.3}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -1051,7 +1057,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
         <p class="bmeta" id="hMeta"></p>
       </div>
     </div>
-    <div class="who" id="who" hidden><button class="btn small" id="installBtn" hidden>Install app</button><span class="netchip" id="netChip" role="status" aria-live="polite" hidden></span><button type="button" class="mebtn" id="meBtn" aria-label="Menu"></button><span id="whoName"></span><span class="rolechip" id="roleChip" hidden></span><button type="button" class="btn small" id="helpBtn" aria-label="Help" title="Help">?</button><button type="button" class="laytog" id="layTog" role="switch" aria-checked="false" aria-label="Simple layout" title="Switch between Simple and Classic layout"><span class="sw" aria-hidden="true"><i></i></span><span class="lt">Simple</span></button><button type="button" class="btn small menubtn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button><button class="btn small" id="alBtn">🔔 Alerts</button><button class="btn small" id="lookBtn">🎨 Appearance</button><button class="btn small" id="profBtn" hidden>Clinic profile</button><button class="btn small" id="acBtn" hidden>Staff access</button><button class="btn small" id="consoleBtn" hidden>Owner console</button><button class="btn ghost small" id="pwBtn" hidden>Password</button><button class="btn ghost small" id="signOut">Sign out</button></div>
+    <div class="who" id="who" hidden><button class="btn small" id="installBtn" hidden>Install app</button><span class="netchip" id="netChip" role="status" aria-live="polite" hidden></span><button type="button" class="mebtn" id="meBtn" aria-label="Menu"></button><span id="whoName"></span><span class="rolechip" id="roleChip" hidden></span><button type="button" class="btn small" id="ncBtn" aria-label="Notification centre" title="Notification centre" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="ncn" hidden>0</span></button><button type="button" class="btn small" id="helpBtn" aria-label="Help" title="Help">?</button><button type="button" class="laytog" id="layTog" role="switch" aria-checked="false" aria-label="Simple layout" title="Switch between Simple and Classic layout"><span class="sw" aria-hidden="true"><i></i></span><span class="lt">Simple</span></button><button type="button" class="btn small menubtn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button><button class="btn small" id="alBtn">🔔 Alerts</button><button class="btn small" id="lookBtn">🎨 Appearance</button><button class="btn small" id="profBtn" hidden>Clinic profile</button><button class="btn small" id="acBtn" hidden>Staff access</button><button class="btn small" id="consoleBtn" hidden>Owner console</button><button class="btn ghost small" id="pwBtn" hidden>Password</button><button class="btn ghost small" id="signOut">Sign out</button></div>
     <nav class="nav mainnav" aria-label="Main"><button class="mainbtn" data-main="dashboard" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="lf">Dashboard</span><span class="ls">Home</span></button><button class="mainbtn" data-main="patients" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M21 19v-1a4 4 0 0 0-3-3.9M15.5 4.1a3.5 3.5 0 0 1 0 6.8"/></svg><span class="lf">Patients</span><span class="ls">Patients</span></button><button class="mainbtn" data-main="appointments" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h3"/></svg><span class="lf">Appointments</span><span class="ls">Appts</span></button><button class="mainbtn" data-main="billing" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span class="lf">Billing</span><span class="ls">Billing</span></button><button class="mainbtn" data-main="lab" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6"/><path d="M10 3v6l-5.5 9.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7.5 15h9"/></svg><span class="lf">Lab</span><span class="ls">Lab</span></button><button class="mainbtn" data-main="inventory" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg><span class="lf">Inventory</span><span class="ls">Stock</span></button><button class="mainbtn morebtn" id="moreBtn" type="button" aria-label="More"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>More</span></button></nav>
   </header>
 
@@ -1242,6 +1248,13 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
   <div class="actions"><button type="button" class="btn small" id="lookReset">Back to original look</button><span></span></div>
 </div></dialog>
 <button type="button" class="fab" id="fabPat" aria-label="Add patient"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button type="button" class="fab" id="fabAp" aria-label="Book appointment"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<dialog id="ncdlg"><div class="dlg">
+  <h2 id="nc-t">Notification centre</h2>
+  <p class="muted small" style="margin:0">Changes made by your team: appointments, bills, payments, patients, lab and stock.</p>
+  <div class="ncf" id="nc-f" role="group" aria-label="Filter"></div>
+  <div class="nclist" id="nc-list"></div>
+  <div class="actions"><button type="button" class="btn" id="nc-all">See all activity</button><button type="button" class="btn primary" data-close>OK</button></div>
+</div></dialog>
 <dialog id="helpdlg"><div class="dlg">
   <h2>❓ Help</h2>
   <p class="muted" style="margin:0">Step-by-step help for every part of the app.</p>
@@ -1901,6 +1914,7 @@ function startLogs(){
       const next={};for(const d of snap.docs){const v=d.data();if(v)next[d.id]=v}
       for(const k in logs)if(k.startsWith("local-"))next[k]=logs[k];
       logs=next; if(afterLogsHook)afterLogsHook();
+      try{actBadge();setTimeout(actPopCheck,1500)}catch(e){}
       const a=document.activeElement;
       if(a&&a.classList&&a.classList.contains("qty"))return;
       if(!dlg.open&&!pdlg.open)render();
@@ -1913,7 +1927,7 @@ async function addLog(entry){
   const doc={itemId:entry.itemId,name:it.name||"",sub:it.sub||"",unit:it.unit||"",kind:entry.kind,qty:+entry.qty||0,
     unitPrice:entry.unitPrice||null,total:entry.total||null,supplier:entry.supplier||"",invoice:entry.invoice||"",
     ...(entry.kind==="purchase"?{paid:entry.paid!==false,paidOn:entry.paid===false?null:(entry.date||ymd(new Date())),photoId:entry.photoId||null}:{}),
-    date:entry.date||ymd(new Date()),at:new Date().toISOString(),...me};
+    date:entry.date||ymd(new Date()),at:new Date().toISOString(),who:myName||"",...me};
   if(!db){logs["local-"+Date.now()+"-"+Math.random().toString(36).slice(2)]=doc;render();return}
   W(db.collection("logs").add(doc),"Couldn't save the record.")
 }
@@ -2176,8 +2190,49 @@ const STORES={patients:()=>P,appts:()=>A,bills:()=>B};
 /* offline-first writes: saved on this device at once, uploaded when internet is back */
 let syncPending=0;
 function W(p,msg){syncPending++;netUI();return p.then(()=>{},e=>{toast((typeof msg==="function"?msg(e):msg)||"Couldn't save.")}).finally(()=>{syncPending=Math.max(0,syncPending-1);netUI()})}
-async function cset(coll,id,doc){STORES[coll]()[id]=doc;render();if(!db)return;W(db.collection(coll).doc(id).set(doc),e=>/permission|invalid_argument/.test((e&&e.code)||"")?"This account can't change clinic records.":"Couldn't save.")}
-async function cdel(coll,id){delete STORES[coll]()[id];render();if(!db)return;W(db.collection(coll).doc(id).delete(),"Couldn't delete.")}
+/* ===== activity feed (notification centre) ===== */
+const ACT_C={appt:["📅","Appointments"],bill:["🧾","Bills"],pat:["🧑","Patients"],lab:["🧪","Lab"],stock:["📦","Stock"]};
+let actLast={};
+function actLog(cat,text){if(!text)return;const k=cat+"|"+text,now=Date.now();if(actLast[k]&&now-actLast[k]<10*60000)return;actLast[k]=now;
+  const doc={kind:"act",cat,text,date:ymd(new Date()),at:new Date().toISOString(),who:myName||"",...me};
+  if(!db){logs["local-"+now+"-"+Math.random().toString(36).slice(2)]=doc;return}
+  try{db.collection("logs").add(doc).catch(()=>{})}catch(e){}}
+function actDescribe(coll,o,n){const nm=x=>(x&&(x.patientName||x.name))||"patient",when=a=>`${a.date===ymd(new Date())?"today":fmtDate(a.date)} ${fmtTime(a.time||"")}`.trim();
+  if(coll==="patients"){if(!n)return ["pat",`Deleted patient ${nm(o)}`];if(!o)return ["pat",`New patient ${nm(n)}${n.fileNo?" ("+n.fileNo+")":""}`];
+    if(o.name!==n.name||o.phone!==n.phone)return ["pat",`Edited details of ${nm(n)}`];return null}
+  if(coll==="appts"){if(!n)return ["appt",`Deleted appointment · ${nm(o)} · ${when(o)}`];if(!o)return ["appt",`Booked ${nm(n)} · ${when(n)} · Chair ${n.chair||""}${n.treatment?" · "+n.treatment:""}`];
+    if(o.date!==n.date||o.time!==n.time)return ["appt",`Rescheduled ${nm(n)} to ${when(n)}`];
+    if((o.status||"booked")!==(n.status||"booked"))return ["appt",`${nm(n)} marked ${n.status==="noshow"?"no-show":n.status||"booked"} (${when(n)})`];return null}
+  if(coll==="bills"){const no=(n||o).no||"bill";if(!n)return ["bill",`Deleted bill ${no} · ${nm(o)}`];if(!o)return ["bill",`New bill ${no} · ${nm(n)} · ${rs(billCalc(n).total)}`];
+    const op=o.payments||[],np=n.payments||[];if(np.length>op.length){const p=np[np.length-1];return ["bill",`Payment ${rs(p.amount)} (${payLbl(p)}) · ${nm(n)} · ${no}`]}
+    if(np.length<op.length)return ["bill",`Removed a payment · ${nm(n)} · ${no}`];
+    if(JSON.stringify(op)!==JSON.stringify(np))return ["bill",`Edited a payment · ${nm(n)} · ${no}`];
+    if(JSON.stringify(o.items||[])!==JSON.stringify(n.items||[])||(+o.discount||0)!==(+n.discount||0))return ["bill",`Edited bill ${no} · ${nm(n)} · now ${rs(billCalc(n).total)}`];return null}
+  if(coll==="labcases"){const x=n||o;if(x.kind==="bill")return n&&!o?["lab",`Lab bill added · ${x.lab||""}`]:(!n?["lab",`Deleted lab bill · ${x.lab||""}`]:null);
+    if(!n)return ["lab",`Deleted lab case · ${nm(o)}`];if(!o)return ["lab",`New lab case · ${nm(n)}${n.work?" · "+n.work:""}${n.lab?" · "+n.lab:""}`];
+    if((o.status||"sent")!==(n.status||"sent"))return ["lab",`Lab case ${nm(n)}: ${((typeof LST!=="undefined"&&LST[n.status])||[n.status])[0]}`];return null}
+  return null}
+function actList(){const out=[];for(const [id,l] of Object.entries(logs)){if(l.kind==="act")out.push({id,cat:l.cat,text:l.text,at:l.at||l.date,who:l.who||l.by||"",uid:l.uid});
+    else if(["used","added","purchase"].includes(l.kind)&&l.itemId){const v={used:"Used",added:"Added to stock",purchase:"Bought"}[l.kind];out.push({id,cat:"stock",text:`${v} ${l.qty} ${l.unit||""} ${l.name||""}${l.kind==="purchase"&&l.total?" · "+rs(l.total):""}`.replace(/\s+/g," "),at:l.at||l.date,who:l.who||byName(l),uid:l.uid})}}
+  return out.sort((a,b)=>String(b.at).localeCompare(String(a.at)))}
+const actKey=()=>"ds-actseen-"+((me&&me.uid)||"x")+"-"+(CLINIC||"alawan");
+function actSeen(){try{return localStorage.getItem(actKey())||""}catch(e){return ""}}
+function actMarkSeen(){try{localStorage.setItem(actKey(),new Date().toISOString())}catch(e){}actBadge()}
+function actUnread(){const s=actSeen();return actList().filter(a=>a.uid!==(me&&me.uid)&&(!s||String(a.at)>s))}
+function actBadge(){const b=$("ncBtn");if(!b)return;const adm=myRole()==="admin";b.hidden=!adm;if(!adm)return;const n=actUnread().length;const c=b.querySelector(".ncn");c.textContent=n>99?"99+":n;c.hidden=!n}
+const agoTx=t=>{const d=(Date.now()-Date.parse(t))/60000;if(!(d>=0))return "";if(d<1)return "just now";if(d<60)return Math.round(d)+" min ago";if(d<24*60)return Math.round(d/60)+" h ago";return new Date(t).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" "+new Date(t).toLocaleTimeString("en-GB",{hour:"numeric",minute:"2-digit",hour12:true})};
+let ncF="all",ncOnlyNew=false;
+function ncRender(){const seen=actSeen(),all=actList(),list=(ncOnlyNew?actUnread():all).filter(a=>ncF==="all"||a.cat===ncF).slice(0,150);
+  $("nc-f").innerHTML=[["all","All"],...Object.entries(ACT_C).map(([k,[i,n]])=>[k,i+" "+n])].map(([k,n])=>`<button type="button" data-ncf="${k}" aria-pressed="${ncF===k}">${n}</button>`).join("");
+  $("nc-t").textContent=ncOnlyNew?"While you were away":"Notification centre";
+  let day="";$("nc-list").innerHTML=list.length?list.map(a=>{const d=String(a.at).slice(0,10),h=d!==day?`<h4 class="ncd">${d===ymd(new Date())?"Today":esc(fmtDate(d))}</h4>`:"";day=d;const isNew=a.uid!==(me&&me.uid)&&(!seen||String(a.at)>seen);
+    return h+`<div class="nci${isNew?" new":""}"><span class="ncic" aria-hidden="true">${(ACT_C[a.cat]||["•"])[0]}</span><div><div>${esc(a.text)}</div><small>${esc(a.who||"")}${a.who?" · ":""}${esc(agoTx(a.at))}</small></div></div>`}).join(""):`<p class="muted" style="margin:10px 0">${ncOnlyNew?"Nothing new.":"No activity yet. Changes made by you and your team will show here."}</p>`;
+  $("nc-all").hidden=!ncOnlyNew}
+function openNC(onlyNew){ncOnlyNew=!!onlyNew;ncF="all";ncRender();openD($("ncdlg"))}
+let actPopDone=false;
+function actPopCheck(){if(actPopDone||myRole()!=="admin")return;actPopDone=true;if(!actSeen()){actMarkSeen();return}const n=actUnread().length;if(n)openNC(true)}
+async function cset(coll,id,doc){try{const d=actDescribe(coll,STORES[coll]()[id],doc);if(d)actLog(d[0],d[1])}catch(e){}STORES[coll]()[id]=doc;render();if(!db)return;W(db.collection(coll).doc(id).set(doc),e=>/permission|invalid_argument/.test((e&&e.code)||"")?"This account can't change clinic records.":"Couldn't save.")}
+async function cdel(coll,id){try{const d=actDescribe(coll,STORES[coll]()[id],null);if(d)actLog(d[0],d[1])}catch(e){}delete STORES[coll]()[id];render();if(!db)return;W(db.collection(coll).doc(id).delete(),"Couldn't delete.")}
 async function saveSet(next){SET=next;render();if(!db)return;W(db.collection("settings").doc("main").set(next),"Couldn't save settings.")}
 function startClinic(){
   if(!db||clinicStarted)return;clinicStarted=true;
@@ -4122,7 +4177,7 @@ function openWorkspace(u,code,mem,seq){
   document.body.classList.add("ws-on");hideGate();$("login").hidden=true;$("who").hidden=false;$("whoName").textContent=myName;canWrite=true;$("notice").hidden=true;
   memUnsub=fsRoot.collection("clinics").doc(code).collection("members").doc(u.uid).onSnapshot(sn=>{if(seq!==authSeq)return;const d=sn.data();if(!d||d.active===false){firebase.auth().signOut();return}MEM=d;myName=d.name||d.username;renderMeChip();render()},()=>{});
   if(roleCheck){roleCheck=false;setTimeout(()=>{if(wantRole==="admin"&&myRole()!=="admin")toast("This login has staff access. Signed in as staff.");else toast("Signed in to "+(CDOC.name||code))},600)}
-  main="dashboard";aoStart(u.uid,roleCheck);netUI();netCheckQueued();setTimeout(()=>{loadMyPhoto();try{alCheck()}catch(e){}},2500);startLogs();startClinic();
+  main="dashboard";actPopDone=false;actLast={};aoStart(u.uid,roleCheck);netUI();netCheckQueued();setTimeout(()=>{loadMyPhoto();try{alCheck()}catch(e){}},2500);startLogs();startClinic();
   unsub=db.collection("items").onSnapshot({includeMetadataChanges:false},snap=>{
     const next={};snap.forEach(d=>{const v=d.data();if(v)next[d.id]={...v}});
     for(const id in pending)if(pending[id]&&!id.startsWith("t"))next[id]=pending[id];
@@ -4287,6 +4342,10 @@ function openHelp(){const [a,n]=HELP_MAIN[main]||["start","the app"];const hn=$(
   const cl=(CDOC&&CDOC.name)||S().clinic.name||"",w=$("hlpWa");w.href=`https://wa.me/${DS_CONTACT.replace(/\D/g,"")}?text=${encodeURIComponent(`Assalam o Alaikum, I need help with the Dental Solutions app.\nClinic: ${cl}\nName: ${myName||""}\nQuestion: `)}`;w.innerHTML=WA_IC+"<span>Ask Dental Solutions on WhatsApp</span>";
   openD($("helpdlg"))}
 $("helpBtn").addEventListener("click",openHelp);
+$("ncBtn").addEventListener("click",()=>openNC(false));
+$("nc-all").addEventListener("click",()=>{ncOnlyNew=false;ncRender()});
+$("nc-f").addEventListener("click",e=>{const b=e.target.closest("[data-ncf]");if(b){ncF=b.dataset.ncf;ncRender()}});
+$("ncdlg").addEventListener("close",actMarkSeen);
 $("layTog").addEventListener("click",()=>{const L=lookGet();if(L.layout==="simple")delete L.layout;else L.layout="simple";try{localStorage.setItem("ds-look",JSON.stringify(L))}catch(x){}lookApply(L);render();try{homeApply()}catch(x){}toast(L.layout==="simple"?"Simple layout on":"Classic layout on")});
 $("lookBody").addEventListener("click",e=>{const b=e.target.closest("[data-lk]");if(!b)return;const [k,v]=b.dataset.lk.split("|"),L=lookGet();if(v)L[k]=v;else delete L[k];try{localStorage.setItem("ds-look",JSON.stringify(L))}catch(x){}lookApply(L);lookRender();if(k==="layout"){render();try{homeApply()}catch(x){}}});
 $("lookReset").addEventListener("click",()=>{try{localStorage.removeItem("ds-look")}catch(x){}lookApply({});lookRender();render();toast("Original look restored")});
