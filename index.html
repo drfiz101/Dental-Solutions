@@ -995,12 +995,11 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 .vdtag{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}.vdtot{margin-top:10px}
 @media (max-width:520px){.vdf{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.vdf>:first-child{grid-column:1/-1}}
 .tooth.tpic{aspect-ratio:auto;background:none!important;border:0!important;border-radius:8px;padding:2px 0!important;flex-direction:column;align-items:center;justify-content:flex-start;gap:1px;color:var(--muted);text-decoration:none!important}
-.tooth.tpic.lower{flex-direction:column-reverse;justify-content:flex-end}.tooth.tpic .tsvg{width:100%;max-width:38px;height:auto;aspect-ratio:44/72;display:block}.tooth.tpic .tn{font-size:.6rem;font-weight:700;line-height:1.1}
+.tooth.tpic.lower{flex-direction:column-reverse;justify-content:flex-end}.tooth.tpic .tsvg{width:100%;max-width:44px;height:auto;aspect-ratio:44/72;display:block}.tooth.tpic .tn{font-size:.6rem;font-weight:700;line-height:1.1}
 .tooth.tpic:hover{background:var(--accent-soft)!important}.tooth.tpic.sel{outline:2px solid var(--ink);outline-offset:-1px}.tooth.tpic.pl{box-shadow:none}.tooth.tpic.pl .tn{color:#2E6BB8;text-decoration:underline 2px!important;text-underline-offset:2px}
 .tooth.tpic.hx::after{top:auto;bottom:14px;right:2px}.tooth.tpic.lower.hx::after{top:14px;bottom:auto}
 .tbtn.tpb,.tleg.tpb{display:inline-flex;align-items:center;gap:4px;padding-left:4px}.tbtn.tpb.on{border-color:var(--accent);background:var(--accent-soft)}.tsm{width:14px;height:23px;flex:none}
 .jarch{display:none}.tarch{width:100%;max-width:640px;display:block;margin:0 auto}.tarch text{font-size:10px;font-weight:700;fill:var(--muted);font-family:inherit}.tarch text.apl{fill:#2E6BB8;text-decoration:underline}.tarch .amid{font-weight:400}.atooth{cursor:pointer}.atooth:hover rect{fill:var(--accent-soft)}.atooth:focus{outline:none}.atooth:focus-visible rect{stroke:var(--accent);stroke-width:2}
-@media (min-width:1000px){.jrow{display:none!important}.jarch{display:block}}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -2396,7 +2395,7 @@ function renderPatDetail(id){setTimeout(loadXThumbs,0);
   <div class="ptabs" role="tablist" aria-label="Patient sections">${[["treat","Treatment"],["chart","Chart"],["xray","X-rays"],["visits","Visits"],["notes","Notes"]].map(([k,n])=>`<button type="button" role="tab" data-psec="${k}" aria-selected="${pSec===k}">${n}</button>`).join("")}</div>
   <div class="pgrid">
     <div class="lcol" style="min-width:0"><div class="card" data-sec="chart"><h3>Tooth chart</h3><p class="muted small" style="margin:-4px 0 10px">Tap a tooth, then choose its condition. Upper jaw on top, patient's right on your left.</p>
-      <div class="jaw jrow"><div class="teeth">${UPPER.map(tooth).join("")}</div><div class="midline"></div><div class="teeth">${LOWER.map(tooth).join("")}</div></div><div class="jarch">${toothArch(teeth,toothSel,TH,PL)}</div>
+      <div class="jaw jrow"><div class="teeth">${UPPER.map(tooth).join("")}</div><div class="midline"></div><div class="teeth">${LOWER.map(tooth).join("")}</div></div>
       <div class="tpal">${toothSel?`<b>Tooth ${toothSel}:</b>`+Object.entries(TOOTH_ST).map(([k,v])=>`<button type="button" class="tbtn tpb${teeth[toothSel]===k?" on":""}" data-tst="${k}">${toothPic(toothSel,k,"tsm")}${v}</button>`).join("")+`<button type="button" class="tbtn" data-tst="">Healthy</button><button type="button" class="tbtn plan" data-tpadd="${toothSel}">+ Plan treatment</button>`:Object.entries(TOOTH_ST).map(([k,v])=>`<span class="tleg tpb">${toothPic(16,k,"tsm")}${v}</span>`).join("")+`<span class="tleg hxl">● Treated (has bill)</span><span class="tleg pll">▁ Planned</span>`}</div>
       ${toothSel?`<div class="thist"><h4>Tooth ${toothSel}: treatment history</h4>${(TH[toothSel]||[]).length?TH[toothSel].map(h=>`<button class="kv kvb" data-bopen="${esc(h.id)}"><span>${esc(fmtDate(h.d))} · ${esc(h.t)}</span><small>${esc(h.no||"")}</small></button>`).join(""):`<p class="muted small" style="margin:0">No treatment billed on this tooth yet.</p>`}</div>`:(Object.keys(TH).length?`<div class="txsum"><span class="muted">Treated:</span>${Object.keys(TH).map(Number).sort((a,b)=>a-b).map(n=>`<span><b>${n}</b> ${esc([...new Set(TH[n].map(h=>h.t))].join(", "))}</span>`).join("")}</div>`:"")}
     </div>
