@@ -2339,7 +2339,7 @@ function markSent(coll,id,field){const st=STORES[coll]();if(st[id])cset(coll,id,
 function renderClinic(){trOpts();if(main==="reports")renderReports();else if(main==="lab")renderLab();else if(main==="dashboard")renderDash();else if(main==="patients")renderPatients();else if(main==="appointments")renderAppts();else if(main==="billing")renderBilling()}
 
 /* --- patients --- */
-const TOOTH_ST={caries:"Caries",filled:"Filled",rct:"Root canal",crown:"Crown",missing:"Missing",extract:"To extract",implant:"Implant",crownoff:"Crown removed",bridge:"Bridge",veneer:"Veneer",fracture:"Fractured",impacted:"Impacted"};
+const TOOTH_ST={caries:"Caries",filled:"Filled",pulpotomy:"Pulpotomy",rct:"Root canal",rerct:"Re-RCT",postcore:"Post & core",crown:"Crown",tempcrown:"Temporary crown",missing:"Missing",extract:"To extract",implant:"Implant",crownoff:"Crown removed",bridge:"Bridge",veneer:"Veneer",bleach:"Bleaching",braces:"Braces",fracture:"Fractured",impacted:"Impacted"};
 /* tooth pictures for the chart */
 const TK=n=>{const d=n%10;return d>=6?"m":d>=4?"p":"i"};
 const T_CR={m:"M5 30 C3 18 6 8 12 6 C16 5 18 9 22 9 C26 9 28 5 32 6 C38 8 41 18 39 30 C37 33 7 33 5 30Z",p:"M9 30 C7 19 10 8 16 6 C19 5 20 8 22 8 C24 8 25 5 28 6 C34 8 37 19 35 30 C33 33 11 33 9 30Z",i:"M12 30 C11 20 13 8 17 5 C20 3 24 3 27 5 C31 8 33 20 32 30 C30 33 14 33 12 30Z"};
@@ -2351,10 +2351,18 @@ function toothG(n,st){const k=TK(n);let g="";const gold=st==="crown"||st==="impl
   else if(st==="bridge")g+=`<path d="M0 22 H44" stroke="#9C7414" stroke-width="3"/>`;
   else g+=`<path d="${T_RT[k]}" fill="#F3EBDD" stroke="#B8A98F" stroke-width="1.2"/>`;
   if(st==="rct")g+=T_CN[k].map(d=>`<path d="${d}" fill="none" stroke="#D9472B" stroke-width="3" stroke-linecap="round"/>`).join("");
+  if(st==="rerct")g+=T_CN[k].map(d=>`<path d="${d}" fill="none" stroke="#7B2FB0" stroke-width="3.4" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#fff" stroke-width="1" stroke-dasharray="2 3"/>`).join("");
+  if(st==="postcore")g+=`<path d="M20 26 L20.5 56 Q22 60 23.5 56 L24 26Z" fill="#7C8A92" stroke="#56636B" stroke-width=".8"/>`;
+  if(st==="postcore")return g+`<path d="${T_CR[k]}" fill="none" stroke="#9FB3AE" stroke-width="1.2" stroke-dasharray="3 2.5"/><path d="M13 30 C12 22 14 15 18 13 H26 C30 15 32 22 31 30Z" fill="#A9B5BC" stroke="#56636B" stroke-width="1.2"/>`;
+  if(st==="tempcrown")return g+`<path d="${T_CR[k]}" fill="#F1E3F7" stroke="#8E5BB0" stroke-width="1.6" stroke-dasharray="3.5 2.5"/><text x="22" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#8E5BB0" font-family="sans-serif">T</text>`;
   if(st==="crownoff")return g+`<path d="${T_CR[k]}" fill="none" stroke="#D4A63A" stroke-width="1.6" stroke-dasharray="3 2.5"/><g transform="translate(22 31) scale(.66 .62) translate(-22 -31)"><path d="${T_CR[k]}" fill="#F1E9DA" stroke="#B8A98F" stroke-width="1.8"/></g><path d="M31 6 L37 2 M34 9 L40 6" stroke="#9C7414" stroke-width="1.6" stroke-linecap="round"/>`;
-  g+=`<path d="${T_CR[k]}" fill="${gold?"#D4A63A":st==="veneer"?"#E8F1FF":"#fff"}" stroke="${gold?"#9C7414":st==="veneer"?"#5B8FD9":"#9FB3AE"}" stroke-width="${st==="veneer"?2.4:1.4}"/>`;
+  g+=`<path d="${T_CR[k]}" fill="${gold?"#D4A63A":st==="veneer"?"#E8F1FF":st==="bleach"?"#F4FBFF":"#fff"}" stroke="${gold?"#9C7414":st==="veneer"?"#5B8FD9":st==="bleach"?"#7FC4E8":"#9FB3AE"}" stroke-width="${st==="veneer"?2.4:1.4}"/>`;
   if(gold)g+=`<path d="${k==="i"?"M15 12 C18 9 26 9 29 12":"M10 14 C16 11 28 11 34 14"}" fill="none" stroke="#FFF3D1" stroke-width="2" stroke-linecap="round" opacity=".8"/>`;
-  if(st==="rct")g+=`<ellipse cx="22" cy="18" rx="${k==="i"?4:7}" ry="4" fill="#5B8FD9"/>`;
+  if(st==="rct"||st==="rerct")g+=`<ellipse cx="22" cy="18" rx="${k==="i"?4:7}" ry="4" fill="#5B8FD9"/>`;
+  if(st==="rerct")g+=`<path d="M33 3 A5 5 0 1 1 28 1" fill="none" stroke="#7B2FB0" stroke-width="1.8" stroke-linecap="round"/><path d="M27 -1 L28.5 1.6 L25.6 2.4" fill="none" stroke="#7B2FB0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if(st==="pulpotomy")g+=`<path d="${k==="i"?"M18 30 C18 22 20 16 22 15 C24 16 26 22 26 30Z":"M13 30 C12 24 14 19 17 18 H27 C30 19 32 24 31 30Z"}" fill="#E8826E" stroke="#B3361C" stroke-width="1"/><ellipse cx="22" cy="14" rx="${k==="i"?4:7}" ry="3.5" fill="#5B8FD9"/>`;
+  if(st==="bleach")g+=`<path d="M8 4 L9.2 7 L12 8 L9.2 9 L8 12 L6.8 9 L4 8 L6.8 7Z M36 12 L37 14.5 L39.5 15.5 L37 16.5 L36 19 L35 16.5 L32.5 15.5 L35 14.5Z M30 1 L30.6 2.6 L32 3 L30.6 3.4 L30 5 L29.4 3.4 L28 3 L29.4 2.6Z" fill="#E0A800"/>`;
+  if(st==="braces")g+=`<path d="M0 19 H44" stroke="#56636B" stroke-width="1.8"/><rect x="16" y="14" width="12" height="10" rx="2" fill="#A9B5BC" stroke="#56636B" stroke-width="1"/><path d="M22 14 V24" stroke="#56636B" stroke-width=".8"/>`;
   if(st==="filled")g+=`<path d="${k==="i"?"M17 14 C19 11 25 11 27 14 C27 19 17 19 17 14Z":k==="p"?"M14 14 C17 10 27 10 30 14 C31 20 13 20 14 14Z":"M11 15 C14 10 30 10 33 15 C34 21 10 21 11 15Z"}" fill="#5B8FD9"/>`;
   if(st==="caries")g+=`<path d="M15 12 C18 8 25 9 26 13 C27 18 19 20 16 17 C14 16 14 13 15 12Z" fill="#4A3424"/><circle cx="30" cy="20" r="2.2" fill="#4A3424"/>`;
   if(st==="fracture")g+=`<path d="M12 6 L20 14 L15 18 L25 26 L21 30" fill="none" stroke="#C0392B" stroke-width="2.4" stroke-linejoin="round"/>`;
@@ -2853,7 +2861,7 @@ function teethText(arr){const set=new Set(arr),all=a=>a.every(n=>set.has(n)),par
   if(all(UPPER)&&all(LOWER)){parts.push("Full mouth");rest=rest.filter(n=>!UPPER.includes(n)&&!LOWER.includes(n))}
   else{if(all(UPPER)){parts.push("Upper arch");rest=rest.filter(n=>!UPPER.includes(n))}if(all(LOWER)){parts.push("Lower arch");rest=rest.filter(n=>!LOWER.includes(n))}}
   return [...parts,...rest.sort((a,b)=>a-b)].join(", ")}
-const TX_MAP=[[/re-?rct|root canal|\brct\b/i,"rct"],[/bridge|pontic/i,"bridge"],[/crown\s*(removal|removed|off)|remov\w*\s+(of\s+)?crown/i,"crownoff"],[/veneer/i,"veneer"],[/crown(?!.*(removal|re-?cement))/i,"crown"],[/filling/i,"filled"],[/extraction|impaction/i,"missing"],[/implant/i,"implant"]];
+const TX_MAP=[[/re-?rct|re-?root canal|retreat/i,"rerct"],[/pulpotomy|pulpectomy/i,"pulpotomy"],[/post\s*(&|and)?\s*core|\bpost\b|core build/i,"postcore"],[/root canal|\brct\b/i,"rct"],[/temp\w*\s*crown/i,"tempcrown"],[/bleach|whiten/i,"bleach"],[/brace|orthodont|bracket|aligner/i,"braces"],[/bridge|pontic/i,"bridge"],[/crown\s*(removal|removed|off)|remov\w*\s+(of\s+)?crown/i,"crownoff"],[/veneer/i,"veneer"],[/crown(?!.*(removal|re-?cement))/i,"crown"],[/filling/i,"filled"],[/extraction|impaction/i,"missing"],[/implant/i,"implant"]];
 function chartFromBill(pid,items){const p=P[pid];if(!p)return false;const teeth={...(p.teeth||{})};let ch=false;
   for(const it of items){const m=TX_MAP.find(([re])=>re.test(it.desc||""));if(!m)continue;for(const n of teethOf(it.tooth))if(n<50&&teeth[n]!==m[1]){teeth[n]=m[1];ch=true}}
   if(ch)cset("patients",pid,{...p,teeth});return ch}
