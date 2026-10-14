@@ -278,6 +278,7 @@ dialog::backdrop{background:rgba(10,25,22,.45)}
 .field{display:flex;flex-direction:column;gap:4px;min-width:0}
 .field label{font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.03em}
 .field input,.field select{padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);width:100%}
+.field select[data-supsel]+input{margin-top:6px}
 .dlg .actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center}
 .dlg .actions div{display:flex;gap:8px}
 .confirm{background:var(--bad-soft);color:var(--bad);border-radius:10px;padding:10px 12px;font-size:.88rem;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
@@ -1909,7 +1910,7 @@ function openEdit(id){
   $("dlgTitle").textContent=id?"Edit item":"Add item";
   $("f-name").value=it.name;$("f-asset").checked=id?!!it.asset:defaultAsset(it);$("f-min").disabled=$("f-asset").checked;
   $("f-cat").value=it.sub;$("f-loc").value=id?(it.loc||""):(defaultLoc(it)||"");$("f-unit").value=it.unit||"";
-  $("f-qty").value=it.qty??"";$("f-iu").value=+it.inUse||0;$("f-iuback").disabled=!(+it.inUse>0);$("f-iuw").hidden=!!$("f-asset").checked;$("f-min").value=it.min??0;$("f-exp").value=it.expiry||"";$("f-sup").value=it.supplier||"";
+  $("f-qty").value=it.qty??"";$("f-iu").value=+it.inUse||0;$("f-iuback").disabled=!(+it.inUse>0);$("f-iuw").hidden=!!$("f-asset").checked;$("f-min").value=it.min??0;$("f-exp").value=it.expiry||"";$("f-sup").value=it.supplier||"";supSync("f-sup");
   fillTypes(it.sub); $("f-type").value=it.type||(id&&typeOf(it)!=="Other"&&TYPES[it.sub]?typeOf(it):"");
   renderHist(id);
   $("removeBtn").hidden=!id;$("confirmBox").hidden=true;
@@ -2080,7 +2081,7 @@ function setBuyItem(it){
   $("p-info").innerHTML=it?`<b>${esc(it.name)}</b><span>${esc(secName(it.sub))} · in stock now: ${it.qty??"not counted"} ${esc(it.unit)}</span>`:"";
   $("p-unit").textContent=it?"("+it.unit+")":"";
   if(it)$("p-sup").value=it.supplier||((lastBuys(it.id)[0]||{}).supplier)||"";
-  priceHint();
+  supSync("p-sup");priceHint();
 }
 function priceHint(){
   const h=$("p-hint"); const lb=buyId?lastBuys(buyId).find(l=>l.unitPrice):null;
@@ -3607,7 +3608,7 @@ $("vb-read").addEventListener("click",async()=>{
     if(lines.join("").replace(/[^a-z]/gi,"").length<15){err.innerHTML="This PDF is a scanned picture, so it has no text to read. Open <b>Paper bill or scanned PDF?</b> below and use <b>Scan text</b> on the printed bill. The PDF will still be attached.";err.hidden=false;$("vb-txw").open=true;return}}
   else if(f&&!txt){err.innerHTML="A photo can't be read directly. Open <b>Paper bill or scanned PDF?</b> below and use <b>Scan text</b>. The photo will still be attached to the purchases.";err.hidden=false;$("vb-txw").open=true;return}
   const {rows,hdr}=vbParse(lines);vbRows=rows;
-  $("vb-sup").value=hdr.sup||"";$("vb-inv").value=hdr.inv||"";$("vb-date").value=hdr.date&&hdr.date<=ymd(new Date())?hdr.date:ymd(new Date());$("vb-paid").value="paid";
+  $("vb-sup").value=hdr.sup||"";supSync("vb-sup");$("vb-inv").value=hdr.inv||"";$("vb-date").value=hdr.date&&hdr.date<=ymd(new Date())?hdr.date:ymd(new Date());$("vb-paid").value="paid";
   $("vb-s1").hidden=true;$("vb-s2").hidden=false;renderVb();
 });
 $("vb-save").addEventListener("click",async()=>{
@@ -4588,8 +4589,24 @@ let deferredInstall=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;$("installBtn").hidden=false});
 $("installBtn").addEventListener("click",async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;$("installBtn").hidden=true});
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+/* supplier dropdowns */
+const SUP_DEF=["Haseeb / Kashif","Mukhtiyar","E-Dental Mart","Hamayun Dental Supply","Aamar","Shah Sb","Aman Shah"];
+function supList(){let l=[];try{l=JSON.parse(localStorage.getItem("ds-sups")||"[]")}catch(e){}const seen=new Set(),out=[];
+  const add=x=>{x=String(x||"").trim();if(!x)return;const k=x.toLowerCase();if(seen.has(k))return;seen.add(k);out.push(x)};
+  SUP_DEF.forEach(add);(Array.isArray(SET&&SET.suppliers)?SET.suppliers:[]).forEach(add);(Array.isArray(l)?l:[]).forEach(add);
+  try{items().forEach(i=>add(i.supplier));Object.values(logs).forEach(x=>add(x.supplier))}catch(e){}return out}
+function supAdd(name){name=String(name||"").trim().slice(0,60);if(!name||supList().some(x=>x.toLowerCase()===name.toLowerCase()))return;
+  let l=[];try{l=JSON.parse(localStorage.getItem("ds-sups")||"[]")}catch(e){}if(!Array.isArray(l))l=[];l.push(name);try{localStorage.setItem("ds-sups",JSON.stringify(l))}catch(e){}
+  try{if(myRole()==="admin")saveSet({...SET,suppliers:[...(Array.isArray(SET.suppliers)?SET.suppliers:[]),name]})}catch(e){}}
+function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementSibling&&inp.previousElementSibling.matches&&inp.previousElementSibling.matches("[data-supsel]")?inp.previousElementSibling:null;
+  if(!sel){sel=document.createElement("select");sel.dataset.supsel=id;sel.setAttribute("aria-label","Supplier");inp.parentNode.insertBefore(sel,inp);
+    sel.addEventListener("change",()=>{if(sel.value==="+"){inp.hidden=false;inp.value="";inp.placeholder="Type the supplier's name";inp.focus()}else{inp.hidden=true;inp.value=sel.value}});
+    inp.addEventListener("change",()=>{if(!inp.hidden&&inp.value.trim())supAdd(inp.value)})}
+  const v=inp.value.trim(),list=supList();if(v&&!list.some(x=>x.toLowerCase()===v.toLowerCase()))list.push(v);
+  sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
+  if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v55";let updShown=false;
+const APP_BUILD="ds-v56";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
