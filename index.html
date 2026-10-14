@@ -1000,6 +1000,8 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 .tooth.tpic.hx::after{top:auto;bottom:14px;right:2px}.tooth.tpic.lower.hx::after{top:14px;bottom:auto}
 .tbtn.tpb,.tleg.tpb{display:inline-flex;align-items:center;gap:4px;padding-left:4px}.tbtn.tpb.on{border-color:var(--accent);background:var(--accent-soft)}.tsm{width:14px;height:23px;flex:none}
 .jarch{display:none}.tarch{width:100%;max-width:640px;display:block;margin:0 auto}.tarch text{font-size:10px;font-weight:700;fill:var(--muted);font-family:inherit}.tarch text.apl{fill:#2E6BB8;text-decoration:underline}.tarch .amid{font-weight:400}.atooth{cursor:pointer}.atooth:hover rect{fill:var(--accent-soft)}.atooth:focus{outline:none}.atooth:focus-visible rect{stroke:var(--accent);stroke-width:2}
+.iu{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px}.iuc{font-size:.76rem;color:var(--muted);padding:2px 8px;border:1px solid var(--line);border-radius:999px}.iuc.on{border-color:var(--ok,#276B43);color:var(--ok,#276B43);background:var(--ok-soft,#E3F2E8)}.iuc b{font-variant-numeric:tabular-nums}
+.iub{height:28px;padding:0 10px;border:1.5px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font:inherit;font-size:.76rem;font-weight:700;cursor:pointer}.iub:disabled{opacity:.45;cursor:default}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -1834,7 +1836,7 @@ function rowHTML(i){
   if(i.supplier)meta.push(`<span>${esc(i.supplier)}</span>`);
   const dis=canWrite?"":"disabled";
   return `<div class="row" role="row" data-id="${esc(i.id)}">
-    <div class="name"><strong>${esc(i.name)}</strong>${meta.length?`<div class="meta">${meta.join("")}</div>`:""}</div>
+    <div class="name"><strong>${esc(i.name)}</strong>${meta.length?`<div class="meta">${meta.join("")}</div>`:""}${i.asset?"":`<div class="iu"><span class="iuc${+i.inUse?" on":""}">In stock <b>${i.qty??0}</b> · In use <b>${+i.inUse||0}</b></span><button type="button" class="iub" data-iuopen ${dis||((+i.qty||0)<=0?"disabled":"")} title="Take one out of stock and start using it">Open one</button>${+i.inUse?`<button type="button" class="iub" data-iudone ${dis} title="The opened one is used up">Finished</button>`:""}</div>`}</div>
     <div class="stepper"><button data-step="-1" aria-label="Decrease ${esc(i.name)}" ${dis}>−</button><input class="qty" id="q-${esc(i.id)}" type="number" min="0" inputmode="numeric" value="${i.qty??""}" placeholder="—" aria-label="${esc(i.name)} in stock" ${dis}><button data-step="1" aria-label="Increase ${esc(i.name)}" ${dis}>+</button></div>
     <div class="unit">${esc(i.unit)}</div>
     <div class="min num${i.asset?" na":""}">${i.asset?`<span class="noreorder">No reorder</span>`:(i.min??0)}</div>
@@ -1849,7 +1851,7 @@ function current(id){return items().find(i=>i.id===id)}
 function patch(id,fields,immediate,opts){
   const base=current(id)||{};
   if(!(opts&&opts.noLog)&&("qty" in fields)&&!base.asset&&base.qty!=null&&fields.qty!=null&&+fields.qty!==+base.qty)queueDelta(id,+fields.qty-(+base.qty));
-  const doc={cat:base.cat||"",sub:base.sub,loc:base.loc??"",asset:!!base.asset,type:base.type||"",name:base.name,unit:base.unit,min:base.min??0,qty:base.qty??null,expiry:base.expiry||"",supplier:base.supplier||"",hidden:!!base.hidden,custom:!!base.custom,...fields,updatedAt:new Date().toISOString()};
+  const doc={cat:base.cat||"",sub:base.sub,loc:base.loc??"",asset:!!base.asset,type:base.type||"",name:base.name,unit:base.unit,min:base.min??0,qty:base.qty??null,inUse:+base.inUse||0,expiry:base.expiry||"",supplier:base.supplier||"",hidden:!!base.hidden,custom:!!base.custom,...fields,updatedAt:new Date().toISOString()};
   overrides[id]=doc; render();
   pending[id]=doc;
   clearTimeout(pending["t"+id]);
@@ -1879,6 +1881,8 @@ document.querySelector(".stats").addEventListener("click",e=>{const b=e.target.c
 $("q").addEventListener("input",e=>{query=e.target.value;render();$("q").focus()});
 document.addEventListener("click",e=>{if(e.target.id==="clearF"){statusF="";query="";$("q").value="";render()}});
 $("list").addEventListener("click",e=>{
+  const io=e.target.closest("[data-iuopen]");if(io){const id=io.closest(".row").dataset.id,it=current(id);if((+it.qty||0)<=0){toast("None left in stock to open");return}patch(id,{qty:(+it.qty||0)-1,inUse:(+it.inUse||0)+1},true);toast("Opened 1 "+(it.unit||"")+" of "+it.name+" · now in use");return}
+  const idn=e.target.closest("[data-iudone]");if(idn){const id=idn.closest(".row").dataset.id,it=current(id);patch(id,{inUse:Math.max(0,(+it.inUse||0)-1)},true);toast(it.name+": finished one");return}
   const st=e.target.closest("[data-step]");
   if(st){const id=st.closest(".row").dataset.id,it=current(id);const q=Math.max(0,(+it.qty||0)+(+st.dataset.step));patch(id,{qty:q});return}
   const bu=e.target.closest("[data-buy]");if(bu){openBuy(bu.dataset.buy);return}
