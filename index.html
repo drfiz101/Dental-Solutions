@@ -1006,6 +1006,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 .updbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));z-index:9999;border:0;border-radius:999px;padding:11px 18px;background:var(--accent);color:var(--accent-ink,#fff);font:inherit;font-size:.88rem;box-shadow:0 10px 24px -10px rgba(0,0,0,.5);max-width:calc(100% - 24px)}
 @supports (-webkit-touch-callout:none){input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;width:100%;display:block;min-height:2.8em}}
 input[type=date]{min-width:0;max-width:100%}
+.lockscr{position:fixed;inset:0;z-index:9998;background:var(--bg);display:grid;place-items:center;padding:20px}.lockbox{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;text-align:center}.lkic{font-size:2.6rem}.lockbox form{display:flex;flex-direction:column;gap:8px;text-align:left}.lockbox input{height:48px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;font:inherit;font-size:1.05rem;background:var(--surface);color:var(--ink)}.lockbox .btn{height:48px}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -1043,6 +1044,9 @@ input[type=date]{min-width:0;max-width:100%}
     Promise.all(jobs).catch(function(){}).then(function(){location.replace(location.pathname+"?r="+Date.now())})};
 })();
 </script>
+<div id="lockScr" class="lockscr" hidden><div class="lockbox"><div class="lkic" aria-hidden="true">🔒</div><h2>App locked</h2><p id="lk-who" class="muted" style="margin:0;white-space:pre-line"></p>
+  <form id="lkForm" novalidate><label for="lk-pw" class="small muted">Your password</label><input id="lk-pw" type="password" autocomplete="current-password"><p class="perr" id="lk-err" hidden></p><button class="btn primary" type="submit" id="lk-go">Unlock</button></form>
+  <p class="muted small" id="lk-net" style="margin:0"></p><button type="button" class="linkbtn" id="lk-out">Sign out instead</button></div></div>
 <div id="aoBar" class="aobar" role="alertdialog" aria-live="assertive" hidden><span id="aoMsg">You'll be signed out soon because the app hasn't been used.</span><button class="btn primary small" id="aoStay" type="button">Stay signed in</button></div>
 <div class="login" id="login" hidden>
   <div class="login-card">
@@ -4305,12 +4309,12 @@ async function enterClinic(u,seq){
   showGate(`<div class="phload"><div class="spin"></div><p>Opening ${esc(code)}…</p></div>`);
   const cref=fsRoot.collection("clinics").doc(code);
   let cs=null;
-  if(code==="alawan"&&isSuper()){try{cs=await cref.get()}catch(e){cs=null}if(!cs||!cs.exists){await cref.set({name:"Al Awan Dental Clinic",city:"",phone:"0311 0053535",ownerName:"Dr Faizan Malik",ownerUid:u.uid,ownerUser:em,status:"active",legacy:true,createdAt:new Date().toISOString(),approvedAt:new Date().toISOString()})}}
-  let ms=null;try{ms=await cref.collection("members").doc(u.uid).get()}catch(e){ms=null}
+  if(code==="alawan"&&isSuper()){try{cs=await getFast(cref)}catch(e){cs=null}if((!cs||!cs.exists)&&isOnline()){await cref.set({name:"Al Awan Dental Clinic",city:"",phone:"0311 0053535",ownerName:"Dr Faizan Malik",ownerUid:u.uid,ownerUser:em,status:"active",legacy:true,createdAt:new Date().toISOString(),approvedAt:new Date().toISOString()})}}
+  let ms=null;try{ms=await getFast(cref.collection("members").doc(u.uid))}catch(e){ms=null}
   if(ms&&ms.exists&&ms.data()&&(ms.data().deleted||ms.data().replacedBy||ms.data().active===false)){const md=ms.data();showGate(`<h2>${md.replacedBy?"Your password was changed":"Login turned off"}</h2><p class="muted">${md.replacedBy?"Your clinic admin set a new password for you. Sign in again with your username and the new password.":"This login has been turned off or removed by your clinic admin. Ask them if you need access."}</p><div class="row"><button class="btn primary" data-gout>Sign out</button></div>`);return}
   if(seq!==authSeq)return;
   if((!ms||!ms.exists)&&code==="alawan"&&LEGACY_ALAWAN.includes(em)){await cref.collection("members").doc(u.uid).set({username:em,name:em==="fizi101@gmail.com"?"Dr Faizan Malik":em==="shaziasami.ss@gmail.com"?"Dr Shazia Sami":em,role:isSuper()?"admin":"staff",perms:isSuper()?[]:PRESETS["Dentist"],active:true,owner:isSuper(),createdAt:new Date().toISOString()});ms=await cref.collection("members").doc(u.uid).get()}
-  try{cs=await cref.get()}catch(e){cs=null}
+  try{cs=await getFast(cref)}catch(e){cs=null}
   if(seq!==authSeq)return;
   if(!cs||!cs.exists){showGate(`<h2>Clinic not found</h2><p class="muted">There's no clinic with the code <b>${esc(code)}</b>. Check the code and sign in again.</p><div class="row"><button class="btn primary" data-gout>Sign out</button></div>`);return}
   if(!ms||!ms.exists){showGate(`<h2>No access</h2><p class="muted">This login isn't part of <b>${esc((cs.data()||{}).name||code)}</b>. Ask the clinic's admin to create a login for you.</p><div class="row"><button class="btn primary" data-gout>Sign out</button>${isSuper()?`<button class="btn" data-gconsole>Owner console</button>`:""}</div>`);return}
@@ -4325,14 +4329,14 @@ async function enterClinic(u,seq){
     if(!CLINIC)openWorkspace(u,code,ms.data(),seq);else render()},()=>{});
 }
 function openWorkspace(u,code,mem,seq){
-  if(!roleCheck){const st=lsGet("ds-ao"),lim=(st!==null&&st!==""&&+st>=0?+st:AO_DEF)*60000,last=+lsGet("ds-last-"+u.uid)||0;if(lim&&last&&Date.now()-last>=lim){aoUid=u.uid;setTimeout(()=>aoSignOut(lim),0);return}}
+  if(!roleCheck){const st=lsGet("ds-ao"),lim=(st!==null&&st!==""&&+st>=0?+st:AO_DEF)*60000,last=+lsGet("ds-last-"+u.uid)||0;if(lim&&last&&Date.now()-last>=lim)lsSet("ds-locked-"+u.uid,"1")}
   CLINIC=code;MEM=mem;useClinicDefaults(code,CDOC);
   const legacy=code==="alawan";db={collection:n=>legacy?fsRoot.collection(n):fsRoot.collection("clinics").doc(code).collection(n)};
   me={by:mem.username||u.email,uid:u.uid};myName=mem.name||mem.username||u.email;
   document.body.classList.add("ws-on");hideGate();$("login").hidden=true;$("who").hidden=false;$("whoName").textContent=myName;canWrite=true;$("notice").hidden=true;
   memUnsub=fsRoot.collection("clinics").doc(code).collection("members").doc(u.uid).onSnapshot(sn=>{if(seq!==authSeq)return;const d=sn.data();if(!d||d.active===false){firebase.auth().signOut();return}MEM=d;myName=d.name||d.username;renderMeChip();render()},()=>{});
   if(roleCheck){roleCheck=false;setTimeout(()=>{if(wantRole==="admin"&&myRole()!=="admin")toast("This login has staff access. Signed in as staff.");else toast("Signed in to "+(CDOC.name||code))},600)}
-  main="dashboard";actPopDone=false;actLast={};aoStart(u.uid,roleCheck);netUI();netCheckQueued();setTimeout(()=>{loadMyPhoto();try{alCheck()}catch(e){}},2500);startLogs();startClinic();
+  main="dashboard";actPopDone=false;actLast={};aoStart(u.uid,roleCheck);setTimeout(()=>lkOpen(u.uid),50);netUI();netCheckQueued();setTimeout(()=>{loadMyPhoto();try{alCheck()}catch(e){}},2500);startLogs();startClinic();
   unsub=db.collection("items").onSnapshot({includeMetadataChanges:false},snap=>{
     const next={};snap.forEach(d=>{const v=d.data();if(v)next[d.id]={...v}});
     for(const id in pending)if(pending[id]&&!id.startsWith("t"))next[id]=pending[id];
@@ -4449,7 +4453,7 @@ function openMore(){const b=document.body,vis=id=>{const x=$(id);return x&&!x.hi
     canShares()&&["shares","Dentist shares","#B7791F",'<circle cx="8" cy="8" r="5"/><circle cx="16" cy="16" r="5"/>'],
     !b.classList.contains("is-staff")&&["prices","Treatment prices","#AD620B",'<path d="M4 7h16M4 12h16M4 17h10"/>'],
     vis("profBtn")&&["profBtn","Clinic profile & WhatsApp messages"],vis("acBtn")&&["acBtn","Staff access"],vis("consoleBtn")&&["consoleBtn","Owner console"],
-    vis("installBtn")&&["installBtn","Install app on this phone"],["myPhoto","My photo"],["alBtn","Alerts & sounds"],["lookBtn","Appearance & layout"],["help","❓ Help & how to use"],vis("pwBtn")&&["pwBtn","Change password"],isSimple()?["classic","Switch to classic layout"]:["simple","Switch to simple layout"],["signOut","Sign out"]].filter(Boolean);
+    vis("installBtn")&&["installBtn","Install app on this phone"],["myPhoto","My photo"],["alBtn","Alerts & sounds"],["lookBtn","Appearance & layout"],["help","❓ Help & how to use"],vis("pwBtn")&&["pwBtn","Change password"],isSimple()?["classic","Switch to classic layout"]:["simple","Switch to simple layout"],["lock","🔒 Lock app"],["signOut","Sign out"]].filter(Boolean);
   $("moreWho").innerHTML=`${myPhoto?`<img class="avimg" src="${myPhoto}" alt="">`:`<span class="av">${esc(initials(myName||""))}</span>`}<div><b>${esc(myName||"")}</b><div class="muted small">${esc((myRole()==="admin"?"Admin":"Staff")+" · "+((CDOC&&CDOC.name)||S().clinic.name||""))}</div></div>`;
   $("moreList").innerHTML=items.map(([k,n,c,ic])=>`<button type="button" class="mli${k==="signOut"?" out":""}" data-mi="${k}">${ic?`<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>`:""}<span>${esc(n)}</span></button>`).join("");
   openD($("moredlg"))}
@@ -4458,6 +4462,7 @@ $("moreList").addEventListener("click",e=>{const b=e.target.closest("[data-mi]")
   if(["lab","inventory","reports"].includes(k))return goMain(k);
   if(k==="prices")return openPrices();
   if(k==="help")return openHelp();
+  if(k==="lock")return lockApp();
   if(k==="shares")return openShares();
   if(k==="myPhoto")return pickMyPhoto();
   if(k==="simple"){const L=lookGet();L.layout="simple";try{localStorage.setItem("ds-look",JSON.stringify(L))}catch(x){}lookApply(L);render();try{homeApply()}catch(x){}toast("Simple layout. Switch back any time from Menu.");return}
@@ -4527,17 +4532,33 @@ window.addEventListener("online",()=>{if(aoUid)aoTouch(true);netUI();if(CLINIC)t
 window.addEventListener("offline",()=>{netUI();if(CLINIC)toast("No internet. Keep working — everything is saved on this device and will upload when the internet is back.")});
 /* auto log out after no use */
 const AO_DEF=30;let aoUid=null,aoTick=null,aoLastSave=0;
+/* ===== offline-friendly lock (instead of signing out) ===== */
+async function pwHash(uid,pw){try{const h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("ds|"+uid+"|"+pw));return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("")}catch(e){return ""}}
+const lkUid=()=>{try{return firebase.auth().currentUser.uid}catch(e){return ""}};
+function lockApp(msg){const uid=lkUid();if(!uid)return;lsSet("ds-locked-"+uid,"1");aoStop();for(const d of document.querySelectorAll("dialog[open]")){try{d.close()}catch(e){}}
+  $("lk-who").textContent=(myName?myName+" · ":"")+((CDOC&&CDOC.name)||"")+(msg?"\n"+msg:"");$("lk-pw").value="";$("lk-err").hidden=true;
+  $("lk-net").textContent=isOnline()?"":"You're offline. You can still unlock and work; changes upload when the internet is back.";$("lockScr").hidden=false;setTimeout(()=>{try{$("lk-pw").focus()}catch(e){}},100)}
+function lkOpen(uid){if(lsGet("ds-locked-"+uid)==="1")lockApp()}
+$("lkForm").addEventListener("submit",async e=>{e.preventDefault();const pw=$("lk-pw").value,uid=lkUid(),err=$("lk-err");err.hidden=true;if(!pw||!uid){err.textContent="Enter your password.";err.hidden=false;return}
+  $("lk-go").disabled=true;$("lk-go").textContent="Checking…";
+  try{const h=await pwHash(uid,pw),saved=lsGet("ds-lk-"+uid);let ok=!!saved&&h===saved;
+    if(!ok&&isOnline()){try{const u=firebase.auth().currentUser;await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,pw));ok=true;lsSet("ds-lk-"+uid,h)}catch(x){if(/network/.test((x&&x.code)||"")&&!saved){err.textContent="No internet. Connect once to unlock.";err.hidden=false;return}}}
+    if(!ok){err.textContent=!saved&&!isOnline()?"You're offline and this phone hasn't saved your password yet. Connect to the internet once to unlock.":"Wrong password. Try again.";err.hidden=false;return}
+    lsSet("ds-locked-"+uid,null);$("lockScr").hidden=true;$("lk-pw").value="";aoStart(uid);toast("Unlocked")}
+  finally{$("lk-go").disabled=false;$("lk-go").textContent="Unlock"}});
+$("lk-out").addEventListener("click",()=>{if(!isOnline()&&!confirm("You're offline. After signing out you can't sign in again until the internet is back. Sign out anyway?"))return;const uid=lkUid();if(uid)lsSet("ds-locked-"+uid,null);$("lockScr").hidden=true;$("lp").value="";firebase.auth().signOut()});
+function getFast(ref){if(!isOnline())return ref.get({source:"cache"}).catch(()=>ref.get());return Promise.race([ref.get(),new Promise((_,rej)=>setTimeout(()=>rej(new Error("slow")),7000))]).catch(()=>ref.get({source:"cache"}))}
 function aoMinutes(){const v=((SET&&SET.clinic)||{}).autoOut;if(v===0||v==="0")return 0;return +v>0?+v:AO_DEF}
 function aoLimit(){let m;if(SET_LOADED){m=aoMinutes();lsSet("ds-ao",String(m))}else{const st=lsGet("ds-ao");m=st!==null&&st!==""&&+st>=0?+st:AO_DEF}return m*60000}
 function aoLast(){return +lsGet("ds-last-"+aoUid)||0}
 function aoTouch(force){const n=Date.now();if(!force&&n-aoLastSave<5000)return;aoLastSave=n;lsSet("ds-last-"+aoUid,String(n))}
-function aoCheck(){if(!aoUid)return false;const lim=aoLimit();if(!isOnline()){$("aoBar").hidden=true;return false}
+function aoCheck(){if(!aoUid)return false;const lim=aoLimit();
   if(!lim){$("aoBar").hidden=true;return false}
   const idle=Date.now()-aoLast();
   if(idle>=lim){aoSignOut(lim);return true}
   const left=lim-idle;if(left<=60000){$("aoMsg").textContent="No one has used the app for a while. Signing out in "+Math.max(1,Math.ceil(left/1000))+" seconds.";$("aoBar").hidden=false}else $("aoBar").hidden=true;
   return false}
-function aoSignOut(lim){const mins=Math.round(lim/60000);aoStop();$("lp").value="";for(const d of document.querySelectorAll("dialog[open]")){try{d.close()}catch(e){}}
+function aoSignOut(lim){const mins=Math.round(lim/60000),uid=lkUid();if(uid&&(lsGet("ds-lk-"+uid)||isOnline())){lockApp("Locked after "+(mins>=60?(mins/60)+(mins>60?" hours":" hour"):mins+" minutes")+" of no use.");return}if(!isOnline())return;aoStop();$("lp").value="";for(const d of document.querySelectorAll("dialog[open]")){try{d.close()}catch(e){}}
   firebase.auth().signOut().then(()=>{const e=$("loginErr");e.textContent="Signed out automatically after "+(mins>=60?(mins/60)+(mins>60?" hours":" hour"):mins+" minutes")+" of no use. Sign in again to continue.";e.hidden=false})}
 function aoActivity(){if(!aoUid)return;if(aoCheck())return;const warn=!$("aoBar").hidden;aoTouch(warn);if(warn)$("aoBar").hidden=true}
 function aoStart(uid,fresh){aoStop();aoUid=uid;aoTouch(true);aoTick=setInterval(aoCheck,5000)}
@@ -4556,8 +4577,9 @@ $("loginForm").addEventListener("submit",async e=>{e.preventDefault();const err=
   if(!code&&!user.includes("@")){err.textContent="Enter your clinic code.";err.hidden=false;return}
   const remember=$("lremember").checked;lsSet("ds-remember",remember?"1":"0");lsSet("ds-user",remember?user:null);
   roleCheck=true;lsSet("ds-code",code||null);$("loginBtn").disabled=true;$("loginBtn").textContent="Signing in…";
-  try{try{await firebase.auth().setPersistence(remember?firebase.auth.Auth.Persistence.LOCAL:firebase.auth.Auth.Persistence.SESSION)}catch(e){}
-    await firebase.auth().signInWithEmailAndPassword(await loginEmailFor(user,code),pw);if(!remember)$("lp").value=""}
+  if(!isOnline()){err.textContent="You're offline. Signing in needs the internet. Tip: when the app is already open on this phone, it locks instead of signing out, so you can unlock it offline with your password.";err.hidden=false;$("loginBtn").disabled=false;$("loginBtn").textContent="Sign in";return}
+  try{try{await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(e){}
+    const cr=await firebase.auth().signInWithEmailAndPassword(await loginEmailFor(user,code),pw);try{const uid=(cr&&cr.user&&cr.user.uid)||lkUid();if(uid){lsSet("ds-lk-"+uid,await pwHash(uid,pw));lsSet("ds-locked-"+uid,null)}}catch(x){}if(!remember)$("lp").value=""}
   catch(x){err.textContent=/user-not-found|wrong-password|invalid-credential|invalid-login|invalid-email/.test(x.code||"")?"Clinic code, username or password is wrong. Try again.":x.code==="auth/network-request-failed"?"No internet connection. Connect and try again.":x.code==="auth/too-many-requests"?"Too many tries. Wait a few minutes and try again.":"Couldn't sign in ("+(x.code||"error")+")";err.hidden=false}
   finally{$("loginBtn").disabled=false;$("loginBtn").textContent="Sign in"}
 });
@@ -4579,7 +4601,7 @@ $("regForm").addEventListener("submit",async e=>{e.preventDefault();const err=$(
     lsSet("ds-code",code);registering=false;await enterClinic(cred.user,++authSeq)}
   catch(x){registering=false;fail(x&&x.msg?x.msg:/email-already-in-use/.test((x&&x.code)||"")?"That clinic code is already used. Choose another code.":authMsg(x))}
   finally{registering=false;b.disabled=false;b.textContent="Register clinic"}});
-$("signOut").addEventListener("click",()=>{if(syncPending&&!confirm((isOnline()?"Some changes are still uploading.":"You're offline and "+syncPending+" change"+(syncPending>1?"s haven't":" hasn't")+" been uploaded yet.")+" If you sign out now they'll upload the next time you sign in on this device. Sign out anyway?"))return;$("lp").value="";firebase.auth().signOut()});
+$("signOut").addEventListener("click",()=>{if(!isOnline()){if(confirm("You're offline. If you sign out, you can't sign in again until the internet is back.\n\nTap OK to LOCK the app instead (you can unlock offline with your password). Tap Cancel to stay signed in."))lockApp();return}if(syncPending&&!confirm((isOnline()?"Some changes are still uploading.":"You're offline and "+syncPending+" change"+(syncPending>1?"s haven't":" hasn't")+" been uploaded yet.")+" If you sign out now they'll upload the next time you sign in on this device. Sign out anyway?"))return;$("lp").value="";firebase.auth().signOut()});
 setupFirebase();
 netUI();
 
@@ -4606,7 +4628,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v56";let updShown=false;
+const APP_BUILD="ds-v57";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
