@@ -1204,6 +1204,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
       <div class="field"><label for="f-cat">Category</label><select id="f-cat"></select></div>
       <div class="field"><label for="f-unit">Unit</label><input id="f-unit" maxlength="20" placeholder="box, pcs, kit"></div>
       <div class="field"><label for="f-qty">In stock</label><input id="f-qty" type="number" min="0" step="1" inputmode="numeric" placeholder="Not counted"></div>
+      <div class="field" id="f-iuw" style="grid-column:1/-1"><label for="f-iu">In use (opened)</label><div style="display:flex;gap:8px"><input id="f-iu" type="number" min="0" step="1" inputmode="numeric" style="flex:1;min-width:0;max-width:140px"><button type="button" class="btn small" id="f-iuback" title="Opened by mistake? Put one back into stock">↩ Undo open</button></div></div>
       <div class="field"><label for="f-min">Reorder at</label><input id="f-min" type="number" min="0" step="1" inputmode="numeric"></div>
       <div class="field"><label for="f-exp">Expiry date</label><input id="f-exp" type="date"></div>
       <div class="field"><label for="f-sup">Supplier</label><input id="f-sup" maxlength="60" placeholder="Optional"></div>
@@ -1905,7 +1906,7 @@ function openEdit(id){
   $("dlgTitle").textContent=id?"Edit item":"Add item";
   $("f-name").value=it.name;$("f-asset").checked=id?!!it.asset:defaultAsset(it);$("f-min").disabled=$("f-asset").checked;
   $("f-cat").value=it.sub;$("f-loc").value=id?(it.loc||""):(defaultLoc(it)||"");$("f-unit").value=it.unit||"";
-  $("f-qty").value=it.qty??"";$("f-min").value=it.min??0;$("f-exp").value=it.expiry||"";$("f-sup").value=it.supplier||"";
+  $("f-qty").value=it.qty??"";$("f-iu").value=+it.inUse||0;$("f-iuback").disabled=!(+it.inUse>0);$("f-iuw").hidden=!!$("f-asset").checked;$("f-min").value=it.min??0;$("f-exp").value=it.expiry||"";$("f-sup").value=it.supplier||"";
   fillTypes(it.sub); $("f-type").value=it.type||(id&&typeOf(it)!=="Other"&&TYPES[it.sub]?typeOf(it):"");
   renderHist(id);
   $("removeBtn").hidden=!id;$("confirmBox").hidden=true;
@@ -1913,10 +1914,14 @@ function openEdit(id){
   $("f-name").focus();
 }
 $("f-type").addEventListener("change",e=>{if(!editId){const l=defaultLoc({sub:$("f-cat").value,name:$("f-name").value,type:e.target.value.trim()});if(l)$("f-loc").value=l}});
-$("f-asset").addEventListener("change",e=>{$("f-min").disabled=e.target.checked});
+$("f-asset").addEventListener("change",e=>{$("f-min").disabled=e.target.checked;$("f-iuw").hidden=e.target.checked});
 $("f-cat").addEventListener("change",e=>{fillTypes(e.target.value);if(!editId){const a=defaultAsset({sub:e.target.value,name:$("f-name").value});$("f-asset").checked=a;$("f-min").disabled=a}});
 $("addBtn").addEventListener("click",()=>{if(!canWrite)return toast("You don't have edit access.");openEdit(null)});
 $("cancelBtn").addEventListener("click",()=>dlg.close());
+$("f-iuback").addEventListener("click",()=>{const iu=Math.max(0,Math.floor(+$("f-iu").value||0));if(!iu)return;$("f-iu").value=iu-1;const q=$("f-qty").value.trim();$("f-qty").value=(q===""?0:Math.floor(+q))+1;$("f-iuback").disabled=iu-1<=0;
+  if(editId){const it=current(editId);const lg=Object.entries(logs).filter(([,l])=>l.itemId===editId&&l.kind==="used").sort((a,b)=>String(b[1].at||"").localeCompare(String(a[1].at||"")))[0];
+    if(lg){if((+lg[1].qty||0)>1)updLog(lg[0],{qty:(+lg[1].qty||0)-1});else delLog(lg[0])}
+    patch(editId,{qty:(+it.qty||0)+1,inUse:iu-1},true,{noLog:true});toast("Put 1 back into stock")}});
 $("removeBtn").addEventListener("click",()=>{$("confirmBox").hidden=false});
 $("noRemove").addEventListener("click",()=>{$("confirmBox").hidden=true});
 $("yesRemove").addEventListener("click",()=>{patch(editId,{hidden:true},true);dlg.close();toast("Item deleted. Restore it from the bottom of its list.")});
@@ -1924,7 +1929,7 @@ $("form").addEventListener("submit",e=>{
   e.preventDefault();
   const name=$("f-name").value.trim(); if(!name){$("f-name").focus();return}
   const qv=$("f-qty").value.trim();
-  const fields={name,sub:$("f-cat").value,loc:$("f-loc").value,asset:$("f-asset").checked,unit:$("f-unit").value.trim()||"pcs",qty:qv===""?null:Math.max(0,Math.floor(+qv)),min:Math.max(0,Math.floor(+$("f-min").value||0)),expiry:$("f-exp").value,supplier:$("f-sup").value.trim(),type:$("f-type").value.trim()};
+  const fields={name,sub:$("f-cat").value,loc:$("f-loc").value,asset:$("f-asset").checked,unit:$("f-unit").value.trim()||"pcs",qty:qv===""?null:Math.max(0,Math.floor(+qv)),inUse:Math.max(0,Math.floor(+$("f-iu").value||0)),min:Math.max(0,Math.floor(+$("f-min").value||0)),expiry:$("f-exp").value,supplier:$("f-sup").value.trim(),type:$("f-type").value.trim()};
   let id=editId;
   if(!id){id="custom--"+slug(name)+"-"+Date.now().toString(36);fields.custom=true;fields.hidden=false}
   patch(id,fields,true); activeGroup=subInfo(fields.sub).g; activeSub=fields.sub; activeType=""; dlg.close(); toast(editId?"Saved":"Item added");
