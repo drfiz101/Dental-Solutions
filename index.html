@@ -1002,6 +1002,9 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 .jarch{display:none}.tarch{width:100%;max-width:640px;display:block;margin:0 auto}.tarch text{font-size:10px;font-weight:700;fill:var(--muted);font-family:inherit}.tarch text.apl{fill:#2E6BB8;text-decoration:underline}.tarch .amid{font-weight:400}.atooth{cursor:pointer}.atooth:hover rect{fill:var(--accent-soft)}.atooth:focus{outline:none}.atooth:focus-visible rect{stroke:var(--accent);stroke-width:2}
 .iu{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px}.iuc{font-size:.76rem;color:var(--muted);padding:2px 8px;border:1px solid var(--line);border-radius:999px}.iuc.on{border-color:var(--ok,#276B43);color:var(--ok,#276B43);background:var(--ok-soft,#E3F2E8)}.iuc b{font-variant-numeric:tabular-nums}
 .iub{height:28px;padding:0 10px;border:1.5px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font:inherit;font-size:.76rem;font-weight:700;cursor:pointer}.iub:disabled{opacity:.45;cursor:default}
+.updbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));z-index:9999;border:0;border-radius:999px;padding:11px 18px;background:var(--accent);color:var(--accent-ink,#fff);font:inherit;font-size:.88rem;box-shadow:0 10px 24px -10px rgba(0,0,0,.5);max-width:calc(100% - 24px)}
+@supports (-webkit-touch-callout:none){input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;width:100%;display:block;min-height:2.8em}}
+input[type=date]{min-width:0;max-width:100%}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -4585,6 +4588,12 @@ let deferredInstall=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;$("installBtn").hidden=false});
 $("installBtn").addEventListener("click",async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;$("installBtn").hidden=true});
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+/* tell the user when a newer version is published */
+const APP_BUILD="ds-v55";let updShown=false;
+async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
+  if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
+    const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
+setTimeout(updCheck,4000);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")updCheck()});
 </script>
 </body>
 </html>
