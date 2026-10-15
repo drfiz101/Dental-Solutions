@@ -1007,6 +1007,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 @supports (-webkit-touch-callout:none){input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;width:100%;display:block;min-height:2.8em}}
 input[type=date]{min-width:0;max-width:100%}
 .lockscr{position:fixed;inset:0;z-index:9998;background:var(--bg);display:grid;place-items:center;padding:20px}.lockbox{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;text-align:center}.lkic{font-size:2.6rem}.lockbox form{display:flex;flex-direction:column;gap:8px;text-align:left}.lockbox input{height:48px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;font:inherit;font-size:1.05rem;background:var(--surface);color:var(--ink)}.lockbox .btn{height:48px}
+.lrow{flex-wrap:wrap;row-gap:2px}.lrow .linkbtn{white-space:nowrap;font-size:.85rem}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -1258,7 +1259,7 @@ input[type=date]{min-width:0;max-width:100%}
 <dialog id="patdlg" class="wide"><form class="dlg" id="patForm" novalidate>
   <h2 id="patT">New patient</h2>
   <div class="grid2">
-    <div class="field span2"><label for="pt-name">Full name</label><input id="pt-name" maxlength="80" autocomplete="off"></div>
+    <div class="field span2"><div class="lrow"><label for="pt-name">Full name</label><button type="button" class="linkbtn" data-contact="pt">📇 From contacts</button></div><input id="pt-name" maxlength="80" autocomplete="off"></div>
     <div class="field"><label for="pt-phone">Mobile (WhatsApp)</label><input id="pt-phone" type="tel" inputmode="tel" placeholder="03xx xxxxxxx" maxlength="20"></div>
     <div class="field"><label for="pt-age">Age</label><input id="pt-age" type="number" min="0" max="120" inputmode="numeric"></div>
     <div class="field"><label for="pt-gender">Gender</label><select id="pt-gender"><option value="">Not set</option><option>Female</option><option>Male</option><option>Other</option></select></div>
@@ -1364,7 +1365,7 @@ input[type=date]{min-width:0;max-width:100%}
 </form></dialog>
 <dialog id="apdlg"><form class="dlg" id="apForm" novalidate>
   <h2 id="apT">Book appointment</h2>
-  <div class="field"><div class="lrow"><label for="ap-pat">Patient</label><button type="button" class="linkbtn" id="ap-toggle-new">+ New patient</button></div><div id="ap-patwrap"><input id="ap-pat" list="ap-pats" autocomplete="off" placeholder="Type name or mobile number of a registered patient" style="width:100%"><datalist id="ap-pats"></datalist></div></div>
+  <div class="field"><div class="lrow"><label for="ap-pat">Patient</label><span style="display:flex;gap:12px"><button type="button" class="linkbtn" data-contact="ap">📇 From contacts</button><button type="button" class="linkbtn" id="ap-toggle-new">+ New patient</button></span></div><div id="ap-patwrap"><input id="ap-pat" list="ap-pats" autocomplete="off" placeholder="Type name or mobile number of a registered patient" style="width:100%"><datalist id="ap-pats"></datalist></div></div>
   <div class="newp" id="ap-newp" hidden><p class="small" style="margin:0 0 8px;font-weight:700" id="ap-newmsg">New patient · a file number is given automatically</p><div class="grid2"><div class="field span2"><label for="ap-nname">Full name</label><input id="ap-nname" maxlength="80" autocomplete="off"></div><div class="field"><label for="ap-nphone">Mobile (WhatsApp)</label><input id="ap-nphone" type="tel" inputmode="tel" maxlength="20" placeholder="03xx xxxxxxx"></div><div class="field"><label for="ap-nage">Age</label><input id="ap-nage" type="number" min="0" max="120" inputmode="numeric"></div><div class="field"><label for="ap-ngender">Gender</label><select id="ap-ngender"><option value="">Not set</option><option>Female</option><option>Male</option><option>Other</option></select></div><div class="field"><label for="ap-nalert">Medical alert</label><input id="ap-nalert" maxlength="200" placeholder="e.g. Diabetes, blood thinners"></div></div></div>
   <div class="field"><label>Chair</label><div class="seg" id="ap-chair"><button type="button" data-ch="1">Chair 1</button><button type="button" data-ch="2">Chair 2</button></div></div>
   <div class="grid2">
@@ -4611,6 +4612,19 @@ let deferredInstall=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;$("installBtn").hidden=false});
 $("installBtn").addEventListener("click",async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;$("installBtn").hidden=true});
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+/* pick a patient from the phone's contacts */
+const canContacts=()=>!!(navigator.contacts&&navigator.contacts.select);
+function cleanTel(t){t=String(t||"").replace(/[^\d+]/g,"");if(t.startsWith("0092"))t="+"+t.slice(2);if(/^92\d{10}$/.test(t))t="+"+t;return t}
+async function pickContact(){if(!canContacts()){const ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
+    alert(ios?"iPhone hasn't switched on contact picking for apps yet.\n\nTo turn it on: Settings → Apps → Safari → Advanced → Feature Flags → turn on \"Contact Picker API\". Then close and reopen the app.\n\nUntil then, type the name and number.":"This phone's browser can't share contacts. Open the app in Chrome on Android to pick from contacts, or type the name and number.");return null}
+  try{const r=await navigator.contacts.select(["name","tel"],{multiple:false});const c=r&&r[0];if(!c)return null;
+    const tels=(c.tel||[]).map(cleanTel).filter(Boolean);return {name:String((c.name||[])[0]||"").trim(),tel:tels.find(t=>waNum(t))||tels[0]||""}}
+  catch(e){toast("Couldn't open contacts");return null}}
+document.addEventListener("click",async e=>{const b=e.target.closest("[data-contact]");if(!b)return;e.preventDefault();const c=await pickContact();if(!c)return;
+  if(b.dataset.contact==="pt"){if(c.name)$("pt-name").value=c.name;if(c.tel)setPhone("pt-phone",c.tel);toast("Filled from contacts");return}
+  const pid=c.tel?Object.keys(P).find(k=>P[k].phone&&waNum(P[k].phone)&&waNum(P[k].phone)===waNum(c.tel)):null;
+  if(pid){setApNew(false);$("ap-pat").value=patLabel(P[pid]);$("ap-newp").hidden=true;toast(P[pid].name+" is already registered · chosen");return}
+  setApNew(true);if(c.name)$("ap-nname").value=c.name;if(c.tel)setPhone("ap-nphone",c.tel);toast("New patient filled from contacts")});
 /* supplier dropdowns */
 const SUP_DEF=["Haseeb / Kashif","Mukhtiyar","E-Dental Mart","Hamayun Dental Supply","Aamar","Shah Sb","Aman Shah"];
 function supList(){let l=[];try{l=JSON.parse(localStorage.getItem("ds-sups")||"[]")}catch(e){}const seen=new Set(),out=[];
@@ -4628,7 +4642,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v57";let updShown=false;
+const APP_BUILD="ds-v58";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
