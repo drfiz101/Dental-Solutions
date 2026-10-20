@@ -1377,6 +1377,7 @@ input[type=date]{min-width:0;max-width:100%}
   </div>
   <p class="muted small" id="ap-denthint" style="margin:0">Add your dentists under <b>Team</b> to assign them and stop double booking a dentist.</p>
   <div class="field"><label for="ap-tr">Treatment</label><input id="ap-tr" list="tr-list" maxlength="80" placeholder="e.g. Root canal — molar"></div>
+  <div class="field" id="ap-visitw" hidden><label for="ap-visit" id="ap-visitl">Which visit?</label><select id="ap-visit"></select><small class="muted" id="ap-visith"></small></div>
   <div class="field"><label for="ap-note">Note</label><input id="ap-note" maxlength="160" placeholder="Optional"></div>
   <div class="grid2" id="ap-repw"><div class="field"><label for="ap-rep">Repeat visits</label><select id="ap-rep"><option value="">Just this visit</option><option value="7">Every week</option><option value="14">Every 2 weeks</option><option value="21">Every 3 weeks</option><option value="m">Every month</option></select></div><div class="field" id="ap-repnw" hidden><label for="ap-repn">Total visits</label><input id="ap-repn" type="number" min="2" max="24" inputmode="numeric" value="4"></div></div>
   <p class="phint up" id="ap-clash" hidden></p>
@@ -2342,7 +2343,20 @@ attachCC("pt-phone");attachCC("ap-nphone");
 
 function waHref(ph,text){const n=waNum(ph);return n?"https://wa.me/"+n+(text?"?text="+encodeURIComponent(text):""):""}
 const fillT=(t,v)=>String(t||"").replace(/\{(\w+)\}/g,(m,k)=>v[k]!=null?v[k]:m);
-function apVars(a){const c=S().clinic,p=P[a.patientId]||{};return {name:a.patientName||"",file:p.fileNo||"new patient",clinic:c.name,phone:c.phone,doctor:a.dentist||c.doctor,dentist:a.dentist||"not assigned",date:fmtDate(a.date),day:dayName(a.date),time:fmtTime(a.time),end:fmtTime(fromMin(toMin(a.time)+(+a.dur||30))),chair:"Chair "+a.chair,treatment:a.treatment||"check-up",by:myName||me.by||"staff"}}
+const VISITS={rct:["1st visit (opening & cleaning)","2nd visit (shaping)","3rd visit (filling canals)","4th visit","5th visit","Final visit","Review"],
+  crown:["Preparation & impression","Trial visit","Cementation visit","Review"],
+  denture:["Primary impression","Final impression","MMR (bite) visit","Trial visit","Insertion visit","Review / adjustment"]};
+function visitKind(t){t=String(t||"");if(/crown\s*(removal|removed|off)|remov\w*\s+(of\s+)?crown/i.test(t))return "";if(/re-?rct|root canal|\brct\b|pulpectomy/i.test(t))return "rct";if(/denture|\bcd\b|\brpd\b|prosthes/i.test(t))return "denture";if(/crown|bridge|veneer|onlay|inlay|\bpfm\b|zirconi|e\.?max/i.test(t))return "crown";return ""}
+const apTr=a=>(a.treatment||"Check-up")+(a.visit?" · "+a.visit:"");
+function apVisitUI(keep){const k=visitKind($("ap-tr").value),w=$("ap-visitw"),sel=$("ap-visit");if(!k){w.hidden=true;sel.value="";return}
+  const cur=keep!==undefined?keep:sel.value;w.hidden=false;$("ap-visitl").textContent=k==="rct"?"Which root canal visit?":k==="crown"?"Which crown visit?":"Which denture visit?";
+  sel.innerHTML=`<option value="">Not set</option>`+VISITS[k].map(v=>`<option>${esc(v)}</option>`).join("");
+  let pick=cur&&VISITS[k].includes(cur)?cur:"";$("ap-visith").textContent="";
+  if(!pick&&!apEdit){const pid=findPat($("ap-pat").value);if(pid){const prev=Object.values(A).filter(a=>a.patientId===pid&&a.visit&&visitKind(a.treatment)===k&&a.status!=="cancelled").sort((x,y)=>(y.date+y.time).localeCompare(x.date+x.time))[0];
+      if(prev){const i=VISITS[k].indexOf(prev.visit);if(i>=0&&i<VISITS[k].length-1){pick=VISITS[k][i+1];$("ap-visith").textContent="Last time: "+prev.visit+" on "+fmtDate(prev.date)}}}
+    if(!pick)pick=VISITS[k][0]}
+  sel.value=pick}
+function apVars(a){const c=S().clinic,p=P[a.patientId]||{};return {name:a.patientName||"",file:p.fileNo||"new patient",clinic:c.name,phone:c.phone,doctor:a.dentist||c.doctor,dentist:a.dentist||"not assigned",date:fmtDate(a.date),day:dayName(a.date),time:fmtTime(a.time),end:fmtTime(fromMin(toMin(a.time)+(+a.dur||30))),chair:"Chair "+a.chair,treatment:(a.treatment||"check-up")+(a.visit?", "+a.visit:""),by:myName||me.by||"staff"}}
 const apMsg=(a,k)=>fillT(S().templates[k],apVars(a));
 function billCalc(b){const sub=(b.items||[]).reduce((s,i)=>s+(+i.qty||1)*(+i.price||0),0),total=Math.max(0,sub-(+b.discount||0)),paid=(b.payments||[]).reduce((s,p)=>s+(+p.amount||0),0);return {sub,total,paid,bal:Math.max(0,total-paid)}}
 function billVars(b){const c=S().clinic,t=billCalc(b);return {name:b.patientName||"",clinic:c.name,phone:c.phone,doctor:c.doctor,bill:b.no||"",date:fmtDate(b.date||ymd(new Date())),total:rs(t.total),paid:rs(t.paid),balance:rs(t.bal)}}
@@ -2430,7 +2444,7 @@ function renderPatDetail(id){setTimeout(loadXThumbs,0);
     <div data-sec="treat">${propCard(p)}${planCard(p)}</div><div data-sec="xray">${xrCard(p)}</div></div>
     <div class="side">
       <div class="card" data-sec="treat"><div class="dh"><h3>Account</h3><button class="btn small" data-pstmt>Statement PDF</button></div><div class="kv"><span>Total paid</span><b>${rs(paid)}</b></div><div class="kv"><span>Balance due</span><b class="${bal>0?"due":""}">${rs(bal)}</b></div>${bal>0&&waNum(p.phone)?`<a class="wa sm" style="margin-top:8px" href="${esc(waHref(p.phone,fillT(S().templates.due,{...billVars({patientName:p.name}),balance:rs(bal)})))}" target="_blank" rel="noopener">${WA_IC}<span>Send balance reminder</span></a>`:""}${waNum(p.phone)?`<a class="wa sm" style="margin-top:8px" href="${esc(waHref(p.phone,fillT(S().templates.recall,billVars({patientName:p.name}))))}" target="_blank" rel="noopener">${WA_IC}<span>Send recall (check-up due)</span></a>`:""}</div>
-      <div class="card" data-sec="visits"><h3>Appointments</h3>${aps.length?aps.slice(0,8).map(a=>{const s=AST[a.status||"booked"]||AST.booked;return `<button class="kv kvb" data-apopen="${esc(a.id)}"><span>${esc(fmtDate(a.date))}, ${esc(fmtTime(a.time))}<small>${esc(a.treatment||"Check-up")} · Chair ${esc(a.chair)}</small></span><span class="chip2 ${s[1]}">${s[0]}</span></button>`}).join(""):`<p class="muted" style="margin:0">No appointments yet.</p>`}</div>
+      <div class="card" data-sec="visits"><h3>Appointments</h3>${aps.length?aps.slice(0,8).map(a=>{const s=AST[a.status||"booked"]||AST.booked;return `<button class="kv kvb" data-apopen="${esc(a.id)}"><span>${esc(fmtDate(a.date))}, ${esc(fmtTime(a.time))}<small>${esc(apTr(a))} · Chair ${esc(a.chair)}</small></span><span class="chip2 ${s[1]}">${s[0]}</span></button>`}).join(""):`<p class="muted" style="margin:0">No appointments yet.</p>`}</div>
       ${(()=>{const cs=lcList().filter(c=>c.patientId===id).sort((a,b)=>(b.sent||"").localeCompare(a.sent||""));return cs.length?`<div class="card" data-sec="visits"><h3>Lab work</h3>${cs.slice(0,6).map(c=>{const st=LST[c.status||"sent"]||LST.sent;return `<button class="kv kvb" data-lcopen="${esc(c.id)}"><span>${esc(c.work||"Lab work")}${c.teeth?" · "+esc(c.teeth):""}<small>${esc(c.lab||"")} · sent ${esc(c.sent?fmtDate(c.sent):"—")}</small></span><span class="chip2 ${lcLate(c)?"bad":st[1]}">${lcLate(c)?"Late":st[0]}</span></button>`}).join("")}</div>`:""})()}
       <div class="card" data-sec="treat"><h3>Bills</h3>${bills.length?bills.slice(0,8).map(b=>{const t=billCalc(b);return `<button class="kv kvb" data-bopen="${esc(b.id)}"><span>${esc(b.no||"Bill")} · ${esc(fmtDate(b.date))}<small>${esc((b.items||[]).map(i=>i.desc).join(", ").slice(0,60))}</small></span>${t.bal>0?(t.paid>0?`<span class="chip2 acc">Paid ${rs(t.paid)}</span> <span class="chip2 warn">${rs(t.bal)} left</span>`:`<span class="chip2 warn">Due ${rs(t.bal)}</span>`):`<span class="chip2 ok">Paid ${rs(t.total)}</span>`}</button>`}).join(""):`<p class="muted" style="margin:0">No bills yet.</p>`}</div>
     </div>
@@ -2567,7 +2581,7 @@ function openAp(id,pre){
   const dl=dentists();$("ap-dent").innerHTML=`<option value="">Not assigned</option>`+dl.map(m=>`<option value="${esc(m.name)}">${esc(m.name)}${m.title?" · "+esc(m.title):""}</option>`).join("")+(a.dentist&&!dl.some(m=>m.name===a.dentist)?`<option value="${esc(a.dentist)}">${esc(a.dentist)}</option>`:"");
   $("ap-dent").value=a.dentist||"";if(!id&&pre&&pre.treatment)$("ap-tr").value=pre.treatment;$("ap-denthint").hidden=dl.length>0;
   $("ap-d").value=a.date||apDate;$("ap-dur").value=String(a.dur||30);
-  apTimes(a.time||firstFree($("ap-d").value,apChair)||"");$("ap-tr").value=a.treatment||"";$("ap-note").value=a.note||"";
+  apTimes(a.time||firstFree($("ap-d").value,apChair)||"");$("ap-tr").value=a.treatment||"";$("ap-note").value=a.note||"";apVisitUI(a.visit||"");
   $("ap-del").hidden=!id;$("ap-conf").hidden=true;$("ap-err").hidden=true;
   apClash();openD(apdlg);if(!a.patientId)$("ap-pat").focus();
 }
@@ -2593,7 +2607,7 @@ $("apForm").addEventListener("submit",async e=>{
   if(!isOpen(d)){err.textContent=`The clinic is closed on ${dayName(d)}s. Please choose ${openDaysText()}.`;err.hidden=false;$("ap-d").focus();return}
   const clash=apConflicts();if(clash.length){apClash();err.textContent="This time is already booked. Choose a free time, another chair or another dentist.";err.hidden=false;return}
   const base=apEdit?A[apEdit]:{status:"booked",createdAt:new Date().toISOString(),...me};
-  const doc={...base,patientId:pid,patientName:p.name,phone:p.phone||"",date:d,time:t,dur:+$("ap-dur").value||30,chair:apChair,dentist:$("ap-dent").value,treatment:$("ap-tr").value.trim(),note:$("ap-note").value.trim()};
+  const doc={...base,patientId:pid,patientName:p.name,phone:p.phone||"",date:d,time:t,dur:+$("ap-dur").value||30,chair:apChair,dentist:$("ap-dent").value,treatment:$("ap-tr").value.trim(),visit:$("ap-visitw").hidden?"":$("ap-visit").value,note:$("ap-note").value.trim()};
   const changed=!apEdit||base.date!==d||base.time!==t;
   if(changed){doc.confirmSentAt=null;doc.remindedAt=null}
   const id=apEdit||nid("a");cset("appts",id,doc);apdlg.close();apDate=d;
@@ -2663,7 +2677,7 @@ function apCard(a){
   const msgs=ok?(a.confirmSentAt?`<span class="chip2 ok">✓ Confirmation sent</span>`:`<a class="wa sm" href="${esc(waHref(a.phone,apMsg(a,"confirm")))}" target="_blank" rel="noopener" data-mark="appts|${esc(a.id)}|confirmSentAt">${WA_IC}<span>Confirm</span></a>`)+(st==="noshow"?(a.missedSentAt?`<span class="chip2 ok">✓ Missed msg sent</span>`:`<a class="wa sm" href="${esc(waHref(a.phone,apMsg(a,"missed")))}" target="_blank" rel="noopener" data-mark="appts|${esc(a.id)}|missedSentAt">${WA_IC}<span>Missed visit</span></a>`):""):`<span class="chip2">No mobile number</span>`;
   return `<div class="apc st-${st}"><div class="tm">${esc(fmtTime(a.time))}<span>to ${esc(fmtTime(end))}</span></div><div class="ab">
     <div class="ah"><button class="linkbtn strong" data-gopat="${esc(a.patientId)}">${esc(a.patientName)}</button>${p&&p.alerts?` <span class="chip2 bad" title="${esc(p.alerts)}">Alert: ${esc(p.alerts.slice(0,28))}</span>`:""}</div>
-    <div class="muted small">${a.dentist?`${docAv(a.dentist)}<b class="dent">${esc(a.dentist)}</b> · `:""}${esc(a.treatment||"Check-up")}${a.note?" · "+esc(a.note):""}</div>
+    <div class="muted small">${a.dentist?`${docAv(a.dentist)}<b class="dent">${esc(a.dentist)}</b> · `:""}${esc(apTr(a))}${a.note?" · "+esc(a.note):""}</div>
     <div class="row3"><select class="stsel s-${st}" data-st="${esc(a.id)}" aria-label="Status of ${esc(a.patientName)}">${Object.entries(AST).map(([k,v])=>`<option value="${k}"${k===st?" selected":""}>${v[0]}</option>`).join("")}</select>${msgs}<button class="btn small" data-apedit="${esc(a.id)}">Edit</button>${st!=="done"?`<button class="btn small" data-apres="${esc(a.id)}">Reschedule</button>`:""}${st==="done"?`<button class="btn small primary" data-apbill="${esc(a.id)}">Bill</button>`:""}</div></div></div>`;
 }
 function renderAppts(){
@@ -2923,7 +2937,7 @@ function renderDash(){$("d-rep").innerHTML=dashRepCard();try{renderSimpleHome()}
   let colT=0;for(const b of Object.values(B))for(const p of b.payments||[])if(p.date===today)colT+=+p.amount||0;
   $("d-kpis").innerHTML=[["Appointments",day.length,""],["Waiting / in chair",cnt("arrived")+cnt("inchair"),"warn"],["Done",cnt("done"),"ok"],["Collected",rs(colT),"acc"]].map(([l,v,c])=>`<div class="kpi ${c}"><b>${v}</b><span>${l}</span></div>`).join("");
   const nextA=day.find(a=>["booked","confirmed","arrived"].includes(a.status||"booked")&&toMin(a.time)+(+a.dur||30)>nowM);
-  if(day.length){$("d-appts").innerHTML=day.map(a=>{const st=AST[a.status||"booked"]||AST.booked,nx=nextA&&a.id===nextA.id;return `<button class="drow${nx?" next":""}" data-goday="${today}"><span class="dt">${esc(fmtTime(a.time))}</span><span class="dn"><b>${esc(a.patientName)}</b><small>${esc(a.treatment||"Check-up")}${a.dentist?" · "+esc(a.dentist):""}</small></span><span class="dch">Chair ${esc(a.chair)}</span><span class="chip2 ${nx?"acc":st[1]}">${nx?"Next":st[0]}</span></button>`}).join("")}
+  if(day.length){$("d-appts").innerHTML=day.map(a=>{const st=AST[a.status||"booked"]||AST.booked,nx=nextA&&a.id===nextA.id;return `<button class="drow${nx?" next":""}" data-goday="${today}"><span class="dt">${esc(fmtTime(a.time))}</span><span class="dn"><b>${esc(a.patientName)}</b><small>${esc(apTr(a))}${a.dentist?" · "+esc(a.dentist):""}</small></span><span class="dch">Chair ${esc(a.chair)}</span><span class="chip2 ${nx?"acc":st[1]}">${nx?"Next":st[0]}</span></button>`}).join("")}
   else{const nd=nextOpen(isOpen(today)?tom:addDays(today,1)),nn=Object.values(A).filter(a=>a.date===nd&&a.status!=="cancelled").length;
     $("d-appts").innerHTML=`<div class="dempty"><p>${isOpen(today)?"No appointments booked for today.":"Clinic is closed today."}</p><p class="muted small">${esc(dayName(nd))} ${esc(fmtDate(nd))}: ${pl(nn,"appointment")} booked</p><button class="btn small primary" data-goday="${nd}">See ${esc(dayName(nd))}</button></div>`}
   // calendar
@@ -4629,7 +4643,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-cont
 /* share a day's appointments as a picture */
 function dayImageHTML(d){const c=S().clinic,logo=(document.querySelector(".head-logo img")||{}).src||"",day=Object.values(A).filter(a=>a.date===d&&a.status!=="cancelled").sort((a,b)=>a.time.localeCompare(b.time));
   const STC={booked:["Booked","#EEF2F1","#4D5F5B"],confirmed:["Confirmed","#E2EFEB","#1D5F53"],arrived:["Arrived","#FBEFD9","#8A5200"],inchair:["In chair","#FBEFD9","#8A5200"],done:["Done","#E3F2E8","#276B43"],noshow:["No-show","#FBE4E2","#A4231B"]};
-  const card=a=>{const st=STC[a.status||"booked"]||STC.booked;return `<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid #DDE6E3;border-radius:14px;background:#fff;margin-top:8px"><div style="min-width:66px;font-weight:700;font-size:15px;color:#13302B">${esc(fmtTime(a.time))}${a.dur&&+a.dur!==30?`<div style="font-weight:400;font-size:11px;color:#5A6F6A">${esc(a.dur)} min</div>`:""}</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:16px;color:#13302B">${esc(a.patientName||"")}</div><div style="font-size:13px;color:#5A6F6A;margin-top:2px">${esc(a.treatment||"Check-up")}${a.dentist?" · "+esc(a.dentist):""}</div>${a.note?`<div style="font-size:12px;color:#5A6F6A;margin-top:2px">Note: ${esc(a.note)}</div>`:""}</div><span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:${st[1]};color:${st[2]};white-space:nowrap">${st[0]}</span></div>`};
+  const card=a=>{const st=STC[a.status||"booked"]||STC.booked;return `<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid #DDE6E3;border-radius:14px;background:#fff;margin-top:8px"><div style="min-width:66px;font-weight:700;font-size:15px;color:#13302B">${esc(fmtTime(a.time))}${a.dur&&+a.dur!==30?`<div style="font-weight:400;font-size:11px;color:#5A6F6A">${esc(a.dur)} min</div>`:""}</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:16px;color:#13302B">${esc(a.patientName||"")}</div><div style="font-size:13px;color:#5A6F6A;margin-top:2px">${esc(apTr(a))}${a.dentist?" · "+esc(a.dentist):""}</div>${a.note?`<div style="font-size:12px;color:#5A6F6A;margin-top:2px">Note: ${esc(a.note)}</div>`:""}</div><span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:${st[1]};color:${st[2]};white-space:nowrap">${st[0]}</span></div>`};
   const col=ch=>{const its=day.filter(a=>String(a.chair)===ch);return `<div style="flex:1;min-width:0;background:#F3F6F5;border-radius:18px;padding:14px"><div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:${ch==="1"?"#1D5F53":"#6A48B2"}">Chair ${ch}</div><div style="font-size:12px;color:#5A6F6A">${pl(its.length,"patient")}</div></div>${its.length?its.map(card).join(""):`<div style="padding:18px 4px;color:#5A6F6A;font-size:13px">No bookings</div>`}</div>`};
   const dl=new Date(d+"T00:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"}),dents=[...new Set(day.map(a=>a.dentist).filter(Boolean))];
   return `<div style="width:760px;padding:26px;background:#fff;font-family:'Atkinson Hyperlegible',system-ui,sans-serif;color:#13302B;box-sizing:border-box">
@@ -4648,6 +4662,8 @@ async function shareDay(btn){const d=apDate,old=btn?btn.textContent:"";if(btn){b
   catch(e){toast(navigator.onLine===false?"Open this once with internet so the picture maker is saved.":"Couldn't make the picture")}
   finally{if(btn){btn.disabled=false;btn.textContent=old}}}
 $("ap-share").addEventListener("click",e=>shareDay(e.currentTarget));
+for(const ev of ["input","change"])$("ap-tr").addEventListener(ev,()=>apVisitUI());
+$("ap-pat").addEventListener("change",()=>{if(!$("ap-visitw").hidden&&!apEdit){$("ap-visit").value="";apVisitUI("")}});
 /* supplier dropdowns */
 const SUP_DEF=["Haseeb / Kashif","Mukhtiyar","E-Dental Mart","Hamayun Dental Supply","Aamar","Shah Sb","Aman Shah"];
 function supList(){let l=[];try{l=JSON.parse(localStorage.getItem("ds-sups")||"[]")}catch(e){}const seen=new Set(),out=[];
@@ -4665,7 +4681,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v59";let updShown=false;
+const APP_BUILD="ds-v60";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
