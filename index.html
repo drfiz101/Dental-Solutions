@@ -3130,6 +3130,10 @@ $("ph-body").addEventListener("click",e=>{const a=e.target.closest("[data-mark]"
 let saveFile=null; // set where saving files is possible
 const canPrint=!window.claude;
 const INV_CSS=`
+.inv .psum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 36px 12px}
+.inv .psum div{border-radius:12px;padding:10px 14px;border:2px solid transparent;text-align:left}.inv .psum small{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.inv .psum b{display:block;font-size:22px;font-variant-numeric:tabular-nums;margin-top:2px}
+.inv .psum .t{background:#EEF2F1;color:#1d2b28}.inv .psum .p{background:#E3F2E8;color:#1F6B45;border-color:#9FD3B4}.inv .psum .d{background:#FDECEA;color:#A4231B;border-color:#F0A9A2}.inv .psum .d.z{background:#E3F2E8;color:#1F6B45;border-color:#9FD3B4}
+.inv .stamp{display:inline-block;margin-top:6px;padding:5px 14px;border:3px solid;border-radius:8px;font-weight:800;font-size:15px;letter-spacing:.1em;transform:rotate(-3deg)}.inv .stamp.due{color:#A4231B;border-color:#A4231B}.inv .stamp.ok{color:#1F6B45;border-color:#1F6B45}
 .inv .docs{display:flex;justify-content:space-between;gap:20px;margin:0 36px;padding:10px 0 12px;border-top:1px solid #dde6e3;border-bottom:1px solid #dde6e3}
 .inv .docs .dc{flex:1;min-width:0}.inv .docs .dc.r{text-align:right}.inv .docs b{display:block;font-size:14px;color:#0F4F45}.inv .docs span{display:block;font-size:10.5px;color:#5b6b67;line-height:1.4}
 .inv .cinfo{margin:16px 36px 0;padding-top:10px;border-top:1px solid #dde6e3;display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 18px;font-size:11px;color:#3d4d49}
@@ -3191,8 +3195,9 @@ function invoiceInner(b){
   return `<div class="inv"><style>${INV_CSS}</style>
 <div class="bar"></div>
 <div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}<br>${esc(openDaysText())} · ${esc(fmtTime(c.open))} – ${esc(fmtTime(c.close))}</div></div></div>
-<div class="ttl"><h1>BILL</h1><p>No. <b>${esc(b.no||"")}</b></p><p>Date: <b>${esc(fmtDate(b.date))}</b></p><span class="st ${t.bal>0?"due":"paid"}">${t.bal>0?"Balance due":"Paid in full"}</span></div></div>
+<div class="ttl"><h1>BILL</h1><p>No. <b>${esc(b.no||"")}</b></p><p>Date: <b>${esc(fmtDate(b.date))}</b></p><span class="stamp ${t.bal>0?"due":"ok"}">${t.bal>0?"PAYMENT DUE":"PAID IN FULL"}</span></div></div>
 ${invDocsHTML()}
+<div class="psum"><div class="t"><small>Total</small><b>${rs(t.total)}</b></div><div class="p"><small>Paid</small><b>${rs(t.paid)}</b></div><div class="d${t.bal>0?"":" z"}"><small>${t.bal>0?"Due (pending)":"Due"}</small><b>${rs(t.bal)}</b></div></div>
 <div class="pt"><div><span>Patient</span><b>${esc(b.patientName||"")}</b></div><div><span>File no.</span>${esc(p.fileNo||"—")}</div>
 <div><span>Mobile</span>${esc(b.phone||p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div>
 ${den?`<div><span>Dentist</span>${esc(den)}</div>`:""}${ap?`<div><span>Visit</span>${esc(fmtDate(ap.date))}, ${esc(fmtTime(ap.time))}</div>`:""}</div>
@@ -3235,8 +3240,9 @@ function planBillInner(pid){const p=P[pid]||{},pl=planOf(p),cl=planCalc(pl),c=S(
 </style>
 <div class="bar"></div>
 <div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}<br>${esc(openDaysText())} · ${esc(fmtTime(c.open))} – ${esc(fmtTime(c.close))}</div></div></div>
-<div class="ttl"><h1>TREATMENT BILL</h1><p>File no. <b>${esc(p.fileNo||"—")}</b></p><p>Date: <b>${esc(fmtDate(today))}</b></p><span class="st ${bal>0?"due":"paid"}">${bal>0?"Balance due":"Paid in full"}</span></div></div>
+<div class="ttl"><h1>TREATMENT BILL</h1><p>File no. <b>${esc(p.fileNo||"—")}</b></p><p>Date: <b>${esc(fmtDate(today))}</b></p><span class="stamp ${bal>0?"due":"ok"}">${bal>0?"PAYMENT DUE":"PAID IN FULL"}</span></div></div>
 ${invDocsHTML()}
+<div class="psum"><div class="t"><small>Total</small><b>${rs(cl.total)}</b></div><div class="p"><small>Paid</small><b>${rs(paid)}</b></div><div class="d${bal>0?"":" z"}"><small>${bal>0?"Due (pending)":"Due"}</small><b>${rs(bal)}</b></div></div>
 <div class="pt"><div><span>Patient</span><b>${esc(p.name||"")}</b></div><div><span>Mobile</span>${esc(p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div>${pl.dentist?`<div><span>Dentist</span>${esc(pl.dentist)}</div>`:""}</div>
 <table><thead><tr><th style="width:30px">#</th><th>Treatment</th><th style="width:90px">Teeth</th><th class="r" style="width:40px">Qty</th><th class="r" style="width:84px">Rate</th><th class="r" style="width:96px">Cost</th><th class="r" style="width:110px">Status</th></tr></thead><tbody>${rows}</tbody></table>
 <div class="bot"><div>${pays.length?`<div class="pay"><h4>Payments received</h4>${pays.map(x=>`<div><span>${esc(fmtDate(x.date))} · ${esc(payLbl(x))}${x.no?" · "+esc(x.no):""}</span><b>${rs(x.amount)}</b></div>`).join("")}</div>`:""}</div>
@@ -3893,7 +3899,7 @@ function stInner(){const d=stData(),c=S().clinic,logo=(document.querySelector(".
   const isNum=v=>/^(?:− )?Rs |^\d+$|^—$/.test(String(v));
   const tb=(head,rows,foot)=>{if(!rows.length)return `<p class="none">Nothing here.</p>`;const al=head.map((h,i)=>i>0&&/^(Amount|Total|Paid|Pending|Balance|Cases|Bills|Qty)$/.test(h));return `<table class="rt"><thead><tr>${head.map((h,i)=>`<th${al[i]?' class="r"':""}>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((v,i)=>`<td${al[i]?' class="r"':""}>${v}</td>`).join("")}</tr>`).join("")}</tbody>${foot?`<tfoot><tr>${foot.map((v,i)=>`<td${al[i]?' class="r"':""}>${v}</td>`).join("")}</tr></tfoot>`:""}</table>`};
   const sec=(title,cls,amt,body)=>`<div class="ss ${cls}"><div class="sh2"><b>${title}</b><span>${amt}</span></div>${body}</div>`;
-  let kp="",body="",sub="",who="";
+  let kp="",body="",sub="",who="",stStamp="";
   if(stKind==="lab"){const P1=sumOf(d.paid,x=>x.cost),P2=sumOf(d.pend,x=>x.cost),B1=sumOf(d.bpaid,x=>x.amount),B2=sumOf(d.bpend,x=>x.amount),l=labs().find(x=>x.name===d.flt);
     who=d.flt?`<div class="pt"><div><span>Lab</span><b>${esc(d.flt)}</b></div><div><span>Phone</span>${esc((l&&l.phone)||"—")}</div></div>`:"";
     kp=`<div class="kp"><div><small>Total lab work</small><b>${rs(P1+P2)}</b><span>${pl(d.paid.length+d.pend.length,"case")}</span></div><div class="in"><small>Paid</small><b>${rs(P1)}</b><span>${pl(d.paid.length,"case")}</span></div><div class="pdk"><small>Pending</small><b>${rs(P2)}</b><span>${pl(d.pend.length,"case")}</span></div></div>`;
@@ -3913,7 +3919,7 @@ function stInner(){const d=stData(),c=S().clinic,logo=(document.querySelector(".
       body=`<h3 class="sh">By supplier</h3><div class="wide">${tb(["Supplier","Paid","Pending","Total"],Object.entries(ps).sort((a,b)=>(b[1].p+b[1].q)-(a[1].p+a[1].q)).map(([k,v])=>[esc(k),rs(v.p),rs(v.q),rs(v.p+v.q)]))}</div>`+body}}
   else{const all=[...d.paid,...d.pend],tot=sumOf(all,b=>billCalc(b).total),rec=sumOf(all,b=>billCalc(b).paid),due=sumOf(d.pend,b=>billCalc(b).bal),p=stKind==="pat"?P[stPid]||{}:null;
     if(p)who=`<div class="pt"><div><span>Patient</span><b>${esc(p.name||"")}</b></div><div><span>File no.</span>${esc(p.fileNo||"—")}</div><div><span>Mobile</span>${esc(p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div></div>`;
-    kp=`<div class="kp"><div><small>Total billed</small><b>${rs(tot)}</b><span>${pl(all.length,"bill")}</span></div><div class="in"><small>Received</small><b>${rs(rec)}</b><span>${pl(d.paid.length,"bill")} paid in full</span></div><div class="pdk"><small>Balance due</small><b>${rs(due)}</b><span>${pl(d.pend.length,"bill")} pending</span></div></div>`;
+    kp=`<div class="kp"><div><small>Total billed</small><b>${rs(tot)}</b><span>${pl(all.length,"bill")}</span></div><div class="in"><small>Paid</small><b>${rs(rec)}</b><span>${pl(d.paid.length,"bill")} paid in full</span></div><div class="pdk${due>0?"":" z"}"><small>${due>0?"Due (pending)":"Due"}</small><b>${rs(due)}</b><span>${pl(d.pend.length,"bill")} pending</span></div></div>`;stStamp=`<span class="stamp ${due>0?"due":"ok"}">${due>0?"PAYMENT DUE":"ALL PAID"}</span>`;
     const H=["Date","Bill no.",...(p?[]:["Patient"]),"Treatment","Total","Paid","Balance"],row=b=>{const k=billCalc(b);return [esc(fmtDate(b.date)),esc(b.no||""),...(p?[]:[esc(b.patientName||"")+(b.phone?`<small>${esc(b.phone)}</small>`:"")]),esc((b.items||[]).map(i=>i.desc+(i.tooth?" ("+i.tooth+")":"")).join(", ")),rs(k.total),rs(k.paid),rs(k.bal)]},F=a=>["Total","",...(p?[]:[""]),"",rs(sumOf(a,b=>billCalc(b).total)),rs(sumOf(a,b=>billCalc(b).paid)),rs(sumOf(a,b=>billCalc(b).bal))];
     body=sec("Pending — balance due","pend",rs(due),tb(H,d.pend.map(row),d.pend.length?F(d.pend):null))+sec("Paid in full","paid",rs(sumOf(d.paid,b=>billCalc(b).total)),tb(H,d.paid.map(row),d.paid.length?F(d.paid):null));
     if(p){const pays=all.flatMap(b=>(b.payments||[]).map(x=>({...x,no:b.no}))).sort((a,b)=>a.date.localeCompare(b.date));body+=`<h3 class="sh">Payments received</h3><div class="wide">${tb(["Date","Bill no.","Method","Amount"],pays.map(x=>[esc(fmtDate(x.date)),esc(x.no||""),esc(payLbl(x)),rs(x.amount)]),pays.length?["Total","","",rs(sumOf(pays,x=>x.amount))]:null)}</div>`}
@@ -3922,6 +3928,7 @@ function stInner(){const d=stData(),c=S().clinic,logo=(document.querySelector(".
   return `<div class="inv stm"><style>${INV_CSS}
 .stm .kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 36px 0}.stm .kp div{border-radius:10px;padding:10px 12px;background:#F3F7F6}.stm .kp small{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#5b6b67;font-weight:700}.stm .kp b{font-size:18px}.stm .kp span{display:block;font-size:10.5px;color:#5b6b67}
 .stm .kp .in{background:#E3F2E8}.stm .kp .in b{color:#2E7D4F}.stm .kp .pdk{background:#FBEFD9}.stm .kp .pdk b{color:#A86200}
+.stm .kp div{border:2px solid transparent}.stm .kp b{font-size:22px}.stm .kp .in{border-color:#9FD3B4}.stm .kp .pdk{background:#FDECEA;border-color:#F0A9A2}.stm .kp .pdk b{color:#A4231B}.stm .kp .pdk small{color:#A4231B}.stm .kp .pdk.z{background:#E3F2E8;border-color:#9FD3B4}.stm .kp .pdk.z b,.stm .kp .pdk.z small{color:#1F6B45}
 .stm h3.sh{margin:18px 36px 6px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#0F4F45;border-bottom:2px solid #0F4F45;padding-bottom:4px}
 .stm .ss{margin:16px 36px 0;border:1px solid #d9e3e0;border-radius:10px;overflow:hidden}
 .stm .sh2{display:flex;justify-content:space-between;padding:9px 12px;font-size:13px}.stm .pend .sh2{background:#FBEFD9;color:#A86200}.stm .paid .sh2{background:#E3F2E8;color:#2E7D4F}.stm .sh2 span{font-weight:700}
@@ -3933,7 +3940,7 @@ function stInner(){const d=stData(),c=S().clinic,logo=(document.querySelector(".
 </style>
 <div class="bar"></div>
 <div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}</div></div></div>
-<div class="ttl"><h1>${T}</h1><p><b>${esc(per)}</b></p><p>Prepared ${esc(fmtDate(today))}</p></div></div>
+<div class="ttl"><h1>${T}</h1><p><b>${esc(per)}</b></p><p>Prepared ${esc(fmtDate(today))}</p>${stStamp}</div></div>
 ${invDocsHTML()}
 ${who}${kp}${body}
 ${invContactHTML()}
@@ -4732,7 +4739,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v64";let updShown=false;
+const APP_BUILD="ds-v65";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
