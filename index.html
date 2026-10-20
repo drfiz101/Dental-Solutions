@@ -3236,11 +3236,13 @@ function planBillInner(pid){const p=P[pid]||{},pl=planOf(p),cl=planCalc(pl),c=S(
 <div class="bar"></div>
 <div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}<br>${esc(openDaysText())} · ${esc(fmtTime(c.open))} – ${esc(fmtTime(c.close))}</div></div></div>
 <div class="ttl"><h1>TREATMENT BILL</h1><p>File no. <b>${esc(p.fileNo||"—")}</b></p><p>Date: <b>${esc(fmtDate(today))}</b></p><span class="st ${bal>0?"due":"paid"}">${bal>0?"Balance due":"Paid in full"}</span></div></div>
+${invDocsHTML()}
 <div class="pt"><div><span>Patient</span><b>${esc(p.name||"")}</b></div><div><span>Mobile</span>${esc(p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div>${pl.dentist?`<div><span>Dentist</span>${esc(pl.dentist)}</div>`:""}</div>
 <table><thead><tr><th style="width:30px">#</th><th>Treatment</th><th style="width:90px">Teeth</th><th class="r" style="width:40px">Qty</th><th class="r" style="width:84px">Rate</th><th class="r" style="width:96px">Cost</th><th class="r" style="width:110px">Status</th></tr></thead><tbody>${rows}</tbody></table>
 <div class="bot"><div>${pays.length?`<div class="pay"><h4>Payments received</h4>${pays.map(x=>`<div><span>${esc(fmtDate(x.date))} · ${esc(payLbl(x))}${x.no?" · "+esc(x.no):""}</span><b>${rs(x.amount)}</b></div>`).join("")}</div>`:""}</div>
 <div class="tot"><div><span>Total treatment cost</span><span>${rs(cl.sub)}</span></div>${cl.phases.filter(g=>g.disc).map(g=>`<div><span>Discount · Phase ${g.ph}</span><span>− ${rs(g.disc)}</span></div>`).join("")}${cl.legacy?`<div><span>Discount</span><span>− ${rs(cl.legacy)}</span></div>`:""}${cl.disc?`<div><span><b>Total discount</b></span><span><b>− ${rs(cl.disc)}</b></span></div>`:""}<div class="g"><span>Net total</span><span>${rs(cl.total)}</span></div><div><span>Paid</span><span>${rs(paid)}</span></div><div class="bal${bal>0?"":" z"}"><span>Balance</span><span>${rs(bal)}</span></div></div></div>
 <div class="ft"><div class="thx"><b>Thank you for choosing ${esc(c.name)}.</b>For appointments or queries, call or WhatsApp ${esc(c.phone)}.</div><div class="sig cg">Computer-generated bill.<br>No signature required.</div></div>
+${invContactHTML()}
 <p class="gen">Computer-generated treatment bill · ${esc(p.name||"")} · printed ${esc(fmtDate(today))}</p></div>`}
 async function planBillAct(kind,btn){const pid=selPat,p=P[pid];if(!p)return;const old=btn.innerHTML;btn.disabled=true;btn.textContent="Preparing PDF…";
   try{const blob=await htmlPdfBlob(planBillInner(pid)),name="Treatment-bill-"+String(p.name||"patient").replace(/[^A-Za-z0-9]+/g,"-")+".pdf",pl=planOf(p),cl=planCalc(pl),paid=Math.min(cl.total,planPaid(pl)),c=S().clinic;
@@ -3420,6 +3422,7 @@ function proposalInner(pid,opt){opt=opt||{};const p=P[pid],pl=propOf(p),cl=planC
 <div class="bar"></div>
 <div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}<br>${esc(openDaysText())} · ${esc(fmtTime(c.open))} – ${esc(fmtTime(c.close))}</div></div></div>
 <div class="ttl"><h1>PROPOSED<br>TREATMENT PLAN</h1><p>No. <b>${esc(proposalNo(p,pl))}</b></p><p>Date: <b>${esc(fmtDate(today))}</b></p><p>Valid until: <b>${esc(fmtDate(valid))}</b></p></div></div>
+${invDocsHTML()}
 <div class="pt"><div><span>Patient</span><b>${esc(p.name||"")}</b></div><div><span>File no.</span>${esc(p.fileNo||"—")}</div>
 <div><span>Mobile</span>${esc(p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div>
 ${pl.dentist?`<div><span>Prepared by</span><em style="font-style:normal">${esc(pl.dentist)}${dm&&dm.title?`<br><small style="color:#5b6b67">${esc(dm.title)}</small>`:""}</em></div>`:""}${p.alerts?`<div><span>Medical</span>${esc(p.alerts)}</div>`:""}</div>
@@ -3438,6 +3441,7 @@ ${(()=>{const xs=opt.x?(p.xrays||[]).filter(x=>!x.pdf&&localPhotos[x.fileId]):[]
 ${opt.n&&(p.notes||[]).length?`<h3 class="sh">Clinical notes</h3><div class="sec" style="margin-top:4px">${p.notes.map(n=>`<div class="nt"><b>${esc(fmtDate(n.d))}</b><span>${esc(n.t)}</span></div>`).join("")}</div>`:""}
 <ul class="terms"><li>This is an estimate based on today's examination. If the treatment needed changes during care, we will discuss it with you first.</li><li>Prices and discounts are valid for 30 days from the date above. Payment is made as each treatment is done; orthodontic and prosthetic work needs an advance.</li><li>Treatment can be done phase by phase, in the order shown. Please ask us about any option you'd like to discuss.</li></ul>
 <div class="ft"><div class="thx"><b>Thank you for choosing ${esc(c.name)}.</b>For appointments or questions, call or WhatsApp ${esc(c.phone)}.</div><div class="sig cg">Computer-generated treatment plan.<br>No signature required.</div></div>
+${invContactHTML()}
 <p class="gen">${esc(proposalNo(p,pl))} · ${esc(p.name||"")} · printed ${esc(fmtDate(today))}</p></div>`}
 async function htmlPdfBlob(html){
   await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
@@ -3930,7 +3934,9 @@ function stInner(){const d=stData(),c=S().clinic,logo=(document.querySelector(".
 <div class="bar"></div>
 <div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}</div></div></div>
 <div class="ttl"><h1>${T}</h1><p><b>${esc(per)}</b></p><p>Prepared ${esc(fmtDate(today))}</p></div></div>
+${invDocsHTML()}
 ${who}${kp}${body}
+${invContactHTML()}
 <p class="gen" style="margin-top:22px">${esc(c.name)} · ${esc(T.toLowerCase())} · ${esc(per)} · computer-generated, no signature required</p></div>`}
 function stFile(){const d=stData(),k={lab:"Lab",mat:"Materials",bills:"Bills",pat:"Account"}[stKind],who=stKind==="pat"?(P[stPid]||{}).name:d.flt;return `${k}-statement${who?"-"+String(who).replace(/[^A-Za-z0-9]+/g,"-"):""}${d.f?"-"+d.f:""}${d.t?"_to_"+d.t:""}.pdf`}
 $("st-print").addEventListener("click",()=>{if(window.claude){toast("Use Download PDF here, then print the PDF.");return}printHtml($("stT").textContent,stInner())});
@@ -4726,7 +4732,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v63";let updShown=false;
+const APP_BUILD="ds-v64";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
