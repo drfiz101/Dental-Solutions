@@ -1427,6 +1427,11 @@ input[type=date]{min-width:0;max-width:100%}
     <div class="field"><label for="st-autoout">Auto log out</label><select id="st-autoout"><option value="0">Off (stay signed in)</option><option value="5">After 5 min of no use</option><option value="10">After 10 min of no use</option><option value="15">After 15 min of no use</option><option value="30">After 30 min of no use</option><option value="60">After 1 hour of no use</option><option value="120">After 2 hours of no use</option></select></div>
     <div class="field"><label for="st-open">Opens</label><input id="st-open" type="time"></div>
     <div class="field"><label for="st-close">Closes</label><input id="st-close" type="time"></div>
+    <div class="field span2"><label for="st-docs">Doctors on the bill</label><textarea id="st-docs" rows="8" style="width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)" placeholder="Dr. Name&#10;BDS (RDS)&#10;C Implant&#10;&#10;Dr. Second Name&#10;BDS"></textarea><small class="muted">First line is the doctor's name, then one degree per line. Leave an empty line between doctors.</small></div>
+    <div class="field"><label for="st-web">Website</label><input id="st-web" maxlength="80"></div>
+    <div class="field"><label for="st-fb">Facebook</label><input id="st-fb" maxlength="80"></div>
+    <div class="field"><label for="st-email">Email</label><input id="st-email" maxlength="80" type="email"></div>
+    <div class="field span2"><label for="st-address">Address</label><input id="st-address" maxlength="160"></div>
   </div>
   <div class="field"><label>Open days</label><div class="days" id="st-days"><label><input type="checkbox" value="1"> Mon</label><label><input type="checkbox" value="2"> Tue</label><label><input type="checkbox" value="3"> Wed</label><label><input type="checkbox" value="4"> Thu</label><label><input type="checkbox" value="5"> Fri</label><label><input type="checkbox" value="6"> Sat</label><label><input type="checkbox" value="0"> Sun</label></div></div>
   <p class="phint" style="margin:0">Words in curly brackets are filled in automatically: {name} {day} {date} {time} {treatment} {chair} {clinic} {phone} {doctor}. Bills also use {bill} {total} {paid} {balance}.</p>
@@ -2900,8 +2905,9 @@ $("prForm").addEventListener("submit",e=>{e.preventDefault();const prices=prColl
 const setdlg=$("setdlg");let stLogo=null;
 async function compressLogo(file){const bmp=await createImageBitmap(file);let max=512,out="";for(let k=0;k<5;k++){const sc=Math.min(1,max/Math.max(bmp.width,bmp.height)),c=document.createElement("canvas");c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);const x=c.getContext("2d");x.drawImage(bmp,0,0,c.width,c.height);out=c.toDataURL("image/png");if(out.length<160000)return out;const c2=document.createElement("canvas");c2.width=c.width;c2.height=c.height;const y=c2.getContext("2d");y.fillStyle="#fff";y.fillRect(0,0,c2.width,c2.height);y.drawImage(c,0,0);out=c2.toDataURL("image/jpeg",.88);if(out.length<160000)return out;max=Math.round(max*.8)}return out}
 $("st-logo").addEventListener("change",async()=>{const f=$("st-logo").files&&$("st-logo").files[0];if(!f)return;try{stLogo=await compressLogo(f);$("st-logoprev").src=stLogo;$("st-logoprev").hidden=false}catch(e){toast("Couldn't read that image.")}});
-function openSet(){const s=S();for(const c of $("st-days").querySelectorAll("input"))c.checked=(s.clinic.days||[]).includes(+c.value);for(const k of ["name","phone","doctor","open","close","slot","tagline"])$("st-"+k).value=s.clinic[k]??"";$("st-logo").value="";stLogo=null;const lp=$("st-logoprev");lp.src=clinicLogo();lp.hidden=false;for(const k of Object.keys(DEF_SET.templates))$("tp-"+k).value=s.templates[k];$("st-autoout").value=String(aoMinutes());openD(setdlg)}
-$("setForm").addEventListener("submit",e=>{e.preventDefault();const clinic={};for(const k of ["name","phone","doctor","open","close","tagline"])clinic[k]=$("st-"+k).value.trim();if(stLogo)clinic.logo=stLogo;else if((SET.clinic||{}).logo)clinic.logo=SET.clinic.logo;clinic.slot=+$("st-slot").value||30;clinic.autoOut=+$("st-autoout").value||0;clinic.days=[...$("st-days").querySelectorAll("input:checked")].map(c=>+c.value);const templates={};for(const k of Object.keys(DEF_SET.templates))templates[k]=$("tp-"+k).value;saveSet({...SET,clinic,templates,tplVer:2});setdlg.close();toast("Settings saved")});
+function openSet(){const s=S();try{$("st-docs").value=clinicDocs().map(d=>[d.name,...String(d.lines||"").split("\n").filter(Boolean)].join("\n")).join("\n\n");const k=clinicContact();$("st-web").value=k.web;$("st-fb").value=k.fb;$("st-email").value=k.email;$("st-address").value=k.addr}catch(e){}for(const c of $("st-days").querySelectorAll("input"))c.checked=(s.clinic.days||[]).includes(+c.value);for(const k of ["name","phone","doctor","open","close","slot","tagline"])$("st-"+k).value=s.clinic[k]??"";$("st-logo").value="";stLogo=null;const lp=$("st-logoprev");lp.src=clinicLogo();lp.hidden=false;for(const k of Object.keys(DEF_SET.templates))$("tp-"+k).value=s.templates[k];$("st-autoout").value=String(aoMinutes());openD(setdlg)}
+$("setForm").addEventListener("submit",e=>{e.preventDefault();const clinic={};for(const k of ["name","phone","doctor","open","close","tagline"])clinic[k]=$("st-"+k).value.trim();
+  clinic.docs=$("st-docs").value.split(/\n\s*\n/).map(b=>b.split("\n").map(x=>x.trim()).filter(Boolean)).filter(a=>a.length).map(a=>({name:a[0],lines:a.slice(1).join("\n")}));for(const k of ["web","fb","email","address"])clinic[k]=$("st-"+k).value.trim();if(stLogo)clinic.logo=stLogo;else if((SET.clinic||{}).logo)clinic.logo=SET.clinic.logo;clinic.slot=+$("st-slot").value||30;clinic.autoOut=+$("st-autoout").value||0;clinic.days=[...$("st-days").querySelectorAll("input:checked")].map(c=>+c.value);const templates={};for(const k of Object.keys(DEF_SET.templates))templates[k]=$("tp-"+k).value;saveSet({...SET,clinic,templates,tplVer:2});setdlg.close();toast("Settings saved")});
 $("st-reset").addEventListener("click",()=>{for(const k of Object.keys(DEF_SET.templates))$("tp-"+k).value=DEF_SET.templates[k]});
 
 /* --- teeth on bills --- */
@@ -3124,6 +3130,10 @@ $("ph-body").addEventListener("click",e=>{const a=e.target.closest("[data-mark]"
 let saveFile=null; // set where saving files is possible
 const canPrint=!window.claude;
 const INV_CSS=`
+.inv .docs{display:flex;justify-content:space-between;gap:20px;margin:0 36px;padding:10px 0 12px;border-top:1px solid #dde6e3;border-bottom:1px solid #dde6e3}
+.inv .docs .dc{flex:1;min-width:0}.inv .docs .dc.r{text-align:right}.inv .docs b{display:block;font-size:14px;color:#0F4F45}.inv .docs span{display:block;font-size:10.5px;color:#5b6b67;line-height:1.4}
+.inv .cinfo{margin:16px 36px 0;padding-top:10px;border-top:1px solid #dde6e3;display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 18px;font-size:11px;color:#3d4d49}
+.inv .cinfo span{display:inline-flex;gap:6px;align-items:center}.inv .cinfo .ad{flex-basis:100%;font-weight:600;letter-spacing:.02em}
 .inv{font:13px/1.45 "Segoe UI",Arial,sans-serif;color:#1d2b28;background:#fff;width:794px;box-sizing:border-box;padding:0 0 28px}
 .inv *{box-sizing:border-box}
 .inv .bar{height:8px;background:linear-gradient(90deg,#25587A 0 20%,#2E6BB8 20% 40%,#0F7A68 40% 60%,#AD620B 60% 80%,#6A48B2 80% 100%)}
@@ -3165,6 +3175,12 @@ const INV_CSS=`
 .inv .thx{font-size:12px;color:#0F4F45}.inv .thx b{display:block;font-size:13px}
 .inv .gen{text-align:center;font-size:10px;color:#9aa9a5;margin-top:18px}
 `;
+function clinicDocs(){const c=S().clinic;if(Array.isArray(c.docs))return c.docs;
+  if(CLINIC==="alawan"||!CLINIC)return [{name:"Dr. M. Faizan Malik",lines:"BDS (RDS)\nC Implant\nMDS (PGT)\nOral & Maxillofacial Prosthodontist"},{name:"Dr. Shazia Sami",lines:"BDS (RDS)\nC Implant\nD-Ortho\nConsultant Dental Surgeon\nFor Ladies & Children"}];return []}
+function clinicContact(){const c=S().clinic;const al=CLINIC==="alawan"||!CLINIC;return {web:c.web??(al?"al-awan-dental-clinic.business.site":""),fb:c.fb??(al?"facebook.com/alawandentalclinic":""),email:c.email??(al?"alawandentalclinic@gmail.com":""),addr:c.address??(al?"Saddique Colony, Eidgah Road, near Sui Gas Office, Faqirabad, Peshawar City, Pakistan":"")}}
+function invDocsHTML(){const d=clinicDocs();if(!d.length)return "";return `<div class="docs">${d.slice(0,3).map((x,i)=>`<div class="dc${i===d.length-1&&d.length>1?" r":""}"><b>${esc(x.name)}</b>${String(x.lines||"").split("\n").filter(Boolean).map(l=>`<span>${esc(l)}</span>`).join("")}</div>`).join("")}</div>`}
+function invContactHTML(){const k=clinicContact();if(!k.web&&!k.fb&&!k.email&&!k.addr)return "";
+  return `<div class="cinfo">${k.web?`<span>🌐 ${esc(k.web)}</span>`:""}${k.fb?`<span>ⓕ ${esc(k.fb)}</span>`:""}${k.email?`<span>✉ ${esc(k.email)}</span>`:""}${k.addr?`<span class="ad">📍 ${esc(k.addr)}</span>`:""}</div>`}
 function invoiceInner(b){
   const t=billCalc(b),c=S().clinic,p=P[b.patientId]||{},ap=b.apId&&A[b.apId],den=(ap&&ap.dentist)||"";
   const logo=(document.querySelector(".head-logo img")||{}).src||"";
@@ -3176,6 +3192,7 @@ function invoiceInner(b){
 <div class="bar"></div>
 <div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}<br>${esc(openDaysText())} · ${esc(fmtTime(c.open))} – ${esc(fmtTime(c.close))}</div></div></div>
 <div class="ttl"><h1>BILL</h1><p>No. <b>${esc(b.no||"")}</b></p><p>Date: <b>${esc(fmtDate(b.date))}</b></p><span class="st ${t.bal>0?"due":"paid"}">${t.bal>0?"Balance due":"Paid in full"}</span></div></div>
+${invDocsHTML()}
 <div class="pt"><div><span>Patient</span><b>${esc(b.patientName||"")}</b></div><div><span>File no.</span>${esc(p.fileNo||"—")}</div>
 <div><span>Mobile</span>${esc(b.phone||p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div>
 ${den?`<div><span>Dentist</span>${esc(den)}</div>`:""}${ap?`<div><span>Visit</span>${esc(fmtDate(ap.date))}, ${esc(fmtTime(ap.time))}</div>`:""}</div>
@@ -3186,6 +3203,7 @@ ${(b.items||[]).map((it,i)=>`<tr><td>${i+1}</td><td>${esc(it.desc)}</td><td>${es
 <div class="tot"><div><span>Subtotal</span><span>${rs(t.sub)}</span></div>${b.discount?`<div><span>Discount</span><span>− ${rs(b.discount)}</span></div>`:""}<div class="g"><span>Total</span><span>${rs(t.total)}</span></div><div><span>Paid</span><span>${rs(t.paid)}</span></div><div class="bal${t.bal>0?"":" z"}"><span>Balance</span><span>${rs(t.bal)}</span></div></div></div>
 ${b.note?`<p class="note"><b>Note:</b> ${esc(b.note)}</p>`:""}
 <div class="ft"><div class="thx"><b>Thank you for choosing ${esc(c.name)}.</b>For appointments or queries, call or WhatsApp ${esc(c.phone)}.</div><div class="sig cg">Computer-generated bill.<br>No signature required.</div></div>
+${invContactHTML()}
 <p class="gen">Computer-generated bill · ${esc(b.no||"")} · printed ${esc(fmtDate(ymd(new Date())))}</p></div>`;
 }
 function printBill(id){
@@ -4708,7 +4726,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v62";let updShown=false;
+const APP_BUILD="ds-v63";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
