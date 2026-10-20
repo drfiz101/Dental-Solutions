@@ -1008,6 +1008,7 @@ html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 input[type=date]{min-width:0;max-width:100%}
 .lockscr{position:fixed;inset:0;z-index:9998;background:var(--bg);display:grid;place-items:center;padding:20px}.lockbox{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;text-align:center}.lkic{font-size:2.6rem}.lockbox form{display:flex;flex-direction:column;gap:8px;text-align:left}.lockbox input{height:48px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;font:inherit;font-size:1.05rem;background:var(--surface);color:var(--ink)}.lockbox .btn{height:48px}
 .lrow{flex-wrap:wrap;row-gap:2px}.lrow .linkbtn{white-space:nowrap;font-size:.85rem}
+#ap-share{white-space:nowrap}@media (max-width:560px){.mnav{flex-wrap:wrap}#ap-share{flex-basis:100%;order:9;min-height:42px}}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -1136,7 +1137,7 @@ input[type=date]{min-width:0;max-width:100%}
   </section>
   <section id="apView" class="view cview" hidden>
     <div class="vhead">
-      <div class="mnav"><button class="btn" id="ap-prev" aria-label="Previous day">‹</button><div class="dwrap"><h2 id="ap-label"></h2><input type="date" id="ap-date" aria-label="Go to date"></div><button class="btn" id="ap-next" aria-label="Next day">›</button><button class="btn small" id="ap-today">Today</button></div>
+      <div class="mnav"><button class="btn" id="ap-prev" aria-label="Previous day">‹</button><div class="dwrap"><h2 id="ap-label"></h2><input type="date" id="ap-date" aria-label="Go to date"></div><button class="btn" id="ap-next" aria-label="Next day">›</button><button class="btn small" id="ap-today">Today</button><button class="btn small primary" id="ap-share" title="Share this day's appointments as a picture">📤 Share day</button></div>
       <div class="vact"><button class="btn" id="ap-team">Team</button><button class="btn" id="ap-set">WhatsApp messages &amp; hours</button><button class="btn" id="ap-photo" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:17px;height:17px;vertical-align:-3px;margin-right:4px"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>From photo</button><input type="file" id="ph-file" accept="image/*" multiple hidden><button class="btn" id="ap-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:17px;height:17px;vertical-align:-3px;margin-right:4px"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M8 9h8M8 12h8M8 15h5"/></svg>Photo or text</button><button class="btn" id="ap-multi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:17px;height:17px;vertical-align:-3px;margin-right:4px"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M8 17h3M14 13h2M14 17h2"/></svg>Book several</button><button class="btn" id="ap-newpat">+ New patient</button><button class="btn primary" id="ap-new">+ Book appointment</button></div>
     </div>
     <div class="tiles t3" id="ap-tiles"></div>
@@ -4625,6 +4626,28 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-cont
   const pid=c.tel?Object.keys(P).find(k=>P[k].phone&&waNum(P[k].phone)&&waNum(P[k].phone)===waNum(c.tel)):null;
   if(pid){setApNew(false);$("ap-pat").value=patLabel(P[pid]);$("ap-newp").hidden=true;toast(P[pid].name+" is already registered · chosen");return}
   setApNew(true);if(c.name)$("ap-nname").value=c.name;if(c.tel)setPhone("ap-nphone",c.tel);toast("New patient filled from contacts")});
+/* share a day's appointments as a picture */
+function dayImageHTML(d){const c=S().clinic,logo=(document.querySelector(".head-logo img")||{}).src||"",day=Object.values(A).filter(a=>a.date===d&&a.status!=="cancelled").sort((a,b)=>a.time.localeCompare(b.time));
+  const STC={booked:["Booked","#EEF2F1","#4D5F5B"],confirmed:["Confirmed","#E2EFEB","#1D5F53"],arrived:["Arrived","#FBEFD9","#8A5200"],inchair:["In chair","#FBEFD9","#8A5200"],done:["Done","#E3F2E8","#276B43"],noshow:["No-show","#FBE4E2","#A4231B"]};
+  const card=a=>{const st=STC[a.status||"booked"]||STC.booked;return `<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid #DDE6E3;border-radius:14px;background:#fff;margin-top:8px"><div style="min-width:66px;font-weight:700;font-size:15px;color:#13302B">${esc(fmtTime(a.time))}${a.dur&&+a.dur!==30?`<div style="font-weight:400;font-size:11px;color:#5A6F6A">${esc(a.dur)} min</div>`:""}</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:16px;color:#13302B">${esc(a.patientName||"")}</div><div style="font-size:13px;color:#5A6F6A;margin-top:2px">${esc(a.treatment||"Check-up")}${a.dentist?" · "+esc(a.dentist):""}</div>${a.note?`<div style="font-size:12px;color:#5A6F6A;margin-top:2px">Note: ${esc(a.note)}</div>`:""}</div><span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:${st[1]};color:${st[2]};white-space:nowrap">${st[0]}</span></div>`};
+  const col=ch=>{const its=day.filter(a=>String(a.chair)===ch);return `<div style="flex:1;min-width:0;background:#F3F6F5;border-radius:18px;padding:14px"><div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:${ch==="1"?"#1D5F53":"#6A48B2"}">Chair ${ch}</div><div style="font-size:12px;color:#5A6F6A">${pl(its.length,"patient")}</div></div>${its.length?its.map(card).join(""):`<div style="padding:18px 4px;color:#5A6F6A;font-size:13px">No bookings</div>`}</div>`};
+  const dl=new Date(d+"T00:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"}),dents=[...new Set(day.map(a=>a.dentist).filter(Boolean))];
+  return `<div style="width:760px;padding:26px;background:#fff;font-family:'Atkinson Hyperlegible',system-ui,sans-serif;color:#13302B;box-sizing:border-box">
+  <div style="display:flex;align-items:center;gap:14px;border-bottom:3px solid #1D5F53;padding-bottom:14px">${logo?`<img src="${logo}" style="width:64px;height:64px;object-fit:contain;border-radius:12px;border:1px solid #DDE6E3;background:#fff">`:""}<div style="flex:1;min-width:0"><div style="font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:700;font-size:24px;line-height:1.15">${esc(c.name||"Clinic")}</div><div style="font-size:13px;color:#5A6F6A">Appointments for the team</div></div><div style="text-align:right"><div style="font-weight:700;font-size:18px">${esc(dl)}</div><div style="font-size:13px;color:#5A6F6A">${pl(day.length,"appointment")}${dents.length?" · "+pl(dents.length,"dentist"):""}</div></div></div>
+  ${!isOpen(d)?`<div style="margin-top:14px;padding:10px 14px;border-radius:12px;background:#FBEFD9;color:#8A5200;font-weight:700">Clinic closed on ${esc(dayName(d))}s</div>`:""}
+  <div style="display:flex;gap:14px;margin-top:16px">${col("1")}${col("2")}</div>
+  <div style="margin-top:14px;font-size:11px;color:#8A9A96;text-align:right">Shared ${esc(new Date().toLocaleString("en-GB",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit",hour12:true}))} · Dental Solutions</div></div>`}
+async function shareDay(btn){const d=apDate,old=btn?btn.textContent:"";if(btn){btn.disabled=true;btn.textContent="Preparing…"}
+  try{await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+    const box=document.createElement("div");box.style.cssText="position:fixed;left:-10000px;top:0";box.innerHTML=dayImageHTML(d);document.body.appendChild(box);
+    await Promise.all([...box.querySelectorAll("img")].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));
+    let blob;try{const cv=await window.html2canvas(box.firstElementChild,{scale:2,backgroundColor:"#ffffff",useCORS:true,logging:false});blob=await new Promise(r=>cv.toBlob(r,"image/png"))}finally{box.remove()}
+    const name=`Appointments-${d}.png`,file=new File([blob],name,{type:"image/png"}),txt=`${S().clinic.name||"Clinic"} · appointments for ${dayName(d)} ${fmtDate(d)}`;
+    if(!window.claude&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:txt,text:txt});return}catch(e){if(e&&e.name==="AbortError")return}}
+    const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},4000);toast("Picture saved · share it on WhatsApp")}
+  catch(e){toast(navigator.onLine===false?"Open this once with internet so the picture maker is saved.":"Couldn't make the picture")}
+  finally{if(btn){btn.disabled=false;btn.textContent=old}}}
+$("ap-share").addEventListener("click",e=>shareDay(e.currentTarget));
 /* supplier dropdowns */
 const SUP_DEF=["Haseeb / Kashif","Mukhtiyar","E-Dental Mart","Hamayun Dental Supply","Aamar","Shah Sb","Aman Shah"];
 function supList(){let l=[];try{l=JSON.parse(localStorage.getItem("ds-sups")||"[]")}catch(e){}const seen=new Set(),out=[];
@@ -4642,7 +4665,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v58";let updShown=false;
+const APP_BUILD="ds-v59";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
