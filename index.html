@@ -1009,6 +1009,7 @@ input[type=date]{min-width:0;max-width:100%}
 .lockscr{position:fixed;inset:0;z-index:9998;background:var(--bg);display:grid;place-items:center;padding:20px}.lockbox{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px;text-align:center}.lkic{font-size:2.6rem}.lockbox form{display:flex;flex-direction:column;gap:8px;text-align:left}.lockbox input{height:48px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;font:inherit;font-size:1.05rem;background:var(--surface);color:var(--ink)}.lockbox .btn{height:48px}
 .lrow{flex-wrap:wrap;row-gap:2px}.lrow .linkbtn{white-space:nowrap;font-size:.85rem}
 #ap-share{white-space:nowrap}@media (max-width:560px){.mnav{flex-wrap:wrap}#ap-share{flex-basis:100%;order:9;min-height:42px}}
+.vsc{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px;display:flex;flex-direction:column;gap:6px}.vsc textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)}.vsc [data-vsrm]{align-self:flex-start}
 .bankadd{display:flex;gap:8px;margin-top:8px}.bankadd input{flex:1;min-width:0}
 .pam[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
 .field.ro input{background:var(--idle-soft);font-weight:700}
@@ -1280,6 +1281,14 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="actions"><button type="button" class="btn small" id="lookReset">Back to original look</button><span></span></div>
 </div></dialog>
 <button type="button" class="fab" id="fabPat" aria-label="Add patient"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button type="button" class="fab" id="fabAp" aria-label="Book appointment"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<dialog id="vsdlg" class="wide"><form class="dlg" id="vsForm" novalidate>
+  <h2>Treatment visits</h2>
+  <p class="muted small" style="margin:0">When a booked treatment contains one of the words, the appointment asks which visit it is. The list is checked from top to bottom.</p>
+  <div id="vs-list"></div>
+  <button type="button" class="btn small" id="vs-add">+ Add treatment</button>
+  <p class="perr" id="vs-err" hidden></p>
+  <div class="actions"><button type="button" class="btn" id="vs-reset">Reset to standard</button><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
+</form></dialog>
 <dialog id="vddlg" class="wide"><form class="dlg" id="vdForm" novalidate>
   <h2 id="vd-t">✓ Visit done</h2>
   <p class="muted" id="vd-sub" style="margin:0"></p>
@@ -1378,6 +1387,7 @@ input[type=date]{min-width:0;max-width:100%}
   <p class="muted small" id="ap-denthint" style="margin:0">Add your dentists under <b>Team</b> to assign them and stop double booking a dentist.</p>
   <div class="field"><label for="ap-tr">Treatment</label><input id="ap-tr" list="tr-list" maxlength="80" placeholder="e.g. Root canal — molar"></div>
   <div class="field" id="ap-visitw" hidden><label for="ap-visit" id="ap-visitl">Which visit?</label><select id="ap-visit"></select><small class="muted" id="ap-visith"></small></div>
+  <button type="button" class="linkbtn" id="ap-vsadd" hidden style="align-self:flex-start;font-size:.85rem">＋ Add visit stages for this treatment</button>
   <div class="field"><label for="ap-note">Note</label><input id="ap-note" maxlength="160" placeholder="Optional"></div>
   <div class="grid2" id="ap-repw"><div class="field"><label for="ap-rep">Repeat visits</label><select id="ap-rep"><option value="">Just this visit</option><option value="7">Every week</option><option value="14">Every 2 weeks</option><option value="21">Every 3 weeks</option><option value="m">Every month</option></select></div><div class="field" id="ap-repnw" hidden><label for="ap-repn">Total visits</label><input id="ap-repn" type="number" min="2" max="24" inputmode="numeric" value="4"></div></div>
   <p class="phint up" id="ap-clash" hidden></p>
@@ -2343,20 +2353,27 @@ attachCC("pt-phone");attachCC("ap-nphone");
 
 function waHref(ph,text){const n=waNum(ph);return n?"https://wa.me/"+n+(text?"?text="+encodeURIComponent(text):""):""}
 const fillT=(t,v)=>String(t||"").replace(/\{(\w+)\}/g,(m,k)=>v[k]!=null?v[k]:m);
-const VISITS={rct:["1st visit (opening & cleaning)","2nd visit (shaping)","3rd visit (filling canals)","4th visit","5th visit","Final visit","Review"],
-  pulpotomy:["Pulpotomy visit","Filling visit","Review"],
-  crown:["Preparation & impression","Trial visit","Cementation visit","Review"],
-  denture:["Primary impression","Final impression","MMR (bite) visit","Trial visit","Insertion visit","Review / adjustment"]};
-function visitKind(t){t=String(t||"");if(/crown\s*(removal|removed|off)|remov\w*\s+(of\s+)?crown/i.test(t))return "";if(/pulpotomy/i.test(t))return "pulpotomy";if(/re-?rct|root canal|\brct\b|pulpectomy/i.test(t))return "rct";if(/denture|\bcd\b|\brpd\b|prosthes/i.test(t))return "denture";if(/crown|bridge|veneer|onlay|inlay|\bpfm\b|zirconi|e\.?max/i.test(t))return "crown";return ""}
+const VS_DEF=[{name:"Pulpotomy",words:"pulpotomy",visits:["Pulpotomy visit","Filling visit","Review"]},
+  {name:"Root canal",words:"root canal, rct, re-rct, rerct, pulpectomy",visits:["1st visit (opening & cleaning)","2nd visit (shaping)","3rd visit (filling canals)","4th visit","5th visit","Final visit","Review"]},
+  {name:"Denture",words:"denture, cd, rpd, prosthesis",visits:["Primary impression","Final impression","MMR (bite) visit","Trial visit","Insertion visit","Review / adjustment"]},
+  {name:"Crown",words:"crown, bridge, veneer, onlay, inlay, pfm, zirconia, emax, e.max",visits:["Preparation & impression","Trial visit","Cementation visit","Review"]}];
+const vsList=()=>Array.isArray(SET&&SET.visitStages)&&SET.visitStages.length?SET.visitStages:VS_DEF;
+const vsWords=r=>String(r.words||"").split(",").map(w=>w.trim().toLowerCase()).filter(Boolean);
+function visitRule(t){t=String(t||"").toLowerCase();if(!t)return null;if(/crown\s*(removal|removed|off)|remov\w*\s+(of\s+)?crown/i.test(t))return null;
+  for(const r of vsList()){if(!(r.visits||[]).length)continue;for(const w of vsWords(r)){const re=new RegExp("(^|[^a-z0-9])"+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"([^a-z0-9]|$)","i");if(re.test(t))return r}}return null}
+const visitKind=t=>{const r=visitRule(t);return r?r.name:""};
 const apTr=a=>(a.treatment||"Check-up")+(a.visit?" · "+a.visit:"");
-function apVisitUI(keep){const k=visitKind($("ap-tr").value),w=$("ap-visitw"),sel=$("ap-visit");if(!k){w.hidden=true;sel.value="";return}
-  const cur=keep!==undefined?keep:sel.value;w.hidden=false;$("ap-visitl").textContent=k==="rct"?"Which root canal visit?":k==="pulpotomy"?"Which pulpotomy visit?":k==="crown"?"Which crown visit?":"Which denture visit?";
-  sel.innerHTML=`<option value="">Not set</option>`+VISITS[k].map(v=>`<option>${esc(v)}</option>`).join("");
-  let pick=cur&&VISITS[k].includes(cur)?cur:"";$("ap-visith").textContent="";
+function apVisitUI(keep){const r=visitRule($("ap-tr").value),w=$("ap-visitw"),sel=$("ap-visit");$("ap-vsadd").hidden=!!r||!$("ap-tr").value.trim()||document.body.classList.contains("is-staff");if(!r){w.hidden=true;sel.value="";return}
+  const V=r.visits,k=r.name,cur=keep!==undefined?keep:(V.includes(sel.value)?sel.value:"");w.hidden=false;$("ap-visitl").textContent="Which "+r.name.toLowerCase()+" visit?";
+  sel.innerHTML=`<option value="">Not set</option>`+V.map(v=>`<option>${esc(v)}</option>`).join("")+(cur&&!V.includes(cur)?`<option>${esc(cur)}</option>`:"");
+  let pick=cur||"";$("ap-visith").textContent="";
   if(!pick&&!apEdit){const pid=findPat($("ap-pat").value);if(pid){const prev=Object.values(A).filter(a=>a.patientId===pid&&a.visit&&visitKind(a.treatment)===k&&a.status!=="cancelled").sort((x,y)=>(y.date+y.time).localeCompare(x.date+x.time))[0];
-      if(prev){const i=VISITS[k].indexOf(prev.visit);if(i>=0&&i<VISITS[k].length-1){pick=VISITS[k][i+1];$("ap-visith").textContent="Last time: "+prev.visit+" on "+fmtDate(prev.date)}}}
-    if(!pick)pick=VISITS[k][0]}
+      if(prev){const i=V.indexOf(prev.visit);if(i>=0&&i<V.length-1){pick=V[i+1];$("ap-visith").textContent="Last time: "+prev.visit+" on "+fmtDate(prev.date)}}}
+    if(!pick)pick=V[0]}
   sel.value=pick}
+/* edit treatment visit stages */
+const vsCard=r=>{r=r||{name:"",words:"",visits:[]};return `<div class="vsc"><div class="grid2"><div class="field"><label>Treatment</label><input class="vs-n" maxlength="40" value="${esc(r.name)}" placeholder="e.g. Implant"></div><div class="field"><label>Matching words</label><input class="vs-w" maxlength="160" value="${esc(r.words)}" placeholder="e.g. implant, fixture"></div></div><div class="field"><label>Visits, one per line, in order</label><textarea class="vs-v" rows="4" placeholder="1st visit&#10;2nd visit&#10;Final visit">${esc((r.visits||[]).join("\n"))}</textarea></div><button type="button" class="btn small danger-outline" data-vsrm>Remove</button></div>`};
+function openVisitStages(pre){$("vs-list").innerHTML=vsList().map(vsCard).join("");if(pre){$("vs-list").insertAdjacentHTML("afterbegin",vsCard({name:pre,words:pre.toLowerCase(),visits:[]}));setTimeout(()=>{const t=$("vs-list").querySelector(".vs-v");if(t)t.focus()},80)}$("vs-err").hidden=true;openD($("vsdlg"))}
 function apVars(a){const c=S().clinic,p=P[a.patientId]||{};return {name:a.patientName||"",file:p.fileNo||"new patient",clinic:c.name,phone:c.phone,doctor:a.dentist||c.doctor,dentist:a.dentist||"not assigned",date:fmtDate(a.date),day:dayName(a.date),time:fmtTime(a.time),end:fmtTime(fromMin(toMin(a.time)+(+a.dur||30))),chair:"Chair "+a.chair,treatment:(a.treatment||"check-up")+(a.visit?", "+a.visit:""),by:myName||me.by||"staff"}}
 const apMsg=(a,k)=>fillT(S().templates[k],apVars(a));
 function billCalc(b){const sub=(b.items||[]).reduce((s,i)=>s+(+i.qty||1)*(+i.price||0),0),total=Math.max(0,sub-(+b.discount||0)),paid=(b.payments||[]).reduce((s,p)=>s+(+p.amount||0),0);return {sub,total,paid,bal:Math.max(0,total-paid)}}
@@ -4468,6 +4485,7 @@ function openMore(){const b=document.body,vis=id=>{const x=$(id);return x&&!x.hi
     isSimple()&&!b.classList.contains("no-tab_inventory")&&["inventory","Stock","#6A48B2",'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/>'],
     !b.classList.contains("no-tab_reports")&&["reports","Reports & income","#25587A",'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'],
     canShares()&&["shares","Dentist shares","#B7791F",'<circle cx="8" cy="8" r="5"/><circle cx="16" cy="16" r="5"/>'],
+    !b.classList.contains("is-staff")&&["visits","Treatment visits","#1D5F53",'<path d="M8 3v4M16 3v4"/><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 13h3M8 17h6"/>'],
     !b.classList.contains("is-staff")&&["prices","Treatment prices","#AD620B",'<path d="M4 7h16M4 12h16M4 17h10"/>'],
     vis("profBtn")&&["profBtn","Clinic profile & WhatsApp messages"],vis("acBtn")&&["acBtn","Staff access"],vis("consoleBtn")&&["consoleBtn","Owner console"],
     vis("installBtn")&&["installBtn","Install app on this phone"],["myPhoto","My photo"],["alBtn","Alerts & sounds"],["lookBtn","Appearance & layout"],["help","❓ Help & how to use"],vis("pwBtn")&&["pwBtn","Change password"],isSimple()?["classic","Switch to classic layout"]:["simple","Switch to simple layout"],["lock","🔒 Lock app"],["signOut","Sign out"]].filter(Boolean);
@@ -4478,6 +4496,7 @@ $("moreBtn").addEventListener("click",openMore);$("menuBtn").addEventListener("c
 $("moreList").addEventListener("click",e=>{const b=e.target.closest("[data-mi]");if(!b)return;const k=b.dataset.mi;$("moredlg").close();
   if(["lab","inventory","reports"].includes(k))return goMain(k);
   if(k==="prices")return openPrices();
+  if(k==="visits")return openVisitStages();
   if(k==="help")return openHelp();
   if(k==="lock")return lockApp();
   if(k==="shares")return openShares();
@@ -4664,6 +4683,13 @@ async function shareDay(btn){const d=apDate,old=btn?btn.textContent:"";if(btn){b
   finally{if(btn){btn.disabled=false;btn.textContent=old}}}
 $("ap-share").addEventListener("click",e=>shareDay(e.currentTarget));
 for(const ev of ["input","change"])$("ap-tr").addEventListener(ev,()=>apVisitUI());
+$("ap-vsadd").addEventListener("click",()=>openVisitStages($("ap-tr").value.trim()));
+$("vs-add").addEventListener("click",()=>{$("vs-list").insertAdjacentHTML("beforeend",vsCard());$("vs-list").lastElementChild.querySelector(".vs-n").focus()});
+$("vs-list").addEventListener("click",e=>{if(e.target.closest("[data-vsrm]"))e.target.closest(".vsc").remove()});
+$("vs-reset").addEventListener("click",()=>{$("vs-list").innerHTML=VS_DEF.map(vsCard).join("")});
+$("vsForm").addEventListener("submit",e=>{e.preventDefault();const L=[...$("vs-list").querySelectorAll(".vsc")].map(c=>({name:c.querySelector(".vs-n").value.trim(),words:c.querySelector(".vs-w").value.trim(),visits:c.querySelector(".vs-v").value.split("\n").map(x=>x.trim()).filter(Boolean)})).filter(r=>r.name||r.words||r.visits.length);
+  const bad=L.find(r=>!r.name||!r.words||!r.visits.length);if(bad){$("vs-err").textContent=`Fill in the treatment, its words and at least one visit${bad.name?" for "+bad.name:""}.`;$("vs-err").hidden=false;return}
+  saveSet({...SET,visitStages:L});$("vsdlg").close();toast("Treatment visits saved");if(apdlg.open)apVisitUI()});
 $("ap-pat").addEventListener("change",()=>{if(!$("ap-visitw").hidden&&!apEdit){$("ap-visit").value="";apVisitUI("")}});
 /* supplier dropdowns */
 const SUP_DEF=["Haseeb / Kashif","Mukhtiyar","E-Dental Mart","Hamayun Dental Supply","Aamar","Shah Sb","Aman Shah"];
@@ -4682,7 +4708,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v61";let updShown=false;
+const APP_BUILD="ds-v62";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
