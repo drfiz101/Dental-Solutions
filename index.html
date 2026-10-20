@@ -2344,12 +2344,13 @@ attachCC("pt-phone");attachCC("ap-nphone");
 function waHref(ph,text){const n=waNum(ph);return n?"https://wa.me/"+n+(text?"?text="+encodeURIComponent(text):""):""}
 const fillT=(t,v)=>String(t||"").replace(/\{(\w+)\}/g,(m,k)=>v[k]!=null?v[k]:m);
 const VISITS={rct:["1st visit (opening & cleaning)","2nd visit (shaping)","3rd visit (filling canals)","4th visit","5th visit","Final visit","Review"],
+  pulpotomy:["Pulpotomy visit","Filling visit","Review"],
   crown:["Preparation & impression","Trial visit","Cementation visit","Review"],
   denture:["Primary impression","Final impression","MMR (bite) visit","Trial visit","Insertion visit","Review / adjustment"]};
-function visitKind(t){t=String(t||"");if(/crown\s*(removal|removed|off)|remov\w*\s+(of\s+)?crown/i.test(t))return "";if(/re-?rct|root canal|\brct\b|pulpectomy/i.test(t))return "rct";if(/denture|\bcd\b|\brpd\b|prosthes/i.test(t))return "denture";if(/crown|bridge|veneer|onlay|inlay|\bpfm\b|zirconi|e\.?max/i.test(t))return "crown";return ""}
+function visitKind(t){t=String(t||"");if(/crown\s*(removal|removed|off)|remov\w*\s+(of\s+)?crown/i.test(t))return "";if(/pulpotomy/i.test(t))return "pulpotomy";if(/re-?rct|root canal|\brct\b|pulpectomy/i.test(t))return "rct";if(/denture|\bcd\b|\brpd\b|prosthes/i.test(t))return "denture";if(/crown|bridge|veneer|onlay|inlay|\bpfm\b|zirconi|e\.?max/i.test(t))return "crown";return ""}
 const apTr=a=>(a.treatment||"Check-up")+(a.visit?" · "+a.visit:"");
 function apVisitUI(keep){const k=visitKind($("ap-tr").value),w=$("ap-visitw"),sel=$("ap-visit");if(!k){w.hidden=true;sel.value="";return}
-  const cur=keep!==undefined?keep:sel.value;w.hidden=false;$("ap-visitl").textContent=k==="rct"?"Which root canal visit?":k==="crown"?"Which crown visit?":"Which denture visit?";
+  const cur=keep!==undefined?keep:sel.value;w.hidden=false;$("ap-visitl").textContent=k==="rct"?"Which root canal visit?":k==="pulpotomy"?"Which pulpotomy visit?":k==="crown"?"Which crown visit?":"Which denture visit?";
   sel.innerHTML=`<option value="">Not set</option>`+VISITS[k].map(v=>`<option>${esc(v)}</option>`).join("");
   let pick=cur&&VISITS[k].includes(cur)?cur:"";$("ap-visith").textContent="";
   if(!pick&&!apEdit){const pid=findPat($("ap-pat").value);if(pid){const prev=Object.values(A).filter(a=>a.patientId===pid&&a.visit&&visitKind(a.treatment)===k&&a.status!=="cancelled").sort((x,y)=>(y.date+y.time).localeCompare(x.date+x.time))[0];
@@ -4681,7 +4682,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v60";let updShown=false;
+const APP_BUILD="ds-v61";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
