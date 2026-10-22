@@ -3197,11 +3197,16 @@ function invDocsHTML(){const d=clinicDocs();if(!d.length)return "";return `<div 
 function invContactHTML(){const k=clinicContact();if(!k.web&&!k.fb&&!k.email&&!k.addr)return "";
   return `<div class="cinfo">${k.web?`<span>🌐 ${esc(k.web)}</span>`:""}${k.fb?`<span>ⓕ ${esc(k.fb)}</span>`:""}${k.email?`<span>✉ ${esc(k.email)}</span>`:""}${k.addr?`<span class="ad">📍 ${esc(k.addr)}</span>`:""}</div>`}
 function prevBills(b){return Object.entries(B).filter(([k,x])=>x.patientId&&x.patientId===b.patientId&&x!==b&&k!==b.id&&!(b.no&&x.no===b.no)&&billCalc(x).bal>0&&(x.date||"")<=(b.date||"9999")).map(([k,x])=>({id:k,...x}))}
-function oldBalHTML(b,t){if(b.showPrev===false)return "";const pb=prevBills(b);const old=pb.reduce((a,x)=>a+billCalc(x).bal,0);if(!old)return "";
+const isOldItem=i=>/^(old balance|previous outstanding balance)/i.test((i&&i.desc)||"");
+function oldBalHTML(b,t){const pb=b.showPrev===false?[]:prevBills(b),oi=(b.items||[]).filter(isOldItem);if(!pb.length&&!oi.length)return "";
+  const amt=i=>(+i.qty||1)*(+i.price||0),oldIn=oi.reduce((a,i)=>a+amt(i),0),treat=Math.max(0,t.total-oldIn),prev=pb.reduce((a,x)=>a+billCalc(x).bal,0);
+  const dt=i=>i.oldDate?"Treatment dated "+fmtDate(i.oldDate):((String(i.desc).match(/(?:from|dated)\s+(.+?)\)?$/i)||[])[1]?"Treatment dated "+String(i.desc).match(/(?:from|dated)\s+(.+?)\)?$/i)[1]:"From earlier records");
   return `<div class="acs"><div class="acsh">Account summary</div><table><tbody>
-  <tr><td>Balance on this bill <span>${esc(b.no||"")} · ${esc(fmtDate(b.date))}</span></td><td>${rs(t.bal)}</td></tr>
-  ${pb.map(x=>`<tr><td>Previous outstanding balance <span>${esc(x.no||"")} · ${esc(fmtDate(x.date))}</span></td><td>${rs(billCalc(x).bal)}</td></tr>`).join("")}
-  <tr class="tot"><td>Total amount due</td><td>${rs(t.bal+old)}</td></tr></tbody></table></div>`}
+  ${treat?`<tr><td>Treatment charges<span>${esc(b.no||"")} · ${esc(fmtDate(b.date))}</span></td><td>${rs(treat)}</td></tr>`:""}
+  ${oi.map(i=>`<tr><td>Previous outstanding balance<span>${esc(dt(i))}</span></td><td>${rs(amt(i))}</td></tr>`).join("")}
+  ${pb.map(x=>`<tr><td>Previous outstanding balance<span>Bill ${esc(x.no||"")} · ${esc(fmtDate(x.date))}</span></td><td>${rs(billCalc(x).bal)}</td></tr>`).join("")}
+  ${t.paid?`<tr><td>Less: paid on this bill</td><td>− ${rs(t.paid)}</td></tr>`:""}
+  <tr class="tot"><td>Total amount due</td><td>${rs(t.bal+prev)}</td></tr></tbody></table></div>`}
 function invoiceInner(b){
   const t=billCalc(b),c=S().clinic,p=P[b.patientId]||{},ap=b.apId&&A[b.apId],den=(ap&&ap.dentist)||"";
   const logo=(document.querySelector(".head-logo img")||{}).src||"";
@@ -4757,7 +4762,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v68";let updShown=false;
+const APP_BUILD="ds-v69";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
