@@ -1401,7 +1401,7 @@ input[type=date]{min-width:0;max-width:100%}
 <dialog id="bdlg" class="wide"><form class="dlg" id="bForm" novalidate>
   <h2 id="bT">New bill</h2>
   <div class="grid2"><div class="field"><label for="b-pat">Patient</label><input id="b-pat" list="b-pats" autocomplete="off" placeholder="Type name or mobile number"><datalist id="b-pats"></datalist></div><div class="field"><label for="b-d">Date</label><input id="b-d" type="date"></div></div>
-  <div class="field"><label>Treatments</label><div class="lhead"><span>Treatment</span><span>Teeth</span><span>Qty</span><span>Price</span><span></span></div><div class="lines" id="b-lines"></div><button type="button" class="btn small" id="b-add" style="align-self:flex-start;margin-top:6px">+ Add treatment</button><button type="button" class="btn small" id="b-old" style="align-self:flex-start;margin-top:6px">+ Old balance (unpaid from before)</button><div class="prevbal" id="b-prev" hidden></div></div>
+  <div class="field"><label>Treatments</label><div class="lhead"><span>Treatment</span><span>Teeth</span><span>Qty</span><span>Price</span><span></span></div><div class="lines" id="b-lines"></div><button type="button" class="btn small" id="b-add" style="align-self:flex-start;margin-top:6px">+ Add treatment</button><button type="button" class="btn small" id="b-old" style="align-self:flex-start;margin-top:6px">+ Old balance (unpaid from before)</button><div class="field" id="b-oldw" hidden style="margin-top:8px;max-width:260px"><label for="b-oldd">Old balance date (when the treatment was done)</label><input id="b-oldd" type="date"></div><div class="prevbal" id="b-prev" hidden></div></div>
   <div class="grid2"><div class="field"><label for="b-disc">Discount (Rs)</label><input id="b-disc" type="number" min="0" inputmode="numeric"></div><div class="field"><label for="b-note">Note</label><input id="b-note" maxlength="120" placeholder="Optional"></div></div>
   <div class="grid2" id="b-paywrap"><div class="field"><label for="b-pay">Paid now (Rs)</label><input id="b-pay" type="number" min="0" inputmode="numeric"></div><div class="field"><label for="b-meth">Method</label><select id="b-meth"><option>Cash</option><option>Bank transfer</option><option>Easypaisa</option><option>JazzCash</option><option>NayaPay</option><option>SadaPay</option><option>Card</option><option>Other</option></select></div></div>
   <div class="field" id="b-bankw" hidden><label for="b-bank">Bank</label><select id="b-bank" data-banksel></select></div>
@@ -2811,11 +2811,12 @@ function openBill(id,pre){
   $("b-pat").value=b.patientId&&P[b.patientId]?patLabel(P[b.patientId]):(b.patientName||"");
   $("b-d").value=b.date;$("b-lines").innerHTML=(b.items&&b.items.length?b.items:[{}]).map(lineHTML).join("");
   $("b-disc").value=b.discount||"";$("b-note").value=b.note||"";$("b-pay").value="";$("b-paywrap").hidden=!!id;$("b-bank").innerHTML="";bankSync("b-meth","b-bank","b-bankw");if(id)$("b-bankw").hidden=true;$("b-err").hidden=true;
+  {const ol=(b.items||[]).find(i=>/^old balance/i.test(i.desc||""));$("b-oldw").hidden=!ol;$("b-oldd").value=(ol&&ol.oldDate)||""}
   billTotals();bPrevUI();openD(bdlg);
 }
 const readLines=()=>[...$("b-lines").querySelectorAll(".line")].map(r=>({desc:r.querySelector(".l-t").value.trim(),tooth:r.querySelector(".l-th").value.trim(),qty:Math.max(1,+r.querySelector(".l-q").value||1),price:+r.querySelector(".l-p").value||0})).filter(l=>l.desc||l.price);
 function billTotals(){const d=+$("b-disc").value||0,t=billCalc({items:readLines(),discount:d,payments:[{amount:bEdit?0:(+$("b-pay").value||0)}]});$("b-tot").innerHTML=`<div class="kv"><span>Subtotal</span><b>${rs(t.sub)}</b></div>${d?`<div class="kv"><span>Discount</span><b>− ${rs(d)}</b></div>`:""}<div class="kv tot"><span>Total</span><b>${rs(t.total)}</b></div>${bEdit?"":`<div class="kv"><span>Balance after payment</span><b>${rs(t.bal)}</b></div>`}`}
-$("b-old").addEventListener("click",()=>{const r=$("b-lines");const first=r.querySelector(".line");if(first&&!first.querySelector(".l-t").value&&!first.querySelector(".l-p").value)first.remove();r.insertAdjacentHTML("beforeend",lineHTML({desc:"Old balance (previous treatment)",qty:1}));const ln=r.lastElementChild;ln.querySelector(".l-p").focus();billTotals()});
+$("b-old").addEventListener("click",()=>{const r=$("b-lines");const first=r.querySelector(".line");if(first&&!first.querySelector(".l-t").value&&!first.querySelector(".l-p").value)first.remove();r.insertAdjacentHTML("beforeend",lineHTML({desc:"Old balance (previous treatment)",qty:1}));$("b-oldw").hidden=false;const ln=r.lastElementChild;ln.querySelector(".l-p").focus();billTotals()});
 function bPrevUI(){const pid=findPat($("b-pat").value),box=$("b-prev");if(!pid||bEdit){box.hidden=true;return}const pb=Object.values(B).filter(x=>x.patientId===pid&&billCalc(x).bal>0),old=pb.reduce((a,x)=>a+billCalc(x).bal,0);
   if(!old){box.hidden=true;return}box.innerHTML=`<b>${esc(P[pid].name)}</b> already owes <b>${rs(old)}</b> on ${pl(pb.length,"earlier bill")} (${pb.map(x=>esc(x.no||"")).join(", ")}). It will show on this bill as <b>old balance</b>, so the total due is clear.`;box.hidden=false}
 for(const ev of ["input","change"])$("b-pat").addEventListener(ev,bPrevUI);
@@ -2827,6 +2828,7 @@ $("bForm").addEventListener("submit",e=>{
   e.preventDefault();const err=$("b-err"),pid=findPat($("b-pat").value);
   if(!pid){err.textContent="Choose the patient from the list. New patients are added in the Patients tab.";err.hidden=false;return}
   const items=readLines();if(!items.length){err.textContent="Add at least one treatment with its price.";err.hidden=false;return}
+  {const od=$("b-oldd").value;for(const it of items)if(/^old balance/i.test(it.desc||"")){it.desc=it.desc.replace(/\s*·\s*from .*$/,"");if(od){it.oldDate=od;it.desc+=" · from "+fmtDate(od)}}}
   const p=P[pid],date=$("b-d").value||ymd(new Date());
   const base=bEdit?B[bEdit]:{no:nextBillNo(date),createdAt:new Date().toISOString(),payments:[],...me};
   const doc={...base,patientId:pid,patientName:p.name,phone:p.phone||"",date,items,discount:+$("b-disc").value||0,note:$("b-note").value.trim()};
@@ -4750,7 +4752,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v66";let updShown=false;
+const APP_BUILD="ds-v67";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
