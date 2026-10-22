@@ -1576,6 +1576,7 @@ input[type=date]{min-width:0;max-width:100%}
 <dialog id="stdlg"><form class="dlg" id="stForm" novalidate>
   <h2 id="stT">Statement PDF</h2>
   <div class="seg stq" id="st-q"><button type="button" data-sq="month">This month</button><button type="button" data-sq="last">Last month</button><button type="button" data-sq="year">This year</button><button type="button" data-sq="all">All time</button></div>
+  <div class="field"><label>Show</label><div class="seg" id="st-show"><button type="button" data-ss="all" aria-pressed="true">Total statement</button><button type="button" data-ss="pend">Unpaid only</button><button type="button" data-ss="paid">Paid only</button></div></div>
   <div class="grid2">
     <div class="field"><label for="st-from">From</label><input id="st-from" type="date"></div>
     <div class="field"><label for="st-to">To</label><input id="st-to" type="date"></div>
@@ -3890,12 +3891,14 @@ function dashRepCard(){const [f,t]=rpRange("month",ymd(new Date())),r=repData("m
 
 
 /* ================= STATEMENTS (paid / pending PDFs) ================= */
-const stdlg=$("stdlg");let stKind="lab",stPid=null;
+const stdlg=$("stdlg");let stKind="lab",stPid=null,stShow="all";
+function stSetShow(k){stShow=k;for(const b of document.querySelectorAll("[data-ss]"))b.setAttribute("aria-pressed",String(b.dataset.ss===k));stPreview()}
+$("st-show").addEventListener("click",e=>{const b=e.target.closest("[data-ss]");if(b)stSetShow(b.dataset.ss)});
 const stInR=(d,f,t)=>!!d&&(!f||d>=f)&&(!t||d<=t);
 function stQuick(k){const td=ymd(new Date()),d=new Date();let f="",t=td;
   if(k==="month")f=td.slice(0,8)+"01";else if(k==="last"){f=ymd(new Date(d.getFullYear(),d.getMonth()-1,1));t=ymd(new Date(d.getFullYear(),d.getMonth(),0))}else if(k==="year")f=td.slice(0,4)+"-01-01";else{f="";t=""}
   $("st-from").value=f;$("st-to").value=t;for(const b of document.querySelectorAll("[data-sq]"))b.setAttribute("aria-pressed",String(b.dataset.sq===k));stPreview()}
-function openStmt(kind,opt){opt=opt||{};stKind=kind;stPid=opt.pid||null;
+function openStmt(kind,opt){opt=opt||{};stKind=kind;stPid=opt.pid||null;stShow=opt.show||"all";for(const b of document.querySelectorAll("[data-ss]"))b.setAttribute("aria-pressed",String(b.dataset.ss===stShow));
   const T={lab:"Lab statement",mat:"Materials statement",bills:"Patient bills statement",pat:"Patient account statement"};$("stT").textContent=T[kind];
   let fo=[];if(kind==="lab")fo=["",...labs().map(l=>l.name)];else if(kind==="mat"){const s=new Set(logList().filter(l=>l.kind==="purchase").map(l=>l.supplier||""));s.delete("");fo=["",...[...s].sort()]}
   $("st-fw").hidden=!fo.length;$("st-fl").textContent=kind==="lab"?"Lab":"Supplier";$("st-f").innerHTML=fo.map(x=>`<option value="${esc(x)}">${esc(x||(kind==="lab"?"All labs":"All suppliers"))}</option>`).join("");$("st-f").value=opt.filter||"";
@@ -3903,7 +3906,8 @@ function openStmt(kind,opt){opt=opt||{};stKind=kind;stPid=opt.pid||null;
   openD(stdlg)}
 $("st-q").addEventListener("click",e=>{const b=e.target.closest("[data-sq]");if(b)stQuick(b.dataset.sq)});
 for(const k of ["st-from","st-to","st-f"])$(k).addEventListener("change",()=>{for(const b of document.querySelectorAll("[data-sq]"))b.setAttribute("aria-pressed","false");stPreview()});
-function stData(){const f=$("st-from").value,t=$("st-to").value,flt=$("st-f").value;
+function stData(){const d=stData0();if(stShow==="pend"){d.paid=[];if(d.bpaid)d.bpaid=[]}else if(stShow==="paid"){d.pend=[];if(d.bpend)d.bpend=[]}return d}
+function stData0(){const f=$("st-from").value,t=$("st-to").value,flt=$("st-f").value;
   if(stKind==="lab"){const cs=lcList().filter(c=>+c.cost&&stInR(c.sent||(c.createdAt||"").slice(0,10),f,t)&&(!flt||c.lab===flt)).sort((a,b)=>(a.sent||"").localeCompare(b.sent||""));
     const bs=lbList().filter(b=>stInR(b.date,f,t)&&(!flt||b.lab===flt)).sort((a,b)=>a.date.localeCompare(b.date));
     return {f,t,flt,paid:cs.filter(c=>c.paid!==false),pend:cs.filter(c=>c.paid===false),bpaid:bs.filter(b=>b.paid!==false),bpend:bs.filter(b=>b.paid===false)}}
@@ -3918,10 +3922,10 @@ function stPreview(){const d=stData();let txt="";
   $("st-sum").textContent=txt}
 function stInner(){const d=stData(),c=S().clinic,logo=(document.querySelector(".head-logo img")||{}).src||"",today=ymd(new Date());
   const per=d.f||d.t?`${d.f?fmtDate(d.f):"Start"} – ${d.t?fmtDate(d.t):fmtDate(today)}`:"All records";
-  const T={lab:"LAB STATEMENT",mat:"MATERIALS STATEMENT",bills:"BILLS STATEMENT",pat:"ACCOUNT STATEMENT"}[stKind];
+  const T=({pend:"UNPAID ",paid:"PAID ",all:""}[stShow])+{lab:"LAB STATEMENT",mat:"MATERIALS STATEMENT",bills:"BILLS STATEMENT",pat:"ACCOUNT STATEMENT"}[stKind];
   const isNum=v=>/^(?:− )?Rs |^\d+$|^—$/.test(String(v));
   const tb=(head,rows,foot)=>{if(!rows.length)return `<p class="none">Nothing here.</p>`;const al=head.map((h,i)=>i>0&&/^(Amount|Total|Paid|Pending|Balance|Cases|Bills|Qty)$/.test(h));return `<table class="rt"><thead><tr>${head.map((h,i)=>`<th${al[i]?' class="r"':""}>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((v,i)=>`<td${al[i]?' class="r"':""}>${v}</td>`).join("")}</tr>`).join("")}</tbody>${foot?`<tfoot><tr>${foot.map((v,i)=>`<td${al[i]?' class="r"':""}>${v}</td>`).join("")}</tr></tfoot>`:""}</table>`};
-  const sec=(title,cls,amt,body)=>`<div class="ss ${cls}"><div class="sh2"><b>${title}</b><span>${amt}</span></div>${body}</div>`;
+  const sec=(title,cls,amt,body)=>(stShow==="pend"&&cls==="paid")||(stShow==="paid"&&cls==="pend")?"":`<div class="ss ${cls}"><div class="sh2"><b>${title}</b><span>${amt}</span></div>${body}</div>`;
   let kp="",body="",sub="",who="",stStamp="";
   if(stKind==="lab"){const P1=sumOf(d.paid,x=>x.cost),P2=sumOf(d.pend,x=>x.cost),B1=sumOf(d.bpaid,x=>x.amount),B2=sumOf(d.bpend,x=>x.amount),l=labs().find(x=>x.name===d.flt);
     who=d.flt?`<div class="pt"><div><span>Lab</span><b>${esc(d.flt)}</b></div><div><span>Phone</span>${esc((l&&l.phone)||"—")}</div></div>`:"";
@@ -3968,7 +3972,7 @@ ${invDocsHTML()}
 ${who}${kp}${body}
 ${invContactHTML()}
 <p class="gen" style="margin-top:22px">${esc(c.name)} · ${esc(T.toLowerCase())} · ${esc(per)} · computer-generated, no signature required</p></div>`}
-function stFile(){const d=stData(),k={lab:"Lab",mat:"Materials",bills:"Bills",pat:"Account"}[stKind],who=stKind==="pat"?(P[stPid]||{}).name:d.flt;return `${k}-statement${who?"-"+String(who).replace(/[^A-Za-z0-9]+/g,"-"):""}${d.f?"-"+d.f:""}${d.t?"_to_"+d.t:""}.pdf`}
+function stFile(){const d=stData(),k={lab:"Lab",mat:"Materials",bills:"Bills",pat:"Account"}[stKind],who=stKind==="pat"?(P[stPid]||{}).name:d.flt;return `${({pend:"Unpaid-",paid:"Paid-",all:""}[stShow])}${k}-statement${who?"-"+String(who).replace(/[^A-Za-z0-9]+/g,"-"):""}${d.f?"-"+d.f:""}${d.t?"_to_"+d.t:""}.pdf`}
 $("st-print").addEventListener("click",()=>{if(window.claude){toast("Use Download PDF here, then print the PDF.");return}printHtml($("stT").textContent,stInner())});
 $("stForm").addEventListener("submit",async e=>{e.preventDefault();const b=$("st-pdf"),old=b.textContent;b.disabled=true;b.textContent="Preparing PDF…";
   try{const blob=await htmlPdfBlob(stInner()),name=stFile();
@@ -4762,7 +4766,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v71";let updShown=false;
+const APP_BUILD="ds-v72";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
