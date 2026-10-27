@@ -668,6 +668,9 @@ body.no-lab_edit select[data-lcst],body.no-inv_count .stepper,body.no-appt_edit 
 .hbg{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #F5C7C1}.hbg.a{opacity:.8}.hbgn{display:grid;gap:3px;font-size:13px}.hbgn small{color:var(--muted)}.hbgn .ex{font-weight:600}.hbgb{display:flex;gap:6px}
 .oblink{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;display:grid;gap:8px}.oblink code{word-break:break-all;font-size:13px}.oblink .row{display:flex;gap:8px;flex-wrap:wrap}
 .obhow{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0}.obhow summary{cursor:pointer}.obhow ol{margin:8px 0 0;padding-left:20px;display:grid;gap:6px;font-size:14px}
+.dhw{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}.dhw h4{margin:0 0 4px}.dhr{border-top:1px solid var(--line);padding:10px 0;display:grid;gap:8px}.dhh{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}.dhh label{display:flex;gap:6px;align-items:center}
+.dhd{display:flex;flex-wrap:wrap;gap:6px}.dday{position:relative}.dday input{position:absolute;opacity:0}.dday span{display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:999px;font-size:13px;cursor:pointer}.dday input:checked+span{background:var(--c-pri,#0F5257);border-color:transparent;color:#fff}.dday input:focus-visible+span{outline:2px solid #0F5257}
+.dht{display:flex;gap:12px;flex-wrap:wrap}.dht label{display:flex;gap:6px;align-items:center;font-size:13px}.dht input{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font:inherit}
 .stq{flex-wrap:wrap}
 body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
@@ -2658,7 +2661,7 @@ let apNew=false;
 function setApNew(on){apNew=on;$("ap-patwrap").hidden=on;$("ap-newp").hidden=!on;$("ap-toggle-new").textContent=on?"Choose a registered patient":"+ New patient";$("ap-newmsg").textContent="New patient · a file number is given automatically"}
 $("ap-toggle-new").addEventListener("click",()=>{setApNew(!apNew);(apNew?$("ap-nname"):$("ap-pat")).focus()});
 $("ap-newpat").addEventListener("click",()=>{openAp(null,{date:apDate,newPatient:true});setTimeout(()=>$("ap-nname").focus(),50)});
-function apClash(){const c=apConflicts(),h=$("ap-clash"),d=$("ap-d").value,closed=d&&!isOpen(d)?`The clinic is closed on ${dayName(d)}s. Please choose ${openDaysText()}.`:"";if(closed){h.textContent=closed;h.hidden=false}else if(c.length){h.textContent=`Not available: ${c.map(a=>`${a.patientName} is booked ${fmtTime(a.time)} on Chair ${a.chair}${a.dentist?" with "+a.dentist:""}`).join("; ")}. Pick a free time.`;h.hidden=false}else if(closed){h.textContent=closed;h.hidden=false}else h.hidden=true}
+function apClash(){const c=apConflicts(),h=$("ap-clash"),d=$("ap-d").value,closed=d&&!isOpen(d)?`The clinic is closed on ${dayName(d)}s. Please choose ${openDaysText()}.`:"";if(closed){h.textContent=closed;h.hidden=false}else if(dOffDuty($("ap-dent").value,d,$("ap-t").value,$("ap-dur").value)){h.textContent="⚠ "+dOffDuty($("ap-dent").value,d,$("ap-t").value,$("ap-dur").value);h.hidden=false}else if(c.length){h.textContent=`Not available: ${c.map(a=>`${a.patientName} is booked ${fmtTime(a.time)} on Chair ${a.chair}${a.dentist?" with "+a.dentist:""}`).join("; ")}. Pick a free time.`;h.hidden=false}else if(closed){h.textContent=closed;h.hidden=false}else h.hidden=true}
 $("ap-chair").addEventListener("click",e=>{const b=e.target.closest("[data-ch]");if(b){apChair=b.dataset.ch;setChairBtns();apTimes($("ap-t").value);apClash()}});
 for(const f of ["ap-d","ap-dur","ap-dent"])$(f).addEventListener("change",()=>{apTimes($("ap-t").value);apClash()});
 $("ap-t").addEventListener("change",apClash);
@@ -3015,6 +3018,12 @@ function tickClock(){if(main!=="dashboard"||!$("d-time"))return;const now=new Da
   const [k,t]=clinicStatus();$("d-open").innerHTML=`<span class="odot ${k}"></span>${esc(t)}`}
 setInterval(tickClock,10000);
 /* ================= ONLINE BOOKING (book.html for Instagram / Facebook) ================= */
+/* dentist working hours */
+const DAYS3=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function dHours(n){const h=(SET.dhours||{})[n],c=S().clinic;return {days:(h&&h.days)||c.days||[1,2,3,4,5,6],from:(h&&h.from)||c.open||"10:00",to:(h&&h.to)||c.close||"20:00",online:!(h&&h.online===false),set:!!h}}
+function dHoursText(n){const h=dHours(n);return `${daysText(h.days)} · ${fmtTime(h.from)} – ${fmtTime(h.to)}`}
+function daysText(ds){ds=[...ds].sort((a,b)=>a-b);const run=ds.length>2&&ds.every((d,i)=>!i||d===ds[i-1]+1);return run?DAYS3[ds[0]]+"–"+DAYS3[ds[ds.length-1]]:ds.map(d=>DAYS3[d]).join(", ")}
+function dOffDuty(n,date,time,dur){if(!n||!date||!time)return "";const h=dHours(n);if(!h.set)return "";const wd=new Date(date+"T00:00:00").getDay();if(!h.days.includes(wd))return `${n} doesn't work on ${dayName(date)}s (${dHoursText(n)}).`;const s0=toMin(time),e0=s0+(+dur||30);if(s0<toMin(h.from)||e0>toMin(h.to))return `${n} works ${fmtTime(h.from)} – ${fmtTime(h.to)}. This would be outside their time.`;return ""}
 const OB_TREAT=["Check-up / consultation","Scaling & polishing","Tooth pain","Filling","Root canal (RCT)","Extraction","Braces / ortho","Crown / bridge","Dentures","Implant consultation","Kids' dentistry","Teeth whitening","Other"];
 const obCfg=()=>SET.online||{};
 const obCode=()=>CLINIC||"alawan";
@@ -3026,7 +3035,7 @@ function obBusy(days){const c=S().clinic,st=Math.max(5,+c.slot||30),out={},today
   return out}
 function obPublish(force){const o=obCfg();if(!db||!SET_LOADED||!fsRoot)return;if(!o.on&&!o.wasOn)return;const c=S().clinic,k=clinicContact();
   const doc={on:!!o.on,name:c.name||"",tagline:c.tagline||"",phone:c.phone||"",address:k.addr||"",open:c.open||"10:00",close:c.close||"20:00",slot:+c.slot||30,days:c.days||[1,2,3,4,5,6],chairs:+(c.chairs||2),ahead:+(o.ahead||14),minNotice:+(o.notice||60),
-    dentists:o.noDent?[]:dentists().map(d=>({name:d.name,title:d.title||""})),treatments:(o.treat&&o.treat.length?o.treat:OB_TREAT),msg:o.msg||"",btopic:o.btopic||"",off:o.off||[],busy:obBusy(+(o.ahead||14)),logo:CLINIC==="alawan"||!CLINIC?"icons/icon-192.png":""};
+    dentists:dentists().filter(d=>dHours(d.name).online).map(d=>{const h=dHours(d.name);return {name:d.name,title:d.title||"",days:h.days,from:h.from,to:h.to}}),pick:!o.noDent,step:+(o.step||60),treatments:(o.treat&&o.treat.length?o.treat:OB_TREAT),msg:o.msg||"",btopic:o.btopic||"",off:o.off||[],busy:obBusy(+(o.ahead||14)),logo:CLINIC==="alawan"||!CLINIC?"icons/icon-192.png":""};
   const js=JSON.stringify(doc);if(js===obLastPub&&!force)return;obLastPub=js;
   try{fsRoot.collection("publicSlots").doc(obCode()).set({...doc,updatedAt:new Date().toISOString()}).catch(e=>{if(/permission/.test((e&&e.code)||""))obPermErr=true})}catch(e){}}
 let obPermErr=false;
@@ -3038,7 +3047,9 @@ async function obQueue(id,b){if(obDone.has(id)||!db||!SET_LOADED){if(!SET_LOADED
     if(A[apId]){await ref.update({status:"added",apId});return}
     const ph=waNum(b.phone||"");let pid=Object.keys(P).find(k=>ph&&waNum(P[k].phone||"")===ph);
     if(!pid){pid="pob_"+id;if(!P[pid])cset("patients",pid,{name:String(b.name||"Online patient").trim(),phone:b.phone||"",createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[],alerts:"",fromOnline:true})}
-    const st=+S().clinic.slot||30,dur=st,dent=b.dentist||"";let chair=0;for(const ch of [1,2])if(!overlaps(b.date,ch,b.time,dur,null,dent).length){chair=ch;break}
+    const dur=+(obCfg().step||60);let dent=b.dentist||"";
+    if(!dent){const free=dentists().filter(d=>dHours(d.name).online&&!dOffDuty(d.name,b.date,b.time,dur)&&!Object.values(A).some(a=>a.dentist===d.name&&a.date===b.date&&!["cancelled","noshow"].includes(a.status)&&toMin(a.time)<toMin(b.time)+dur&&toMin(b.time)<toMin(a.time)+(+a.dur||30)));if(free.length===1)dent=free[0].name}
+    let chair=0;for(const ch of [1,2])if(!overlaps(b.date,ch,b.time,dur,null,dent).length){chair=ch;break}
     const clash=!chair;if(!chair)chair=1;
     const doc={status:"booked",source:"online",patientId:pid,patientName:(P[pid]&&P[pid].name)||b.name,phone:(P[pid]&&P[pid].phone)||b.phone||"",date:b.date,time:b.time,dur,chair,dentist:dent,treatment:b.treatment||"",visit:"",note:((clash?"⚠ Online booking clashes with another appointment · please call the patient. ":"🌐 Booked online. ")+(b.note?"Patient's note: "+b.note:"")).trim(),createdAt:new Date().toISOString(),by:"Online booking",onlineId:id};
     cset("appts",apId,doc);await ref.update({status:"added",apId});
@@ -3056,15 +3067,21 @@ function openOnline(){const o=obCfg(),c=S().clinic,link=obLink();
   <li>Share it on <b>WhatsApp</b> status or in replies to messages too.</li></ol></details>
   <div class="grid2"><div class="field"><label for="ob-ahead">Patients can book up to</label><select id="ob-ahead">${[7,14,21,30].map(d=>`<option value="${d}"${+(o.ahead||14)===d?" selected":""}>${d} days ahead</option>`).join("")}</select></div>
   <div class="field"><label for="ob-notice">Earliest booking</label><select id="ob-notice">${[[30,"30 min from now"],[60,"1 hour from now"],[120,"2 hours from now"],[240,"4 hours from now"],[1440,"Next day"]].map(([v,l])=>`<option value="${v}"${+(o.notice||60)===v?" selected":""}>${l}</option>`).join("")}</select></div></div>
+  <div class="field"><label for="ob-step">Online appointments every</label><select id="ob-step">${[[30,"30 minutes"],[60,"1 hour"],[90,"1½ hours"],[120,"2 hours"]].map(([v,l])=>`<option value="${v}"${+(o.step||60)===v?" selected":""}>${l}</option>`).join("")}</select><small class="muted">Each online booking takes this much time, so slots show as ${fmtTime(c.open||"10:00")}, ${fmtTime(fromMin(toMin(c.open||"10:00")+(+(o.step||60))))} …</small></div>
   <label class="altg"><input type="checkbox" id="ob-dent" ${o.noDent?"":"checked"}> <span><b>Let patients choose a dentist</b><small>Optional for them; "Any dentist" is the default</small></span></label>
+  <div class="dhw"><h4>🕒 Dentist timings</h4><p class="muted small" style="margin:0 0 6px">Patients can only book a dentist inside their time, and the app warns you if you book them outside it. "Any dentist" bookings go to whoever is free.</p>
+  ${dentists().map((d,i)=>{const h=dHours(d.name);return `<div class="dhr" data-dhi="${i}" data-dhn="${esc(d.name)}"><div class="dhh"><b>${esc(d.name)}</b><label class="small"><input type="checkbox" data-dh="online" ${h.online?"checked":""}> Bookable online</label></div>
+   <div class="dhd">${[1,2,3,4,5,6,0].map(x=>`<label class="dday"><input type="checkbox" data-dhday="${x}" ${h.days.includes(x)?"checked":""}><span>${DAYS3[x]}</span></label>`).join("")}</div>
+   <div class="dht"><label>From <input type="time" data-dh="from" value="${esc(h.from)}"></label><label>To <input type="time" data-dh="to" value="${esc(h.to)}"></label></div></div>`}).join("")||`<p class="muted small">Add dentists in Clinic profile → Team first.</p>`}</div>
   <div class="field"><label for="ob-msg">Message on the booking page (optional)</label><input id="ob-msg" maxlength="160" value="${esc(o.msg||"")}" placeholder="e.g. Lady dentist available for ladies & children"></div>
   <div class="field"><label for="ob-off">Closed dates (holidays)</label><input id="ob-off" value="${esc((o.off||[]).join(", "))}" placeholder="e.g. 2026-11-09, 2026-12-25"><small class="muted">Booked times, closed days (${esc(openDaysText())}) and hours (${esc(fmtTime(c.open||"10:00"))} – ${esc(fmtTime(c.close||"20:00"))}) come from the app automatically.</small></div>
   <div class="pushb" style="margin-top:6px"><h4>📲 Phone alert for each online booking</h4><p class="muted small" style="margin:0 0 6px">Every booking is added to Appointments and announced in the app (and on the clinic ntfy channel) as soon as any clinic phone has the app open. To get an alert even when every phone is closed, subscribe in ntfy to this second channel too. It only says the day and time, never the patient's name or number.</p>
   ${o.btopic?`<div class="pushtp"><code>${esc(o.btopic)}</code><button type="button" class="btn small" id="ob-bcopy">Copy</button></div>`:`<button type="button" class="btn small" id="ob-bnew">Create booking alert channel</button>`}</div>`;
   openD($("obdlg"))}
 function obSave(){const o=obCfg(),off=$("ob-off").value.split(/[,\s]+/).map(x=>x.trim()).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x));
-  const n={...o,on:$("ob-on").checked,wasOn:o.wasOn||$("ob-on").checked,ahead:+$("ob-ahead").value,notice:+$("ob-notice").value,noDent:!$("ob-dent").checked,msg:$("ob-msg").value.trim(),off};
-  saveSet({...SET,online:n});obLastPub="";setTimeout(()=>obPublish(true),300);$("obdlg").close();toast(n.on?"Online booking is on":"Online booking is off")}
+  const dh={...(SET.dhours||{})};for(const r of document.querySelectorAll("#ob-body .dhr")){const days=[...r.querySelectorAll("[data-dhday]:checked")].map(x=>+x.dataset.dhday),f=r.querySelector("[data-dh=from]").value,t=r.querySelector("[data-dh=to]").value;dh[r.dataset.dhn]={days,from:f||S().clinic.open,to:t||S().clinic.close,online:r.querySelector("[data-dh=online]").checked}}
+  const n={...o,step:+$("ob-step").value,on:$("ob-on").checked,wasOn:o.wasOn||$("ob-on").checked,ahead:+$("ob-ahead").value,notice:+$("ob-notice").value,noDent:!$("ob-dent").checked,msg:$("ob-msg").value.trim(),off};
+  saveSet({...SET,online:n,dhours:dh});obLastPub="";setTimeout(()=>obPublish(true),300);$("obdlg").close();toast(n.on?"Online booking is on":"Online booking is off")}
 /* ---- home search ---- */
 function hsFind(q){q=q.trim().toLowerCase();if(q.length<2)return [];const dg=q.replace(/\D/g,""),hit=v=>String(v||"").toLowerCase().includes(q),ph=v=>dg.length>=4&&String(v||"").replace(/\D/g,"").includes(dg.replace(/^0/,""));const out=[],today=ymd(new Date());
   if(can("tab_patients")){const ps=Object.entries(P).filter(([,p])=>hit(p.name)||hit(p.fileNo)||ph(p.phone)).slice(0,6);if(ps.length)out.push(["Patients",ps.map(([id,p])=>({a:`data-gopat="${esc(id)}"`,t:p.name||"",s:[p.fileNo,p.phone,p.age?p.age+" y":""].filter(Boolean).join(" · ")}))])}
@@ -5090,7 +5107,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v86";let updShown=false;
+const APP_BUILD="ds-v87";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
