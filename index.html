@@ -664,6 +664,8 @@ body.no-lab_edit select[data-lcst],body.no-inv_count .stepper,body.no-appt_edit 
 .hbr{display:grid;grid-template-columns:22px 74px 1fr auto;gap:8px;align-items:start;padding:7px 0;border-top:1px solid var(--line);font-size:13px}.hbr.dn{opacity:.55}.hbd{color:var(--muted);font-size:12px;padding-top:1px}.hbm b{display:block;font-weight:600}.hbm small{display:block;color:var(--muted)}
 .hbm em{display:block;font-style:normal;font-size:12px;color:#8A5300;margin-top:2px}.hbm em.ok{color:#1F6B45}.hbm em.nw{color:#A4231B}.hbm select{margin-top:4px;padding:4px 6px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:12px;max-width:100%}.hba{white-space:nowrap}
 .shpd{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:2px}
+.hbq{border:2px solid #F0A9A2;background:#FFF8F7;border-radius:12px;padding:10px}.hbq h4{margin:0 0 4px;display:flex;gap:8px;align-items:center;font-size:14px}
+.hbg{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #F5C7C1}.hbg.a{opacity:.8}.hbgn{display:grid;gap:3px;font-size:13px}.hbgn small{color:var(--muted)}.hbgn .ex{font-weight:600}.hbgb{display:flex;gap:6px}
 .stq{flex-wrap:wrap}
 body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
@@ -3958,7 +3960,16 @@ function hbPayM(acct){const a=String(acct||"").toLowerCase();if(/cash/.test(a))r
 function hbPat(name){const a=hbNorm(name);if(a.length<3)return null;let best=null;for(const [id,p] of Object.entries(P)){const b=hbNorm(p.name);if(!b)continue;if(a===b)return id;if(!best&&a.length>=5&&b.length>=5&&(b.startsWith(a)||a.startsWith(b)))best=id}return best}
 function hbPayIn(x){const t=Date.parse(x.date);for(const [id,b] of Object.entries(B))for(const p of b.payments||[])if(Math.round(+p.amount)===Math.round(x.amt)&&Math.abs(Date.parse(p.date)-t)<=3*864e5){const sim=hbNorm(b.patientName),a=hbNorm(x.desc);if(sim&&a&&(sim.includes(a.slice(0,5))||a.includes(sim.slice(0,5))))return {id,no:b.no,sure:true}}
   for(const [id,b] of Object.entries(B))if(b.hb===hbKey(x))return {id,no:b.no,sure:true};return null}
-let HB=null;
+function lev1(a,b){if(Math.abs(a.length-b.length)>1)return false;let i=0,j=0,d=0;while(i<a.length&&j<b.length){if(a[i]===b[j]){i++;j++;continue}if(++d>1)return false;if(a.length>b.length)i++;else if(b.length>a.length)j++;else{i++;j++}}return d+(a.length-i)+(b.length-j)<=1}
+function hbSim(a,b){if(!a||!b)return false;if(a===b)return true;const m=Math.min(a.length,b.length);if(m<5)return false;return a.startsWith(b)||b.startsWith(a)||a.endsWith(b)||b.endsWith(a)||lev1(a,b)}
+function hbGroups(){const R=HB||[],ids=new Map(),nm=id=>id.startsWith("p:")?hbNorm((P[id.slice(2)]||{}).name):id.slice(2);
+  for(const r of R){if(r.t!=="in"||r.done)continue;r.ident=r.pid?"p:"+r.pid:"n:"+hbNorm(r.x.desc);if(!ids.has(r.ident))ids.set(r.ident,[]);ids.get(r.ident).push(r)}
+  for(const r of R){if(r.t!=="in"||r.done||r.pid)continue;const a=hbNorm(r.x.desc);for(const [pid,p] of Object.entries(P)){const b=hbNorm(p.name);if(b&&hbSim(a,b)&&!ids.has("p:"+pid))ids.set("p:"+pid,[])}}
+  const keys=[...ids.keys()],par=new Map(keys.map(k=>[k,k])),f=k=>par.get(k)===k?k:(par.set(k,f(par.get(k))),par.get(k));
+  for(let i=0;i<keys.length;i++)for(let j=i+1;j<keys.length;j++){const a=keys[i],b=keys[j];if(a.startsWith("p:")&&b.startsWith("p:")&&!ids.get(a).length&&!ids.get(b).length){const na=nm(a),nb=nm(b);if(na!==nb)continue}if(hbSim(nm(a),nm(b)))par.set(f(a),f(b))}
+  const g=new Map();for(const k of keys){const r=f(k);if(!g.has(r))g.set(r,[]);g.get(r).push(k)}
+  return [...g.values()].filter(ks=>ks.length>1&&ks.some(k=>ids.get(k).length)).map(ks=>({key:ks.slice().sort().join("+"),ks,rows:ks.flatMap(k=>ids.get(k))}))}
+let HB=null,HBANS={},HBNAME={};
 function hbBuild(txt){const d=hbParse(txt);if(!d.ex.length&&!d.inc.length)return null;const done=new Set(expList().map(e=>e.hb).filter(Boolean));
   const rows=[];
   for(const x of d.ex){const k=hbKey(x),clinic=/clinic/i.test(x.cat)||/clinic/i.test(x.sub),share=/share/i.test(x.cat)&&/clinic|dr/i.test(x.cat);
@@ -3972,15 +3983,28 @@ function hbRender(){const R=HB||[],sec=(kind,title,sub)=>{const xs=R.map((r,i)=>
       return `<div class="hbr${r.done?" dn":""}"><input type="checkbox" data-hbon="${i}" ${r.on?"checked":""} ${r.done?"disabled":""} aria-label="Import"><span class="hbd">${esc(fmtDate(x.date))}</span><span class="hbm"><b>${esc(x.sub||x.cat)}</b><small>${esc(x.cat)}${x.notes?" · "+esc(x.notes):""}${x.acct?" · "+esc(x.acct):""}</small>${r.done?`<em class="ok">✓ Already imported</em>`:r.kind==="share"?`<select data-hbdent="${i}"><option value="">Which dentist?</option>${dentists().map(d=>`<option${d.name===r.dent?" selected":""}>${esc(d.name)}</option>`).join("")}</select>`:`<select data-hbcat="${i}">${EXCATS.map(c=>`<option${c===r.cat?" selected":""}>${c}</option>`).join("")}</select>`}</span><b class="hba">${rs(x.amt)}</b></div>`}).join("");
     const open=kind!=="home";return `<details class="hbs hb-${kind}" ${open?"open":""}><summary><b>${title}</b><span>${xs.length} · ${rs(tot)} · <i>${on} ticked</i></span></summary>${sub?`<p class="muted small">${sub}</p>`:""}<div class="hbsel"><button type="button" class="linkbtn" data-hball="${kind}">Tick all</button> · <button type="button" class="linkbtn" data-hbnone="${kind}">Untick all</button></div>${body}</details>`};
   const n=R.filter(r=>r.on&&!r.done).length,amt=R.filter(r=>r.on&&!r.done).reduce((a,r)=>a+r.x.amt,0);
-  $("hb-body").innerHTML=R.length?sec("clinic","Clinic expenses","Saved under Reports → Other expenses with the category you pick.")+sec("share","Dentist share payments","Shown as \"Paid\" against each dentist in Reports → Dentist shares.")+sec("income","Patient income","Already-recorded payments are skipped. For the rest, a bill marked paid is made for the patient.")+sec("home","Home & personal (not imported unless you tick)",""):`<p class="muted">Choose the CSV you exported from HomeBudget.</p>`;
-  $("hb-go").disabled=!n;$("hb-go").textContent=n?`Import ${n} · ${rs(amt)}`:"Import";}
-async function hbImport(){const R=(HB||[]).filter(r=>r.on&&!r.done);if(!R.length)return;const b=$("hb-go");b.disabled=true;b.textContent="Importing…";let ne=0,nb=0,np=0;
+  const G=HB?hbGroups():[];HB_G=G;const pend=G.filter(g=>!HBANS[g.key]&&g.rows.some(r=>r.on)).length;
+  const gq=G.length?`<div class="hbq"><h4>Same patient? ${pend?`<span class="chip2 warn">${pend} to answer</span>`:`<span class="chip2 ok">All answered</span>`}</h4><p class="muted small" style="margin:0 0 6px">These names look alike. Tell me if they are the same person so their bills go into one file.</p>${G.map(g=>{const ans=HBANS[g.key];return `<div class="hbg${ans?" a":""}"><div class="hbgn">${g.ks.map(k=>k.startsWith("p:")?`<span class="ex">📁 ${esc((P[k.slice(2)]||{}).name||"")}${(P[k.slice(2)]||{}).fileNo?" · "+esc(P[k.slice(2)].fileNo):""} <small>in app</small></span>`:`<span>🆕 ${esc((g.rows.find(r=>r.ident===k)||{x:{}}).x.desc||"")} <small>${g.rows.filter(r=>r.ident===k).map(r=>fmtDate(r.x.date).replace(/ \d{4}$/,"")+" · "+rs(r.x.amt)).join(", ")}</small></span>`).join("")}</div><div class="hbgb">${ans==="same"&&!g.ks.some(k=>k.startsWith("p:"))?`<label class="small">Save as <select data-hbname="${esc(g.key)}">${[...new Set(g.rows.map(r=>r.x.desc.replace(/\s+/g," ").trim()))].map(n=>`<option${n===(HBNAME[g.key]||"")?" selected":""}>${esc(n)}</option>`).join("")}</select></label>`:""}<button type="button" class="btn small${ans==="same"?" primary":""}" data-hbsame="${esc(g.key)}">Same patient</button><button type="button" class="btn small${ans==="diff"?" primary":""}" data-hbdiff="${esc(g.key)}">Different people</button></div></div>`}).join("")}</div>`:"";
+  $("hb-body").innerHTML=R.length?gq+sec("clinic","Clinic expenses","Saved under Reports → Other expenses with the category you pick.")+sec("share","Dentist share payments","Shown as \"Paid\" against each dentist in Reports → Dentist shares.")+sec("income","Patient income","Already-recorded payments are skipped. For the rest, a bill marked paid is made for the patient.")+sec("home","Home & personal (not imported unless you tick)",""):`<p class="muted">Choose the CSV you exported from HomeBudget.</p>`;
+  $("hb-go").disabled=!n||pend>0;$("hb-go").textContent=pend?`Answer ${pend} "same patient?" first`:n?`Import ${n} · ${rs(amt)}`:"Import";}
+let HB_G=[];
+function mergePatients(keep,drop){if(!P[keep]||!P[drop]||keep===drop)return;const k=P[keep],d=P[drop];
+  for(const [id,b] of Object.entries(B))if(b.patientId===drop)cset("bills",id,{...b,patientId:keep,patientName:k.name});
+  for(const [id,a] of Object.entries(A))if(a.patientId===drop)cset("appts",id,{...a,patientId:keep,patientName:k.name});
+  for(const [id,c] of Object.entries(LC))if(c.patientId===drop)cset("labcases",id,{...c,patientId:keep,patientName:k.name});
+  const mp=(x,y)=>x&&x.items&&x.items.length?(y&&y.items&&y.items.length?{...x,items:[...x.items,...y.items]}:x):(y||x);
+  const nk={...d,...k,phone:k.phone||d.phone||"",age:k.age||d.age||"",gender:k.gender||d.gender||"",alerts:[k.alerts,d.alerts].filter(Boolean).join("; "),notes:[...(k.notes||[]),...(d.notes||[])],xrays:[...(k.xrays||[]),...(d.xrays||[])],teeth:{...(d.teeth||{}),...(k.teeth||{})},plan:mp(k.plan,d.plan),proposal:mp(k.proposal,d.proposal),mergedFrom:[...(k.mergedFrom||[]),{name:d.name,fileNo:d.fileNo||"",at:new Date().toISOString()}]};
+  for(const x of ["plan","proposal"])if(!nk[x])delete nk[x];cset("patients",keep,nk);cdel("patients",drop);if(selPat===drop)selPat=keep}
+async function hbImport(){const R=(HB||[]).filter(r=>r.on&&!r.done);if(!R.length)return;const b=$("hb-go");b.disabled=true;b.textContent="Importing…";let ne=0,nb=0,np=0,nm=0;
+  const idmap={};for(const g of HB_G){if(HBANS[g.key]!=="same")continue;const ps=g.ks.filter(k=>k.startsWith("p:")).map(k=>k.slice(2)).filter(id=>P[id]).sort((a,b)=>String(P[a].fileNo||"").localeCompare(String(P[b].fileNo||""))||String(P[a].createdAt||"").localeCompare(String(P[b].createdAt||"")));
+    let target=ps[0]||"";for(const d of ps.slice(1)){mergePatients(target,d);nm++}if(!target){const rows=g.rows.filter(r=>r.on);const nmx=HBNAME[g.key]||(rows[0]||g.rows[0]).x.desc;target=nid("p");cset("patients",target,{name:nmx.replace(/\s+/g," ").trim(),phone:"",createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[],alerts:""});np++}
+    for(const k of g.ks)idmap[k]=target}
   for(const r of R){const x=r.x;
     if(r.t==="ex"){if(r.kind==="share"&&!r.dent)continue;const doc={kind:"expense",cat:r.kind==="share"?"Dentist share paid":r.cat,amount:x.amt,date:x.date,paid:true,paidOn:x.date,note:[r.kind==="home"?x.cat+" · "+x.sub:x.sub,x.notes,x.acct?"via "+x.acct:""].filter(Boolean).join(" · "),hb:r.k,at:new Date().toISOString(),...me};if(r.dent)doc.dentist=r.dent;
       if(!db)logs["local-"+Date.now()+"-"+ne]=doc;else{try{const ref=db.collection("logs").doc();logs[ref.id]=doc;W(ref.set(doc))}catch(e){}}ne++;continue}
-    let pid=r.pid;if(!pid){pid=nid("p");cset("patients",pid,{name:x.desc.replace(/\s+/g," ").trim(),phone:"",createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[],alerts:""});np++}
+    let pid=idmap[r.ident]||r.pid;if(!pid){pid=nid("p");cset("patients",pid,{name:x.desc.replace(/\s+/g," ").trim(),phone:"",createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[],alerts:""});np++;idmap[r.ident]=pid}
     const p=P[pid]||{},pm=hbPayM(x.acct),id=nid("b");cset("bills",id,{no:nextBillNo(x.date),patientId:pid,patientName:p.name||x.desc,phone:p.phone||"",date:x.date,items:[{desc:x.notes||"Treatment",qty:1,price:x.amt}],discount:0,note:"Imported from HomeBudget",hb:r.k,...(r.dent?{dentist:r.dent}:{}),createdAt:new Date().toISOString(),payments:[{date:x.date,amount:x.amt,...pm,...me}],...me});nb++}
-  render();$("hbdlg").close();toast(`Imported ${[ne?pl(ne,"expense"):"",nb?pl(nb,"bill"):"",np?pl(np,"new patient"):""].filter(Boolean).join(", ")} from HomeBudget`)}
+  render();$("hbdlg").close();toast(`Imported ${[ne?pl(ne,"expense"):"",nb?pl(nb,"bill"):"",np?pl(np,"new patient"):"",nm?pl(nm,"patient")+" merged":""].filter(Boolean).join(", ")} from HomeBudget`)}
 function hbExport(f,t){const rows=[],d8=s=>s.replace(/-/g,""),cl=s=>String(s||"").replace(/[",\n]/g," ").replace(/\s+/g," ").trim();
   for(const b of Object.values(B))if(!b.hb)for(const x of b.payments||[])if(inR(x.date,f,t))rows.push([x.date,cl(`${b.patientName||"Patient"} · ${b.no||""} · ${(b.items||[]).map(i=>i.desc).join(", ")} · ${payLbl(x)}`),+x.amount||0]);
   for(const l of logList())if(l.kind==="purchase"&&inR(l.date,f,t))rows.push([l.date,cl(`Bought ${l.qty||""} ${l.unit||""} ${l.name||""}${l.supplier?" · "+l.supplier:""}`),-(+l.total||0)]);
@@ -3992,11 +4016,13 @@ async function hbSendCsv(f,t){const r=hbExport(f,t);if(!r.n){toast("Nothing to e
   if(!window.claude&&navigator.canShare&&/Android|iPhone|iPad/i.test(navigator.userAgent)){const file=new File([blob],name,{type:"text/csv"});if(navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"For HomeBudget"});toast(`${r.n} entries · tap HomeBudget in the share list`);return}catch(e){if(e&&e.name==="AbortError")return}}}
   await propSave(blob,name);toast(`Saved ${r.n} entries (income ${rs(r.inc)}, expenses ${rs(r.out)}). Open the file with HomeBudget.`)}
 document.addEventListener("click",e=>{const t=e.target;
-  if(t.closest("[data-hbin]")){HB=null;$("hb-file").value="";hbRender();openD($("hbdlg"));return}
+  const sm=t.closest("[data-hbsame],[data-hbdiff]");if(sm&&HB){const k=sm.dataset.hbsame||sm.dataset.hbdiff;HBANS[k]=sm.dataset.hbsame?"same":"diff";if(sm.dataset.hbsame){const g=HB_G.find(x=>x.key===k);if(g&&g.rows.some(r=>r.on))for(const r of g.rows)r.on=true}hbRender();return}
+  if(t.closest("[data-hbin]")){HB=null;HBANS={};HBNAME={};$("hb-file").value="";hbRender();openD($("hbdlg"));return}
   const o=t.closest("[data-hbout]");if(o){hbSendCsv(o.dataset.f,o.dataset.t);return}
   const al=t.closest("[data-hball],[data-hbnone]");if(al&&HB){const k=al.dataset.hball||al.dataset.hbnone,v=!!al.dataset.hball;for(const r of HB)if(r.kind===k&&!r.done)r.on=v;hbRender();return}});
 $("hb-file").addEventListener("change",async()=>{const f=$("hb-file").files&&$("hb-file").files[0];if(!f)return;try{const txt=await f.text();HB=hbBuild(txt);if(!HB){$("hb-body").innerHTML=`<p class="perr">This doesn't look like a HomeBudget export. In HomeBudget: Reports → Export → CSV.</p>`;$("hb-go").disabled=true;return}hbRender()}catch(x){toast("Couldn't read that file.")}});
 $("hb-body").addEventListener("change",e=>{const t=e.target;if(!HB)return;const on=t.closest("[data-hbon]");if(on){HB[+on.dataset.hbon].on=on.checked;hbRender();return}
+  const hn=t.closest("[data-hbname]");if(hn){HBNAME[hn.dataset.hbname]=hn.value;return}
   const c=t.closest("[data-hbcat]");if(c){HB[+c.dataset.hbcat].cat=c.value;return}const d=t.closest("[data-hbdent]");if(d){HB[+d.dataset.hbdent].dent=d.value;return}});
 $("hb-go").addEventListener("click",hbImport);
 $("rp-per").addEventListener("click",e=>{const b=e.target.closest("[data-rp]");if(!b)return;rpPer=b.dataset.rp;localSet("aa-rp",rpPer);render()});
@@ -4991,7 +5017,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v83";let updShown=false;
+const APP_BUILD="ds-v84";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
