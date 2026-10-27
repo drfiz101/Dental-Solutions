@@ -372,7 +372,7 @@ function formHTML(){
       <div class="field"><label>Time</label><div class="seg" role="group" aria-label="Shift">
         <button type="button" data-v="morning" aria-pressed="${r.shift!=="evening"}" ${dis}>Morning</button>
         <button type="button" data-v="evening" aria-pressed="${r.shift==="evening"}" ${dis}>Evening</button></div></div>
-      <div class="field wide"><label for="fPat">Patient's name</label><input id="fPat" list="dlPat" required placeholder="e.g. HAJIRA BIBI" value="${esc(r.patient)}" ${dis}></div>
+      <div class="field wide"><label for="fPat">Patient's name</label><input id="fPat" list="dlPat" required placeholder="Full name" value="${esc(r.patient)}" ${dis}></div>
       <div class="field wide"><label for="fProc">Procedure</label><input id="fProc" list="dlProc" required placeholder="e.g. RCT, FILLING, CROWN" value="${esc(r.procedure)}" ${dis}></div>
       <div class="field"><label for="fChg">Charges (Rs)</label><input id="fChg" inputmode="numeric" required placeholder="5000" value="${esc(r.charges)}" ${dis}></div>
       <div class="btnrow">${editing?'<button type="button" class="btn plain" id="delEdit" style="color:var(--danger)">Delete</button><button type="button" class="btn plain" id="cancelEdit">Cancel</button>':""}<button class="btn" type="submit" ${dis}>${editing?"Save":"Add"}</button></div>
