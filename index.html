@@ -3976,7 +3976,7 @@ function stInner(){const d=stData(),c=S().clinic,logo=(document.querySelector(".
     body=sec("Pending — balance due","pend",rs(due),tb(H,d.pend.map(row),d.pend.length?F(d.pend):null))+sec("Paid in full","paid",rs(sumOf(d.paid,b=>billCalc(b).total)),tb(H,d.paid.map(row),d.paid.length?F(d.paid):null));
     if(p){const pays=all.flatMap(b=>(b.payments||[]).map(x=>({...x,no:b.no}))).sort((a,b)=>a.date.localeCompare(b.date));body+=`<h3 class="sh">Payments received</h3><div class="wide">${tb(["Date","Bill no.","Method","Amount"],pays.map(x=>[esc(fmtDate(x.date)),esc(x.no||""),esc(payLbl(x)),rs(x.amount)]),pays.length?["Total","","",rs(sumOf(pays,x=>x.amount))]:null)}</div>`}
     if(!p&&d.pend.length){const pp={};for(const b of d.pend){const k=b.patientId||b.patientName;pp[k]=pp[k]||{n:b.patientName,ph:b.phone||"",bal:0,c:0};pp[k].bal+=billCalc(b).bal;pp[k].c++}
-      body=`<h3 class="sh">Patients with a balance</h3><div class="wide">${tb(["Patient","Mobile","Bills","Balance"],Object.values(pp).sort((a,b)=>b.bal-a.bal).map(x=>[esc(x.n),esc(x.ph),x.c,rs(x.bal)]))}</div>`+body}}
+      body=`<h3 class="sh">Patients with a balance</h3><div class="wide owe">${tb(["Patient","Mobile","Bills","Balance"],Object.values(pp).sort((a,b)=>b.bal-a.bal).map(x=>[esc(x.n),esc(x.ph),x.c,rs(x.bal)]))}</div>`+body}}
   return `<div class="inv stm"><style>${INV_CSS}
 .stm .kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 36px 0}.stm .kp div{border-radius:10px;padding:10px 12px;background:#F3F7F6}.stm .kp small{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#5b6b67;font-weight:700}.stm .kp b{font-size:18px}.stm .kp span{display:block;font-size:10.5px;color:#5b6b67}
 .stm .kp .in{background:#E3F2E8}.stm .kp .in b{color:#2E7D4F}.stm .kp .pdk{background:#FBEFD9}.stm .kp .pdk b{color:#A86200}
@@ -3988,6 +3988,9 @@ function stInner(){const d=stData(),c=S().clinic,logo=(document.querySelector(".
 .stm .rt tfoot td{font-weight:700;border-top:2px solid #1d2b28;background:#FAFCFB}
 .stm .wide{margin:0 36px}.stm .wide .rt th{background:#0F4F45;color:#fff}
 .stm .none{font-size:12px;color:#7d8c88;margin:8px 12px}
+.stm .ss.pend{border:2px solid #F0A9A2}.stm .pend .sh2{background:#FDECEA;color:#A4231B;font-size:14px}.stm .pend .sh2 b::before{content:"⚠ "}.stm .pend .sh2 span{font-size:16px;font-weight:800}
+.stm .pend .rt tbody td:last-child,.stm .owe .rt tbody td:last-child{background:#FDECEA;color:#A4231B;font-weight:800}.stm .pend .rt tbody td,.stm .owe .rt tbody td{background:#FDECEA;color:#7A1D16;border-bottom:1px solid #F5C7C1}.stm .pend .rt tbody td:last-child,.stm .owe .rt tbody td:last-child{background:#F9D6D1;color:#A4231B}
+.stm .pend .rt tfoot td{background:#FDECEA;color:#A4231B}.stm .owe .rt tbody tr:first-child td{font-weight:700}
 .stm .ttl h1{font-size:20px}
 </style>
 <div class="bar"></div>
@@ -4836,7 +4839,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v77";let updShown=false;
+const APP_BUILD="ds-v78";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
