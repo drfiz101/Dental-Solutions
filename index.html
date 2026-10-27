@@ -654,6 +654,8 @@ body.no-lab_edit select[data-lcst],body.no-inv_count .stepper,body.no-appt_edit 
 
 .pushb{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.pushb h4{margin:0 0 6px;font-size:15px}.pushs{margin:0;padding-left:20px;display:grid;gap:8px;font-size:14px}.pushs small{display:block;margin-top:3px}
 .pushtp{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}.pushtp code{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;word-break:break-all}.pusha{margin-top:10px}
+.rcbox{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.rcbox img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}.rcpick{cursor:pointer;display:inline-flex;gap:4px;align-items:center}.rcpick.on{background:#E3F2E8;border-color:#9FD3B4;color:#1F6B45}
+.rcchip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:1px 8px;font:inherit;font-size:12px;cursor:pointer;color:var(--ink);margin-left:4px}
 .stq{flex-wrap:wrap}
 body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
@@ -1354,6 +1356,7 @@ input[type=date]{min-width:0;max-width:100%}
     <div class="bankadd" id="pa-bankadd" hidden><input id="pa-banknew" maxlength="40" placeholder="Bank name, e.g. Khushhali Bank" autocomplete="off" aria-label="New bank name"><button type="button" class="btn primary" id="pa-bankok">Add</button></div></div>
   <div class="field" id="pa-datew" hidden><label for="pa-date">Date received</label><input id="pa-date" type="date"></div>
   <div class="field" id="pa-refw"><label for="pa-ref">Transaction ID / reference (optional)</label><input id="pa-ref" maxlength="60" placeholder="e.g. TID 0123456789" autocomplete="off"></div>
+  <div class="field" id="pa-rcw"><label>Payment receipt / screenshot (optional)</label><div class="rcbox"><img id="pa-rcimg" alt="Receipt" hidden><label class="btn small rcpick">📎 <span id="pa-rcl">Add receipt photo</span><input id="pa-rc" type="file" accept="image/*" hidden></label><button type="button" class="btn small danger-outline" id="pa-rcdel" hidden>Remove</button></div></div>
   <p class="perr" id="pa-err" hidden></p>
   <div class="actions"><span></span><div><button type="button" class="btn" id="pa-cancel">Cancel</button><button type="submit" class="btn primary">Save payment</button></div></div>
 </form></dialog>
@@ -2850,9 +2853,9 @@ function renderBV(){
   $("bv").innerHTML=`<div class="bvh"><div><h2>${esc(b.no||"Bill")}</h2><p class="muted" style="margin:2px 0 0">${esc(fmtDate(b.date))} · <button class="linkbtn" data-gopat="${esc(b.patientId)}">${esc(b.patientName)}</button>${b.phone?" · "+esc(b.phone):""}</p></div><span class="chip2 ${t.bal>0?"warn":"ok"}">${t.bal>0?"Due "+rs(t.bal):"Paid in full"}</span></div>
   <div>${(b.items||[]).map(i=>`<div class="kv"><span>${esc(i.desc)}${i.tooth?` <small class="muted">· tooth ${esc(i.tooth)}</small>`:""}${(+i.qty||1)>1?` <small class="muted">× ${esc(i.qty)}</small>`:""}</span><b>${rs((+i.qty||1)*(+i.price||0))}</b></div>`).join("")}${b.discount?`<div class="kv"><span>Discount</span><b>− ${rs(b.discount)}</b></div>`:""}<div class="kv tot"><span>Total</span><b>${rs(t.total)}</b></div></div>
   ${miniChart(b.items)}
-  <h3 class="h3s">Payments</h3>${(b.payments||[]).length?b.payments.map((p,ix)=>`<div class="kv"><span>${esc(fmtDate(p.date))} · ${esc(payLbl(p))}${p.ref?" · "+esc(p.ref):""}</span><span class="kvr"><b>${rs(p.amount)}</b><button type="button" class="pedit" data-ppedit="${ix}" aria-label="Edit this payment">✎ Edit</button><button type="button" class="ldel" data-pdel="${ix}" aria-label="Remove this payment">×</button></span></div>`).join(""):`<p class="muted" style="margin:0">No payments yet.</p>`}
+  <h3 class="h3s">Payments</h3>${(b.payments||[]).length?b.payments.map((p,ix)=>`<div class="kv"><span>${esc(fmtDate(p.date))} · ${esc(payLbl(p))}${p.ref?" · "+esc(p.ref):""}${p.receipt?` <button type="button" class="rcchip" data-prc="${esc(p.receipt)}">🧾 Receipt</button>`:""}</span><span class="kvr"><b>${rs(p.amount)}</b><button type="button" class="pedit" data-ppedit="${ix}" aria-label="Edit this payment">✎ Edit</button><button type="button" class="ldel" data-pdel="${ix}" aria-label="Remove this payment">×</button></span></div>`).join(""):`<p class="muted" style="margin:0">No payments yet.</p>`}
   <div class="kv tot"><span>Balance</span><b>${rs(t.bal)}</b></div>
-  ${t.bal>0?`<label class="fulltick"><input type="checkbox" data-bvfull> Paid in full — ${rs(t.bal)} received</label><form class="payform" id="payForm"><input id="pay-amt" type="number" min="1" inputmode="numeric" value="${t.bal}" aria-label="Payment amount in rupees"><select id="pay-m" aria-label="Payment method"><option>Cash</option><option>Bank transfer</option><option>Easypaisa</option><option>JazzCash</option><option>NayaPay</option><option>SadaPay</option><option>Card</option><option>Other</option></select><select id="pay-bank" data-banksel aria-label="Bank" hidden></select><button class="btn primary" type="submit">Add payment</button></form>`:""}
+  ${t.bal>0?`<label class="fulltick"><input type="checkbox" data-bvfull> Paid in full — ${rs(t.bal)} received</label><form class="payform" id="payForm"><input id="pay-amt" type="number" min="1" inputmode="numeric" value="${t.bal}" aria-label="Payment amount in rupees"><select id="pay-m" aria-label="Payment method"><option>Cash</option><option>Bank transfer</option><option>Easypaisa</option><option>JazzCash</option><option>NayaPay</option><option>SadaPay</option><option>Card</option><option>Other</option></select><select id="pay-bank" data-banksel aria-label="Bank" hidden></select><label class="btn rcpick" title="Attach payment receipt / screenshot">📎<span id="pay-rcl">Receipt</span><input id="pay-rc" type="file" accept="image/*" hidden></label><button class="btn primary" type="submit">Add payment</button></form>`:""}
   ${canShares()?(()=>{const d=billDentist(b),pct=d?shRate(d):0,rec=(b.payments||[]).reduce((a,x)=>a+(+x.amount||0),0);return `<div class="bvsh"><h4>🔒 Dentist share · only ${isClinicOwner()?"you":"owner & admins"} see this</h4><label class="small muted" for="bv-dent">Treated by</label><select id="bv-dent"><option value="">Not assigned</option>${[...new Set([...dentists().map(x=>x.name),d].filter(Boolean))].map(n=>`<option${n===d?" selected":""}>${esc(n)}</option>`).join("")}</select>${d&&shOwner(d)?`<div class="kv"><span>${esc(d)} is the owner</span><b>All ${rs(rec)} to clinic</b></div>`:d?`<div class="kv"><span>${esc(d)} (${pct}%) of ${rs(rec)} received</span><b>${rs(rec*pct/100)}</b></div><div class="kv"><span>Clinic profit</span><b>${rs(rec*(100-pct)/100)}</b></div><p class="muted small" style="margin:4px 0 0">Lab fees are split 50/50 with the clinic in Reports → Dentist shares.</p>`:`<p class="muted small" style="margin:6px 0 0">Choose who treated this patient so the share is counted.</p>`}</div>`})():""}
   ${(()=>{const pb=prevBills({...b,id:bvId}).filter(x=>x.id!==bvId),old=pb.reduce((a,x)=>a+billCalc(x).bal,0);return old?`<label class="fulltick" style="background:#FDECEA;color:#A4231B"><input type="checkbox" data-bvprev ${b.showPrev===false?"":"checked"}> Show old balance (${rs(old)} from ${pl(pb.length,"earlier bill")}) on this bill · total due now ${rs(t.bal+old)}</label>`:""})()}
   ${b.note?`<p class="muted small">Note: ${esc(b.note)}</p>`:""}
@@ -2864,7 +2867,8 @@ function renderBV(){
 $("bv").addEventListener("click",e=>{
   const t=e.target,b=B[bvId];if(!b)return;
   const pe=t.closest("[data-ppedit]");if(pe){const id=bvId,ix=+pe.dataset.ppedit,b0=B[id],py=(b0.payments||[])[ix];if(!py)return;const others=(b0.payments||[]).reduce((a,x,i)=>i===ix?a:a+(+x.amount||0),0),maxA=Math.max(0,billCalc(b0).total-others);
-    payAsk({title:"Edit payment · "+(b0.no||"Bill"),sub:(b0.patientName||"")+" · "+fmtDate(py.date),amount:py.amount,max:maxA||0,editable:true,method:py.method||"Cash",bank:py.bank||"",ref:py.ref||"",date:py.date}).then(r=>{if(!r)return;const b1=B[id],ps=[...(b1.payments||[])];const np={...ps[ix],amount:r.amount,method:r.method,date:r.date||ps[ix].date};if(r.ref)np.ref=r.ref;else delete np.ref;if(r.bank)np.bank=r.bank;else delete np.bank;ps[ix]=np;cset("bills",id,{...b1,payments:ps});if(bvId===id)renderBV();toast("Payment updated · "+rs(r.amount)+" ("+payLbl(r)+")")});return}
+    payAsk({title:"Edit payment · "+(b0.no||"Bill"),sub:(b0.patientName||"")+" · "+fmtDate(py.date),amount:py.amount,max:maxA||0,editable:true,method:py.method||"Cash",bank:py.bank||"",ref:py.ref||"",receipt:py.receipt||"",date:py.date}).then(r=>{if(!r)return;const b1=B[id],ps=[...(b1.payments||[])];const np={...ps[ix],amount:r.amount,method:r.method,date:r.date||ps[ix].date};if(r.ref)np.ref=r.ref;else delete np.ref;if(r.bank)np.bank=r.bank;else delete np.bank;if(r.receipt)np.receipt=r.receipt;else delete np.receipt;ps[ix]=np;cset("bills",id,{...b1,payments:ps});if(bvId===id)renderBV();toast("Payment updated · "+rs(r.amount)+" ("+payLbl(r)+")")});return}
+  const rc=t.closest("[data-prc]");if(rc){showPhoto(rc.dataset.prc,"Payment receipt · "+(b.patientName||"")+" · "+(b.no||""));return}
   const pd=t.closest("[data-pdel]");if(pd){const pays=[...(b.payments||[])];pays.splice(+pd.dataset.pdel,1);cset("bills",bvId,{...b,payments:pays});renderBV();toast("Payment removed");return}
   if(t.closest("[data-bvdel]")){bvConf=true;renderBV();return}
   if(t.closest("[data-bvno]")){bvConf=false;renderBV();return}
@@ -2877,9 +2881,10 @@ $("bv").addEventListener("click",e=>{
 });
 $("bv").addEventListener("change",async e=>{const f=e.target.closest("[data-bvfull]");if(!f||!f.checked)return;f.checked=false;const id=bvId,b=B[id],bal=billCalc(b).bal;if(bal<=0)return;
   const r=await payAsk({title:"Paid in full · "+(b.no||"Bill"),sub:(b.patientName||"")+" · "+rs(bal),amount:bal,max:bal,editable:false});if(!r)return;
-  const b2=B[id];cset("bills",id,{...b2,payments:[...(b2.payments||[]),{date:ymd(new Date()),amount:r.amount,method:r.method,...(r.bank?{bank:r.bank}:{}),...(r.ref?{ref:r.ref}:{}),...me}]});if(bvId===id)renderBV();toast("✓ Paid in full · "+rs(r.amount)+" ("+payLbl(r)+")")});
+  const b2=B[id];cset("bills",id,{...b2,payments:[...(b2.payments||[]),{date:ymd(new Date()),amount:r.amount,method:r.method,...(r.bank?{bank:r.bank}:{}),...(r.ref?{ref:r.ref}:{}),...(r.receipt?{receipt:r.receipt}:{}),...me}]});if(bvId===id)renderBV();toast("✓ Paid in full · "+rs(r.amount)+" ("+payLbl(r)+")")});
 $("bv").addEventListener("change",e=>{if(e.target.matches("[data-bvprev]")){const b=B[bvId];if(!b)return;const nb={...b};if(e.target.checked)delete nb.showPrev;else nb.showPrev=false;cset("bills",bvId,nb);renderBV();return}if(e.target.id!=="bv-dent"||!canShares())return;const b=B[bvId];if(!b)return;const v=e.target.value;const nb={...b};if(v)nb.dentist=v;else delete nb.dentist;cset("bills",bvId,nb);renderBV();toast(v?"Treated by "+v:"Dentist cleared")});
-$("bv").addEventListener("submit",e=>{if(e.target.id!=="payForm")return;e.preventDefault();const amt=+$("pay-amt").value;if(!(amt>0))return;const b=B[bvId];cset("bills",bvId,{...b,payments:[...(b.payments||[]),{date:ymd(new Date()),amount:amt,method:$("pay-m").value,...($("pay-m").value==="Bank transfer"&&$("pay-bank").value&&$("pay-bank").value!=="+"?{bank:$("pay-bank").value}:{}),...me}]});renderBV();toast("Payment added")});
+$("bv").addEventListener("change",e=>{if(e.target.id!=="pay-rc")return;const f=e.target.files&&e.target.files[0];$("pay-rcl").textContent=f?"✓ Receipt":"Receipt";e.target.closest(".rcpick").classList.toggle("on",!!f)});
+$("bv").addEventListener("submit",async e=>{if(e.target.id!=="payForm")return;e.preventDefault();const amt=+$("pay-amt").value;if(!(amt>0))return;const f=$("pay-rc").files&&$("pay-rc").files[0];let receipt="";if(f){try{receipt=await savePhoto(f)}catch(x){toast("Couldn't read that receipt photo.");return}}const b=B[bvId];cset("bills",bvId,{...b,payments:[...(b.payments||[]),{date:ymd(new Date()),amount:amt,method:$("pay-m").value,...(receipt?{receipt}:{}),...($("pay-m").value==="Bank transfer"&&$("pay-bank").value&&$("pay-bank").value!=="+"?{bank:$("pay-bank").value}:{}),...me}]});renderBV();toast("Payment added")});
 /* full treatment list, grouped by specialty */
 const TX_MASTER=[
 ["Consultation & diagnosis",["Consultation / examination","Consultation / examination with X-ray","Specialist consultation","Emergency visit","Follow-up visit","Periapical X-ray (per film)","Bitewing X-ray","OPG (full mouth X-ray)","Lateral cephalogram","CBCT scan — single area","CBCT scan — full mouth","Intraoral photographs","Study models / impressions","Digital smile design","Oral cancer screening","Pulp vitality test"]],
@@ -3390,7 +3395,7 @@ function tpPaidTick(el){const pid=selPat,p=P[pid],pl=planOf(p),it=pl.items.find(
   cdel("bills",it.billId);const pp=P[pid],l=planOf(pp);cset("patients",pid,{...pp,plan:{...l,items:l.items.map(i=>{if(i.id!==it.id)return i;const u={...i};delete u.billNo;delete u.billId;delete u.autoBill;return u}),updatedAt:new Date().toISOString()}});toast("Marked not paid")}
 async function tpPayFlow(it,left,editable){const pid=selPat,p=P[pid];const r=await payAsk({title:"Payment for "+it.tr,sub:(p?p.name+" · ":"")+(editable?"Full amount "+rs(left)+" — or enter a smaller amount for an advance.":"Full payment "+rs(left)),amount:left,max:left,editable});
   if(!r)return;const today=ymd(new Date()),pl=planOf(P[pid]),cur=pl.items.find(i=>i.id===it.id)||it,b=cur.billId&&B[cur.billId],amt=r.amount,net=itemNet(pl,cur);
-  const pay={date:today,amount:amt,method:r.method,...(r.bank?{bank:r.bank}:{}),...(r.ref?{ref:r.ref}:{}),auto:cur.id,...me};
+  const pay={date:today,amount:amt,method:r.method,...(r.bank?{bank:r.bank}:{}),...(r.ref?{ref:r.ref}:{}),...(r.receipt?{receipt:r.receipt}:{}),auto:cur.id,...me};
   if(b){cset("bills",cur.billId,{...b,payments:[...(b.payments||[]),pay]});const bl=billCalc(B[cur.billId]).bal;toast(rs(amt)+" received ("+payLbl(r)+") · "+(b.no||"")+(bl>0?" · "+rs(bl)+" left":" · fully paid"));return}
   const id=nid("b"),no=nextBillNo(today);
   cset("bills",id,{no,createdAt:new Date().toISOString(),...me,patientId:pid,patientName:P[pid].name,phone:P[pid].phone||"",date:today,items:[{desc:cur.tr,tooth:cur.tooth||"",qty:+cur.qty||1,price:+cur.price||0}],discount:Math.max(0,itAmt(cur)-net),note:"Treatment plan",autoItem:cur.id,payments:[pay]});
@@ -4154,11 +4159,15 @@ document.addEventListener("change",e=>{const t=e.target;if(!t||!t.id)return;
   if(t.id==="b-meth")bankSync("b-meth","b-bank","b-bankw");
   if(t.id==="pay-m")bankSync("pay-m","pay-bank");
   if(t.matches("[data-banksel]")&&t.value==="+"){const n=addBank(prompt("Name of the bank:")||"");t.innerHTML=bankOpts(n)}});
-let paRes=null,paMax=0,paMethod="";
+let paRes=null,paMax=0,paMethod="",paRc="",paRcFile=null;
+function paRcShow(){const im=$("pa-rcimg"),has=!!(paRcFile||paRc);$("pa-rcdel").hidden=!has;$("pa-rcl").textContent=has?"Change receipt":"Add receipt photo";
+  if(paRcFile){im.src=URL.createObjectURL(paRcFile);im.hidden=false}else if(paRc){im.hidden=true;getPhoto(paRc).then(d=>{if(d&&paRc){im.src=d;im.hidden=false}})}else{im.hidden=true;im.removeAttribute("src")}}
+$("pa-rc").addEventListener("change",()=>{const f=$("pa-rc").files&&$("pa-rc").files[0];if(f){paRcFile=f;paRcShow()}});
+$("pa-rcdel").addEventListener("click",()=>{paRcFile=null;paRc="";$("pa-rc").value="";paRcShow()});
 function payAsk(o){return new Promise(res=>{paRes=res;paMax=+o.max||0;paMethod="";
   $("pa-title").textContent=o.title||"Payment received";$("pa-sub").textContent=o.sub||"";
   const a=$("pa-amt");a.value=o.amount||"";a.readOnly=!o.editable;a.closest(".field").classList.toggle("ro",!o.editable);
-  $("pa-ref").value=o.ref||"";$("pa-err").hidden=true;paMethod=o.method&&PAY_M.includes(o.method)?o.method:(o.method?"Other":"");
+  $("pa-ref").value=o.ref||"";$("pa-err").hidden=true;paRc=o.receipt||"";paRcFile=null;$("pa-rc").value="";paRcShow();paMethod=o.method&&PAY_M.includes(o.method)?o.method:(o.method?"Other":"");
   $("pa-datew").hidden=!o.date;$("pa-date").value=o.date||"";
   $("pa-bank").innerHTML=bankOpts(o.bank||"");$("pa-bankadd").hidden=true;paBankShow();
   $("pa-m").innerHTML=PAY_M.map(m=>`<button type="button" class="pam" data-pam="${esc(m)}" aria-pressed="${m===paMethod}">${esc(m)}</button>`).join("");
@@ -4167,12 +4176,13 @@ function paDone(v){const r=paRes;paRes=null;try{$("paydlg").close()}catch(e){}if
 $("pa-m").addEventListener("click",e=>{const b=e.target.closest("[data-pam]");if(!b)return;paMethod=b.dataset.pam;for(const x of $("pa-m").querySelectorAll("[data-pam]"))x.setAttribute("aria-pressed",String(x===b));$("pa-err").hidden=true;paBankShow()});
 $("pa-cancel").addEventListener("click",()=>paDone(null));
 $("paydlg").addEventListener("close",()=>{if(paRes)paDone(null)});
-$("payAskForm").addEventListener("submit",e=>{e.preventDefault();const amt=Math.round(+$("pa-amt").value||0),err=$("pa-err");
+$("payAskForm").addEventListener("submit",async e=>{e.preventDefault();const amt=Math.round(+$("pa-amt").value||0),err=$("pa-err");
   if(!(amt>0)){err.textContent="Enter the amount received.";err.hidden=false;return}
   if(paMax&&amt>paMax){err.textContent="The most you can enter here is "+rs(paMax)+".";err.hidden=false;return}
   if(!paMethod){err.textContent="Choose how it was paid.";err.hidden=false;return}
   let bank="";if(paMethod==="Bank transfer"){bank=$("pa-bank").value;if(bank==="+"){bank=addBank($("pa-banknew").value)}if(!bank){err.textContent="Choose which bank it came to.";err.hidden=false;return}}
-  paDone({amount:amt,method:paMethod,bank,ref:$("pa-ref").value.trim(),date:$("pa-datew").hidden?"":($("pa-date").value||"")})});
+  let receipt=paRc;if(paRcFile){const sb=e.target.querySelector("[type=submit]");sb.disabled=true;try{receipt=await savePhoto(paRcFile)}catch(x){sb.disabled=false;err.textContent="Couldn't read that photo. Try another one.";err.hidden=false;return}sb.disabled=false}
+  paDone({receipt,amount:amt,method:paMethod,bank,ref:$("pa-ref").value.trim(),date:$("pa-datew").hidden?"":($("pa-date").value||"")})});
 /* change own password */
 const pwdlg=$("pwdlg");
 $("pwBtn").addEventListener("click",()=>{$("pw-old").value="";$("pw-new").value="";$("pw-err").hidden=true;openD(pwdlg)});
@@ -4826,7 +4836,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v76";let updShown=false;
+const APP_BUILD="ds-v77";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
