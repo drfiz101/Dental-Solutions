@@ -652,6 +652,8 @@ body.no-inv_edit #addBtn,body.no-inv_edit [data-edit],body.no-inv_edit [data-rmv
 body.no-pdf [data-tpprint],body.no-pdf [data-tpbillpdf],body.no-pdf [data-tpbillsend],body.no-pdf [data-tppdf],body.no-pdf [data-tpsend],body.no-pdf #lab-pdf,body.no-pdf #b-pdf,body.no-pdf #m-pdf,body.no-pdf [data-pstmt],body.no-pdf [data-lcpdf],body.no-pdf #rp-print,body.no-pdf #rp-pdf{display:none!important}
 body.no-lab_edit select[data-lcst],body.no-inv_count .stepper,body.no-appt_edit .stsel{pointer-events:none;opacity:.6}
 
+.pushb{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.pushb h4{margin:0 0 6px;font-size:15px}.pushs{margin:0;padding-left:20px;display:grid;gap:8px;font-size:14px}.pushs small{display:block;margin-top:3px}
+.pushtp{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}.pushtp code{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;word-break:break-all}.pusha{margin-top:10px}
 .stq{flex-wrap:wrap}
 body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
@@ -2274,7 +2276,7 @@ let actLast={};
 const ACT_PERM={appt:"tab_appointments",bill:"tab_billing",pat:"tab_patients",lab:"tab_lab",stock:"tab_inventory"};
 const actCats=()=>Object.keys(ACT_C).filter(k=>myRole()==="admin"||can(ACT_PERM[k]));
 function actLog(cat,text){if(!text)return;const k=cat+"|"+text,now=Date.now();if(actLast[k]&&now-actLast[k]<10*60000)return;actLast[k]=now;
-  const doc={kind:"act",cat,text,date:ymd(new Date()),at:new Date().toISOString(),who:myName||"",...me};
+  const doc={kind:"act",cat,text,date:ymd(new Date()),at:new Date().toISOString(),who:myName||"",...me};try{pushOut(cat,text)}catch(e){}
   if(!db){logs["local-"+now+"-"+Math.random().toString(36).slice(2)]=doc;return}
   try{db.collection("logs").add(doc).catch(()=>{})}catch(e){}}
 function actDescribe(coll,o,n){const nm=x=>(x&&(x.patientName||x.name))||"patient",when=a=>`${a.date===ymd(new Date())?"today":fmtDate(a.date)} ${fmtTime(a.time||"")}`.trim();
@@ -4516,19 +4518,52 @@ function apNewCheck(m){const ids=Object.keys(m);if(!apSeen){apSeen=new Set(ids);
   for(const id of ids){if(apSeen.has(id))continue;apSeen.add(id);const a=m[id];if(!cfg.newap||!a||a.status==="cancelled")continue;
     if(me&&a.uid&&a.uid===me.uid)continue;const t=Date.parse(a.createdAt||"");if(!t||t<fresh)continue;
     alShow("new","New appointment: "+(a.patientName||"Patient"),(a.date===ymd(new Date())?"Today":dayName(a.date)+" "+fmtDate(a.date))+", "+fmtTime(a.time)+" · Chair "+(a.chair||"")+(a.treatment?" · "+a.treatment:"")+(a.by?" · booked by "+(byName(a)||a.by):""),"ap|"+a.date)}}
+/* ---- phone push via the free ntfy app (works when the app is closed) ---- */
+const PUSH_CATS=[["appt","Appointments","booked, moved, cancelled"],["pat","New patients",""],["bill","Bills & payments","new bills and payments received"],["lab","Lab work","new cases and status changes"]];
+const pushCfg=()=>SET.push||{};
+const ntfyLink=t=>"https://ntfy.sh/"+t;
+function pushText(cat,text){const c=pushCfg();let t=String(text);if(cat==="appt")t=t.replace(/ · (?!Chair)[^·]*$/,m=>/Chair/.test(m)?m:"");if(c.names===false)t=t.replace(/(Booked|New patient|Rescheduled|Deleted appointment ·|Deleted patient|Payment [^·]*·|New bill [^·]*·|New lab case ·|Lab case) [^·(]+/,(m,a)=>a+" a patient ");return t.replace(/\s+/g," ").trim()}
+function pushQ(){try{return JSON.parse(localStorage.getItem("ds-pushq")||"[]")}catch(e){return []}}
+function pushQSet(q){try{localStorage.setItem("ds-pushq",JSON.stringify(q.slice(-30)))}catch(e){}}
+async function pushSend(m){const r=await fetch("https://ntfy.sh/",{method:"POST",body:JSON.stringify(m)});if(!r.ok)throw new Error("ntfy "+r.status)}
+async function pushFlush(){const q=pushQ();if(!q.length||!navigator.onLine)return;const left=[];for(const m of q){if(Date.now()-m.t>6*3600e3)continue;try{await pushSend(m.m)}catch(e){left.push(m)}}pushQSet(left)}
+window.addEventListener("online",()=>setTimeout(pushFlush,2000));setTimeout(()=>{try{pushFlush()}catch(e){}},8000);
+function pushOut(cat,text){const c=pushCfg();if(!c.topic||!(c.cats||PUSH_CATS.map(x=>x[0])).includes(cat))return;
+  const T={appt:"📅 Appointment",pat:"🧑 New patient",bill:"💵 Bills",lab:"🦷 Lab"}[cat]||"Dental Solutions";
+  const m={topic:c.topic,title:T+" · "+(S().clinic.name||"Clinic"),message:pushText(cat,text)+(myName?" — by "+myName:""),click:typeof APP_URL!=="undefined"?APP_URL+(CLINIC?"?c="+encodeURIComponent(CLINIC):""):location.href,priority:cat==="appt"?4:3};
+  pushSend(m).catch(()=>{const q=pushQ();q.push({t:Date.now(),m});pushQSet(q)})}
+function pushNewTopic(){const a=new Uint8Array(9);crypto.getRandomValues(a);return "ds-"+String(CLINIC||"clinic").replace(/[^a-z0-9]/gi,"").slice(0,12).toLowerCase()+"-"+[...a].map(x=>x.toString(36).padStart(2,"0")).join("").slice(0,14)}
+function pushHTML(){const c=pushCfg(),adm=myRole()==="admin",on=!!c.topic,cats=c.cats||PUSH_CATS.map(x=>x[0]);
+  if(!on&&!adm)return `<div class="pushb"><h4>Notifications when the app is closed</h4><p class="muted small">Not turned on yet. Ask an admin to turn it on here.</p></div>`;
+  return `<div class="pushb"><h4>Notifications when the app is closed</h4>
+  ${on?`<ol class="pushs"><li>Install the free <b>ntfy</b> app: <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Android (Play Store)</a> · <a href="https://apps.apple.com/app/ntfy/id1625396347" target="_blank" rel="noopener">iPhone (App Store)</a></li>
+  <li>In ntfy tap <b>+</b> (Subscribe to topic) and paste this clinic channel:<div class="pushtp"><code>${esc(c.topic)}</code><button type="button" class="btn small" id="pushCopy">Copy</button></div><small class="muted">Keep this name private: anyone with it gets the clinic's notifications.</small></li>
+  <li><button type="button" class="btn small" id="pushTest">Send a test notification</button></li></ol>`:`<p class="muted small" style="margin:0 0 8px">Everyone who installs the free ntfy app gets a phone notification whenever something is added, even with Dental Solutions closed.</p>`}
+  ${adm?`<div class="pusha">${on?`<p class="small" style="margin:6px 0"><b>Send notifications for:</b></p>${PUSH_CATS.map(([k,l,d])=>`<label class="altg"><input type="checkbox" data-pushcat="${k}" ${cats.includes(k)?"checked":""}> <span><b>${l}</b>${d?`<small>${d}</small>`:""}</span></label>`).join("")}
+  <label class="altg"><input type="checkbox" id="pushNames" ${c.names!==false?"checked":""}> <span><b>Show patient names</b><small>Untick to say "a patient" instead</small></span></label>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn small" id="pushNew">New channel name</button><button type="button" class="btn small danger-outline" id="pushOff">Turn off</button></div><small class="muted">New channel name stops notifications to everyone until they subscribe to the new name (use it if a staff member leaves).</small>`:`<button type="button" class="btn primary" id="pushOn">Turn on clinic notifications</button>`}</div>`:""}</div>`}
+function pushSave(c){saveSet({...SET,push:c});setTimeout(alRender,50)}
 function alRender(){const c=alGet(),perm=("Notification" in window)?Notification.permission:"unsupported";
   $("alBody").innerHTML=`<label class="altg"><input type="checkbox" data-al="appt" ${c.appt?"checked":""}> <span><b>Upcoming appointments</b><small>Ring before each booked patient's time</small></span></label>
   <div class="lkopts" style="margin:4px 0 12px 32px">${[5,10,15,30].map(m=>`<button type="button" class="lkopt" data-almins="${m}" aria-pressed="${+c.mins===m}">${m} min before</button>`).join("")}</div>
   <label class="altg"><input type="checkbox" data-al="newap" ${c.newap?"checked":""}> <span><b>New bookings</b><small>Pop up and ring when someone else in the clinic books an appointment</small></span></label>
   <label class="altg"><input type="checkbox" data-al="lab" ${c.lab?"checked":""}> <span><b>Lab cases due</b><small>Ring on the day a lab case is due back, and if it's overdue</small></span></label>
   <label class="altg"><input type="checkbox" data-al="sound" ${c.sound?"checked":""}> <span><b>Play a sound</b><small>Turn off to show the alert silently</small></span></label>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button type="button" class="btn" id="alTest">▶ Test sound</button>${perm==="default"?`<button type="button" class="btn primary" id="alPerm">Allow phone notifications</button>`:perm==="granted"?`<span class="chip2 ok">Phone notifications on</span>`:perm==="denied"?`<span class="chip2">Notifications blocked in phone settings</span>`:""}</div>`}
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button type="button" class="btn" id="alTest">▶ Test sound</button>${perm==="default"?`<button type="button" class="btn primary" id="alPerm">Allow phone notifications</button>`:perm==="granted"?`<span class="chip2 ok">Phone notifications on</span>`:perm==="denied"?`<span class="chip2">Notifications blocked in phone settings</span>`:""}</div>${pushHTML()}`}
 $("alBtn").addEventListener("click",()=>{alRender();openD($("aldlg"))});
 $("whoName").title="Tap to add or change your photo";$("whoName").style.cursor="pointer";$("whoName").addEventListener("click",()=>pickMyPhoto());
 $("alBody").addEventListener("change",e=>{const t=e.target.closest("[data-al]");if(!t)return;const c=alGet();c[t.dataset.al]=t.checked;alSet(c)});
 $("alBody").addEventListener("click",async e=>{const m=e.target.closest("[data-almins]");if(m){const c=alGet();c.mins=+m.dataset.almins;alSet(c);alRender();return}
   if(e.target.closest("#alTest")){alUnlock();const c=alGet();const was=c.sound;c.sound=true;alSet(c);chime("ap");c.sound=was;alSet(c);return}
-  if(e.target.closest("#alPerm")){try{await Notification.requestPermission()}catch(x){}alRender()}});
+  if(e.target.closest("#alPerm")){try{await Notification.requestPermission()}catch(x){}alRender();return}
+  const c=pushCfg();
+  if(e.target.closest("#pushOn")){pushSave({topic:pushNewTopic(),cats:PUSH_CATS.map(x=>x[0]),names:true});toast("Clinic notifications turned on");return}
+  if(e.target.closest("#pushNew")){if(!confirm("Make a new channel name? Everyone will need to subscribe again in ntfy."))return;pushSave({...c,topic:pushNewTopic()});return}
+  if(e.target.closest("#pushOff")){pushSave({...c,topic:""});toast("Clinic notifications turned off");return}
+  if(e.target.closest("#pushCopy")){try{await navigator.clipboard.writeText(c.topic);toast("Copied. Paste it in the ntfy app.")}catch(x){toast(c.topic)}return}
+  if(e.target.closest("#pushTest")){try{await pushSend({topic:c.topic,title:"Dental Solutions · "+(S().clinic.name||"Clinic"),message:"Test notification"+(myName?" from "+myName:"")+". Notifications are working ✓"});toast("Test sent. Check your phone.")}catch(x){toast("Couldn't send. Check the internet connection.")}return}});
+$("alBody").addEventListener("change",e=>{const k=e.target.closest("[data-pushcat]"),n=e.target.closest("#pushNames");if(!k&&!n)return;const c=pushCfg();
+  if(k){const cats=new Set(c.cats||PUSH_CATS.map(x=>x[0]));k.checked?cats.add(k.dataset.pushcat):cats.delete(k.dataset.pushcat);pushSave({...c,cats:[...cats]})}else pushSave({...c,names:n.checked})});
 /* customisable home widgets */
 const HOME_W=[["d-simple","Quick buttons & today's money"],["d-clock","Clock & opening hours"],["d-today","Today at a glance"],["d-rep","This month: income, expenses, profit"],["d-appts","Today's appointments"],["d-cal","Calendar"],["d-pay","Pending payments & bills"],["d-stock","Restock needed"],["d-exp","Expiring soon"],["d-money","Lab, reminders & spending"]];
 const homeKey=()=>"ds-home-"+(isSimple()?"simple":"classic");
@@ -4784,7 +4819,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v74";let updShown=false;
+const APP_BUILD="ds-v75";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
