@@ -2017,7 +2017,7 @@ async function delLog(id){
 }
 function queueDelta(id,d){
   deltaQ[id]=(deltaQ[id]||0)+d; clearTimeout(deltaT[id]);
-  deltaT[id]=setTimeout(()=>{const n=deltaQ[id];delete deltaQ[id];if(n)addLog({itemId:id,kind:n>0?"added":"used",qty:Math.abs(n)})},1500);
+  deltaT[id]=setTimeout(()=>{const n=deltaQ[id];delete deltaQ[id];if(n)addLog({itemId:id,kind:n>0?"added":"used",qty:Math.abs(n)});try{stockPush(id,n>0?"added":"used",Math.abs(n))}catch(e){}},1500);
 }
 async function copyText(t,msg){
   try{await navigator.clipboard.writeText(t);toast(msg)}
@@ -2136,6 +2136,7 @@ $("pform").addEventListener("submit",async e=>{
   const bid=buyId,pf=$("p-photo").files&&$("p-photo").files[0],paidSel=$("p-paid").value!=="pending";
   let photoId=null;if(pf){const sb=$("pform").querySelector("button[type=submit]");sb.disabled=true;sb.textContent="Saving photo…";try{photoId=await saveAny(pf)}finally{sb.disabled=false;sb.textContent="Save purchase"}}
   patch(bid,f,true,{noLog:true});
+  try{stockPush(bid,"purchase",q,sup)}catch(e){}
   addLog({itemId:bid,kind:"purchase",qty:q,unitPrice:price||(total?Math.round(total/q*100)/100:null),total,supplier:sup,invoice:$("p-inv").value.trim(),date:$("p-date").value||ymd(new Date()),paid:paidSel,photoId});
   pdlg.close(); toast(`Purchase saved · ${it.name}: now ${now} ${it.unit}`);
 });
@@ -4519,7 +4520,12 @@ function apNewCheck(m){const ids=Object.keys(m);if(!apSeen){apSeen=new Set(ids);
     if(me&&a.uid&&a.uid===me.uid)continue;const t=Date.parse(a.createdAt||"");if(!t||t<fresh)continue;
     alShow("new","New appointment: "+(a.patientName||"Patient"),(a.date===ymd(new Date())?"Today":dayName(a.date)+" "+fmtDate(a.date))+", "+fmtTime(a.time)+" · Chair "+(a.chair||"")+(a.treatment?" · "+a.treatment:"")+(a.by?" · booked by "+(byName(a)||a.by):""),"ap|"+a.date)}}
 /* ---- phone push via the free ntfy app (works when the app is closed) ---- */
-const PUSH_CATS=[["appt","Appointments","booked, moved, cancelled"],["pat","New patients",""],["bill","Bills & payments","new bills and payments received"],["lab","Lab work","new cases and status changes"]];
+function stockPush(id,kind,q,sup){const it=current(id)||{},u=it.unit||"",nm=it.name||"item",have=+it.qty||0,min=+it.min||0;
+  if(kind==="added")pushOut("stock",`Added ${q} ${u} ${nm} · now ${have} ${u}`);
+  else if(kind==="purchase")pushOut("stock",`Bought ${q} ${u} ${nm}${sup?" from "+sup:""}`);
+  if(kind==="used"&&min>0&&have<=min&&have+q>min)pushOut("stock",`${nm} · only ${have} ${u} left (reorder at ${min})`)}
+const PUSH_CATS=[["appt","Appointments","booked, moved, cancelled"],["pat","New patients",""],["bill","Bills & payments","new bills and payments received"],["lab","Lab work","new cases and status changes"],["stock","Inventory","stock added or bought, and low-stock warnings"]];
+const pushOn=(c,k)=>k==="stock"?c.stock!==false:(c.cats||PUSH_CATS.map(x=>x[0])).includes(k);
 const pushCfg=()=>SET.push||{};
 const ntfyLink=t=>"https://ntfy.sh/"+t;
 function pushText(cat,text){const c=pushCfg();let t=String(text);if(cat==="appt")t=t.replace(/ · (?!Chair)[^·]*$/,m=>/Chair/.test(m)?m:"");if(c.names===false)t=t.replace(/(Booked|New patient|Rescheduled|Deleted appointment ·|Deleted patient|Payment [^·]*·|New bill [^·]*·|New lab case ·|Lab case) [^·(]+/,(m,a)=>a+" a patient ");return t.replace(/\s+/g," ").trim()}
@@ -4528,8 +4534,8 @@ function pushQSet(q){try{localStorage.setItem("ds-pushq",JSON.stringify(q.slice(
 async function pushSend(m){const r=await fetch("https://ntfy.sh/",{method:"POST",body:JSON.stringify(m)});if(!r.ok)throw new Error("ntfy "+r.status)}
 async function pushFlush(){const q=pushQ();if(!q.length||!navigator.onLine)return;const left=[];for(const m of q){if(Date.now()-m.t>6*3600e3)continue;try{await pushSend(m.m)}catch(e){left.push(m)}}pushQSet(left)}
 window.addEventListener("online",()=>setTimeout(pushFlush,2000));setTimeout(()=>{try{pushFlush()}catch(e){}},8000);
-function pushOut(cat,text){const c=pushCfg();if(!c.topic||!(c.cats||PUSH_CATS.map(x=>x[0])).includes(cat))return;
-  const T={appt:"📅 Appointment",pat:"🧑 New patient",bill:"💵 Bills",lab:"🦷 Lab"}[cat]||"Dental Solutions";
+function pushOut(cat,text){const c=pushCfg();if(!c.topic||!pushOn(c,cat))return;
+  const T={appt:"📅 Appointment",pat:"🧑 New patient",bill:"💵 Bills",lab:"🦷 Lab",stock:/ left \(reorder at/.test(text)?"⚠️ Low stock":"📦 Inventory"}[cat]||"Dental Solutions";
   const m={topic:c.topic,title:T+" · "+(S().clinic.name||"Clinic"),message:pushText(cat,text)+(myName?" — by "+myName:""),click:typeof APP_URL!=="undefined"?APP_URL+(CLINIC?"?c="+encodeURIComponent(CLINIC):""):location.href,priority:cat==="appt"?4:3};
   pushSend(m).catch(()=>{const q=pushQ();q.push({t:Date.now(),m});pushQSet(q)})}
 function pushNewTopic(){const a=new Uint8Array(9);crypto.getRandomValues(a);return "ds-"+String(CLINIC||"clinic").replace(/[^a-z0-9]/gi,"").slice(0,12).toLowerCase()+"-"+[...a].map(x=>x.toString(36).padStart(2,"0")).join("").slice(0,14)}
@@ -4539,7 +4545,7 @@ function pushHTML(){const c=pushCfg(),adm=myRole()==="admin",on=!!c.topic,cats=c
   ${on?`<ol class="pushs"><li>Install the free <b>ntfy</b> app: <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Android (Play Store)</a> · <a href="https://apps.apple.com/app/ntfy/id1625396347" target="_blank" rel="noopener">iPhone (App Store)</a></li>
   <li>In ntfy tap <b>+</b> (Subscribe to topic) and paste this clinic channel:<div class="pushtp"><code>${esc(c.topic)}</code><button type="button" class="btn small" id="pushCopy">Copy</button></div><small class="muted">Keep this name private: anyone with it gets the clinic's notifications.</small></li>
   <li><button type="button" class="btn small" id="pushTest">Send a test notification</button></li></ol>`:`<p class="muted small" style="margin:0 0 8px">Everyone who installs the free ntfy app gets a phone notification whenever something is added, even with Dental Solutions closed.</p>`}
-  ${adm?`<div class="pusha">${on?`<p class="small" style="margin:6px 0"><b>Send notifications for:</b></p>${PUSH_CATS.map(([k,l,d])=>`<label class="altg"><input type="checkbox" data-pushcat="${k}" ${cats.includes(k)?"checked":""}> <span><b>${l}</b>${d?`<small>${d}</small>`:""}</span></label>`).join("")}
+  ${adm?`<div class="pusha">${on?`<p class="small" style="margin:6px 0"><b>Send notifications for:</b></p>${PUSH_CATS.map(([k,l,d])=>`<label class="altg"><input type="checkbox" data-pushcat="${k}" ${pushOn(c,k)?"checked":""}> <span><b>${l}</b>${d?`<small>${d}</small>`:""}</span></label>`).join("")}
   <label class="altg"><input type="checkbox" id="pushNames" ${c.names!==false?"checked":""}> <span><b>Show patient names</b><small>Untick to say "a patient" instead</small></span></label>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn small" id="pushNew">New channel name</button><button type="button" class="btn small danger-outline" id="pushOff">Turn off</button></div><small class="muted">New channel name stops notifications to everyone until they subscribe to the new name (use it if a staff member leaves).</small>`:`<button type="button" class="btn primary" id="pushOn">Turn on clinic notifications</button>`}</div>`:""}</div>`}
 function pushSave(c){saveSet({...SET,push:c});setTimeout(alRender,50)}
@@ -4563,6 +4569,7 @@ $("alBody").addEventListener("click",async e=>{const m=e.target.closest("[data-a
   if(e.target.closest("#pushCopy")){try{await navigator.clipboard.writeText(c.topic);toast("Copied. Paste it in the ntfy app.")}catch(x){toast(c.topic)}return}
   if(e.target.closest("#pushTest")){try{await pushSend({topic:c.topic,title:"Dental Solutions · "+(S().clinic.name||"Clinic"),message:"Test notification"+(myName?" from "+myName:"")+". Notifications are working ✓"});toast("Test sent. Check your phone.")}catch(x){toast("Couldn't send. Check the internet connection.")}return}});
 $("alBody").addEventListener("change",e=>{const k=e.target.closest("[data-pushcat]"),n=e.target.closest("#pushNames");if(!k&&!n)return;const c=pushCfg();
+  if(k&&k.dataset.pushcat==="stock"){pushSave({...c,stock:k.checked});return}
   if(k){const cats=new Set(c.cats||PUSH_CATS.map(x=>x[0]));k.checked?cats.add(k.dataset.pushcat):cats.delete(k.dataset.pushcat);pushSave({...c,cats:[...cats]})}else pushSave({...c,names:n.checked})});
 /* customisable home widgets */
 const HOME_W=[["d-simple","Quick buttons & today's money"],["d-clock","Clock & opening hours"],["d-today","Today at a glance"],["d-rep","This month: income, expenses, profit"],["d-appts","Today's appointments"],["d-cal","Calendar"],["d-pay","Pending payments & bills"],["d-stock","Restock needed"],["d-exp","Expiring soon"],["d-money","Lab, reminders & spending"]];
@@ -4819,7 +4826,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v75";let updShown=false;
+const APP_BUILD="ds-v76";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
