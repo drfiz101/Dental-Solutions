@@ -666,6 +666,8 @@ body.no-lab_edit select[data-lcst],body.no-inv_count .stepper,body.no-appt_edit 
 .shpd{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:2px}
 .hbq{border:2px solid #F0A9A2;background:#FFF8F7;border-radius:12px;padding:10px}.hbq h4{margin:0 0 4px;display:flex;gap:8px;align-items:center;font-size:14px}
 .hbg{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #F5C7C1}.hbg.a{opacity:.8}.hbgn{display:grid;gap:3px;font-size:13px}.hbgn small{color:var(--muted)}.hbgn .ex{font-weight:600}.hbgb{display:flex;gap:6px}
+.oblink{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;display:grid;gap:8px}.oblink code{word-break:break-all;font-size:13px}.oblink .row{display:flex;gap:8px;flex-wrap:wrap}
+.obhow{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0}.obhow summary{cursor:pointer}.obhow ol{margin:8px 0 0;padding-left:20px;display:grid;gap:6px;font-size:14px}
 .stq{flex-wrap:wrap}
 body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
@@ -1584,6 +1586,11 @@ input[type=date]{min-width:0;max-width:100%}
   <p class="perr" id="tp-err" hidden></p>
   <div class="actions"><button type="button" class="btn danger-outline" id="tp-del">Remove</button><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
+<dialog id="obdlg" class="wide"><div class="dlg">
+  <h2>🌐 Online booking</h2>
+  <div id="ob-body"></div>
+  <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="button" class="btn primary" id="ob-save">Save</button></div></div>
+</div></dialog>
 <dialog id="hbdlg" class="wide"><div class="dlg">
   <h2>Import from HomeBudget</h2>
   <p class="muted small" style="margin:0">In HomeBudget: <b>Reports → Export → CSV</b>, choose the dates, and save or share the file. Then choose it here. You'll see everything before anything is saved, and items already imported are skipped.</p>
@@ -2347,7 +2354,8 @@ async function saveSet(next){SET=next;render();if(!db)return;W(db.collection("se
 function startClinic(){
   if(!db||clinicStarted)return;clinicStarted=true;
   const sub=(c,fn)=>{try{clinicUnsubs.push(db.collection(c).onSnapshot(snap=>{const m={};for(const d of snap.docs){const v=d.data();if(v)m[d.id]=v}fn(m);softRender()},()=>{}))}catch(e){}};
-  sub("patients",m=>P=m);sub("appts",m=>{try{apNewCheck(m)}catch(e){}A=m});sub("bills",m=>B=m);sub("labcases",m=>LC=m);sub("settings",m=>{SET=m.main||{};SET_LOADED=true;aoCheck();try{addWahaj()}catch(e){}});
+  sub("patients",m=>P=m);sub("appts",m=>{try{apNewCheck(m)}catch(e){}A=m;try{obSchedule()}catch(e){}});sub("bills",m=>B=m);sub("labcases",m=>LC=m);sub("settings",m=>{SET=m.main||{};SET_LOADED=true;aoCheck();try{addWahaj()}catch(e){}});
+  try{clinicUnsubs.push(fsRoot.collection("bookings").doc(CLINIC||"alawan").collection("items").where("status","==","new").onSnapshot(sn=>{for(const d of sn.docs)obQueue(d.id,d.data())},()=>{}))}catch(e){}
 }
 /* one-time: add Dr Wahaj Anees to Al Awan's doctors (only once, so removing him later sticks) */
 function addWahaj(){if(CLINIC!=="alawan"||!SET_LOADED||SET.addedWahaj||myRole()!=="admin"||!db)return;const team=[...S().team];
@@ -3006,6 +3014,57 @@ function tickClock(){if(main!=="dashboard"||!$("d-time"))return;const now=new Da
   $("d-date").textContent=now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   const [k,t]=clinicStatus();$("d-open").innerHTML=`<span class="odot ${k}"></span>${esc(t)}`}
 setInterval(tickClock,10000);
+/* ================= ONLINE BOOKING (book.html for Instagram / Facebook) ================= */
+const OB_TREAT=["Check-up / consultation","Scaling & polishing","Tooth pain","Filling","Root canal (RCT)","Extraction","Braces / ortho","Crown / bridge","Dentures","Implant consultation","Kids' dentistry","Teeth whitening","Other"];
+const obCfg=()=>SET.online||{};
+const obCode=()=>CLINIC||"alawan";
+const obLink=()=>APP_URL+"book.html?c="+encodeURIComponent(obCode());
+let obLastPub="",obPubT=null;
+function obBusy(days){const c=S().clinic,st=Math.max(5,+c.slot||30),out={},today=ymd(new Date()),end=addDays(today,days);
+  for(const a of Object.values(A)){if(!a.date||a.date<today||a.date>end||!a.time||["cancelled","noshow"].includes(a.status))continue;const s0=toMin(a.time),e0=s0+(+a.dur||st);
+    for(let m=Math.floor(s0/st)*st;m<e0;m+=st){if(m+st<=s0)continue;const k=fromMin(m).replace(":","");const d=out[a.date]||(out[a.date]={});const x=d[k]||(d[k]={n:0,c:[],d:[]});x.n++;if(a.chair&&!x.c.includes(+a.chair))x.c.push(+a.chair);if(a.dentist&&!x.d.includes(a.dentist))x.d.push(a.dentist)}}
+  return out}
+function obPublish(force){const o=obCfg();if(!db||!SET_LOADED||!fsRoot)return;if(!o.on&&!o.wasOn)return;const c=S().clinic,k=clinicContact();
+  const doc={on:!!o.on,name:c.name||"",tagline:c.tagline||"",phone:c.phone||"",address:k.addr||"",open:c.open||"10:00",close:c.close||"20:00",slot:+c.slot||30,days:c.days||[1,2,3,4,5,6],chairs:+(c.chairs||2),ahead:+(o.ahead||14),minNotice:+(o.notice||60),
+    dentists:o.noDent?[]:dentists().map(d=>({name:d.name,title:d.title||""})),treatments:(o.treat&&o.treat.length?o.treat:OB_TREAT),msg:o.msg||"",btopic:o.btopic||"",off:o.off||[],busy:obBusy(+(o.ahead||14)),logo:CLINIC==="alawan"||!CLINIC?"icons/icon-192.png":""};
+  const js=JSON.stringify(doc);if(js===obLastPub&&!force)return;obLastPub=js;
+  try{fsRoot.collection("publicSlots").doc(obCode()).set({...doc,updatedAt:new Date().toISOString()}).catch(e=>{if(/permission/.test((e&&e.code)||""))obPermErr=true})}catch(e){}}
+let obPermErr=false;
+function obSchedule(){clearTimeout(obPubT);obPubT=setTimeout(()=>{try{obPublish()}catch(e){}},2500)}
+setInterval(()=>{try{if(obCfg().on)obPublish()}catch(e){}},10*60000);
+const obDone=new Set();
+async function obQueue(id,b){if(obDone.has(id)||!db||!SET_LOADED){if(!SET_LOADED)setTimeout(()=>obQueue(id,b),3000);return}obDone.add(id);
+  try{const apId="ob_"+id,ref=fsRoot.collection("bookings").doc(obCode()).collection("items").doc(id);
+    if(A[apId]){await ref.update({status:"added",apId});return}
+    const ph=waNum(b.phone||"");let pid=Object.keys(P).find(k=>ph&&waNum(P[k].phone||"")===ph);
+    if(!pid){pid="pob_"+id;if(!P[pid])cset("patients",pid,{name:String(b.name||"Online patient").trim(),phone:b.phone||"",createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[],alerts:"",fromOnline:true})}
+    const st=+S().clinic.slot||30,dur=st,dent=b.dentist||"";let chair=0;for(const ch of [1,2])if(!overlaps(b.date,ch,b.time,dur,null,dent).length){chair=ch;break}
+    const clash=!chair;if(!chair)chair=1;
+    const doc={status:"booked",source:"online",patientId:pid,patientName:(P[pid]&&P[pid].name)||b.name,phone:(P[pid]&&P[pid].phone)||b.phone||"",date:b.date,time:b.time,dur,chair,dentist:dent,treatment:b.treatment||"",visit:"",note:((clash?"⚠ Online booking clashes with another appointment · please call the patient. ":"🌐 Booked online. ")+(b.note?"Patient's note: "+b.note:"")).trim(),createdAt:new Date().toISOString(),by:"Online booking",onlineId:id};
+    cset("appts",apId,doc);await ref.update({status:"added",apId});
+    if(b.hold){try{await fsRoot.collection("slotHolds").doc(obCode()).collection("h").doc(b.hold).delete()}catch(e){}}
+    try{actLog("appt",`🌐 Online booking: ${doc.patientName} · ${b.date===ymd(new Date())?"today":fmtDate(b.date)} ${fmtTime(b.time)} · Chair ${chair}${b.treatment?" · "+b.treatment:""}${clash?" · ⚠ clash":""}`)}catch(e){}
+    obSchedule()}catch(e){obDone.delete(id)}}
+function openOnline(){const o=obCfg(),c=S().clinic,link=obLink();
+  $("ob-body").innerHTML=`<label class="altg"><input type="checkbox" id="ob-on" ${o.on?"checked":""}> <span><b>Patients can book online</b><small>Shows your free times on a booking page. Booked times are hidden automatically.</small></span></label>
+  <div class="oblink"><code>${esc(link)}</code><div class="row"><button type="button" class="btn small" id="ob-copy">Copy link</button><a class="btn small" href="${esc(link)}" target="_blank" rel="noopener">Open page</a></div></div>
+  ${obPermErr?`<p class="perr">The booking page can't be updated yet. Publish the new Firebase rules first (see Help → Online booking).</p>`:""}
+  <details class="obhow" open><summary><b>Add it to Instagram &amp; Facebook</b></summary><ol>
+  <li><b>Instagram:</b> Edit profile → <b>Links</b> → Add external link → paste the link → title "Book appointment".</li>
+  <li><b>Instagram button:</b> Edit profile → <b>Action buttons</b> → Book now → paste the same link (if your account shows this option).</li>
+  <li><b>Facebook page:</b> open the page → <b>Add button</b> (or Edit button) → <b>Book now</b> → Link to website → paste the link.</li>
+  <li>Share it on <b>WhatsApp</b> status or in replies to messages too.</li></ol></details>
+  <div class="grid2"><div class="field"><label for="ob-ahead">Patients can book up to</label><select id="ob-ahead">${[7,14,21,30].map(d=>`<option value="${d}"${+(o.ahead||14)===d?" selected":""}>${d} days ahead</option>`).join("")}</select></div>
+  <div class="field"><label for="ob-notice">Earliest booking</label><select id="ob-notice">${[[30,"30 min from now"],[60,"1 hour from now"],[120,"2 hours from now"],[240,"4 hours from now"],[1440,"Next day"]].map(([v,l])=>`<option value="${v}"${+(o.notice||60)===v?" selected":""}>${l}</option>`).join("")}</select></div></div>
+  <label class="altg"><input type="checkbox" id="ob-dent" ${o.noDent?"":"checked"}> <span><b>Let patients choose a dentist</b><small>Optional for them; "Any dentist" is the default</small></span></label>
+  <div class="field"><label for="ob-msg">Message on the booking page (optional)</label><input id="ob-msg" maxlength="160" value="${esc(o.msg||"")}" placeholder="e.g. Lady dentist available for ladies & children"></div>
+  <div class="field"><label for="ob-off">Closed dates (holidays)</label><input id="ob-off" value="${esc((o.off||[]).join(", "))}" placeholder="e.g. 2026-11-09, 2026-12-25"><small class="muted">Booked times, closed days (${esc(openDaysText())}) and hours (${esc(fmtTime(c.open||"10:00"))} – ${esc(fmtTime(c.close||"20:00"))}) come from the app automatically.</small></div>
+  <div class="pushb" style="margin-top:6px"><h4>📲 Phone alert for each online booking</h4><p class="muted small" style="margin:0 0 6px">Every booking is added to Appointments and announced in the app (and on the clinic ntfy channel) as soon as any clinic phone has the app open. To get an alert even when every phone is closed, subscribe in ntfy to this second channel too. It only says the day and time, never the patient's name or number.</p>
+  ${o.btopic?`<div class="pushtp"><code>${esc(o.btopic)}</code><button type="button" class="btn small" id="ob-bcopy">Copy</button></div>`:`<button type="button" class="btn small" id="ob-bnew">Create booking alert channel</button>`}</div>`;
+  openD($("obdlg"))}
+function obSave(){const o=obCfg(),off=$("ob-off").value.split(/[,\s]+/).map(x=>x.trim()).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x));
+  const n={...o,on:$("ob-on").checked,wasOn:o.wasOn||$("ob-on").checked,ahead:+$("ob-ahead").value,notice:+$("ob-notice").value,noDent:!$("ob-dent").checked,msg:$("ob-msg").value.trim(),off};
+  saveSet({...SET,online:n});obLastPub="";setTimeout(()=>obPublish(true),300);$("obdlg").close();toast(n.on?"Online booking is on":"Online booking is off")}
 /* ---- home search ---- */
 function hsFind(q){q=q.trim().toLowerCase();if(q.length<2)return [];const dg=q.replace(/\D/g,""),hit=v=>String(v||"").toLowerCase().includes(q),ph=v=>dg.length>=4&&String(v||"").replace(/\D/g,"").includes(dg.replace(/^0/,""));const out=[],today=ymd(new Date());
   if(can("tab_patients")){const ps=Object.entries(P).filter(([,p])=>hit(p.name)||hit(p.fileNo)||ph(p.phone)).slice(0,6);if(ps.length)out.push(["Patients",ps.map(([id,p])=>({a:`data-gopat="${esc(id)}"`,t:p.name||"",s:[p.fileNo,p.phone,p.age?p.age+" y":""].filter(Boolean).join(" · ")}))])}
@@ -4032,6 +4091,11 @@ $("hb-body").addEventListener("change",e=>{const t=e.target;if(!HB)return;const 
   const hn=t.closest("[data-hbname]");if(hn){HBNAME[hn.dataset.hbname]=hn.value;return}
   const c=t.closest("[data-hbcat]");if(c){HB[+c.dataset.hbcat].cat=c.value;return}const d=t.closest("[data-hbdent]");if(d){HB[+d.dataset.hbdent].dent=d.value;return}});
 $("hb-go").addEventListener("click",hbImport);
+$("ob-save").addEventListener("click",obSave);
+$("ob-body").addEventListener("click",async e=>{const t=e.target;
+  if(t.closest("#ob-copy")){try{await navigator.clipboard.writeText(obLink());toast("Link copied")}catch(x){toast(obLink())}return}
+  if(t.closest("#ob-bcopy")){try{await navigator.clipboard.writeText(obCfg().btopic);toast("Copied. Paste it in ntfy.")}catch(x){toast(obCfg().btopic)}return}
+  if(t.closest("#ob-bnew")){const a=new Uint8Array(9);crypto.getRandomValues(a);const tp="dsbook-"+[...a].map(x=>x.toString(36).padStart(2,"0")).join("").slice(0,16);saveSet({...SET,online:{...obCfg(),btopic:tp}});obLastPub="";setTimeout(()=>{obPublish(true);openOnline()},200);return}});
 $("rp-per").addEventListener("click",e=>{const b=e.target.closest("[data-rp]");if(!b)return;rpPer=b.dataset.rp;localSet("aa-rp",rpPer);render()});
 $("rp-prev").addEventListener("click",()=>{rpAnchor=rpShift(rpPer,rpAnchor,-1);render()});
 $("rp-next").addEventListener("click",()=>{rpAnchor=rpShift(rpPer,rpAnchor,1);render()});
@@ -4802,6 +4866,7 @@ function openMore(){const b=document.body,vis=id=>{const x=$(id);return x&&!x.hi
     !b.classList.contains("no-tab_reports")&&["reports","Reports & income","#25587A",'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'],
     canShares()&&["shares","Dentist shares","#B7791F",'<circle cx="8" cy="8" r="5"/><circle cx="16" cy="16" r="5"/>'],
     !b.classList.contains("is-staff")&&["visits","Treatment visits","#1D5F53",'<path d="M8 3v4M16 3v4"/><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 13h3M8 17h6"/>'],
+    !b.classList.contains("is-staff")&&["online","🌐 Online booking (Instagram / Facebook)","#C13584",'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'],
     !b.classList.contains("is-staff")&&["prices","Treatment prices","#AD620B",'<path d="M4 7h16M4 12h16M4 17h10"/>'],
     vis("profBtn")&&["profBtn","Clinic profile & WhatsApp messages"],vis("acBtn")&&["acBtn","Staff access"],vis("consoleBtn")&&["consoleBtn","Owner console"],
     vis("installBtn")&&["installBtn","Install app on this phone"],["myPhoto","My photo"],["alBtn","Alerts & sounds"],["lookBtn","Appearance & layout"],["help","❓ Help & how to use"],vis("pwBtn")&&["pwBtn","Change password"],isSimple()?["classic","Switch to classic layout"]:["simple","Switch to simple layout"],["lock","🔒 Lock app"],["signOut","Sign out"]].filter(Boolean);
@@ -4813,6 +4878,7 @@ $("moreList").addEventListener("click",e=>{const b=e.target.closest("[data-mi]")
   if(["lab","inventory","reports"].includes(k))return goMain(k);
   if(k==="prices")return openPrices();
   if(k==="visits")return openVisitStages();
+  if(k==="online")return openOnline();
   if(k==="help")return openHelp();
   if(k==="lock")return lockApp();
   if(k==="shares")return openShares();
@@ -5024,7 +5090,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v85";let updShown=false;
+const APP_BUILD="ds-v86";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
