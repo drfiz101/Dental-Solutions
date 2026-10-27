@@ -1,7 +1,7 @@
 // Clinic Ledger works offline: the app and its libraries are kept on the device.
 // Records are saved on the device by Firebase and upload when the internet is back.
-const CACHE = "ledger-v2";
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "../firebase-config.js", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
+const CACHE = "ledger-v3";
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./firebase-config.js", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 const LIBS = [
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js",
