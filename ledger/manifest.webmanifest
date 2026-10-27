@@ -1,6 +1,6 @@
 {
   "name": "Executive Clinic Ledger",
-  "short_name": "Clinic Ledger",
+  "short_name": "Executive Clinic Ledger",
   "description": "Patient records, monthly statement and share summary for Executive Clinic",
   "start_url": "./index.html",
   "scope": "./",
