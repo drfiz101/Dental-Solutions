@@ -656,7 +656,7 @@ body.no-lab_edit select[data-lcst],body.no-inv_count .stepper,body.no-appt_edit 
 .pushtp{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}.pushtp code{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;word-break:break-all}.pusha{margin-top:10px}
 .rcbox{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.rcbox img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}.rcpick{cursor:pointer;display:inline-flex;gap:4px;align-items:center}.rcpick.on{background:#E3F2E8;border-color:#9FD3B4;color:#1F6B45}
 .rcchip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:1px 8px;font:inherit;font-size:12px;cursor:pointer;color:var(--ink);margin-left:4px}
-.stq{flex-wrap:wrap}
+.shh .shrep{margin-left:auto}.stq{flex-wrap:wrap}
 body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
 .rpnav{display:flex;align-items:center;gap:8px}.rpnav b{min-width:150px;text-align:center;color:var(--mod)}
@@ -3807,9 +3807,40 @@ function shareData(f,t){const m={},row=n=>m[n]||(m[n]={name:n,rec:0,lab:0,pats:n
 function sharesCard(f,t){if(!canShares())return "";const rows=shareData(f,t),T=rows.reduce((a,r)=>({rec:a.rec+r.rec,lab:a.lab+r.lab,dr:a.dr+r.dr,cl:a.cl+r.cl}),{rec:0,lab:0,dr:0,cl:0});
   return `<div class="card r-sh"><div class="dh"><h3>Dentist shares</h3><button type="button" class="btn small" data-shset>⚙ Change shares</button></div>
   <p class="muted small" style="margin:0 0 8px">🔒 Only ${isClinicOwner()?"you (clinic owner)":"the owner and admins"} can see this. Shares come from money received. Lab fees are split 50/50 between the treating dentist and the clinic.</p>
-  <div class="shl">${rows.map(r=>`<div class="shi"><div class="shh"><b>${esc(r.name)}</b><span>${r.own?"Owner · all to clinic · "+pl(r.n,"patient"):r.na?"Pick the dentist on these bills":r.pct+"% · "+pl(r.n,"patient")}</span></div><div class="shg"><div><small>Received</small>${rs(r.rec)}</div><div><small>Lab fees</small>${r.lab?rs(r.lab):"–"}</div><div class="shd"><small>${r.na?"Dentist":"Pay dentist"}</small>${r.na?"–":(r.dr<0?"− ":"")+rs(Math.abs(r.dr))}</div><div class="shc"><small>Clinic</small>${(r.cl<0?"− ":"")+rs(Math.abs(r.cl))}</div></div></div>`).join("")}
+  <div class="shl">${rows.map(r=>`<div class="shi"><div class="shh"><b>${esc(r.name)}</b><span>${r.own?"Owner · all to clinic · "+pl(r.n,"patient"):r.na?"Pick the dentist on these bills":r.pct+"% · "+pl(r.n,"patient")}</span>${!r.na?`<button type="button" class="btn small shrep" data-shrep="${esc(r.name)}" data-shf="${esc(f)}" data-sht="${esc(t)}">📄 Report</button>`:""}</div><div class="shg"><div><small>Received</small>${rs(r.rec)}</div><div><small>Lab fees</small>${r.lab?rs(r.lab):"–"}</div><div class="shd"><small>${r.na?"Dentist":"Pay dentist"}</small>${r.na?"–":(r.dr<0?"− ":"")+rs(Math.abs(r.dr))}</div><div class="shc"><small>Clinic</small>${(r.cl<0?"− ":"")+rs(Math.abs(r.cl))}</div></div></div>`).join("")}
   <div class="shi tot"><div class="shh"><b>Total</b></div><div class="shg"><div><small>Received</small>${rs(T.rec)}</div><div><small>Lab fees</small>${T.lab?rs(T.lab):"–"}</div><div class="shd"><small>Pay dentists</small>${rs(T.dr)}</div><div class="shc"><small>Clinic</small>${rs(T.cl)}</div></div></div></div>
   ${rows.some(r=>r.dr<0||r.cl<0)?`<p class="muted small" style="margin:8px 0 0">A minus amount means the half of the lab fees was more than that share in this period.</p>`:""}</div>`}
+function shDetail(n,f,t){const pays=[],labs=[];
+  for(const b of Object.values(B)){if((billDentist(b)||"")!==n)continue;for(const x of b.payments||[])if(inR(x.date,f,t))pays.push({date:x.date,pat:b.patientName||"",no:b.no||"",tr:(b.items||[]).filter(i=>!isOldItem(i)).map(i=>i.desc+(i.tooth?" ("+i.tooth+")":"")).join(", "),amt:+x.amount||0,m:payLbl(x)})}
+  for(const c of lcList())if(c.kind!=="bill"&&+c.cost&&(labDentist(c)||"")===n&&inR(c.sent||(c.createdAt||"").slice(0,10),f,t))labs.push({date:c.sent||(c.createdAt||"").slice(0,10),pat:c.patientName||"",work:c.work||"Lab work",teeth:c.teeth||"",lab:c.lab||"",cost:+c.cost||0});
+  pays.sort((a,b)=>a.date.localeCompare(b.date));labs.sort((a,b)=>a.date.localeCompare(b.date));
+  const own=shOwner(n),pct=own?0:shRate(n),rec=pays.reduce((a,x)=>a+x.amt,0),lab=labs.reduce((a,x)=>a+x.cost,0),sh=rec*pct/100,half=own?0:lab/2;
+  return {n,f,t,pays,labs,own,pct,rec,lab,sh,half,net:sh-half,pats:new Set(pays.map(x=>x.pat)).size}}
+function shRepInner(n,f,t){const d=shDetail(n,f,t),c=S().clinic,logo=(document.querySelector(".head-logo img")||{}).src||"",today=ymd(new Date()),per=f.slice(8)==="01"&&rpRange("month",f)[1]===t?new Date(f+"T00:00:00").toLocaleDateString("en-GB",{month:"long",year:"numeric"}):fmtDate(f)+" – "+fmtDate(t);
+  const tm=dentists().find(x=>x.name===n)||{},rr=(v)=>(v<0?"− ":"")+rs(Math.abs(v));
+  const tb=(head,rows,foot,num)=>rows.length?`<table class="rt"><thead><tr>${head.map((h,i)=>`<th${num.includes(i)?' class="r"':""}>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((v,i)=>`<td${num.includes(i)?' class="r"':""}>${v}</td>`).join("")}</tr>`).join("")}</tbody><tfoot><tr>${foot.map((v,i)=>`<td${num.includes(i)?' class="r"':""}>${v}</td>`).join("")}</tr></tfoot></table>`:`<p class="none">Nothing in this period.</p>`;
+  return `<div class="inv stm shr"><style>${INV_CSS}
+${ST_CSS}
+.shr .kp{grid-template-columns:repeat(4,1fr)}.shr .kp .sh{background:#E8F0FB;border-color:#B9CDEE}.shr .kp .sh b{color:#1E4E8C}.shr .kp .net{background:#0F4F45;border-color:#0F4F45}.shr .kp .net b,.shr .kp .net small,.shr .kp .net span{color:#fff}
+.shr .calc{margin:16px 36px 0 auto;width:56%;border:1px solid #d9e3e0;border-radius:10px;overflow:hidden}.shr .calc div{display:flex;justify-content:space-between;padding:7px 12px;font-size:12.5px;border-top:1px solid #e6eeeb}.shr .calc div:first-child{border-top:0}.shr .calc b{font-variant-numeric:tabular-nums}.shr .calc .g{background:#0F4F45;color:#fff;font-size:14px;font-weight:800}
+.shr .sgn{display:flex;justify-content:space-between;gap:30px;margin:34px 36px 0}.shr .sgn div{flex:1;border-top:1px solid #9aa9a5;padding-top:5px;font-size:11px;color:#5b6b67}
+</style>
+<div class="bar"></div>
+<div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}</div></div></div>
+<div class="ttl"><h1>DENTIST SHARE REPORT</h1><p><b>${esc(per)}</b></p><p>Prepared ${esc(fmtDate(today))}</p></div></div>
+<div class="pt"><div><span>Dentist</span><b>${esc(n)}</b></div><div><span>Share</span>${d.own?"Owner · all to clinic":d.pct+"% of money received"}</div>${tm.phone?`<div><span>Mobile</span>${esc(tm.phone)}</div>`:""}<div><span>Patients</span>${d.pats}</div></div>
+<div class="kp"><div><small>Received from patients</small><b>${rs(d.rec)}</b><span>${pl(d.pays.length,"payment")}</span></div><div class="sh"><small>Your share (${d.pct}%)</small><b>${rs(d.sh)}</b><span>of money received</span></div><div class="pdk z" style="background:#FBEFD9;border-color:#F1CF8E"><small style="color:#8A5300">Lab fees · your half</small><b style="color:#8A5300">${d.half?"− "+rs(d.half):"–"}</b><span>${pl(d.labs.length,"case")} · ${rs(d.lab)} total</span></div><div class="net"><small>Payable to you</small><b>${rr(d.own?0:d.net)}</b><span>for ${esc(per)}</span></div></div>
+<h3 class="sh">Payments received from your patients</h3><div class="wide">${tb(["Date","Patient","Bill no.","Treatment","Paid by","Received",`Share ${d.pct}%`],d.pays.map(x=>[esc(fmtDate(x.date)),esc(x.pat),esc(x.no),esc(x.tr),esc(x.m),rs(x.amt),rs(x.amt*d.pct/100)]),["Total","","","","",rs(d.rec),rs(d.sh)],[5,6])}</div>
+<h3 class="sh">Lab work for your patients</h3><div class="wide">${tb(["Sent","Patient","Work","Lab","Lab fee","Your half"],d.labs.map(x=>[esc(fmtDate(x.date)),esc(x.pat),esc(x.work)+(x.teeth?` <small>${esc(x.teeth)}</small>`:""),esc(x.lab),rs(x.cost),rs(d.own?0:x.cost/2)]),["Total","","","",rs(d.lab),rs(d.half)],[4,5])}</div>
+<div class="calc"><div><span>Your share of ${rs(d.rec)} (${d.pct}%)</span><b>${rs(d.sh)}</b></div><div><span>Less: half of lab fees</span><b>${d.half?"− "+rs(d.half):"–"}</b></div><div class="g"><span>Payable to you</span><b>${rr(d.own?0:d.net)}</b></div></div>
+<div class="sgn"><div>Prepared by · ${esc(c.name)}</div><div>Received by · ${esc(n)}</div></div>
+${invContactHTML()}
+<p class="gen" style="margin-top:22px">${esc(c.name)} · dentist share report · ${esc(n)} · ${esc(per)} · computer-generated</p></div>`}
+async function shRepSend(n,f,t,btn){const old=btn.textContent;btn.disabled=true;btn.textContent="Preparing…";
+  try{const blob=await htmlPdfBlob(shRepInner(n,f,t)),name=`Share-report-${String(n).replace(/[^A-Za-z0-9]+/g,"-")}-${f.slice(0,7)}.pdf`;
+    if(!window.claude&&navigator.canShare&&/Android|iPhone|iPad/i.test(navigator.userAgent)){const file=new File([blob],name,{type:"application/pdf"});if(navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"Share report · "+n});return}catch(e){if(e&&e.name==="AbortError")return}}}
+    await propSave(blob,name)}catch(e){if(!(e&&(e.code==="cancelled"||e.code==="declined")))toast("Couldn't make the PDF. Check the internet connection and try again.")}finally{btn.disabled=false;btn.textContent=old}}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-shrep]");if(b&&canShares())shRepSend(b.dataset.shrep,b.dataset.shf,b.dataset.sht,b)});
 function openShares(){if(!canShares())return;const names=[...new Set([...dentists().map(d=>d.name),...Object.keys(shCfg().rates||{})])].filter(Boolean);
   $("sh-list").innerHTML=names.length?names.map((n,i)=>{const own=shOwner(n),v=own?0:shRate(n);return `<div class="shrow"><div><b>${esc(n)}</b><small id="shs${i}">${own?"Owner · everything goes to clinic profit":v>=100?"Keeps everything":"Clinic gets "+(100-v)+"%"}</small></div><label class="shpct"><input type="number" min="0" max="100" inputmode="numeric" data-shn="${esc(n)}" data-shi="${i}" value="${v}" aria-label="${esc(n)} share percent"${own?" disabled":""}>%</label><div class="shbar"><i style="width:${v}%"></i></div><label class="shown"><input type="checkbox" data-sho="${i}"${own?" checked":""}> Owner (all goes to clinic)</label></div>`}).join(""):`<p class="muted">Add your dentists first in Appointments → Team.</p>`;
   $("sh-adm").checked=shCfg().admins===true;$("sh-admw").hidden=!isClinicOwner();openD($("shdlg"))}
@@ -3945,6 +3976,21 @@ function stPreview(){const d=stData();let txt="";
   else if(stKind==="mat")txt=`Paid ${rs(sumOf(d.paid,l=>l.total))} (${pl(d.paid.length,"purchase")}) · Pending ${rs(sumOf(d.pend,l=>l.total))} (${pl(d.pend.length,"purchase")})`;
   else txt=`Paid in full: ${pl(d.paid.length,"bill")} · Pending: ${pl(d.pend.length,"bill")}, ${rs(sumOf(d.pend,b=>billCalc(b).bal))} due`;
   $("st-sum").textContent=txt}
+const ST_CSS=`.stm .kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 36px 0}.stm .kp div{border-radius:10px;padding:10px 12px;background:#F3F7F6}.stm .kp small{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#5b6b67;font-weight:700}.stm .kp b{font-size:18px}.stm .kp span{display:block;font-size:10.5px;color:#5b6b67}
+.stm .kp .in{background:#E3F2E8}.stm .kp .in b{color:#2E7D4F}.stm .kp .pdk{background:#FBEFD9}.stm .kp .pdk b{color:#A86200}
+.stm .kp div{border:2px solid transparent}.stm .kp b{font-size:22px}.stm .kp .in{border-color:#9FD3B4}.stm .kp .pdk{background:#FDECEA;border-color:#F0A9A2}.stm .kp .pdk b{color:#A4231B}.stm .kp .pdk small{color:#A4231B}.stm .kp .pdk.z{background:#E3F2E8;border-color:#9FD3B4}.stm .kp .pdk.z b,.stm .kp .pdk.z small{color:#1F6B45}
+.stm h3.sh{margin:18px 36px 6px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#0F4F45;border-bottom:2px solid #0F4F45;padding-bottom:4px}
+.stm .ss{margin:16px 36px 0;border:1px solid #d9e3e0;border-radius:10px;overflow:hidden}
+.stm .sh2{display:flex;justify-content:space-between;padding:9px 12px;font-size:13px}.stm .pend .sh2{background:#FBEFD9;color:#A86200}.stm .paid .sh2{background:#E3F2E8;color:#2E7D4F}.stm .sh2 span{font-weight:700}
+.stm table.rt{width:100%;margin:0}.stm .rt th{padding:6px 8px;font-size:10px;background:#f6f8f7;color:#5b6b67}.stm .rt td{padding:6px 8px;font-size:11.5px}.stm .rt td small{display:block;color:#5b6b67;font-size:10px}
+.stm .rt tfoot td{font-weight:700;border-top:2px solid #1d2b28;background:#FAFCFB}
+.stm .wide{margin:0 36px}.stm .wide .rt th{background:#0F4F45;color:#fff}
+.stm .none{font-size:12px;color:#7d8c88;margin:8px 12px}
+.stm .ss.pend{border:2px solid #F0A9A2}.stm .pend .sh2{background:#FDECEA;color:#A4231B;font-size:14px}.stm .pend .sh2 b::before{content:"⚠ "}.stm .pend .sh2 span{font-size:16px;font-weight:800}
+.stm .pend .rt tbody td:last-child,.stm .owe .rt tbody td:last-child{background:#FDECEA;color:#A4231B;font-weight:800}.stm .pend .rt tbody td,.stm .owe .rt tbody td{background:#FDECEA;color:#7A1D16;border-bottom:1px solid #F5C7C1}.stm .pend .rt tbody td:last-child,.stm .owe .rt tbody td:last-child{background:#F9D6D1;color:#A4231B}
+.stm .pend .rt tfoot td{background:#FDECEA;color:#A4231B}.stm .owe .rt tbody tr:first-child td{font-weight:700}
+.stm .ttl h1{font-size:20px}
+`;
 function stInner(){const d=stData(),c=S().clinic,logo=(document.querySelector(".head-logo img")||{}).src||"",today=ymd(new Date());
   const per=d.f||d.t?`${d.f?fmtDate(d.f):"Start"} – ${d.t?fmtDate(d.t):fmtDate(today)}`:"All records";
   const T=({pend:"UNPAID ",paid:"PAID ",all:""}[stShow])+{lab:"LAB STATEMENT",mat:"MATERIALS STATEMENT",bills:"BILLS STATEMENT",pat:"ACCOUNT STATEMENT"}[stKind];
@@ -3978,21 +4024,7 @@ function stInner(){const d=stData(),c=S().clinic,logo=(document.querySelector(".
     if(!p&&d.pend.length){const pp={};for(const b of d.pend){const k=b.patientId||b.patientName;pp[k]=pp[k]||{n:b.patientName,ph:b.phone||"",bal:0,c:0};pp[k].bal+=billCalc(b).bal;pp[k].c++}
       body=`<h3 class="sh">Patients with a balance</h3><div class="wide owe">${tb(["Patient","Mobile","Bills","Balance"],Object.values(pp).sort((a,b)=>b.bal-a.bal).map(x=>[esc(x.n),esc(x.ph),x.c,rs(x.bal)]))}</div>`+body}}
   return `<div class="inv stm"><style>${INV_CSS}
-.stm .kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 36px 0}.stm .kp div{border-radius:10px;padding:10px 12px;background:#F3F7F6}.stm .kp small{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#5b6b67;font-weight:700}.stm .kp b{font-size:18px}.stm .kp span{display:block;font-size:10.5px;color:#5b6b67}
-.stm .kp .in{background:#E3F2E8}.stm .kp .in b{color:#2E7D4F}.stm .kp .pdk{background:#FBEFD9}.stm .kp .pdk b{color:#A86200}
-.stm .kp div{border:2px solid transparent}.stm .kp b{font-size:22px}.stm .kp .in{border-color:#9FD3B4}.stm .kp .pdk{background:#FDECEA;border-color:#F0A9A2}.stm .kp .pdk b{color:#A4231B}.stm .kp .pdk small{color:#A4231B}.stm .kp .pdk.z{background:#E3F2E8;border-color:#9FD3B4}.stm .kp .pdk.z b,.stm .kp .pdk.z small{color:#1F6B45}
-.stm h3.sh{margin:18px 36px 6px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#0F4F45;border-bottom:2px solid #0F4F45;padding-bottom:4px}
-.stm .ss{margin:16px 36px 0;border:1px solid #d9e3e0;border-radius:10px;overflow:hidden}
-.stm .sh2{display:flex;justify-content:space-between;padding:9px 12px;font-size:13px}.stm .pend .sh2{background:#FBEFD9;color:#A86200}.stm .paid .sh2{background:#E3F2E8;color:#2E7D4F}.stm .sh2 span{font-weight:700}
-.stm table.rt{width:100%;margin:0}.stm .rt th{padding:6px 8px;font-size:10px;background:#f6f8f7;color:#5b6b67}.stm .rt td{padding:6px 8px;font-size:11.5px}.stm .rt td small{display:block;color:#5b6b67;font-size:10px}
-.stm .rt tfoot td{font-weight:700;border-top:2px solid #1d2b28;background:#FAFCFB}
-.stm .wide{margin:0 36px}.stm .wide .rt th{background:#0F4F45;color:#fff}
-.stm .none{font-size:12px;color:#7d8c88;margin:8px 12px}
-.stm .ss.pend{border:2px solid #F0A9A2}.stm .pend .sh2{background:#FDECEA;color:#A4231B;font-size:14px}.stm .pend .sh2 b::before{content:"⚠ "}.stm .pend .sh2 span{font-size:16px;font-weight:800}
-.stm .pend .rt tbody td:last-child,.stm .owe .rt tbody td:last-child{background:#FDECEA;color:#A4231B;font-weight:800}.stm .pend .rt tbody td,.stm .owe .rt tbody td{background:#FDECEA;color:#7A1D16;border-bottom:1px solid #F5C7C1}.stm .pend .rt tbody td:last-child,.stm .owe .rt tbody td:last-child{background:#F9D6D1;color:#A4231B}
-.stm .pend .rt tfoot td{background:#FDECEA;color:#A4231B}.stm .owe .rt tbody tr:first-child td{font-weight:700}
-.stm .ttl h1{font-size:20px}
-</style>
+${ST_CSS}</style>
 <div class="bar"></div>
 <div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}</div></div></div>
 <div class="ttl"><h1>${T}</h1><p><b>${esc(per)}</b></p><p>Prepared ${esc(fmtDate(today))}</p>${stStamp}</div></div>
@@ -4839,7 +4871,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v78";let updShown=false;
+const APP_BUILD="ds-v79";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
