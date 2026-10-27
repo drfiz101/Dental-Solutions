@@ -3252,7 +3252,7 @@ function printBill(id){
   const b=B[id];if(!b)return;
   const f=document.createElement("iframe");f.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0";document.body.appendChild(f);
   f.srcdoc=`<!doctype html><html><head><meta charset="utf-8"><title>${esc(b.no||"Bill")} - ${esc(b.patientName||"")}</title><style>@page{size:A4;margin:10mm}body{margin:0}.inv{margin:0 auto}</style></head><body>${invoiceInner(b)}</body></html>`;
-  f.onload=()=>setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(e){toast("Printing isn't available here. Use Download PDF.")}setTimeout(()=>f.remove(),60000)},400);
+  f.onload=()=>setTimeout(()=>{try{const v=f.contentDocument.querySelector(".inv");if(v){const r=v.scrollHeight/(v.scrollWidth*277/190);if(r>1&&r<=FIT1)v.style.zoom=String(1/r)}}catch(e){}try{f.contentWindow.focus();f.contentWindow.print()}catch(e){toast("Printing isn't available here. Use Download PDF.")}setTimeout(()=>f.remove(),60000)},400);
 }
 function loadScript(src){return new Promise((res,rej)=>{if(document.querySelector(`script[src="${src}"]`))return res();const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=()=>rej(new Error("load"));document.head.appendChild(s)})}
 async function billPdfBlob(b){
@@ -3488,6 +3488,7 @@ ${invPayHTML()}
 <div class="ft"><div class="thx"><b>Thank you for choosing ${esc(c.name)}.</b>For appointments or questions, call or WhatsApp ${esc(c.phone)}.</div><div class="sig cg">Computer-generated treatment plan.<br>No signature required.</div></div>
 ${invContactHTML()}
 <p class="gen">${esc(proposalNo(p,pl))} · ${esc(p.name||"")} · printed ${esc(fmtDate(today))}</p></div>`}
+const FIT1=1.42;/* up to 42% taller than A4 is shrunk to fit on one page */
 async function htmlPdfBlob(html){
   await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
   await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
@@ -3495,12 +3496,13 @@ async function htmlPdfBlob(html){
   await Promise.all([...box.querySelectorAll("img")].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));
   try{const cv=await window.html2canvas(box.firstElementChild,{scale:2,backgroundColor:"#ffffff",useCORS:true,logging:false});
     const pdf=new window.jspdf.jsPDF({unit:"pt",format:"a4"}),W=pdf.internal.pageSize.getWidth(),H=pdf.internal.pageSize.getHeight(),pageH=Math.floor(cv.width*H/W);
+    const r=cv.height/pageH;if(r>1&&r<=FIT1){const w=W/r;pdf.addImage(cv.toDataURL("image/jpeg",.92),"JPEG",(W-w)/2,0,w,H);return pdf.output("blob")}
     for(let y=0,pg=0;y<cv.height;y+=pageH,pg++){const h=Math.min(pageH,cv.height-y),c2=document.createElement("canvas");c2.width=cv.width;c2.height=h;const x=c2.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c2.width,h);x.drawImage(cv,0,y,cv.width,h,0,0,cv.width,h);
       if(pg)pdf.addPage();pdf.addImage(c2.toDataURL("image/jpeg",.92),"JPEG",0,0,W,h*W/cv.width)}
     return pdf.output("blob")}finally{box.remove()}}
 function printHtml(title,html){const f=document.createElement("iframe");f.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0";document.body.appendChild(f);
   f.srcdoc=`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>@page{size:A4;margin:10mm}body{margin:0}.inv{margin:0 auto}tr{page-break-inside:avoid}</style></head><body>${html}</body></html>`;
-  f.onload=()=>setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(e){toast("Printing isn't available here. Use Download PDF.")}setTimeout(()=>f.remove(),60000)},400)}
+  f.onload=()=>setTimeout(()=>{try{const v=f.contentDocument.querySelector(".inv");if(v){const r=v.scrollHeight/(v.scrollWidth*277/190);if(r>1&&r<=FIT1)v.style.zoom=String(1/r)}}catch(e){}try{f.contentWindow.focus();f.contentWindow.print()}catch(e){toast("Printing isn't available here. Use Download PDF.")}setTimeout(()=>f.remove(),60000)},400)}
 const propFileName=p=>`Proposed-treatment-plan-${String(p.name||"patient").replace(/[^A-Za-z0-9]+/g,"-")}.pdf`;
 async function propSave(blob,name){if(saveFile){await saveFile(name,blob);return true}if(window.claude){toast("Saving files isn't available in this view.");return false}const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000);return true}
 async function propAction(kind,btn){const pid=selPat,p=P[pid];if(!p)return;
@@ -4782,7 +4784,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v73";let updShown=false;
+const APP_BUILD="ds-v74";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
