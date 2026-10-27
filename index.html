@@ -3926,7 +3926,7 @@ function renderReports(){
     ${rl("Clinic owes suppliers",rs(r.supPend))}${rl("Clinic owes labs",rs(r.labPendAll))}${rl("Other unpaid expenses",rs(r.exPendAll))}
     ${r.dues.length?`<div class="rsec"><h4>Patients with a balance</h4>${r.dues.slice(0,8).map(x=>`<div class="rl"><span><button class="linkbtn" data-gopat="${esc(x.id)}">${esc(x.name)}</button><small>${esc(x.phone||"")}</small></span><b class="pend">${rs(x.bal)}</b></div>`).join("")}${r.dues.length>8?`<p class="muted small" style="margin:4px 0 0">+ ${r.dues.length-8} more in Billing → Unpaid.</p>`:""}</div>`:""}</div>
   <div class="card r-oe"><div class="dh"><h3>Other expenses</h3><button class="btn small primary" data-exnew>+ Add expense</button></div>
-    <div class="hbbar"><span>🏠 HomeBudget</span><button type="button" class="btn small" data-hbin>⬇ Import from HomeBudget</button><button type="button" class="btn small" data-hbout data-f="${esc(f)}" data-t="${esc(t)}">⬆ Export ${esc(rpLabel(rpPer,f,t))}</button></div>
+    <div class="hbbar"><span>🏠 HomeBudget</span><button type="button" class="btn small" data-hbin>⬇ Import from HomeBudget</button><button type="button" class="btn small" data-hbout data-f="${esc(f)}" data-t="${esc(t)}">⬆ Export ${esc(rpLabel(rpPer,f,t))}</button>${hbUndoData().n?`<button type="button" class="btn small danger-outline" data-hbundo>↩ Undo HomeBudget import</button>`:""}</div>
     ${r.ex.length?r.ex.sort((a,b)=>b.date.localeCompare(a.date)).map(e=>`<div class="rl"><span><button class="linkbtn" data-exedit="${esc(e.id)}">${esc(e.cat||"Other")}</button><small>${esc(fmtDate(e.date))}${e.note?" · "+esc(e.note):""}${e.paid===false?' · <span class="pend">pending</span>':""}</small></span><b>${rs(e.amount)}</b></div>`).join(""):`<p class="muted small" style="margin:0">Rent, salaries, electricity and other running costs. Add them here so profit is accurate.</p>`}</div>
   <div class="card r-tx"><h3>Payments received</h3>${r.pays.length?r.pays.sort((a,b)=>b.date.localeCompare(a.date)).slice(0,25).map(x=>rl(esc(x.patient),rs(x.amount),"",`${esc(fmtDate(x.date))} · ${esc(x.method)}${x.no?" · "+esc(x.no):""}`)).join("")+(r.pays.length>25?`<p class="muted small" style="margin:4px 0 0">Showing the latest 25 of ${r.pays.length}. The PDF lists them all.</p>`:""):`<p class="muted small" style="margin:0">No payments in this period.</p>`}</div>
   </div>`;
@@ -3988,6 +3988,12 @@ function hbRender(){const R=HB||[],sec=(kind,title,sub)=>{const xs=R.map((r,i)=>
   $("hb-body").innerHTML=R.length?gq+sec("clinic","Clinic expenses","Saved under Reports → Other expenses with the category you pick.")+sec("share","Dentist share payments","Shown as \"Paid\" against each dentist in Reports → Dentist shares.")+sec("income","Patient income","Already-recorded payments are skipped. For the rest, a bill marked paid is made for the patient.")+sec("home","Home & personal (not imported unless you tick)",""):`<p class="muted">Choose the CSV you exported from HomeBudget.</p>`;
   $("hb-go").disabled=!n||pend>0;$("hb-go").textContent=pend?`Answer ${pend} "same patient?" first`:n?`Import ${n} · ${rs(amt)}`:"Import";}
 let HB_G=[];
+function hbUndoData(){const ex=expList().filter(e=>e.hb),bills=Object.entries(B).filter(([,b])=>b.hb),hbPids=new Set(bills.map(([,b])=>b.patientId));
+  const pats=Object.entries(P).filter(([id,p])=>p.fromHb||(hbPids.has(id)&&!p.phone&&!(p.notes||[]).length&&!(p.xrays||[]).length&&!Object.keys(p.teeth||{}).length&&!(p.plan&&(p.plan.items||[]).length)&&!Object.values(B).some(b=>b.patientId===id&&!b.hb)&&!Object.values(A).some(a=>a.patientId===id)&&!Object.values(LC).some(c=>c.patientId===id)));
+  return {ex,bills,pats,n:ex.length+bills.length,amtEx:ex.reduce((a,e)=>a+(+e.amount||0),0),amtIn:bills.reduce((a,[,b])=>a+billCalc(b).paid,0)}}
+async function hbUndo(){const d=hbUndoData();if(!d.n){toast("Nothing imported from HomeBudget.");return}
+  if(!confirm(`Remove everything imported from HomeBudget?\n\n• ${pl(d.ex.length,"expense")} (${rs(d.amtEx)}) incl. dentist share payments\n• ${pl(d.bills.length,"bill")} with their payments (${rs(d.amtIn)})\n• ${pl(d.pats.length,"patient")} that were created by the import\n\nEverything you entered yourself stays. You can import the file again afterwards.`))return;
+  for(const e of d.ex)await delLog(e.id);for(const [id] of d.bills)cdel("bills",id);for(const [id] of d.pats)cdel("patients",id);render();toast("HomeBudget import removed. You can import again.")}
 function mergePatients(keep,drop){if(!P[keep]||!P[drop]||keep===drop)return;const k=P[keep],d=P[drop];
   for(const [id,b] of Object.entries(B))if(b.patientId===drop)cset("bills",id,{...b,patientId:keep,patientName:k.name});
   for(const [id,a] of Object.entries(A))if(a.patientId===drop)cset("appts",id,{...a,patientId:keep,patientName:k.name});
@@ -3997,12 +4003,12 @@ function mergePatients(keep,drop){if(!P[keep]||!P[drop]||keep===drop)return;cons
   for(const x of ["plan","proposal"])if(!nk[x])delete nk[x];cset("patients",keep,nk);cdel("patients",drop);if(selPat===drop)selPat=keep}
 async function hbImport(){const R=(HB||[]).filter(r=>r.on&&!r.done);if(!R.length)return;const b=$("hb-go");b.disabled=true;b.textContent="Importing…";let ne=0,nb=0,np=0,nm=0;
   const idmap={};for(const g of HB_G){if(HBANS[g.key]!=="same")continue;const ps=g.ks.filter(k=>k.startsWith("p:")).map(k=>k.slice(2)).filter(id=>P[id]).sort((a,b)=>String(P[a].fileNo||"").localeCompare(String(P[b].fileNo||""))||String(P[a].createdAt||"").localeCompare(String(P[b].createdAt||"")));
-    let target=ps[0]||"";for(const d of ps.slice(1)){mergePatients(target,d);nm++}if(!target){const rows=g.rows.filter(r=>r.on);const nmx=HBNAME[g.key]||(rows[0]||g.rows[0]).x.desc;target=nid("p");cset("patients",target,{name:nmx.replace(/\s+/g," ").trim(),phone:"",createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[],alerts:""});np++}
+    let target=ps[0]||"";for(const d of ps.slice(1)){mergePatients(target,d);nm++}if(!target){const rows=g.rows.filter(r=>r.on);const nmx=HBNAME[g.key]||(rows[0]||g.rows[0]).x.desc;target=nid("p");cset("patients",target,{name:nmx.replace(/\s+/g," ").trim(),phone:"",createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[],alerts:"",fromHb:true});np++}
     for(const k of g.ks)idmap[k]=target}
   for(const r of R){const x=r.x;
     if(r.t==="ex"){if(r.kind==="share"&&!r.dent)continue;const doc={kind:"expense",cat:r.kind==="share"?"Dentist share paid":r.cat,amount:x.amt,date:x.date,paid:true,paidOn:x.date,note:[r.kind==="home"?x.cat+" · "+x.sub:x.sub,x.notes,x.acct?"via "+x.acct:""].filter(Boolean).join(" · "),hb:r.k,at:new Date().toISOString(),...me};if(r.dent)doc.dentist=r.dent;
       if(!db)logs["local-"+Date.now()+"-"+ne]=doc;else{try{const ref=db.collection("logs").doc();logs[ref.id]=doc;W(ref.set(doc))}catch(e){}}ne++;continue}
-    let pid=idmap[r.ident]||r.pid;if(!pid){pid=nid("p");cset("patients",pid,{name:x.desc.replace(/\s+/g," ").trim(),phone:"",createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[],alerts:""});np++;idmap[r.ident]=pid}
+    let pid=idmap[r.ident]||r.pid;if(!pid){pid=nid("p");cset("patients",pid,{name:x.desc.replace(/\s+/g," ").trim(),phone:"",createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[],alerts:"",fromHb:true});np++;idmap[r.ident]=pid}
     const p=P[pid]||{},pm=hbPayM(x.acct),id=nid("b");cset("bills",id,{no:nextBillNo(x.date),patientId:pid,patientName:p.name||x.desc,phone:p.phone||"",date:x.date,items:[{desc:x.notes||"Treatment",qty:1,price:x.amt}],discount:0,note:"Imported from HomeBudget",hb:r.k,...(r.dent?{dentist:r.dent}:{}),createdAt:new Date().toISOString(),payments:[{date:x.date,amount:x.amt,...pm,...me}],...me});nb++}
   render();$("hbdlg").close();toast(`Imported ${[ne?pl(ne,"expense"):"",nb?pl(nb,"bill"):"",np?pl(np,"new patient"):"",nm?pl(nm,"patient")+" merged":""].filter(Boolean).join(", ")} from HomeBudget`)}
 function hbExport(f,t){const rows=[],d8=s=>s.replace(/-/g,""),cl=s=>String(s||"").replace(/[",\n]/g," ").replace(/\s+/g," ").trim();
@@ -4017,6 +4023,7 @@ async function hbSendCsv(f,t){const r=hbExport(f,t);if(!r.n){toast("Nothing to e
   await propSave(blob,name);toast(`Saved ${r.n} entries (income ${rs(r.inc)}, expenses ${rs(r.out)}). Open the file with HomeBudget.`)}
 document.addEventListener("click",e=>{const t=e.target;
   const sm=t.closest("[data-hbsame],[data-hbdiff]");if(sm&&HB){const k=sm.dataset.hbsame||sm.dataset.hbdiff;HBANS[k]=sm.dataset.hbsame?"same":"diff";if(sm.dataset.hbsame){const g=HB_G.find(x=>x.key===k);if(g&&g.rows.some(r=>r.on))for(const r of g.rows)r.on=true}hbRender();return}
+  if(t.closest("[data-hbundo]")){hbUndo();return}
   if(t.closest("[data-hbin]")){HB=null;HBANS={};HBNAME={};$("hb-file").value="";hbRender();openD($("hbdlg"));return}
   const o=t.closest("[data-hbout]");if(o){hbSendCsv(o.dataset.f,o.dataset.t);return}
   const al=t.closest("[data-hball],[data-hbnone]");if(al&&HB){const k=al.dataset.hball||al.dataset.hbnone,v=!!al.dataset.hball;for(const r of HB)if(r.kind===k&&!r.done)r.on=v;hbRender();return}});
@@ -5017,7 +5024,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v84";let updShown=false;
+const APP_BUILD="ds-v85";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
