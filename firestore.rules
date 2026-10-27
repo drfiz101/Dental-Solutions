@@ -94,6 +94,12 @@ service cloud.firestore {
       allow read, update, delete: if staffOf(c);
     }
 
+    // ---------- Executive Clinic Ledger (ledger/ app) ----------
+    // Each login keeps its own patient records and statements; nobody else can read them.
+    match /ledgers/{uid}/{rest=**} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
     // ---------- Al Awan Dental Clinic data (kept where it always was) ----------
     // The two original emails keep working until their Dental Solutions login exists
     function legacyOnly() { return isLegacyAlawan() && !exists(memberDoc("alawan")); }
