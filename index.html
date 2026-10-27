@@ -3229,7 +3229,7 @@ function oldBalHTML(b,t){const pb=b.showPrev===false?[]:prevBills(b),oi=(b.items
   ${t.paid?`<tr><td>Less: paid on this bill</td><td>− ${rs(t.paid)}</td></tr>`:""}
   <tr class="tot"><td>Total amount due</td><td>${rs(t.bal+prev)}</td></tr></tbody></table></div>`}
 function invoiceInner(b){
-  const t=billCalc(b),c=S().clinic,p=P[b.patientId]||{},ap=b.apId&&A[b.apId],den=(ap&&ap.dentist)||"";
+  const t=billCalc(b),c=S().clinic,p=P[b.patientId]||{},ap=b.apId&&A[b.apId],den=billDentist(b)||"";
   const logo=(document.querySelector(".head-logo img")||{}).src||"";
   const teeth={};for(const it of b.items||[])for(const n of teethOf(it.tooth))(teeth[n]=teeth[n]||[]).push(it.desc);
   const tk=Object.keys(teeth).map(Number).sort((a,b)=>a-b);
@@ -3243,7 +3243,7 @@ ${invDocsHTML()}
 <div class="psum"><div class="t"><small>Total</small><b>${rs(t.total)}</b></div><div class="p"><small>Paid</small><b>${rs(t.paid)}</b></div><div class="d${t.bal>0?"":" z"}"><small>${t.bal>0?"Due (pending)":"Due"}</small><b>${rs(t.bal)}</b></div></div>
 <div class="pt"><div><span>Patient</span><b>${esc(b.patientName||"")}</b></div><div><span>File no.</span>${esc(p.fileNo||"—")}</div>
 <div><span>Mobile</span>${esc(b.phone||p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div>
-${den?`<div><span>Dentist</span>${esc(den)}</div>`:""}${ap?`<div><span>Visit</span>${esc(fmtDate(ap.date))}, ${esc(fmtTime(ap.time))}</div>`:""}</div>
+${den?`<div><span>Treated by</span><b>${esc(den)}</b></div>`:""}${ap?`<div><span>Visit</span>${esc(fmtDate(ap.date))}, ${esc(fmtTime(ap.time))}</div>`:""}</div>
 <table><thead><tr><th style="width:34px">#</th><th>Treatment</th><th>Teeth</th><th class="r" style="width:50px">Qty</th><th class="r" style="width:100px">Rate</th><th class="r" style="width:110px">Amount</th></tr></thead><tbody>
 ${(b.items||[]).map((it,i)=>`<tr><td>${i+1}</td><td>${esc(it.desc)}</td><td>${esc(it.tooth||"—")}</td><td class="r">${+it.qty||1}</td><td class="r">${rs(it.price)}</td><td class="r">${rs((+it.qty||1)*(+it.price||0))}</td></tr>`).join("")}
 </tbody></table>
@@ -3983,6 +3983,7 @@ const ST_CSS=`.stm .kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px
 .stm .ss{margin:16px 36px 0;border:1px solid #d9e3e0;border-radius:10px;overflow:hidden}
 .stm .sh2{display:flex;justify-content:space-between;padding:9px 12px;font-size:13px}.stm .pend .sh2{background:#FBEFD9;color:#A86200}.stm .paid .sh2{background:#E3F2E8;color:#2E7D4F}.stm .sh2 span{font-weight:700}
 .stm table.rt{width:100%;margin:0}.stm .rt th{padding:6px 8px;font-size:10px;background:#f6f8f7;color:#5b6b67}.stm .rt td{padding:6px 8px;font-size:11.5px}.stm .rt td small{display:block;color:#5b6b67;font-size:10px}
+.stm .rt td.r,.stm .rt th.r,.stm .rt td:nth-child(-n+2){white-space:nowrap}.stm .rt th,.stm .rt td{padding-left:6px;padding-right:6px}.stm .rt td{font-size:11px}
 .stm .rt tfoot td{font-weight:700;border-top:2px solid #1d2b28;background:#FAFCFB}
 .stm .wide{margin:0 36px}.stm .wide .rt th{background:#0F4F45;color:#fff}
 .stm .none{font-size:12px;color:#7d8c88;margin:8px 12px}
@@ -4018,7 +4019,7 @@ function stInner(){const d=stData(),c=S().clinic,logo=(document.querySelector(".
   else{const all=[...d.paid,...d.pend],tot=sumOf(all,b=>billCalc(b).total),rec=sumOf(all,b=>billCalc(b).paid),due=sumOf(d.pend,b=>billCalc(b).bal),p=stKind==="pat"?P[stPid]||{}:null;
     if(p)who=`<div class="pt"><div><span>Patient</span><b>${esc(p.name||"")}</b></div><div><span>File no.</span>${esc(p.fileNo||"—")}</div><div><span>Mobile</span>${esc(p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div></div>`;
     kp=`<div class="kp"><div><small>Total billed</small><b>${rs(tot)}</b><span>${pl(all.length,"bill")}</span></div><div class="in"><small>Paid</small><b>${rs(rec)}</b><span>${pl(d.paid.length,"bill")} paid in full</span></div><div class="pdk${due>0?"":" z"}"><small>${due>0?"Due (pending)":"Due"}</small><b>${rs(due)}</b><span>${pl(d.pend.length,"bill")} pending</span></div></div>`;stStamp=`<span class="stamp ${due>0?"due":"ok"}">${due>0?"PAYMENT DUE":"ALL PAID"}</span>`;
-    const H=["Date","Bill no.",...(p?[]:["Patient"]),"Treatment","Total","Paid","Balance"],row=b=>{const k=billCalc(b);return [esc(fmtDate(b.date)),esc(b.no||""),...(p?[]:[esc(b.patientName||"")+(b.phone?`<small>${esc(b.phone)}</small>`:"")]),esc((b.items||[]).map(i=>i.desc+(i.tooth?" ("+i.tooth+")":"")).join(", ")),rs(k.total),rs(k.paid),rs(k.bal)]},F=a=>["Total","",...(p?[]:[""]),"",rs(sumOf(a,b=>billCalc(b).total)),rs(sumOf(a,b=>billCalc(b).paid)),rs(sumOf(a,b=>billCalc(b).bal))];
+    const H=["Date","Bill no.",...(p?[]:["Patient"]),"Treatment","Dentist","Total","Paid","Balance"],row=b=>{const k=billCalc(b);return [esc(fmtDate(b.date)),esc(b.no||""),...(p?[]:[esc(b.patientName||"")+(b.phone?`<small>${esc(b.phone)}</small>`:"")]),esc((b.items||[]).map(i=>i.desc+(i.tooth?" ("+i.tooth+")":"")).join(", ")),esc(billDentist(b)||"—"),rs(k.total),rs(k.paid),rs(k.bal)]},F=a=>["Total","",...(p?[]:[""]),"","",rs(sumOf(a,b=>billCalc(b).total)),rs(sumOf(a,b=>billCalc(b).paid)),rs(sumOf(a,b=>billCalc(b).bal))];
     body=sec("Pending — balance due","pend",rs(due),tb(H,d.pend.map(row),d.pend.length?F(d.pend):null))+sec("Paid in full","paid",rs(sumOf(d.paid,b=>billCalc(b).total)),tb(H,d.paid.map(row),d.paid.length?F(d.paid):null));
     if(p){const pays=all.flatMap(b=>(b.payments||[]).map(x=>({...x,no:b.no}))).sort((a,b)=>a.date.localeCompare(b.date));body+=`<h3 class="sh">Payments received</h3><div class="wide">${tb(["Date","Bill no.","Method","Amount"],pays.map(x=>[esc(fmtDate(x.date)),esc(x.no||""),esc(payLbl(x)),rs(x.amount)]),pays.length?["Total","","",rs(sumOf(pays,x=>x.amount))]:null)}</div>`}
     if(!p&&d.pend.length){const pp={};for(const b of d.pend){const k=b.patientId||b.patientName;pp[k]=pp[k]||{n:b.patientName,ph:b.phone||"",bal:0,c:0};pp[k].bal+=billCalc(b).bal;pp[k].c++}
@@ -4871,7 +4872,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v79";let updShown=false;
+const APP_BUILD="ds-v80";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
