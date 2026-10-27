@@ -953,7 +953,13 @@ html,body{overflow-x:hidden;max-width:100%;overscroll-behavior-x:none}
 :root[data-layout="simple"] body.ws-on>.mainnav{display:grid!important}
 
 /* customisable home */
-.homebar{display:flex;justify-content:flex-end;margin:0 0 8px}
+.homebar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 10px}.hsrch{flex:1 1 auto!important;max-width:none}.hsrch input{font-size:16px;padding:12px 12px 12px 38px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.hres{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:40;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.15);max-height:70vh;overflow:auto;padding:4px 0}
+@media(max-width:560px){.homebar{flex-wrap:wrap}.hsrch{flex-basis:100%!important}}
+.hsg{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 12px 4px}
+.hsi{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;padding:8px 12px;font:inherit;color:var(--ink);cursor:pointer}.hsi:hover,.hsi:focus{background:var(--bg)}
+.hsi span{min-width:0}.hsi b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hsi small{display:block;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hsi em{font-style:normal;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;white-space:nowrap}.hsi em.due{background:#FDECEA;color:#A4231B}.hsi em.ok{background:#E3F2E8;color:#1F6B45}
 html:root #dashView .dgrid>.card[data-wh]{display:none!important}
 html:root #dashView .dgrid>.card[data-ws]{display:block!important}
 .hwrow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}.hwrow label{flex:1;display:flex;gap:10px;align-items:center;min-height:44px;cursor:pointer;font-weight:600}.hwrow input{width:20px;height:20px;flex:none}
@@ -1121,7 +1127,7 @@ input[type=date]{min-width:0;max-width:100%}
     <div id="rp-body"></div>
   </section>
   <section id="dashView" class="view cview" hidden>
-    <div class="homebar"><button type="button" class="btn small" id="homeEdit">✎ Customise home</button></div>
+    <div class="homebar"><div class="search hsrch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="hq" type="search" placeholder="Search patients, mobile, bills, lab, stock…" aria-label="Search the whole app" autocomplete="off"><div class="hres" id="hres" hidden></div></div><button type="button" class="btn small" id="homeEdit">✎ Customise home</button></div>
     <div class="dgrid">
       <div class="card d-simple" id="d-simple"></div>
       <div class="card d-clock"><div class="clk" id="d-time"></div><div class="cdate" id="d-date"></div><div class="copen" id="d-open"></div></div>
@@ -2975,6 +2981,21 @@ function tickClock(){if(main!=="dashboard"||!$("d-time"))return;const now=new Da
   $("d-date").textContent=now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   const [k,t]=clinicStatus();$("d-open").innerHTML=`<span class="odot ${k}"></span>${esc(t)}`}
 setInterval(tickClock,10000);
+/* ---- home search ---- */
+function hsFind(q){q=q.trim().toLowerCase();if(q.length<2)return [];const dg=q.replace(/\D/g,""),hit=v=>String(v||"").toLowerCase().includes(q),ph=v=>dg.length>=4&&String(v||"").replace(/\D/g,"").includes(dg.replace(/^0/,""));const out=[],today=ymd(new Date());
+  if(can("tab_patients")){const ps=Object.entries(P).filter(([,p])=>hit(p.name)||hit(p.fileNo)||ph(p.phone)).slice(0,6);if(ps.length)out.push(["Patients",ps.map(([id,p])=>({a:`data-gopat="${esc(id)}"`,t:p.name||"",s:[p.fileNo,p.phone,p.age?p.age+" y":""].filter(Boolean).join(" · ")}))])}
+  if(can("tab_appointments")){const as=Object.entries(A).filter(([,a])=>a.status!=="cancelled"&&(hit(a.patientName)||ph(a.phone)||hit(a.treatment))).sort((x,y)=>{const fx=x[1].date>=today,fy=y[1].date>=today;return fx!==fy?(fy-fx):fx?x[1].date.localeCompare(y[1].date):y[1].date.localeCompare(x[1].date)}).slice(0,5);if(as.length)out.push(["Appointments",as.map(([id,a])=>({a:`data-hsap="${esc(id)}"`,t:a.patientName||"",s:`${a.date===today?"Today":dayName(a.date).slice(0,3)+" "+fmtDate(a.date)}, ${fmtTime(a.time||"")} · Chair ${a.chair||""}${a.dentist?" · "+a.dentist:""}${a.treatment?" · "+a.treatment:""}`}))])}
+  if(can("tab_billing")){const bs=Object.entries(B).filter(([,b])=>hit(b.no)||hit(b.patientName)||ph(b.phone)).sort((x,y)=>String(y[1].date).localeCompare(String(x[1].date))).slice(0,5);if(bs.length)out.push(["Bills",bs.map(([id,b])=>{const k=billCalc(b);return {a:`data-hsbill="${esc(id)}"`,t:`${b.no||"Bill"} · ${b.patientName||""}`,s:`${fmtDate(b.date)} · ${rs(k.total)}`,tag:k.bal>0?`<em class="due">Due ${rs(k.bal)}</em>`:`<em class="ok">Paid</em>`}})])}
+  if(can("tab_lab")){const ls=lcList().filter(c=>c.kind!=="bill"&&(hit(c.patientName)||hit(c.work)||hit(c.lab))).slice(0,5);if(ls.length)out.push(["Lab work",ls.map(c=>({a:`data-hslc="${esc(c.id)}"`,t:`${c.patientName||""} · ${c.work||"Lab work"}`,s:[c.lab,c.teeth,c.sent?"sent "+fmtDate(c.sent):""].filter(Boolean).join(" · ")}))])}
+  if(can("tab_inventory")){const is=items().filter(i=>!i.hidden&&(hit(i.name)||hit(i.supplier))).slice(0,6);if(is.length)out.push(["Stock",is.map(i=>({a:`data-hsit="${esc(i.id)}"`,t:i.name,s:i.asset?"Equipment":`Have ${i.qty??"–"} ${i.unit||""}${i.min?" · reorder at "+i.min:""}`,tag:!i.asset&&i.qty!=null&&i.min&&+i.qty<=+i.min?`<em class="due">Low</em>`:""}))])}
+  return out}
+function hsRender(){const q=$("hq").value,box=$("hres"),r=hsFind(q);if(q.trim().length<2){box.hidden=true;return}
+  box.innerHTML=r.length?r.map(([g,xs])=>`<div class="hsg">${g}</div>${xs.map(x=>`<button type="button" class="hsi" ${x.a}><span><b>${esc(x.t)}</b><small>${esc(x.s||"")}</small></span>${x.tag||""}</button>`).join("")}`).join(""):`<p class="muted small" style="margin:10px 12px">Nothing found for “${esc(q.trim())}”.</p>`;box.hidden=false}
+$("hq").addEventListener("input",hsRender);$("hq").addEventListener("focus",hsRender);
+$("hq").addEventListener("keydown",e=>{if(e.key==="Escape"){$("hq").value="";hsRender();$("hq").blur()}if(e.key==="Enter"){e.preventDefault();const f=$("hres").querySelector(".hsi");if(f)f.click()}});
+document.addEventListener("click",e=>{if(!e.target.closest(".hsrch"))$("hres").hidden=true;const b=e.target.closest(".hsi");if(!b)return;$("hres").hidden=true;
+  if(b.dataset.hsap)openAp(b.dataset.hsap);else if(b.dataset.hsbill)openBillView(b.dataset.hsbill);else if(b.dataset.hslc)openLC(b.dataset.hslc);else if(b.dataset.hsit)openEdit(b.dataset.hsit);
+  if(!b.dataset.gopat){$("hq").value=""}});
 function renderDash(){$("d-rep").innerHTML=dashRepCard();try{renderSimpleHome()}catch(e){}try{homeApply()}catch(e){}
   const today=ymd(new Date()),tom=addDays(today,1),nowM=new Date().getHours()*60+new Date().getMinutes();
   const day=Object.entries(A).filter(([,a])=>a.date===today&&a.status!=="cancelled").map(([id,a])=>({id,...a})).sort((a,b)=>a.time.localeCompare(b.time));
@@ -4872,7 +4893,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v80";let updShown=false;
+const APP_BUILD="ds-v81";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
