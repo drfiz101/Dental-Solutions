@@ -2546,17 +2546,17 @@ function renderPatDetail(id){setTimeout(loadXThumbs,0);
   const aps=Object.entries(A).filter(([,a])=>a.patientId===id).map(([k,a])=>({id:k,...a})).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
   const bills=Object.entries(B).filter(([,b])=>b.patientId===id).map(([k,b])=>({id:k,...b})).sort((a,b)=>(b.date+(b.createdAt||"")).localeCompare(a.date+(a.createdAt||"")));
   const bal=bills.reduce((s,b)=>s+billCalc(b).bal,0),paid=bills.reduce((s,b)=>s+billCalc(b).paid,0),TH=toothHist(bills);
-  const PL=planTeeth(p);const tooth=n=>{const st=teeth[n]||"";return `<button type="button" class="tooth tpic${n>=31?" lower":""}${toothSel===n?" sel":""}${TH[n]?" hx":""}${PL.has(n)?" pl":""}" data-tooth="${n}" aria-label="Tooth ${n}${st?", "+TOOTH_ST[st]:""}">${toothPic(n,st)}<span class="tn">${n}</span></button>`};
+  const PL=planTeeth(p),shT=chShowT();const tooth=n=>{const st=shT?teeth[n]||"":"";return `<button type="button" class="tooth tpic${n>=31?" lower":""}${toothSel===n?" sel":""}${shT&&TH[n]?" hx":""}${shT&&PL.has(n)?" pl":""}" data-tooth="${n}" aria-label="Tooth ${n}${st?", "+TOOTH_ST[st]:""}">${toothPic(n,st)}<span class="tn">${n}</span></button>`};
   $("patDetail").dataset.psec=pSec;$("patDetail").innerHTML=`<div class="pd-back"><button class="btn" data-back>‹ All patients</button></div>
   <div class="card pd-top"><div class="pd-id"><span class="av big">${esc(initials(p.name))}</span><div><h2>${esc(p.name)}</h2><p class="muted">${[p.fileNo,p.age?p.age+" years":"",p.gender,p.cnic?"CNIC "+p.cnic:"",p.ref?"Referred by "+p.ref:""].filter(Boolean).map(esc).join(" · ")}</p><p class="phline"><span class="seltxt">${esc(p.phone||"No phone")}</span>${waNum(p.phone)?` <a class="wa sm" href="${esc(waHref(p.phone,""))}" target="_blank" rel="noopener">${WA_IC}<span>WhatsApp</span></a>`:""}</p>${p.address?`<p class="muted">${esc(p.address)}</p>`:""}</div></div>
     <div class="vact">${p.phone?`<a class="btn callbtn" href="tel:${esc(String(p.phone).replace(/[^0-9+]/g,""))}">Call</a>`:""}<button class="btn" data-pedit>Edit</button><button class="btn" data-plab>Lab case</button><button class="btn" data-prx>💊 Prescription</button><button class="btn" data-pbook>Book appointment</button><button class="btn primary" data-pbill>New bill</button></div></div>
   ${p.alerts?`<div class="alertbar">Medical alert: ${esc(p.alerts)}</div>`:""}
   <div class="ptabs" role="tablist" aria-label="Patient sections">${[["treat","Treatment"],["chart","Chart"],["xray","X-rays"],["visits","Visits"],["notes","Notes"]].map(([k,n])=>`<button type="button" role="tab" data-psec="${k}" aria-selected="${pSec===k}">${n}</button>`).join("")}</div>
   <div class="pgrid">
-    <div class="lcol" style="min-width:0"><div class="card" data-sec="chart"><h3>Tooth chart</h3><p class="muted small" style="margin:-4px 0 10px">Tap a tooth, then choose its condition. Upper jaw on top, patient's right on your left.</p>
+    <div class="lcol" style="min-width:0"><div class="card" data-sec="chart"><div class="dh"><h3>Tooth chart</h3><button type="button" class="btn small chtog" data-chtog aria-pressed="${shT}">${shT?"🙈 Hide treated":"👁 Show treated"}</button></div><p class="muted small" style="margin:-4px 0 10px">Tap a tooth, then choose its condition. Upper jaw on top, patient's right on your left.</p>
       <div class="jaw jrow"><div class="teeth">${UPPER.map(tooth).join("")}</div><div class="midline"></div><div class="teeth">${LOWER.map(tooth).join("")}</div></div>
-      <div class="tpal">${toothSel?`<b>Tooth ${toothSel}:</b>`+Object.entries(TOOTH_ST).map(([k,v])=>`<button type="button" class="tbtn tpb${teeth[toothSel]===k?" on":""}" data-tst="${k}">${toothPic(toothSel,k,"tsm")}${v}</button>`).join("")+`<button type="button" class="tbtn" data-tst="">Healthy</button><button type="button" class="tbtn plan" data-tpadd="${toothSel}">+ Plan treatment</button>`:Object.entries(TOOTH_ST).map(([k,v])=>`<span class="tleg tpb">${toothPic(16,k,"tsm")}${v}</span>`).join("")+`<span class="tleg hxl">● Treated (has bill)</span><span class="tleg pll">▁ Planned</span>`}</div>
-      ${toothSel?`<div class="thist"><h4>Tooth ${toothSel}: treatment history</h4>${(TH[toothSel]||[]).length?TH[toothSel].map(h=>`<button class="kv kvb" data-bopen="${esc(h.id)}"><span>${esc(fmtDate(h.d))} · ${esc(h.t)}</span><small>${esc(h.no||"")}</small></button>`).join(""):`<p class="muted small" style="margin:0">No treatment billed on this tooth yet.</p>`}</div>`:(Object.keys(TH).length?`<div class="txsum"><span class="muted">Treated:</span>${Object.keys(TH).map(Number).sort((a,b)=>a-b).map(n=>`<span><b>${n}</b> ${esc([...new Set(TH[n].map(h=>h.t))].join(", "))}</span>`).join("")}</div>`:"")}
+      <div class="tpal">${toothSel?`<b>Tooth ${toothSel}:</b>`+Object.entries(TOOTH_ST).map(([k,v])=>`<button type="button" class="tbtn tpb${teeth[toothSel]===k?" on":""}" data-tst="${k}">${toothPic(toothSel,k,"tsm")}${v}</button>`).join("")+`<button type="button" class="tbtn" data-tst="">Healthy</button><button type="button" class="tbtn plan" data-tpadd="${toothSel}">+ Plan treatment</button>`:Object.entries(TOOTH_ST).map(([k,v])=>`<span class="tleg tpb">${toothPic(16,k,"tsm")}${v}</span>`).join("")+`<span class="tleg hxl">● Treated (has bill)</span><span class="tleg pll">▁ Planned</span>`}</div>${shT?"":`<p class="muted small" style="margin:6px 0 0">Treatments are hidden. Tap <b>👁 Show treated</b> to see them again.</p>`}
+      ${toothSel?`<div class="thist"><h4>Tooth ${toothSel}: treatment history</h4>${(TH[toothSel]||[]).length?TH[toothSel].map(h=>`<button class="kv kvb" data-bopen="${esc(h.id)}"><span>${esc(fmtDate(h.d))} · ${esc(h.t)}</span><small>${esc(h.no||"")}</small></button>`).join(""):`<p class="muted small" style="margin:0">No treatment billed on this tooth yet.</p>`}</div>`:(shT&&Object.keys(TH).length?`<div class="txsum"><span class="muted">Treated:</span>${Object.keys(TH).map(Number).sort((a,b)=>a-b).map(n=>`<span><b>${n}</b> ${esc([...new Set(TH[n].map(h=>h.t))].join(", "))}</span>`).join("")}</div>`:"")}
     </div>
     <div data-sec="treat">${propCard(p)}${planCard(p)}</div><div data-sec="xray">${xrCard(p)}${rxCard(p)}</div></div>
     <div class="side">
@@ -2581,6 +2581,7 @@ function xrCard(p){const xs=p.xrays||[];
   ${xs.length?`<div class="xrgrid">${xs.map(x=>`<div class="xrt" role="button" tabindex="0" data-xopen="${esc(x.id)}" aria-label="${esc(x.type)} ${esc(fmtDate(x.date))}">${x.pdf?`<div class="xri">PDF</div>`:`<img data-xthumb="${esc(x.fileId)}" alt="">`}<div class="xrc"><b>${esc(x.type)}</b>${x.teeth?esc(x.teeth)+" · ":""}${esc(fmtDate(x.date))}</div><button type="button" class="xrx" data-xdel="${esc(x.id)}" aria-label="Delete">×</button></div>`).join("")}</div>
   ${xrDel?`<div class="xrconf"><span>Delete this ${esc((xs.find(x=>x.id===xrDel)||{}).type||"X-ray")}?</span><span style="display:flex;gap:8px"><button type="button" class="btn small" data-xno>Keep</button><button type="button" class="btn small danger" data-xyes>Delete</button></span></div>`:""}`
   :`<p class="muted" style="margin:0">No X-rays yet. Add OPGs, periapicals and photos to keep them with the patient's file.</p>`}</div>`}
+const chShowT=()=>{try{return localStorage.getItem("ds-chshow")!=="0"}catch(e){return true}};
 let rxDel=null;
 function rxCard(p){const xs=p.rx||[];
   return `<div class="card" style="margin-top:12px"><div class="dh"><h3>💊 Prescriptions</h3><button class="btn small" data-rxadd>+ Add prescription</button></div>
@@ -2754,6 +2755,7 @@ $("patRows").addEventListener("click",e=>{const d=e.target.closest("[data-pdelp]
 $("patDetail").addEventListener("click",e=>{
   const t=e.target;
   if(t.closest("[data-back]")){propOpen=false;selPat=null;toothSel=null;render();return}
+  if(t.closest("[data-chtog]")){try{localStorage.setItem("ds-chshow",chShowT()?"0":"1")}catch(x){}render();return}
   if(t.closest("[data-pedit]"))return openPat(selPat);
   if(t.closest("[data-pbook]"))return openAp(null,{patientId:selPat});
   if(t.closest("[data-plab]"))return openLC(null,{patientId:selPat});
@@ -5332,7 +5334,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v97";let updShown=false;
+const APP_BUILD="ds-v98";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
