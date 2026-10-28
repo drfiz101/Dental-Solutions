@@ -671,6 +671,10 @@ body.no-lab_edit select[data-lcst],body.no-inv_count .stepper,body.no-appt_edit 
 .dhw{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}.dhw h4{margin:0 0 4px}.dhr{border-top:1px solid var(--line);padding:10px 0;display:grid;gap:8px}.dhh{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}.dhh label{display:flex;gap:6px;align-items:center}
 .dhd{display:flex;flex-wrap:wrap;gap:6px}.dday{position:relative}.dday input{position:absolute;opacity:0}.dday span{display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:999px;font-size:13px;cursor:pointer}.dday input:checked+span{background:var(--c-pri,#0F5257);border-color:transparent;color:#fff}.dday input:focus-visible+span{outline:2px solid #0F5257}
 .dht{display:flex;gap:12px;flex-wrap:wrap}.dht label{display:flex;gap:6px;align-items:center;font-size:13px}.dht input{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font:inherit}
+.xrc .rxn{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rxhead,.rxrow{display:grid;grid-template-columns:2.2fr .8fr 1.4fr .6fr 28px;gap:6px;align-items:center}.rxhead{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:8px 0 4px}.rxrow{padding:6px 0;border-bottom:1px dashed var(--line)}.rxrow input,.rxrow select{min-width:0;padding:8px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:14px;background:var(--bg);color:var(--ink)}.rxrow .rx-i{grid-column:1/-1}
+@media(max-width:560px){.rxhead{display:none}.rxrow{grid-template-columns:.9fr 1.4fr 70px 28px}.rxrow .rx-m{grid-column:1/4;grid-row:1}.rxrow .ldel{grid-column:4;grid-row:1}.rxrow .rx-d{grid-column:1;grid-row:2}.rxrow .rx-f{grid-column:2;grid-row:2}.rxrow .rx-n{grid-column:3/5;grid-row:2}.rxrow .rx-i{grid-row:3}}
+#rx-mode{margin:4px 0 8px}.xri.rxw{font:700 34px/1 Georgia,serif;color:#0F4F45;background:#E3F2EE;display:grid;place-items:center;align-content:center}.xri.rxw small{font:600 11px/1.2 system-ui;color:#5b6b67}
+.rxvl{display:grid;gap:8px;margin:6px 0 10px}.rxvl div{background:var(--bg);border-radius:10px;padding:8px 12px}.rxvl b{display:block}.rxvl span{font-size:13px;color:var(--muted)}
 .stq{flex-wrap:wrap}
 body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
@@ -1574,6 +1578,23 @@ input[type=date]{min-width:0;max-width:100%}
   <p class="perr" id="xr-err" hidden></p>
   <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
+<dialog id="rxdlg"><form class="dlg" id="rxForm" novalidate>
+  <h2>💊 Add prescription</h2>
+  <div class="grid2">
+    <div class="field"><label for="rx-date">Date</label><input id="rx-date" type="date"></div>
+    <div class="field"><label for="rx-by">Prescribed by</label><select id="rx-by"></select></div>
+  </div>
+  <div class="seg" id="rx-mode" role="group" aria-label="How to add"><button type="button" data-rxm="write" aria-pressed="true">✍️ Write medicines</button><button type="button" data-rxm="photo" aria-pressed="false">📷 Photo / PDF</button></div>
+  <div id="rx-w"><div class="rxhead"><span>Medicine</span><span>Dose</span><span>How often</span><span>Days</span><span></span></div><div id="rx-meds"></div><button type="button" class="btn small" id="rx-addm" style="align-self:flex-start">+ Add medicine</button>
+   <datalist id="rx-list"></datalist></div>
+  <div class="field" id="rx-fw" hidden><label for="rx-file">Photo of the prescription or PDF (you can pick several pages)</label><input id="rx-file" type="file" accept="image/*,application/pdf" multiple>
+   <button type="button" class="btn small" id="rx-ocr" style="margin-top:8px;align-self:flex-start">🔍 Read medicines from the photo</button><span class="muted small" id="rx-ocrst"></span></div>
+  <div class="field"><label for="rx-note" id="rx-notel">Advice / note (optional)</label><input id="rx-note" maxlength="300" placeholder="e.g. Warm saline rinses, soft diet for 2 days"></div>
+  <p class="perr" id="rx-err" hidden></p>
+  <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
+</form></dialog>
+<dialog id="rxvdlg"><div class="dlg"><h2 id="rxv-t">℞ Prescription</h2><div id="rxv-body"></div>
+  <div class="actions"><span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="rxv-print">Print</button><button type="button" class="btn" id="rxv-pdf">Download PDF</button><button type="button" class="wa" id="rxv-wa"><span>Send on WhatsApp</span></button></span><button type="button" class="btn primary" data-close>Done</button></div></div></dialog>
 <dialog id="tpdlg"><form class="dlg" id="tpForm" novalidate>
   <h2 id="tpT">Add to treatment plan</h2>
   <div class="line-lab tpline" data-for="Treatment plan">
@@ -2513,7 +2534,7 @@ function renderPatDetail(id){setTimeout(loadXThumbs,0);
       <div class="tpal">${toothSel?`<b>Tooth ${toothSel}:</b>`+Object.entries(TOOTH_ST).map(([k,v])=>`<button type="button" class="tbtn tpb${teeth[toothSel]===k?" on":""}" data-tst="${k}">${toothPic(toothSel,k,"tsm")}${v}</button>`).join("")+`<button type="button" class="tbtn" data-tst="">Healthy</button><button type="button" class="tbtn plan" data-tpadd="${toothSel}">+ Plan treatment</button>`:Object.entries(TOOTH_ST).map(([k,v])=>`<span class="tleg tpb">${toothPic(16,k,"tsm")}${v}</span>`).join("")+`<span class="tleg hxl">● Treated (has bill)</span><span class="tleg pll">▁ Planned</span>`}</div>
       ${toothSel?`<div class="thist"><h4>Tooth ${toothSel}: treatment history</h4>${(TH[toothSel]||[]).length?TH[toothSel].map(h=>`<button class="kv kvb" data-bopen="${esc(h.id)}"><span>${esc(fmtDate(h.d))} · ${esc(h.t)}</span><small>${esc(h.no||"")}</small></button>`).join(""):`<p class="muted small" style="margin:0">No treatment billed on this tooth yet.</p>`}</div>`:(Object.keys(TH).length?`<div class="txsum"><span class="muted">Treated:</span>${Object.keys(TH).map(Number).sort((a,b)=>a-b).map(n=>`<span><b>${n}</b> ${esc([...new Set(TH[n].map(h=>h.t))].join(", "))}</span>`).join("")}</div>`:"")}
     </div>
-    <div data-sec="treat">${propCard(p)}${planCard(p)}</div><div data-sec="xray">${xrCard(p)}</div></div>
+    <div data-sec="treat">${propCard(p)}${planCard(p)}</div><div data-sec="xray">${xrCard(p)}${rxCard(p)}</div></div>
     <div class="side">
       <div class="card" data-sec="treat"><div class="dh"><h3>Account</h3><button class="btn small" data-pstmt>Statement PDF</button></div><div class="kv"><span>Total paid</span><b>${rs(paid)}</b></div><div class="kv"><span>Balance due</span><b class="${bal>0?"due":""}">${rs(bal)}</b></div>${bal>0&&waNum(p.phone)?`<a class="wa sm" style="margin-top:8px" href="${esc(waHref(p.phone,fillT(S().templates.due,{...billVars({patientName:p.name}),balance:rs(bal)})))}" target="_blank" rel="noopener">${WA_IC}<span>Send balance reminder</span></a>`:""}${waNum(p.phone)?`<a class="wa sm" style="margin-top:8px" href="${esc(waHref(p.phone,fillT(S().templates.recall,billVars({patientName:p.name}))))}" target="_blank" rel="noopener">${WA_IC}<span>Send recall (check-up due)</span></a>`:""}</div>
       <div class="card" data-sec="visits"><h3>Appointments</h3>${aps.length?aps.slice(0,8).map(a=>{const s=AST[a.status||"booked"]||AST.booked;return `<button class="kv kvb" data-apopen="${esc(a.id)}"><span>${esc(fmtDate(a.date))}, ${esc(fmtTime(a.time))}<small>${esc(apTr(a))} · Chair ${esc(a.chair)}</small></span><span class="chip2 ${s[1]}">${s[0]}</span></button>`}).join(""):`<p class="muted" style="margin:0">No appointments yet.</p>`}</div>
@@ -2536,6 +2557,92 @@ function xrCard(p){const xs=p.xrays||[];
   ${xs.length?`<div class="xrgrid">${xs.map(x=>`<div class="xrt" role="button" tabindex="0" data-xopen="${esc(x.id)}" aria-label="${esc(x.type)} ${esc(fmtDate(x.date))}">${x.pdf?`<div class="xri">PDF</div>`:`<img data-xthumb="${esc(x.fileId)}" alt="">`}<div class="xrc"><b>${esc(x.type)}</b>${x.teeth?esc(x.teeth)+" · ":""}${esc(fmtDate(x.date))}</div><button type="button" class="xrx" data-xdel="${esc(x.id)}" aria-label="Delete">×</button></div>`).join("")}</div>
   ${xrDel?`<div class="xrconf"><span>Delete this ${esc((xs.find(x=>x.id===xrDel)||{}).type||"X-ray")}?</span><span style="display:flex;gap:8px"><button type="button" class="btn small" data-xno>Keep</button><button type="button" class="btn small danger" data-xyes>Delete</button></span></div>`:""}`
   :`<p class="muted" style="margin:0">No X-rays yet. Add OPGs, periapicals and photos to keep them with the patient's file.</p>`}</div>`}
+let rxDel=null;
+function rxCard(p){const xs=p.rx||[];
+  return `<div class="card" style="margin-top:12px"><div class="dh"><h3>💊 Prescriptions</h3><button class="btn small" data-rxadd>+ Add prescription</button></div>
+  ${xs.length?`<div class="xrgrid">${xs.map(x=>`<div class="xrt" role="button" tabindex="0" data-rxopen="${esc(x.id)}" aria-label="Prescription ${esc(fmtDate(x.date))}">${x.meds?`<div class="xri rxw">℞<small>${x.meds.length} med${x.meds.length>1?"s":""}</small></div>`:x.pdf?`<div class="xri">PDF</div>`:`<img data-xthumb="${esc(x.fileId)}" alt="">`}<div class="xrc"><b>${esc(fmtDate(x.date))}</b>${x.by?esc(x.by):""}${x.meds?`<span class="rxn">${esc(x.meds.map(m=>m.m).join(", "))}</span>`:x.note?`<span class="rxn">${esc(x.note)}</span>`:""}</div><button type="button" class="xrx" data-rxdel="${esc(x.id)}" aria-label="Delete">×</button></div>`).join("")}</div>
+  ${rxDel?`<div class="xrconf"><span>Delete the prescription of ${esc(fmtDate((xs.find(x=>x.id===rxDel)||{}).date||""))}?</span><span style="display:flex;gap:8px"><button type="button" class="btn small" data-rxno>Keep</button><button type="button" class="btn small danger" data-rxyes>Delete</button></span></div>`:""}`
+  :`<p class="muted" style="margin:0">No prescriptions yet. Take a photo of the prescription or upload a PDF to keep it in the patient's history.</p>`}</div>`}
+const RX_DB=[
+["Antibiotics","Augmentin 625 mg tab (co-amoxiclav)","1 tab","TDS",5,"After meals"],["Antibiotics","Augmentin 1 g tab (co-amoxiclav)","1 tab","BD",5,"After meals"],["Antibiotics","Amoxil 500 mg cap (amoxicillin)","1 cap","TDS",5,""],["Antibiotics","Velosef 500 mg cap (cephradine)","1 cap","TDS",5,""],
+["Antibiotics","Flagyl 400 mg tab (metronidazole)","1 tab","TDS",5,"After meals · no alcohol"],["Antibiotics","Klaricid 500 mg tab (clarithromycin)","1 tab","BD",5,""],["Antibiotics","Azomax 500 mg tab (azithromycin)","1 tab","OD",3,"1 hour before food"],["Antibiotics","Zetro 500 mg tab (azithromycin)","1 tab","OD",3,"1 hour before food"],
+["Antibiotics","Dalacin C 300 mg cap (clindamycin)","1 cap","TDS",5,"With a full glass of water"],["Antibiotics","Vibramycin 100 mg cap (doxycycline)","1 cap","OD",7,"After meals · not with milk"],
+["Painkillers","Brufen 400 mg tab (ibuprofen)","1 tab","TDS",3,"After meals"],["Painkillers","Brufen 600 mg tab (ibuprofen)","1 tab","TDS",3,"After meals"],["Painkillers","Ponstan 500 mg tab (mefenamic acid)","1 tab","TDS",3,"After meals"],["Painkillers","Panadol 500 mg tab (paracetamol)","2 tabs","TDS",3,""],["Painkillers","Panadol Extra tab (paracetamol + caffeine)","1 tab","TDS",3,""],
+["Painkillers","Caflam 50 mg tab (diclofenac potassium)","1 tab","BD",3,"After meals"],["Painkillers","Voltral 50 mg tab (diclofenac sodium)","1 tab","BD",3,"After meals"],["Painkillers","Synflex 550 mg tab (naproxen)","1 tab","BD",3,"After meals"],["Painkillers","Toradol 10 mg tab (ketorolac)","1 tab","TDS",2,"After meals · max 5 days"],["Painkillers","Nuberol Forte tab (paracetamol + orphenadrine)","1 tab","BD",3,"Jaw / muscle pain"],["Painkillers","Tramal 50 mg cap (tramadol)","1 cap","SOS",3,"Only for severe pain"],
+["Stomach","Risek 20 mg cap (omeprazole)","1 cap","OD",5,"Before breakfast"],["Stomach","Nexum 40 mg tab (esomeprazole)","1 tab","OD",5,"Before breakfast"],
+["Antifungal / antiviral","Daktarin oral gel (miconazole)","Apply","QID",7,"After meals · keep in mouth"],["Antifungal / antiviral","Mycostatin oral drops (nystatin)","1 ml","QID",7,"Swish then swallow"],["Antifungal / antiviral","Diflucan 150 mg cap (fluconazole)","1 cap","Stat",1,""],["Antifungal / antiviral","Zovirax 400 mg tab (acyclovir)","1 tab","5X",5,""],["Antifungal / antiviral","Zovirax cream (acyclovir)","Apply","5X",5,"On lip sores"],
+["Gels & pastes","Kenacort-A in Orabase (triamcinolone paste)","Apply","TDS",5,"After meals & at bedtime"],["Gels & pastes","Benzocaine oral gel (e.g. Orajel)","Apply","SOS",3,"On the sore area"],["Gels & pastes","Choline salicylate gel (e.g. Bonjela)","Apply","TDS",5,"On ulcers"],["Gels & pastes","Fluoride gel 1.23% (APF)","Apply","OD",30,"At night · don't eat 30 min"],
+["Mouthwashes","Chlorhexidine 0.2% mouthwash (e.g. Hexidine)","10 ml","BD",7,"Rinse 30 sec · don't swallow · 30 min after brushing"],["Mouthwashes","Listerine mouthwash","20 ml","BD",14,"Rinse 30 sec"],["Mouthwashes","Colgate Plax mouthwash","15 ml","BD",14,"Rinse 30 sec"],["Mouthwashes","Betadine gargle (povidone-iodine)","10 ml","TDS",5,"Gargle · don't swallow"],["Mouthwashes","Warm salt water rinses","1 glass","QID",5,"Start 24 hours after extraction"],["Mouthwashes","Fluoride mouthwash 0.05%","10 ml","OD",30,"At night"],
+["Toothpastes","Sensodyne Repair & Protect toothpaste","Brush","BD",30,"Don't rinse right after"],["Toothpastes","Sensodyne Rapid Relief toothpaste","Brush","BD",30,"Can also rub on sensitive teeth"],["Toothpastes","Colgate Sensitive Pro-Relief toothpaste","Brush","BD",30,""],["Toothpastes","Parodontax toothpaste","Brush","BD",30,"For bleeding gums"],["Toothpastes","Colgate Total toothpaste","Brush","BD",30,""],["Toothpastes","Kids fluoride toothpaste (e.g. Colgate Kids)","Pea-size","BD",30,"Under 3: rice-grain size"],
+["Kids","Calpol syrup 120 mg/5 ml (paracetamol)","As per weight","TDS",3,""],["Kids","Brufen syrup 100 mg/5 ml (ibuprofen)","As per weight","TDS",3,"After meals"],["Kids","Augmentin syrup (co-amoxiclav)","As per weight","BD",5,""],["Kids","Amoxil syrup 250 mg/5 ml (amoxicillin)","As per weight","TDS",5,""],["Kids","Flagyl suspension 200 mg/5 ml (metronidazole)","As per weight","TDS",5,"After meals"],
+["Vitamins & others","Surbex Z tab (vitamin B, C + zinc)","1 tab","OD",30,"After meals"],["Vitamins & others","Neurobion tab (vitamin B1, B6, B12)","1 tab","OD",30,"For numbness"],["Vitamins & others","Softin 10 mg tab (loratadine)","1 tab","OD",5,"For allergy / swelling"]];
+const RX_MEDS=RX_DB.map(x=>x[1]);
+const RX_FREQ=[["OD","Once a day"],["BD","2 times a day"],["TDS","3 times a day"],["QID","4 times a day"],["5X","5 times a day"],["SOS","When needed (pain)"],["HS","At bedtime"],["Stat","Once only"]];
+function rxFind(name){const n=String(name||"").toLowerCase().trim();if(!n)return null;return RX_DB.find(x=>x[1].toLowerCase()===n)||null}
+function rxOcrParse(text){const out=[],brands=RX_DB.flatMap(x=>{const l=x[1].toLowerCase(),ks=[l.split(/[^a-z]+/).filter(w=>w.length>=4)[0]],eg=l.match(/e\.g\. ([a-z]+)/),gn=l.match(/\(([a-z]+)/);if(eg)ks.push(eg[1]);if(gn&&gn[1].length>=6&&!/^e$/.test(gn[1]))ks.push(gn[1]);return ks.filter(Boolean).map(k=>({x,k}))}),norm=w=>w.toLowerCase().replace(/[^a-z]/g,"");
+  for(const raw of String(text).split(/\n+/)){const line=raw.trim();if(line.length<3)continue;const ws=line.split(/\s+/).map(norm).filter(w=>w.length>=4);let hit=null;
+    for(const b of brands){if(!b.k)continue;if(ws.some(w=>w===b.k||(w.length>=5&&lev1(w,b.k)))){const str=(line.match(/(\d{2,4})\s*mg/i)||[])[1];hit=(str&&RX_DB.find(x=>x[1].toLowerCase().startsWith(b.k)&&x[1].includes(str+" mg")))||b.x;break}}
+    const L=line.toLowerCase();let f=/\b(tds|tid|t\.d\.s|thrice|1\s*\+\s*1\s*\+\s*1|3\s*times)\b/.test(L)?"TDS":/\b(bd|bid|b\.d|twice|1\s*\+\s*0\s*\+\s*1|2\s*times)\b/.test(L)?"BD":/\b(qid|q\.i\.d|4\s*times)\b/.test(L)?"QID":/\b(od|once|0\s*\+\s*0\s*\+\s*1|1\s*\+\s*0\s*\+\s*0)\b/.test(L)?"OD":/\b(sos|prn)\b/.test(L)?"SOS":/\bhs\b/.test(L)?"HS":"";
+    const dm=L.match(/(?:x|for)?\s*(\d{1,2})\s*(?:days?|d\b|\/7)/),n=dm?dm[1]:"";
+    if(hit)out.push({m:hit[1],d:hit[2],f:f||hit[3],n:n||String(hit[4]),i:hit[5]});
+    else if(/\b(tab|cap|syp|syrup|susp|gel|mouth ?wash|paste|cream|drops|inj)\b|\d+\s*mg/i.test(line)&&/[a-z]{3,}/i.test(line))out.push({m:line.replace(/\s+/g," ").slice(0,60),d:"1",f:f||"TDS",n,i:""})}
+  return out}
+let rxMode="write";
+function rxRow(m){m=m||{};return `<div class="rxrow"><input class="rx-m" list="rx-list" placeholder="e.g. Augmentin 625 mg tab" value="${esc(m.m||"")}" aria-label="Medicine"><input class="rx-d" placeholder="1 tab" value="${esc(m.d||"1 tab")}" aria-label="Dose"><select class="rx-f" aria-label="How often">${RX_FREQ.map(([k,l])=>`<option value="${k}"${(m.f||"TDS")===k?" selected":""}>${l}</option>`).join("")}</select><input class="rx-n" type="number" min="1" inputmode="numeric" placeholder="days" value="${esc(m.n||"")}" aria-label="Days"><button type="button" class="ldel" data-rxrm aria-label="Remove">×</button><input class="rx-i" placeholder="After meals" value="${esc(m.i||"After meals")}" aria-label="Instructions"></div>`}
+function rxSetMode(m){rxMode=m;for(const b of document.querySelectorAll("[data-rxm]"))b.setAttribute("aria-pressed",String(b.dataset.rxm===m));$("rx-w").hidden=m!=="write";$("rx-fw").hidden=m!=="photo";$("rx-notel").textContent=m==="write"?"Advice / note (optional)":"Medicines / note (optional)"}
+$("rx-mode").addEventListener("click",e=>{const b=e.target.closest("[data-rxm]");if(b)rxSetMode(b.dataset.rxm)});
+$("rx-addm").addEventListener("click",()=>{$("rx-meds").insertAdjacentHTML("beforeend",rxRow());const r=$("rx-meds").lastElementChild;r.querySelector(".rx-m").focus()});
+$("rx-meds").addEventListener("change",e=>{const m=e.target.closest(".rx-m");if(!m)return;const x=rxFind(m.value);if(!x)return;const r=m.closest(".rxrow");r.querySelector(".rx-d").value=x[2];r.querySelector(".rx-f").value=x[3];r.querySelector(".rx-n").value=x[4];r.querySelector(".rx-i").value=x[5]});
+$("rx-ocr").addEventListener("click",async()=>{const fs=[...($("rx-file").files||[])].filter(f=>!isPdfFile(f)).slice(0,3),st=$("rx-ocrst");if(!fs.length){st.textContent=" Choose a photo first.";return}
+  const b=$("rx-ocr");b.disabled=true;st.textContent=" Reading… (first time takes up to a minute)";ocrProg=m=>{if(m&&m.status==="recognizing text")st.textContent=` Reading… ${Math.round((m.progress||0)*100)}%`};
+  try{const txt=await ocrImages(fs),meds=rxOcrParse(txt);ocrProg=null;b.disabled=false;
+    if(!meds.length){st.textContent=" Couldn't recognise any medicines. Type them in ✍️ Write medicines (the photo will still be saved).";rxSetMode("write");$("rx-fw").hidden=false;return}
+    $("rx-meds").innerHTML=meds.map(rxRow).join("");rxSetMode("write");$("rx-fw").hidden=false;st.textContent=` Found ${pl(meds.length,"medicine")} — please check them before saving.`}
+  catch(e){ocrProg=null;b.disabled=false;st.textContent=" Couldn't read the photo here. Type the medicines instead."}});
+$("rx-meds").addEventListener("click",e=>{const x=e.target.closest("[data-rxrm]");if(x){x.closest(".rxrow").remove();if(!$("rx-meds").children.length)$("rx-meds").innerHTML=rxRow()}});
+function rxText(x){return (x.meds||[]).map((m,i)=>`${i+1}. ${m.m} — ${m.d||""} ${(RX_FREQ.find(f=>f[0]===m.f)||[0,m.f])[1].toLowerCase()}${m.n?" × "+m.n+" days":""}${m.i?" ("+m.i+")":""}`).join("\n")}
+function openRx(){rxSetMode("write");$("rx-list").innerHTML=RX_DB.map(x=>`<option value="${esc(x[1])}" label="${esc(x[0])}">`).join("")+rxUsed().filter(m=>!rxFind(m)).map(m=>`<option value="${esc(m)}" label="Added by you">`).join("");$("rx-ocrst").textContent="";$("rx-meds").innerHTML=rxRow();$("rx-date").value=ymd(new Date());$("rx-by").innerHTML=`<option value="">—</option>`+dentists().map(d=>`<option${d.name===myName?" selected":""}>${esc(d.name)}</option>`).join("");for(const k of ["rx-note","rx-file"])$(k).value="";$("rx-err").hidden=true;openD($("rxdlg"))}
+function rxUsed(){const s=new Set();for(const p of Object.values(P))for(const x of p.rx||[])for(const m of x.meds||[])if(m.m)s.add(m.m);return [...s]}
+$("rxForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("rx-err"),fs=[...($("rx-file").files||[])].slice(0,8);
+  if(rxMode==="write"){const meds=[...document.querySelectorAll("#rx-meds .rxrow")].map(r=>({m:r.querySelector(".rx-m").value.trim(),d:r.querySelector(".rx-d").value.trim(),f:r.querySelector(".rx-f").value,n:r.querySelector(".rx-n").value.trim(),i:r.querySelector(".rx-i").value.trim()})).filter(m=>m.m);
+    if(!meds.length){err.textContent="Write at least one medicine.";err.hidden=false;return}const pid=selPat;if(!pid||!P[pid])return;const p=P[pid];
+    let fileId="",pdf=false;if(fs.length){const sb=$("rxForm").querySelector("button[type=submit]");sb.disabled=true;sb.textContent="Uploading photo…";try{const f=fs[0];pdf=isPdfFile(f);fileId=await saveFileDoc(pdf?f:await compressXray(f),(p.name+" prescription "+($("rx-date").value||"")).replace(/[^\w\- ]+/g,"").trim()+(pdf?".pdf":".jpg"))}catch(ex){}sb.disabled=false;sb.textContent="Save"}
+    const x={...me,id:nid("rx"),meds,date:$("rx-date").value||ymd(new Date()),by:$("rx-by").value,note:$("rx-note").value.trim(),...(fileId?{fileId,pdf}:{})};cset("patients",pid,{...p,rx:[x,...(p.rx||[])]});$("rxdlg").close();toast("Prescription saved");setTimeout(()=>rxView(pid,x.id),200);return}
+  if(!fs.length){err.textContent="Take a photo of the prescription or choose a PDF.";err.hidden=false;return}
+  const pid=selPat;if(!pid||!P[pid])return;const sb=$("rxForm").querySelector("button[type=submit]");sb.disabled=true;const add=[];
+  try{for(let i=0;i<fs.length;i++){sb.textContent=`Uploading ${i+1} of ${fs.length}…`;const f=fs[i],pdf=isPdfFile(f);
+      const blob=pdf?f:await compressXray(f);const fileId=await saveFileDoc(blob,(P[pid].name+" prescription "+($("rx-date").value||"")).replace(/[^\w\- ]+/g,"").trim()+(pdf?".pdf":".jpg"));
+      add.push({...me,id:nid("rx"),fileId,pdf,date:$("rx-date").value||ymd(new Date()),by:$("rx-by").value,note:$("rx-note").value.trim()})}}
+  catch(ex){err.textContent=ex&&ex.code==="big"?"That file is over 8 MB. Use a smaller one.":"Couldn't upload. Check your connection and try again.";err.hidden=false;sb.disabled=false;sb.textContent="Save";return}
+  sb.disabled=false;sb.textContent="Save";const p=P[pid];cset("patients",pid,{...p,rx:[...add,...(p.rx||[])]});$("rxdlg").close();toast(add.length>1?pl(add.length,"prescription page")+" saved":"Prescription saved")});
+function rxInner(pid,x){const p=P[pid]||{},c=S().clinic,logo=(document.querySelector(".head-logo img")||{}).src||"",dm=dentists().find(d=>d.name===x.by);
+  return `<div class="inv rxp"><style>${INV_CSS}
+.rxp .rxb{margin:18px 36px 0;display:grid;grid-template-columns:70px 1fr;gap:10px}.rxp .rxs{font:700 54px/1 Georgia,serif;color:#0F4F45}
+.rxp table.rm{width:100%;border-collapse:collapse;margin:0}.rxp .rm th{background:#0F4F45;color:#fff;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;text-align:left;padding:7px 9px}.rxp .rm td{padding:9px;border-bottom:1px solid #e3ebe8;font-size:13px;vertical-align:top}.rxp .rm td b{font-size:14px}.rxp .rm td small{display:block;color:#5b6b67;font-size:11.5px}
+.rxp .adv{margin:16px 36px 0;padding:10px 12px;background:#F3F7F6;border-radius:10px;font-size:13px}.rxp .sgn{margin:46px 36px 0 auto;width:42%;border-top:1px solid #9aa9a5;padding-top:6px;text-align:center;font-size:12px}.rxp .sgn b{display:block;font-size:13px}
+</style><div class="bar"></div>
+<div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}</div></div></div>
+<div class="ttl"><h1>PRESCRIPTION</h1><p>Date: <b>${esc(fmtDate(x.date))}</b></p>${p.fileNo?`<p>File no. <b>${esc(p.fileNo)}</b></p>`:""}</div></div>
+${invDocsHTML()}
+<div class="pt"><div><span>Patient</span><b>${esc(p.name||"")}</b></div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div><div><span>Mobile</span>${esc(p.phone||"—")}</div>${p.alerts?`<div><span>Medical</span>${esc(p.alerts)}</div>`:""}</div>
+<div class="rxb"><div class="rxs">℞</div><table class="rm"><thead><tr><th style="width:24px">#</th><th>Medicine</th><th>Dose</th><th>How often</th><th>Days</th></tr></thead><tbody>${(x.meds||[]).map((m,i)=>`<tr><td>${i+1}</td><td><b>${esc(m.m)}</b>${m.i?`<small>${esc(m.i)}</small>`:""}</td><td>${esc(m.d||"")}</td><td>${esc((RX_FREQ.find(f=>f[0]===m.f)||[0,m.f])[1])}</td><td>${esc(m.n?m.n+" days":"—")}</td></tr>`).join("")}</tbody></table></div>
+${x.note?`<div class="adv"><b>Advice:</b> ${esc(x.note)}</div>`:""}
+<div class="sgn"><b>${esc(x.by||c.doctor||"")}</b>${dm&&dm.title?esc(dm.title):"Dentist"}</div>
+${invContactHTML()}
+<p class="gen">${esc(c.name)} · prescription · ${esc(p.name||"")} · ${esc(fmtDate(x.date))}</p></div>`}
+let rxCur=null;
+function rxView(pid,id){const x=((P[pid]||{}).rx||[]).find(y=>y.id===id);if(!x)return;rxCur={pid,id};const p=P[pid];
+  $("rxv-body").innerHTML=`<div class="rxvl">${x.meds.map((m,i)=>`<div><b>${i+1}. ${esc(m.m)}</b><span>${esc(m.d||"")} · ${esc((RX_FREQ.find(f=>f[0]===m.f)||[0,m.f])[1])}${m.n?" · "+esc(m.n)+" days":""}${m.i?" · "+esc(m.i):""}</span></div>`).join("")}</div>${x.note?`<p class="small"><b>Advice:</b> ${esc(x.note)}</p>`:""}<p class="muted small" style="margin:0">${esc(fmtDate(x.date))}${x.by?" · "+esc(x.by):""}${x.fileId?` · <button type="button" class="linkbtn" id="rxv-ph">📷 See original photo</button>`:""}</p>`;
+  $("rxv-t").textContent="℞ "+(p.name||"")+" · "+fmtDate(x.date);$("rxv-wa").hidden=!waNum(p.phone||"");openD($("rxvdlg"))}
+const rxFile=(p,x)=>`Prescription-${String(p.name||"patient").replace(/[^A-Za-z0-9]+/g,"-")}-${x.date}.pdf`;
+async function rxPdf(send){if(!rxCur)return;const p=P[rxCur.pid],x=(p.rx||[]).find(y=>y.id===rxCur.id);if(!x)return;const b=send?$("rxv-wa"):$("rxv-pdf"),old=b.innerHTML;b.disabled=true;b.textContent="Preparing PDF…";
+  try{const blob=await htmlPdfBlob(rxInner(rxCur.pid,x)),name=rxFile(p,x),msg=`Salam ${p.name||""},\n\nYour prescription from *${S().clinic.name}* (${fmtDate(x.date)}):\n\n${rxText(x)}${x.note?"\n\nAdvice: "+x.note:""}\n\nFor any query call ${S().clinic.phone}.`;
+    if(send&&!window.claude&&navigator.canShare){const file=new File([blob],name,{type:"application/pdf"});if(navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"Prescription",text:msg});return}catch(e){if(e&&e.name==="AbortError")return}}}
+    if(send){window.open(waHref(p.phone,msg),"_blank");return}
+    await propSave(blob,name)}catch(e){toast("Couldn't make the PDF. Check the internet connection and try again.")}finally{b.disabled=false;b.innerHTML=old}}
+$("rxv-pdf").addEventListener("click",()=>rxPdf(false));$("rxv-body").addEventListener("click",e=>{if(e.target.closest("#rxv-ph")&&rxCur){const x=(P[rxCur.pid].rx||[]).find(y=>y.id===rxCur.id);if(x&&x.fileId)showPhoto(x.fileId,"Prescription photo · "+fmtDate(x.date))}});
+$("rxv-wa").insertAdjacentHTML("afterbegin",WA_IC);$("rxv-wa").addEventListener("click",()=>rxPdf(true));
+$("rxv-print").addEventListener("click",()=>{if(!rxCur)return;const x=(P[rxCur.pid].rx||[]).find(y=>y.id===rxCur.id);if(x)printHtml("Prescription",rxInner(rxCur.pid,x))});
 function loadXThumbs(){for(const im of document.querySelectorAll("img[data-xthumb]")){if(im.src)continue;const id=im.dataset.xthumb;if(localPhotos[id]){im.src=localPhotos[id];continue}getPhoto(id).then(d=>{if(d&&!d.startsWith("data:application/pdf"))im.src=d})}}
 function openXr(){$("xr-type").value="OPG";$("xr-date").value=ymd(new Date());for(const k of ["xr-teeth","xr-note","xr-file"])$(k).value="";$("xr-err").hidden=true;openD(xrdlg)}
 $("xrdlg").addEventListener("click",e=>{const pk=e.target.closest("[data-pick]");if(pk)openTeeth(pk.closest(".line-lab"))});
@@ -2580,6 +2687,11 @@ $("patDetail").addEventListener("click",e=>{
   if(t.closest("[data-tpbill]"))return billFromPlan();
   const tbp=t.closest("[data-tpbillpdf]");if(tbp)return planBillAct("pdf",tbp);
   const tbs=t.closest("[data-tpbillsend]");if(tbs)return planBillAct("send",tbs);
+  if(t.closest("[data-rxadd]"))return openRx();
+  const rd=t.closest("[data-rxdel]");if(rd){e.stopPropagation();rxDel=rd.dataset.rxdel;render();return}
+  if(t.closest("[data-rxno]")){rxDel=null;render();return}
+  if(t.closest("[data-rxyes]")){const p=P[selPat],x=(p.rx||[]).find(y=>y.id===rxDel);rxDel=null;cset("patients",selPat,{...p,rx:(p.rx||[]).filter(y=>y!==x)});if(x)delFileDoc(x.fileId);toast("Prescription deleted");return}
+  const ro=t.closest("[data-rxopen]");if(ro){const x=(P[selPat].rx||[]).find(y=>y.id===ro.dataset.rxopen);if(x&&x.meds){rxView(selPat,x.id);return}if(x)showPhoto(x.fileId,P[selPat].name+" · Prescription · "+fmtDate(x.date)+(x.by?" · "+x.by:"")+(x.note?" — "+x.note:""));return}
   const xd=t.closest("[data-xdel]");if(xd){e.stopPropagation();xrDel=xd.dataset.xdel;render();return}
   if(t.closest("[data-xno]")){xrDel=null;render();return}
   if(t.closest("[data-xyes]")){const p=P[selPat],x=(p.xrays||[]).find(y=>y.id===xrDel);xrDel=null;cset("patients",selPat,{...p,xrays:(p.xrays||[]).filter(y=>y!==x)});if(x)delFileDoc(x.fileId);toast("X-ray deleted");return}
@@ -4077,7 +4189,7 @@ function mergePatients(keep,drop){if(!P[keep]||!P[drop]||keep===drop)return;cons
   for(const [id,a] of Object.entries(A))if(a.patientId===drop)cset("appts",id,{...a,patientId:keep,patientName:k.name});
   for(const [id,c] of Object.entries(LC))if(c.patientId===drop)cset("labcases",id,{...c,patientId:keep,patientName:k.name});
   const mp=(x,y)=>x&&x.items&&x.items.length?(y&&y.items&&y.items.length?{...x,items:[...x.items,...y.items]}:x):(y||x);
-  const nk={...d,...k,phone:k.phone||d.phone||"",age:k.age||d.age||"",gender:k.gender||d.gender||"",alerts:[k.alerts,d.alerts].filter(Boolean).join("; "),notes:[...(k.notes||[]),...(d.notes||[])],xrays:[...(k.xrays||[]),...(d.xrays||[])],teeth:{...(d.teeth||{}),...(k.teeth||{})},plan:mp(k.plan,d.plan),proposal:mp(k.proposal,d.proposal),mergedFrom:[...(k.mergedFrom||[]),{name:d.name,fileNo:d.fileNo||"",at:new Date().toISOString()}]};
+  const nk={...d,...k,phone:k.phone||d.phone||"",age:k.age||d.age||"",gender:k.gender||d.gender||"",alerts:[k.alerts,d.alerts].filter(Boolean).join("; "),notes:[...(k.notes||[]),...(d.notes||[])],xrays:[...(k.xrays||[]),...(d.xrays||[])],rx:[...(k.rx||[]),...(d.rx||[])],teeth:{...(d.teeth||{}),...(k.teeth||{})},plan:mp(k.plan,d.plan),proposal:mp(k.proposal,d.proposal),mergedFrom:[...(k.mergedFrom||[]),{name:d.name,fileNo:d.fileNo||"",at:new Date().toISOString()}]};
   for(const x of ["plan","proposal"])if(!nk[x])delete nk[x];cset("patients",keep,nk);cdel("patients",drop);if(selPat===drop)selPat=keep}
 async function hbImport(){const R=(HB||[]).filter(r=>r.on&&!r.done);if(!R.length)return;const b=$("hb-go");b.disabled=true;b.textContent="Importing…";let ne=0,nb=0,np=0,nm=0;
   const idmap={};for(const g of HB_G){if(HBANS[g.key]!=="same")continue;const ps=g.ks.filter(k=>k.startsWith("p:")).map(k=>k.slice(2)).filter(id=>P[id]).sort((a,b)=>String(P[a].fileNo||"").localeCompare(String(P[b].fileNo||""))||String(P[a].createdAt||"").localeCompare(String(P[b].createdAt||"")));
@@ -5109,7 +5221,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v88";let updShown=false;
+const APP_BUILD="ds-v90";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
