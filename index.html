@@ -690,7 +690,7 @@ body.no-lab_edit select[data-lcst],body.no-inv_count .stepper,body.no-appt_edit 
 .tsact{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.tsmore{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}.tsmore summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}.tsmore .tpexp{margin-top:8px}
 .nxq{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:12px 0 4px}.nxq .btn{display:grid;gap:2px;text-align:center;padding:10px 6px}.nxq .btn small{font-weight:400;font-size:11.5px;color:var(--muted)}
 .rxnext{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:4px}.rxnl{font-weight:700;font-size:14px}.rxnq{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
-.stq{flex-wrap:wrap}
+.tst .tsdt{color:var(--muted);font-size:11.5px}.tsrow.done .tsdt{color:#1F6B45}.stq{flex-wrap:wrap}
 body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
 .rpnav{display:flex;align-items:center;gap:8px}.rpnav b{min-width:150px;text-align:center;color:var(--mod)}
@@ -3623,7 +3623,7 @@ async function billPdfBlob(b){
 function planBillInner(pid){const p=P[pid]||{},pl=planOf(p),cl=planCalc(pl),c=S().clinic,logo=(document.querySelector(".head-logo img")||{}).src||"";
   const paid=Math.min(cl.total,planPaid(pl)),bal=Math.max(0,cl.total-paid),today=ymd(new Date());let k=0;
   const bids=[...new Set(pl.items.filter(i=>i.billId&&B[i.billId]).map(i=>i.billId))],pays=bids.flatMap(id=>(B[id].payments||[]).map(x=>({...x,no:B[id].no}))).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
-  const rows=cl.phases.map(g=>g.its.map(it=>{const t=itemPay(it),st=(it.done?"Done":"Pending")+" · "+(t&&t.bal<=0&&t.paid>0?"Paid":t&&t.paid>0?"Part paid":"Not paid");return `<tr><td>${++k}</td><td>${esc(it.tr)}${it.note?`<small style="display:block;color:#5b6b67">${esc(it.note)}</small>`:""}</td><td>${esc(it.tooth||"—")}</td><td class="r">${+it.qty||1}</td><td class="r">${rs(it.price)}</td><td class="r">${rs(itAmt(it))}</td><td class="r" style="font-size:11px;color:#3d4d49">${st}</td></tr>`}).join("")).join("");
+  const rows=[tpOrder(pl)].map(its=>its.map(it=>{const t=itemPay(it),st=(it.done?"Done"+(it.doneOn?" "+fmtDate(it.doneOn).replace(/ \d{4}$/,""):""):"Pending")+" · "+(t&&t.bal<=0&&t.paid>0?"Paid":t&&t.paid>0?"Part paid":"Not paid");return `<tr><td>${++k}</td><td>${esc(it.tr)}${it.note?`<small style="display:block;color:#5b6b67">${esc(it.note)}</small>`:""}</td><td>${esc(it.tooth||"—")}</td><td class="r">${+it.qty||1}</td><td class="r">${rs(it.price)}</td><td class="r">${rs(itAmt(it))}</td><td class="r" style="font-size:11px;color:#3d4d49">${st}</td></tr>`}).join("")).join("");
   return `<div class="inv"><style>${INV_CSS}
 .inv tr.ph td{background:#EEF4FB;color:#123f7a;font-size:12px;padding:6px 10px}
 .inv td.r{white-space:nowrap}.inv td{vertical-align:top}
@@ -3696,10 +3696,11 @@ function planCalc(pl){const pd=pl.phaseDisc||{},phases=[1,2,3,4,5].map(ph=>{cons
 const tpDiscOpen=new Set();
 function tpRow(kind,it,canTick){const t=canTick?itemPay(it):null,full=!!(t&&t.bal<=0&&t.paid>0),part=!!(t&&t.paid>0&&t.bal>0);
     return `<div class="tsrow${it.done?" done":""}"><span class="tsth${it.tooth?"":" no"}">${esc(it.tooth||"—")}</span><span class="tst"><b>${esc(it.tr)}</b>${it.note?`<small>${esc(it.note)}</small>`:""}${(+it.qty||1)>1?`<small>${+it.qty} × ${rs(it.price)}</small>`:""}
-    ${canTick?`<span class="tspills"><label class="tsp dn"><input type="checkbox" data-tpdone="${esc(it.id)}" ${it.done?"checked":""} aria-label="${esc(it.tr)} done"><span>${it.done?"✓ Done":"Done?"}</span></label><label class="tsp pd${part?" part":""}"><input type="checkbox" data-tppaid="${esc(it.id)}" ${full?"checked":""} aria-label="${esc(it.tr)} paid"><span>${full?"✓ Paid":part?"Part paid":"Paid?"}</span></label>${!full?`<button type="button" class="tspay" data-tprecv="${esc(it.id)}">${part?rs(t.bal)+" left · ":""}+ payment</button>`:""}</span>`:""}</span>
+    ${canTick?`<small class="tsdt">${it.done?"✓ Done "+(it.doneOn?esc(fmtDate(it.doneOn)):""):it.addedOn?"Planned "+esc(fmtDate(it.addedOn)):""}</small><span class="tspills"><label class="tsp dn"><input type="checkbox" data-tpdone="${esc(it.id)}" ${it.done?"checked":""} aria-label="${esc(it.tr)} done"><span>${it.done?"✓ Done":"Done?"}</span></label><label class="tsp pd${part?" part":""}"><input type="checkbox" data-tppaid="${esc(it.id)}" ${full?"checked":""} aria-label="${esc(it.tr)} paid"><span>${full?"✓ Paid":part?"Part paid":"Paid?"}</span></label>${!full?`<button type="button" class="tspay" data-tprecv="${esc(it.id)}">${part?rs(t.bal)+" left · ":""}+ payment</button>`:""}</span>`:""}</span>
     <span class="tsa">${rs(itAmt(it))}</span><button type="button" class="tpedit" data-tpedit="${kind}|${esc(it.id)}" aria-label="Edit">✎</button></div>`}
 function phaseBlock(kind,g,canTick){return g.its.map(it=>tpRow(kind,it,canTick)).join("")}
-function tpItems(kind,c,canTick){return c.phases.flatMap(g=>g.its).map(it=>tpRow(kind,it,canTick)).join("")}
+function tpOrder(pl){const its=(pl.items||[]).map((it,i)=>({it,i}));return its.sort((a,b)=>{const ad=!!a.it.done,bd=!!b.it.done;if(ad!==bd)return ad?-1:1;if(ad)return String(a.it.doneOn||"").localeCompare(String(b.it.doneOn||""))||a.i-b.i;return String(a.it.addedOn||"").localeCompare(String(b.it.addedOn||""))||a.i-b.i}).map(x=>x.it)}
+function tpItems(kind,c,canTick){const pl=tpGet(kind);return (kind==="plan"?tpOrder(pl):(pl.items||[])).map(it=>tpRow(kind,it,canTick)).join("")}
 function tpDiscRow(kind,c){const pl=tpGet(kind),open=c.disc||tpDiscOpen.has(kind),ph=c.disc-(c.legacy||0);
   return open?`<div class="tsdisc"><label>Discount (Rs) <input type="number" min="0" inputmode="numeric" data-tpdiscall="${kind}" value="${+pl.discount||""}" placeholder="0"></label>${ph>0?`<small class="muted">+ ${rs(ph)} given earlier</small>`:""}</div>`:`<div class="tsdisc"><button type="button" class="linkbtn" data-tpdiscbtn="${kind}">＋ Add discount</button></div>`}
 function totalsBlock(c,big){return `<div class="tstot"><span>${big}${c.disc?`<small>after ${rs(c.disc)} discount</small>`:""}</span><b>${rs(c.total)}</b></div>`}
@@ -3776,12 +3777,12 @@ $("tpdlg").addEventListener("click",e=>{const pk=e.target.closest("[data-pick]")
 $("th-ok").addEventListener("click",()=>{if(tpdlg.open)setTimeout(()=>{$("tp-th").dispatchEvent(new Event("change"))},0)});
 $("tpForm").addEventListener("submit",e=>{e.preventDefault();const tr=$("tp-tr").value.trim();if(!tr){$("tp-err").textContent="Enter the treatment.";$("tp-err").hidden=false;return}
   const pl=tpGet(tpKind),it={id:tpEdit||nid("tp"),tr,tooth:$("tp-th").value.trim(),qty:Math.max(1,Math.floor(+$("tp-q").value||1)),price:+$("tp-p").value||0,phase:+$("tp-ph").value||2,note:$("tp-n").value.trim()};
-  const old=tpEdit&&pl.items.find(i=>i.id===tpEdit);if(old){for(const k of ["done","doneOn","billNo","billId"])if(old[k]!==undefined)it[k]=old[k]}
+  const old=tpEdit&&pl.items.find(i=>i.id===tpEdit);if(old){for(const k of ["done","doneOn","billNo","billId","addedOn"])if(old[k]!==undefined)it[k]=old[k]}else it.addedOn=ymd(new Date());
   tpSave(tpKind,{...pl,items:old?pl.items.map(i=>i.id===tpEdit?it:i):[...pl.items,it]});tpdlg.close();toast(old?"Updated":tpKind==="plan"?"Added to treatment plan":"Added to proposed plan")});
 $("tp-del").addEventListener("click",()=>{const pl=tpGet(tpKind);tpSave(tpKind,{...pl,items:pl.items.filter(i=>i.id!==tpEdit)});tpdlg.close();toast("Removed")});
 function acceptProposal(){const p=P[selPat],pr=propOf(p),pl=planOf(p),pd={...(pl.phaseDisc||{})};for(const [k,v] of Object.entries(pr.phaseDisc||{}))pd[k]=(+pd[k]||0)+(+v||0);
   const now=new Date().toISOString(),today=ymd(new Date());
-  cset("patients",selPat,{...p,plan:{...pl,items:[...pl.items,...pr.items.map(i=>({...i,id:nid("tp"),done:false}))],phaseDisc:pd,dentist:pl.dentist||pr.dentist||"",createdAt:pl.createdAt||now,updatedAt:now},proposal:{...pr,status:"accepted",acceptedOn:today,updatedAt:now}});
+  cset("patients",selPat,{...p,plan:{...pl,items:[...pl.items,...pr.items.map(i=>({...i,id:nid("tp"),done:false,addedOn:i.addedOn||ymd(new Date())}))],phaseDisc:pd,dentist:pl.dentist||pr.dentist||"",createdAt:pl.createdAt||now,updatedAt:now},proposal:{...pr,status:"accepted",acceptedOn:today,updatedAt:now}});
   toast("Moved to the treatment plan")}
 let bPlanIds=null;
 function billFromPlan(){const p=P[selPat],pl=planOf(p),c=planCalc(pl),its=pl.items.filter(i=>i.done&&!i.billNo);if(!its.length)return;
@@ -5334,7 +5335,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v99";let updShown=false;
+const APP_BUILD="ds-v100";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
