@@ -696,6 +696,10 @@ body.no-lab_edit select[data-lcst],body.no-inv_count .stepper,body.no-appt_edit 
 .tsleg{display:flex;flex-wrap:wrap;gap:6px 12px;margin:10px 0 2px;font-size:11.5px;color:var(--muted)}.tsleg span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .tsleg .st-dp::before{background:#2E7D4F}.tsleg .st-d::before{background:#D98A1E}.tsleg .st-p::before{background:#2F6FC4}.tsleg .st-n::before{background:#C3CFCC}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tsrow.st-dp{background:#173A2A}:root:not([data-theme="light"]) .tsrow.st-d{background:#3D2C12}:root:not([data-theme="light"]) .tsrow.st-p{background:#172C47}}
+.tsleg .tsf{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 10px 4px 8px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}.tsleg .tsf i{font-style:normal;color:var(--muted);font-weight:500;margin-left:2px}
+.tsleg .tsf[aria-pressed="false"]{opacity:.55;text-decoration:line-through}.tsleg .tsf[aria-pressed="false"]::before{opacity:.5}.tshid{margin:6px 0 0;font-size:12.5px;color:var(--muted)}
+.xrt .xre{position:absolute;top:6px;left:6px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#0F4F45;font-size:13px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tsleg .tsf::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .stq{flex-wrap:wrap}
 body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
@@ -1624,7 +1628,7 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
 <dialog id="rxvdlg"><div class="dlg"><h2 id="rxv-t">℞ Prescription</h2><div id="rxv-body"></div>
-  <div class="actions"><span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="rxv-print">Print</button><button type="button" class="btn" id="rxv-pdf">Download PDF</button><button type="button" class="wa" id="rxv-wa"><span>Send on WhatsApp</span></button></span><button type="button" class="btn primary" data-close>Done</button></div></div></dialog>
+  <div class="actions"><span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="rxv-edit">✎ Edit</button><button type="button" class="btn" id="rxv-print">Print</button><button type="button" class="btn" id="rxv-pdf">Download PDF</button><button type="button" class="wa" id="rxv-wa"><span>Send on WhatsApp</span></button></span><button type="button" class="btn primary" data-close>Done</button></div></div></dialog>
 <dialog id="tpdlg"><form class="dlg" id="tpForm" novalidate>
   <h2 id="tpT">Add to treatment plan</h2>
   <div class="line-lab tpline" data-for="Treatment plan">
@@ -2591,7 +2595,7 @@ const chShowT=()=>{try{return localStorage.getItem("ds-chshow")!=="0"}catch(e){r
 let rxDel=null;
 function rxCard(p){const xs=p.rx||[];
   return `<div class="card" style="margin-top:12px"><div class="dh"><h3>💊 Prescriptions</h3><button class="btn small" data-rxadd>+ Add prescription</button></div>
-  ${xs.length?`<div class="xrgrid">${xs.map(x=>`<div class="xrt" role="button" tabindex="0" data-rxopen="${esc(x.id)}" aria-label="Prescription ${esc(fmtDate(x.date))}">${x.meds?`<div class="xri rxw">℞<small>${x.meds.length} med${x.meds.length>1?"s":""}</small></div>`:x.pdf?`<div class="xri">PDF</div>`:`<img data-xthumb="${esc(x.fileId)}" alt="">`}<div class="xrc"><b>${esc(fmtDate(x.date))}</b>${x.tx||x.teeth?`<span class="rxt" title="${esc([x.tx,x.teeth?"tooth "+x.teeth:""].filter(Boolean).join(" · "))}">🦷 ${esc([x.teeth,x.tx].filter(Boolean).join(" · "))}</span>`:""}${x.by?esc(x.by):""}${x.meds?`<span class="rxn">${esc(x.meds.map(m=>m.m).join(", "))}</span>`:x.note?`<span class="rxn">${esc(x.note)}</span>`:""}</div><button type="button" class="xrx" data-rxdel="${esc(x.id)}" aria-label="Delete">×</button></div>`).join("")}</div>
+  ${xs.length?`<div class="xrgrid">${xs.map(x=>`<div class="xrt" role="button" tabindex="0" data-rxopen="${esc(x.id)}" aria-label="Prescription ${esc(fmtDate(x.date))}">${x.meds?`<div class="xri rxw">℞<small>${x.meds.length} med${x.meds.length>1?"s":""}</small></div>`:x.pdf?`<div class="xri">PDF</div>`:`<img data-xthumb="${esc(x.fileId)}" alt="">`}<div class="xrc"><b>${esc(fmtDate(x.date))}</b>${x.tx||x.teeth?`<span class="rxt" title="${esc([x.tx,x.teeth?"tooth "+x.teeth:""].filter(Boolean).join(" · "))}">🦷 ${esc([x.teeth,x.tx].filter(Boolean).join(" · "))}</span>`:""}${x.by?esc(x.by):""}${x.meds?`<span class="rxn">${esc(x.meds.map(m=>m.m).join(", "))}</span>`:x.note?`<span class="rxn">${esc(x.note)}</span>`:""}</div><button type="button" class="xrx" data-rxdel="${esc(x.id)}" aria-label="Delete">×</button><button type="button" class="xre" data-rxedit="${esc(x.id)}" aria-label="Edit">✎</button></div>`).join("")}</div>
   ${rxDel?`<div class="xrconf"><span>Delete the prescription of ${esc(fmtDate((xs.find(x=>x.id===rxDel)||{}).date||""))}?</span><span style="display:flex;gap:8px"><button type="button" class="btn small" data-rxno>Keep</button><button type="button" class="btn small danger" data-rxyes>Delete</button></span></div>`:""}`
   :`<p class="muted" style="margin:0">No prescriptions yet. Take a photo of the prescription or upload a PDF to keep it in the patient's history.</p>`}</div>`}
 const RX_DB=[
@@ -2669,10 +2673,25 @@ $("rx-nd").addEventListener("change",rxNextTimes);$("rx-by").addEventListener("c
 $("rx-nq").addEventListener("click",e=>{const b=e.target.closest("[data-rxnq]");if(!b)return;$("rx-nd").value=nextOpen(addDays(ymd(new Date()),+b.dataset.rxnq));rxNextTimes()});
 function rxBookNext(pid,x){const d=$("rx-nd").value,t=$("rx-nt").value;if(!d||!t)return null;const p=P[pid],dent=x.by||"";let chair=0;for(const ch of [1,2])if(!overlaps(d,ch,t,30,null,dent).length){chair=ch;break}if(!chair)return null;
   const id=nid("a");cset("appts",id,{status:"booked",createdAt:new Date().toISOString(),...me,patientId:pid,patientName:p.name,phone:p.phone||"",date:d,time:t,dur:30,chair:String(chair),dentist:dent,treatment:x.tx?x.tx+" — follow-up":"Follow-up",visit:"",note:"Booked from prescription"});return {date:d,time:t,apId:id,chair}}
-function openRx(){rxSetMode("write");$("rx-nd").value="";$("rx-nh").textContent="";$("rx-nq").innerHTML=[[3,"3 days"],[7,"1 week"],[14,"2 weeks"],[30,"1 month"],[180,"6 months"]].map(([d,l])=>`<button type="button" class="btn small" data-rxnq="${d}">${l}</button>`).join("");{const g=rxTodayTx(selPat,ymd(new Date()));$("rx-tr").value=g.tr;$("rx-teeth").value=g.teeth}try{trOpts()}catch(e){}$("rx-list").innerHTML=RX_DB.map(x=>`<option value="${esc(x[1])}" label="${esc(x[0])}">`).join("")+rxUsed().filter(m=>!rxFind(m)).map(m=>`<option value="${esc(m)}" label="Added by you">`).join("");$("rx-ocrst").textContent="";$("rx-meds").innerHTML=rxRow();$("rx-date").value=ymd(new Date());$("rx-by").innerHTML=`<option value="">—</option>`+dentists().map(d=>`<option${d.name===myName?" selected":""}>${esc(d.name)}</option>`).join("");for(const k of ["rx-note","rx-file"])$(k).value="";$("rx-err").hidden=true;rxNextTimes();openD($("rxdlg"))}
+let rxEdit=null;
+function openRx(editId){rxEdit=null;rxSetMode("write");$("rx-nd").value="";$("rx-nh").textContent="";$("rx-nq").innerHTML=[[3,"3 days"],[7,"1 week"],[14,"2 weeks"],[30,"1 month"],[180,"6 months"]].map(([d,l])=>`<button type="button" class="btn small" data-rxnq="${d}">${l}</button>`).join("");{const g=rxTodayTx(selPat,ymd(new Date()));$("rx-tr").value=g.tr;$("rx-teeth").value=g.teeth}try{trOpts()}catch(e){}$("rx-list").innerHTML=RX_DB.map(x=>`<option value="${esc(x[1])}" label="${esc(x[0])}">`).join("")+rxUsed().filter(m=>!rxFind(m)).map(m=>`<option value="${esc(m)}" label="Added by you">`).join("");$("rx-ocrst").textContent="";$("rx-meds").innerHTML=rxRow();$("rx-date").value=ymd(new Date());$("rx-by").innerHTML=`<option value="">—</option>`+dentists().map(d=>`<option${d.name===myName?" selected":""}>${esc(d.name)}</option>`).join("");for(const k of ["rx-note","rx-file"])$(k).value="";$("rx-err").hidden=true;rxNextTimes();
+  $("rxdlg").querySelector("h2").textContent="💊 Add prescription";
+  const x=editId&&((P[selPat]||{}).rx||[]).find(y=>y.id===editId);
+  if(x){rxEdit=editId;$("rxdlg").querySelector("h2").textContent="✎ Edit prescription";$("rx-date").value=x.date||ymd(new Date());if(x.by&&![...$("rx-by").options].some(o=>o.value===x.by))$("rx-by").insertAdjacentHTML("beforeend",`<option>${esc(x.by)}</option>`);$("rx-by").value=x.by||"";$("rx-tr").value=x.tx||"";$("rx-teeth").value=x.teeth||"";$("rx-note").value=x.note||"";
+    if(x.meds&&x.meds.length){$("rx-meds").innerHTML=x.meds.map(rxRow).join("");rxSetMode("write")}else{rxSetMode("photo")}
+    $("rx-nh").textContent=x.next?`Already booked: ${dayName(x.next.date)} ${fmtDate(x.next.date)}, ${fmtTime(x.next.time)}. Pick a new date only to move it.`:""}
+  openD($("rxdlg"))}
 function rxUsed(){const s=new Set();for(const p of Object.values(P))for(const x of p.rx||[])for(const m of x.meds||[])if(m.m)s.add(m.m);return [...s]}
 $("rx-date").addEventListener("change",()=>{const g=rxTodayTx(selPat,$("rx-date").value);if(g.tr||g.teeth){$("rx-tr").value=g.tr;$("rx-teeth").value=g.teeth}});
 $("rxForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("rx-err"),fs=[...($("rx-file").files||[])].slice(0,8);
+  if(rxEdit){const pid=selPat,p=P[pid],old=((p||{}).rx||[]).find(y=>y.id===rxEdit);if(!old){rxEdit=null;return}
+    const meds=[...document.querySelectorAll("#rx-meds .rxrow")].map(r=>({m:r.querySelector(".rx-m").value.trim(),d:r.querySelector(".rx-d").value.trim(),f:r.querySelector(".rx-f").value,n:r.querySelector(".rx-n").value.trim(),i:r.querySelector(".rx-i").value.trim()})).filter(m=>m.m);
+    if(rxMode==="write"&&!meds.length){err.textContent="Write at least one medicine.";err.hidden=false;return}
+    const nx={...old,date:$("rx-date").value||old.date,by:$("rx-by").value,tx:$("rx-tr").value.trim(),teeth:$("rx-teeth").value.trim(),note:$("rx-note").value.trim(),editedAt:new Date().toISOString()};
+    if(rxMode==="write")nx.meds=meds;
+    if(fs.length){const sb=$("rxForm").querySelector("button[type=submit]");sb.disabled=true;sb.textContent="Uploading…";try{const f=fs[0],pdf=isPdfFile(f);const fid=await saveFileDoc(pdf?f:await compressXray(f),(p.name+" prescription "+nx.date).replace(/[^\w\- ]+/g,"").trim()+(pdf?".pdf":".jpg"));if(old.fileId)delFileDoc(old.fileId);nx.fileId=fid;nx.pdf=pdf}catch(ex){}sb.disabled=false;sb.textContent="Save"}
+    if($("rx-nd").value&&$("rx-nt").value){const nb=rxBookNext(pid,nx);if(!nb){err.textContent="That next-visit time was just taken. Choose another time.";err.hidden=false;rxNextTimes();return}if(old.next&&old.next.apId&&A[old.next.apId])cset("appts",old.next.apId,{...A[old.next.apId],status:"cancelled",note:((A[old.next.apId].note||"")+" · moved from prescription").trim()});nx.next=nb}
+    cset("patients",pid,{...P[pid],rx:(P[pid].rx||[]).map(y=>y.id===rxEdit?nx:y)});const id=rxEdit;rxEdit=null;$("rxdlg").close();toast("Prescription updated");if(nx.meds)setTimeout(()=>rxView(pid,id),200);return}
   if(rxMode==="write"){const meds=[...document.querySelectorAll("#rx-meds .rxrow")].map(r=>({m:r.querySelector(".rx-m").value.trim(),d:r.querySelector(".rx-d").value.trim(),f:r.querySelector(".rx-f").value,n:r.querySelector(".rx-n").value.trim(),i:r.querySelector(".rx-i").value.trim()})).filter(m=>m.m);
     if(!meds.length){err.textContent="Write at least one medicine.";err.hidden=false;return}const pid=selPat;if(!pid||!P[pid])return;const p=P[pid];
     let fileId="",pdf=false;if(fs.length){const sb=$("rxForm").querySelector("button[type=submit]");sb.disabled=true;sb.textContent="Uploading photo…";try{const f=fs[0];pdf=isPdfFile(f);fileId=await saveFileDoc(pdf?f:await compressXray(f),(p.name+" prescription "+($("rx-date").value||"")).replace(/[^\w\- ]+/g,"").trim()+(pdf?".pdf":".jpg"))}catch(ex){}sb.disabled=false;sb.textContent="Save"}
@@ -2738,7 +2757,7 @@ async function rxPdf(send){if(!rxCur)return;const p=P[rxCur.pid],x=(p.rx||[]).fi
     if(send&&!window.claude&&navigator.canShare){const file=new File([blob],name,{type:"application/pdf"});if(navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"Prescription",text:msg});return}catch(e){if(e&&e.name==="AbortError")return}}}
     if(send){window.open(waHref(p.phone,msg),"_blank");return}
     await propSave(blob,name)}catch(e){toast("Couldn't make the PDF. Check the internet connection and try again.")}finally{b.disabled=false;b.innerHTML=old}}
-$("rxv-pdf").addEventListener("click",()=>rxPdf(false));$("rxv-body").addEventListener("click",e=>{if(e.target.closest("#rxv-ph")&&rxCur){const x=(P[rxCur.pid].rx||[]).find(y=>y.id===rxCur.id);if(x&&x.fileId)showPhoto(x.fileId,"Prescription photo · "+fmtDate(x.date))}});
+$("rxv-pdf").addEventListener("click",()=>rxPdf(false));$("rxv-edit").addEventListener("click",()=>{if(!rxCur)return;const id=rxCur.id;$("rxvdlg").close();openRx(id)});$("rxv-body").addEventListener("click",e=>{if(e.target.closest("#rxv-ph")&&rxCur){const x=(P[rxCur.pid].rx||[]).find(y=>y.id===rxCur.id);if(x&&x.fileId)showPhoto(x.fileId,"Prescription photo · "+fmtDate(x.date))}});
 $("rxv-wa").insertAdjacentHTML("afterbegin",WA_IC);$("rxv-wa").addEventListener("click",()=>rxPdf(true));
 $("rxv-print").addEventListener("click",()=>{if(!rxCur)return;const x=(P[rxCur.pid].rx||[]).find(y=>y.id===rxCur.id);if(x)printHtml("Prescription",rxInner(rxCur.pid,x))});
 function loadXThumbs(){for(const im of document.querySelectorAll("img[data-xthumb]")){if(im.src)continue;const id=im.dataset.xthumb;if(localPhotos[id]){im.src=localPhotos[id];continue}getPhoto(id).then(d=>{if(d&&!d.startsWith("data:application/pdf"))im.src=d})}}
@@ -2761,11 +2780,13 @@ $("patRows").addEventListener("click",e=>{const d=e.target.closest("[data-pdelp]
 $("patDetail").addEventListener("click",e=>{
   const t=e.target;
   if(t.closest("[data-back]")){propOpen=false;selPat=null;toothSel=null;render();return}
+  const tf=t.closest("[data-tpf]");if(tf){const H=tpHid(),k=tf.dataset.tpf;H.has(k)?H.delete(k):H.add(k);try{localStorage.setItem("ds-tphide",JSON.stringify([...H]))}catch(x){}render();return}
+  if(t.closest("[data-tpfall]")){try{localStorage.setItem("ds-tphide","[]")}catch(x){}render();return}
   if(t.closest("[data-chtog]")){try{localStorage.setItem("ds-chshow",chShowT()?"0":"1")}catch(x){}render();return}
   if(t.closest("[data-pedit]"))return openPat(selPat);
   if(t.closest("[data-pbook]"))return openAp(null,{patientId:selPat});
   if(t.closest("[data-plab]"))return openLC(null,{patientId:selPat});
-  if(t.closest("[data-prx]"))return openRx();
+  if(t.closest("[data-prx]"))return openRx(null);
   if(t.closest("[data-pbill]"))return openBill(null,{patientId:selPat});
   const th=t.closest("[data-tooth]");if(th){const n=+th.dataset.tooth;toothSel=toothSel===n?null:n;render();return}
   const ts=t.closest("[data-tst]");if(ts&&toothSel){const p=P[selPat],teeth={...(p.teeth||{})};if(ts.dataset.tst)teeth[toothSel]=ts.dataset.tst;else delete teeth[toothSel];toothSel=null;cset("patients",selPat,{...p,teeth});return}
@@ -2789,6 +2810,7 @@ $("patDetail").addEventListener("click",e=>{
   const tbp=t.closest("[data-tpbillpdf]");if(tbp)return planBillAct("pdf",tbp);
   const tbs=t.closest("[data-tpbillsend]");if(tbs)return planBillAct("send",tbs);
   if(t.closest("[data-rxadd]"))return openRx();
+  const re=t.closest("[data-rxedit]");if(re){e.stopPropagation();return openRx(re.dataset.rxedit)}
   const rd=t.closest("[data-rxdel]");if(rd){e.stopPropagation();rxDel=rd.dataset.rxdel;render();return}
   if(t.closest("[data-rxno]")){rxDel=null;render();return}
   if(t.closest("[data-rxyes]")){const p=P[selPat],x=(p.rx||[]).find(y=>y.id===rxDel);rxDel=null;cset("patients",selPat,{...p,rx:(p.rx||[]).filter(y=>y!==x)});if(x)delFileDoc(x.fileId);toast("Prescription deleted");return}
@@ -3706,7 +3728,12 @@ function tpRow(kind,it,canTick){const t=canTick?itemPay(it):null,full=!!(t&&t.ba
     <span class="tsa">${rs(itAmt(it))}</span><button type="button" class="tpedit" data-tpedit="${kind}|${esc(it.id)}" aria-label="Edit">✎</button></div>`}
 function phaseBlock(kind,g,canTick){return g.its.map(it=>tpRow(kind,it,canTick)).join("")}
 function tpOrder(pl){const its=(pl.items||[]).map((it,i)=>({it,i}));return its.sort((a,b)=>{const ad=!!a.it.done,bd=!!b.it.done;if(ad!==bd)return ad?-1:1;if(ad)return String(a.it.doneOn||"").localeCompare(String(b.it.doneOn||""))||a.i-b.i;return String(a.it.addedOn||"").localeCompare(String(b.it.addedOn||""))||a.i-b.i}).map(x=>x.it)}
-function tpItems(kind,c,canTick){const pl=tpGet(kind);return (canTick?`<div class="tsleg"><span class="st-dp">Done &amp; paid</span><span class="st-d">Done · not paid</span><span class="st-p">Paid · not done</span><span class="st-n">Not done · not paid</span></div>`:"")+(kind==="plan"?tpOrder(pl):(pl.items||[])).map(it=>tpRow(kind,it,canTick)).join("")}
+function tpHid(){try{return new Set(JSON.parse(localStorage.getItem("ds-tphide")||"[]"))}catch(e){return new Set()}}
+function tpSt(it){const t=itemPay(it),full=!!(t&&t.bal<=0&&t.paid>0);return it.done&&full?"st-dp":it.done?"st-d":full?"st-p":"st-n"}
+function tpItems(kind,c,canTick){const tpl=tpGet(kind),all=kind==="plan"?tpOrder(tpl):(tpl.items||[]);if(!canTick)return all.map(it=>tpRow(kind,it,canTick)).join("");
+  const H=tpHid(),cnt={};for(const it of all){const k=tpSt(it);cnt[k]=(cnt[k]||0)+1}const vis=all.filter(it=>!H.has(tpSt(it))),nh=all.length-vis.length;
+  return `<div class="tsleg" role="group" aria-label="Show or hide by status">${[["st-dp","Done & paid"],["st-d","Done · not paid"],["st-p","Paid · not done"],["st-n","Not done · not paid"]].map(([k,l])=>`<button type="button" class="tsf ${k}" data-tpf="${k}" aria-pressed="${!H.has(k)}">${H.has(k)?"🙈 ":""}${l} <i>${cnt[k]||0}</i></button>`).join("")}</div>
+  ${nh?`<p class="tshid">${pl(nh,"treatment")} hidden · <button type="button" class="linkbtn" data-tpfall>Show all</button></p>`:""}`+vis.map(it=>tpRow(kind,it,canTick)).join("")}
 function tpDiscRow(kind,c){const pl=tpGet(kind),open=c.disc||tpDiscOpen.has(kind),ph=c.disc-(c.legacy||0);
   return open?`<div class="tsdisc"><label>Discount (Rs) <input type="number" min="0" inputmode="numeric" data-tpdiscall="${kind}" value="${+pl.discount||""}" placeholder="0"></label>${ph>0?`<small class="muted">+ ${rs(ph)} given earlier</small>`:""}</div>`:`<div class="tsdisc"><button type="button" class="linkbtn" data-tpdiscbtn="${kind}">＋ Add discount</button></div>`}
 function totalsBlock(c,big){return `<div class="tstot"><span>${big}${c.disc?`<small>after ${rs(c.disc)} discount</small>`:""}</span><b>${rs(c.total)}</b></div>`}
@@ -5341,7 +5368,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v101";let updShown=false;
+const APP_BUILD="ds-v102";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
