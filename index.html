@@ -690,7 +690,13 @@ body.no-lab_edit select[data-lcst],body.no-inv_count .stepper,body.no-appt_edit 
 .tsact{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.tsmore{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}.tsmore summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}.tsmore .tpexp{margin-top:8px}
 .nxq{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:12px 0 4px}.nxq .btn{display:grid;gap:2px;text-align:center;padding:10px 6px}.nxq .btn small{font-weight:400;font-size:11.5px;color:var(--muted)}
 .rxnext{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:4px}.rxnl{font-weight:700;font-size:14px}.rxnq{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
-.tst .tsdt{color:var(--muted);font-size:11.5px}.tsrow.done .tsdt{color:#1F6B45}.stq{flex-wrap:wrap}
+.tst .tsdt{color:var(--muted);font-size:11.5px}.tsrow.done .tsdt{color:#1F6B45}.tsrow.st-dp,.tsrow.st-d,.tsrow.st-p,.tsrow.st-n{border-radius:12px;border:0;border-left:5px solid;margin:6px 0;padding:10px 8px}
+.tsrow.st-dp{background:#E3F2E8;border-color:#2E7D4F}.tsrow.st-d{background:#FFF1DE;border-color:#D98A1E}.tsrow.st-p{background:#E6EFFB;border-color:#2F6FC4}.tsrow.st-n{background:var(--surface);border-color:#C3CFCC;box-shadow:inset 0 0 0 1px var(--line)}
+.tsrow.st-dp .tst b,.tsrow.st-d .tst b,.tsrow.st-p .tst b{color:var(--ink)}.tsrow.st-d .tsdt{color:#8A5300}.tsrow.st-p .tsdt{color:#1E4E8C}
+.tsleg{display:flex;flex-wrap:wrap;gap:6px 12px;margin:10px 0 2px;font-size:11.5px;color:var(--muted)}.tsleg span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.tsleg .st-dp::before{background:#2E7D4F}.tsleg .st-d::before{background:#D98A1E}.tsleg .st-p::before{background:#2F6FC4}.tsleg .st-n::before{background:#C3CFCC}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tsrow.st-dp{background:#173A2A}:root:not([data-theme="light"]) .tsrow.st-d{background:#3D2C12}:root:not([data-theme="light"]) .tsrow.st-p{background:#172C47}}
+.stq{flex-wrap:wrap}
 body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
 .rpnav{display:flex;align-items:center;gap:8px}.rpnav b{min-width:150px;text-align:center;color:var(--mod)}
@@ -3695,12 +3701,12 @@ function planCalc(pl){const pd=pl.phaseDisc||{},phases=[1,2,3,4,5].map(ph=>{cons
   return {phases,sub,disc,legacy,total,done,left:Math.max(0,total-done),nDone,n:pl.items.length}}
 const tpDiscOpen=new Set();
 function tpRow(kind,it,canTick){const t=canTick?itemPay(it):null,full=!!(t&&t.bal<=0&&t.paid>0),part=!!(t&&t.paid>0&&t.bal>0);
-    return `<div class="tsrow${it.done?" done":""}"><span class="tsth${it.tooth?"":" no"}">${esc(it.tooth||"—")}</span><span class="tst"><b>${esc(it.tr)}</b>${it.note?`<small>${esc(it.note)}</small>`:""}${(+it.qty||1)>1?`<small>${+it.qty} × ${rs(it.price)}</small>`:""}
+    const sc=canTick?(it.done&&full?"st-dp":it.done?"st-d":full?"st-p":"st-n"):"";return `<div class="tsrow${it.done?" done":""} ${sc}"><span class="tsth${it.tooth?"":" no"}">${esc(it.tooth||"—")}</span><span class="tst"><b>${esc(it.tr)}</b>${it.note?`<small>${esc(it.note)}</small>`:""}${(+it.qty||1)>1?`<small>${+it.qty} × ${rs(it.price)}</small>`:""}
     ${canTick?`<small class="tsdt">${it.done?"✓ Done "+(it.doneOn?esc(fmtDate(it.doneOn)):""):it.addedOn?"Planned "+esc(fmtDate(it.addedOn)):""}</small><span class="tspills"><label class="tsp dn"><input type="checkbox" data-tpdone="${esc(it.id)}" ${it.done?"checked":""} aria-label="${esc(it.tr)} done"><span>${it.done?"✓ Done":"Done?"}</span></label><label class="tsp pd${part?" part":""}"><input type="checkbox" data-tppaid="${esc(it.id)}" ${full?"checked":""} aria-label="${esc(it.tr)} paid"><span>${full?"✓ Paid":part?"Part paid":"Paid?"}</span></label>${!full?`<button type="button" class="tspay" data-tprecv="${esc(it.id)}">${part?rs(t.bal)+" left · ":""}+ payment</button>`:""}</span>`:""}</span>
     <span class="tsa">${rs(itAmt(it))}</span><button type="button" class="tpedit" data-tpedit="${kind}|${esc(it.id)}" aria-label="Edit">✎</button></div>`}
 function phaseBlock(kind,g,canTick){return g.its.map(it=>tpRow(kind,it,canTick)).join("")}
 function tpOrder(pl){const its=(pl.items||[]).map((it,i)=>({it,i}));return its.sort((a,b)=>{const ad=!!a.it.done,bd=!!b.it.done;if(ad!==bd)return ad?-1:1;if(ad)return String(a.it.doneOn||"").localeCompare(String(b.it.doneOn||""))||a.i-b.i;return String(a.it.addedOn||"").localeCompare(String(b.it.addedOn||""))||a.i-b.i}).map(x=>x.it)}
-function tpItems(kind,c,canTick){const pl=tpGet(kind);return (kind==="plan"?tpOrder(pl):(pl.items||[])).map(it=>tpRow(kind,it,canTick)).join("")}
+function tpItems(kind,c,canTick){const pl=tpGet(kind);return (canTick?`<div class="tsleg"><span class="st-dp">Done &amp; paid</span><span class="st-d">Done · not paid</span><span class="st-p">Paid · not done</span><span class="st-n">Not done · not paid</span></div>`:"")+(kind==="plan"?tpOrder(pl):(pl.items||[])).map(it=>tpRow(kind,it,canTick)).join("")}
 function tpDiscRow(kind,c){const pl=tpGet(kind),open=c.disc||tpDiscOpen.has(kind),ph=c.disc-(c.legacy||0);
   return open?`<div class="tsdisc"><label>Discount (Rs) <input type="number" min="0" inputmode="numeric" data-tpdiscall="${kind}" value="${+pl.discount||""}" placeholder="0"></label>${ph>0?`<small class="muted">+ ${rs(ph)} given earlier</small>`:""}</div>`:`<div class="tsdisc"><button type="button" class="linkbtn" data-tpdiscbtn="${kind}">＋ Add discount</button></div>`}
 function totalsBlock(c,big){return `<div class="tstot"><span>${big}${c.disc?`<small>after ${rs(c.disc)} discount</small>`:""}</span><b>${rs(c.total)}</b></div>`}
@@ -5335,7 +5341,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v100";let updShown=false;
+const APP_BUILD="ds-v101";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
