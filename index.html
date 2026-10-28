@@ -2647,19 +2647,46 @@ $("rxForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("
       add.push({...me,id:nid("rx"),fileId,pdf,date:$("rx-date").value||ymd(new Date()),by:$("rx-by").value,tx:$("rx-tr").value.trim(),teeth:$("rx-teeth").value.trim(),note:$("rx-note").value.trim()})}}
   catch(ex){err.textContent=ex&&ex.code==="big"?"That file is over 8 MB. Use a smaller one.":"Couldn't upload. Check your connection and try again.";err.hidden=false;sb.disabled=false;sb.textContent="Save";return}
   sb.disabled=false;sb.textContent="Save";const p=P[pid];cset("patients",pid,{...p,rx:[...add,...(p.rx||[])]});$("rxdlg").close();toast(add.length>1?pl(add.length,"prescription page")+" saved":"Prescription saved")});
-function rxInner(pid,x){const p=P[pid]||{},c=S().clinic,logo=(document.querySelector(".head-logo img")||{}).src||"",dm=dentists().find(d=>d.name===x.by);
+function rxTeethMap(t){const ns=String(t||"").split(/[^0-9]+/).map(Number).filter(n=>n>=11&&n<=85&&n%10>=1&&n%10<=8);
+  const on=new Set(ns.map(n=>{const k=Math.floor(n/10);return (k>4?k-4:k)*10+n%10}));
+  const W=[8.6,6.6,7.8,7,6.8,10,9.2,8.4],tot=W.reduce((a,b)=>a+b,0),cx=110,A=68,B=88,SPAN=1.5,K=1.95;
+  const pos=[];let acc=0;for(let i=0;i<8;i++){const mid=(acc+W[i]/2)/tot;acc+=W[i];pos.push(mid*SPAN)}
+  let g="";const tooth=(q,i,upper)=>{const th=pos[i],side=(q===1||q===4)?-1:1,x=cx+side*A*Math.sin(th),y0=upper?24:256,y=upper?y0+B*(1-Math.cos(th)):y0-B*(1-Math.cos(th));
+    const ang=(upper?1:-1)*side*th*180/Math.PI,w=W[i]*K,rx=w*.62,ry=(i<3?w*.42:w*.6),n=q*10+i+1,hit=on.has(n);
+    const ccy=upper?y0+B*.95:y0-B*.95,dx=x-cx,dy=y-ccy,dl=Math.hypot(dx,dy)||1,off=w*.62+8,lx=x+dx/dl*off,ly=y+dy/dl*off;
+    g+=`<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${ang.toFixed(1)})"><ellipse rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="${hit?"#0F4F45":"#fff"}" stroke="${hit?"#0F4F45":"#9fb3ae"}" stroke-width="1.2"/>${i>=3?`<path d="M${(-rx*.45).toFixed(1)} 0 H${(rx*.45).toFixed(1)} M0 ${(-ry*.4).toFixed(1)} V${(ry*.4).toFixed(1)}" stroke="${hit?"#7FD3C0":"#d3dfdc"}" stroke-width=".9" fill="none"/>`:""}</g>`;
+    g+=`<text x="${lx.toFixed(1)}" y="${(ly+3).toFixed(1)}" text-anchor="middle" font-size="${hit?12:9}" font-weight="${hit?800:600}" fill="${hit?"#0F4F45":"#8a9a96"}">${n}</text>`};
+  for(const q of [1,2])for(let i=0;i<8;i++)tooth(q,i,true);for(const q of [4,3])for(let i=0;i<8;i++)tooth(q,i,false);
+  return `<svg class="arch" viewBox="0 0 220 280" role="img" aria-label="Teeth treated: ${esc(ns.join(", "))}">${g}<text x="110" y="78" text-anchor="middle" font-size="8" font-weight="800" letter-spacing="1.4" fill="#0F4F45" opacity=".75">UPPER</text><text x="110" y="208" text-anchor="middle" font-size="8" font-weight="800" letter-spacing="1.4" fill="#0F4F45" opacity=".75">LOWER</text><text x="4" y="143" font-size="7" font-weight="700" fill="#8a9a96">R</text><text x="210" y="143" font-size="7" font-weight="700" fill="#8a9a96">L</text><line x1="30" y1="140" x2="190" y2="140" stroke="#d3dfdc" stroke-dasharray="3 3"/></svg>`}
+function rxInner(pid,x){const p=P[pid]||{},c=S().clinic,logo=(document.querySelector(".head-logo img")||{}).src||"",dm=dentists().find(d=>d.name===x.by),fq=m=>(RX_FREQ.find(f=>f[0]===m.f)||[0,m.f])[1];
+  const advLines=String(x.note||"").split("\n");
   return `<div class="inv rxp"><style>${INV_CSS}
-.rxp .rxb{margin:18px 36px 0;display:grid;grid-template-columns:70px 1fr;gap:10px}.rxp .rxs{font:700 54px/1 Georgia,serif;color:#0F4F45}
-.rxp table.rm{width:100%;border-collapse:collapse;margin:0}.rxp .rm th{background:#0F4F45;color:#fff;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;text-align:left;padding:7px 9px}.rxp .rm td{padding:9px;border-bottom:1px solid #e3ebe8;font-size:13px;vertical-align:top}.rxp .rm td b{font-size:14px}.rxp .rm td small{display:block;color:#5b6b67;font-size:11.5px}
-.rxp .adv{margin:16px 36px 0;padding:10px 12px;background:#F3F7F6;border-radius:10px;font-size:13px}.rxp .sgn{margin:46px 36px 0 auto;width:42%;border-top:1px solid #9aa9a5;padding-top:6px;text-align:center;font-size:12px}.rxp .sgn b{display:block;font-size:13px}
+.rxp .pbar{margin:14px 36px 0;display:grid;grid-template-columns:2.2fr 1fr 1.3fr 1fr;border:1px solid #d9e3e0;border-radius:10px;overflow:hidden}.rxp .pbar div{padding:8px 12px;border-left:1px solid #e3ebe8;font-size:13px}.rxp .pbar div:first-child{border-left:0}.rxp .pbar span{display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#6b7a76;font-weight:700;margin-bottom:1px}.rxp .pbar b{font-size:14.5px}
+.rxp .body{margin:16px 36px 0;display:grid;grid-template-columns:34% 1fr;gap:0;min-height:520px;border:1px solid #d9e3e0;border-radius:12px;overflow:hidden}
+.rxp .side{background:#F1F7F5;border-right:1px solid #d9e3e0;padding:16px 16px}.rxp .side h5{margin:0 0 4px;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#0F4F45}.rxp .side .blk{margin-bottom:16px}.rxp .side .v{font-size:13.5px;font-weight:600;color:#1d2b28;line-height:1.35}.rxp .side .m{font-size:12px;color:#3d4d49;line-height:1.4}
+.rxp .arch{display:block;width:100%;max-width:230px;margin:8px auto 0}.rxp .tqm{display:grid;grid-template-columns:1fr 1fr;width:150px;margin-top:6px;font:700 15px/1 system-ui;color:#0F4F45}.rxp .tqm div{padding:6px 8px;min-height:16px}.rxp .tqm div:nth-child(1){border-right:2px solid #0F4F45;border-bottom:2px solid #0F4F45;text-align:right}.rxp .tqm div:nth-child(2){border-bottom:2px solid #0F4F45}.rxp .tqm div:nth-child(3){border-right:2px solid #0F4F45;text-align:right}
+.rxp .line{border-bottom:1px dotted #8fa39e;height:20px}
+.rxp .main{padding:14px 20px 18px}.rxp .rxs{font:700 46px/1 Georgia,"Times New Roman",serif;color:#0F4F45;margin:0 0 6px}
+.rxp ol.ml{list-style:none;margin:0;padding:0;counter-reset:m}.rxp .ml li{counter-increment:m;display:grid;grid-template-columns:26px 1fr;gap:6px;padding:10px 0;border-bottom:1px dashed #cfdcd8}.rxp .ml li::before{content:counter(m)".";font-weight:700;color:#0F4F45;font-size:14px}
+.rxp .ml b{font-size:14.5px;color:#14302F}.rxp .ml .dz{display:block;margin-top:3px;font-size:13px;color:#1d2b28}.rxp .ml .dz i{display:inline-block;font-style:normal;background:#E3F2EE;color:#0F4F45;border-radius:6px;padding:1px 7px;margin-right:4px;font-weight:600;font-size:12px}.rxp .ml small{display:block;margin-top:3px;color:#5b6b67;font-size:11.5px;font-style:italic}
+.rxp .adv{margin-top:16px}.rxp .adv h5{margin:0 0 6px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#0F4F45;border-bottom:2px solid #0F4F45;padding-bottom:4px}.rxp .adv p{margin:0;font-size:12.5px;line-height:1.5;color:#1d2b28}.rxp .adv p.h{font-weight:700;margin-top:6px}
+.rxp .ftr{display:flex;justify-content:space-between;align-items:flex-end;margin:34px 36px 0;gap:20px}.rxp .ftr .fn{font-size:10.5px;color:#6b7a76;max-width:48%}.rxp .sgn{width:40%;border-top:1px solid #6b7a76;padding-top:6px;text-align:center;font-size:12px}.rxp .sgn b{display:block;font-size:13.5px}
 </style><div class="bar"></div>
 <div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}</div></div></div>
 <div class="ttl"><h1>PRESCRIPTION</h1><p>Date: <b>${esc(fmtDate(x.date))}</b></p>${p.fileNo?`<p>File no. <b>${esc(p.fileNo)}</b></p>`:""}</div></div>
 ${invDocsHTML()}
-<div class="pt"><div><span>Patient</span><b>${esc(p.name||"")}</b></div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div><div><span>Mobile</span>${esc(p.phone||"—")}</div>${p.alerts?`<div><span>Medical</span>${esc(p.alerts)}</div>`:""}${x.tx?`<div><span>Treatment</span><b>${esc(x.tx)}</b></div>`:""}${x.teeth?`<div><span>Tooth</span><b>${esc(x.teeth)}</b></div>`:""}</div>
-<div class="rxb"><div class="rxs">℞</div><table class="rm"><thead><tr><th style="width:24px">#</th><th>Medicine</th><th>Dose</th><th>How often</th><th>Days</th></tr></thead><tbody>${(x.meds||[]).map((m,i)=>`<tr><td>${i+1}</td><td><b>${esc(m.m)}</b>${m.i?`<small>${esc(m.i)}</small>`:""}</td><td>${esc(m.d||"")}</td><td>${esc((RX_FREQ.find(f=>f[0]===m.f)||[0,m.f])[1])}</td><td>${esc(m.n?m.n+" days":"—")}</td></tr>`).join("")}</tbody></table></div>
-${x.note?`<div class="adv"><b>Advice</b><div style="white-space:pre-line;margin-top:4px">${esc(x.note)}</div></div>`:""}
-<div class="sgn"><b>${esc(x.by||c.doctor||"")}</b>${dm&&dm.title?esc(dm.title):"Dentist"}</div>
+<div class="pbar"><div><span>Patient</span><b>${esc(p.name||"")}</b></div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div><div><span>Mobile</span>${esc(p.phone||"—")}</div><div><span>Date</span>${esc(fmtDate(x.date))}</div></div>
+<div class="body"><div class="side">
+ <div class="blk"><h5>Treatment done</h5><div class="v">${esc(x.tx||"—")}</div></div>
+ <div class="blk"><h5>Tooth</h5><div class="v">${esc(x.teeth||"—")}</div>${rxTeethMap(x.teeth)}</div>
+ <div class="blk"><h5>Medical history</h5><div class="m">${esc(p.alerts||"None reported")}</div></div>
+ <div class="blk"><h5>Treated by</h5><div class="m"><b>${esc(x.by||c.doctor||"")}</b>${dm&&dm.title?"<br>"+esc(dm.title):""}</div></div>
+ <div class="blk"><h5>Next visit</h5><div class="line"></div></div>
+</div><div class="main"><div class="rxs">℞</div>
+ <ol class="ml">${(x.meds||[]).map(m=>`<li><div><b>${esc(m.m)}</b><span class="dz"><i>${esc(m.d||"")}</i><i>${esc(fq(m))}</i>${m.n?`<i>${esc(m.n)} days</i>`:""}</span>${m.i?`<small>${esc(m.i)}</small>`:""}</div></li>`).join("")}</ol>
+ ${x.note?`<div class="adv"><h5>Advice</h5>${advLines.map(l=>l.trim()?`<p class="${/:$/.test(l.trim())&&!/^•/.test(l.trim())?"h":""}">${esc(l)}</p>`:"").join("")}</div>`:""}
+</div></div>
+<div class="ftr"><div class="fn">Take medicines exactly as written. Stop and call us if you get a rash, swelling or breathing difficulty.<br>Call / WhatsApp ${esc(c.phone)}</div><div class="sgn"><b>${esc(x.by||c.doctor||"")}</b>${dm&&dm.title?esc(dm.title):"Dentist"}</div></div>
 ${invContactHTML()}
 <p class="gen">${esc(c.name)} · prescription · ${esc(p.name||"")} · ${esc(fmtDate(x.date))}</p></div>`}
 let rxCur=null;
@@ -5254,7 +5281,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v94";let updShown=false;
+const APP_BUILD="ds-v95";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
