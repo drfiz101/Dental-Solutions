@@ -2525,7 +2525,7 @@ function renderPatDetail(id){setTimeout(loadXThumbs,0);
   const PL=planTeeth(p);const tooth=n=>{const st=teeth[n]||"";return `<button type="button" class="tooth tpic${n>=31?" lower":""}${toothSel===n?" sel":""}${TH[n]?" hx":""}${PL.has(n)?" pl":""}" data-tooth="${n}" aria-label="Tooth ${n}${st?", "+TOOTH_ST[st]:""}">${toothPic(n,st)}<span class="tn">${n}</span></button>`};
   $("patDetail").dataset.psec=pSec;$("patDetail").innerHTML=`<div class="pd-back"><button class="btn" data-back>‹ All patients</button></div>
   <div class="card pd-top"><div class="pd-id"><span class="av big">${esc(initials(p.name))}</span><div><h2>${esc(p.name)}</h2><p class="muted">${[p.fileNo,p.age?p.age+" years":"",p.gender,p.cnic?"CNIC "+p.cnic:"",p.ref?"Referred by "+p.ref:""].filter(Boolean).map(esc).join(" · ")}</p><p class="phline"><span class="seltxt">${esc(p.phone||"No phone")}</span>${waNum(p.phone)?` <a class="wa sm" href="${esc(waHref(p.phone,""))}" target="_blank" rel="noopener">${WA_IC}<span>WhatsApp</span></a>`:""}</p>${p.address?`<p class="muted">${esc(p.address)}</p>`:""}</div></div>
-    <div class="vact">${p.phone?`<a class="btn callbtn" href="tel:${esc(String(p.phone).replace(/[^0-9+]/g,""))}">Call</a>`:""}<button class="btn" data-pedit>Edit</button><button class="btn" data-plab>Lab case</button><button class="btn" data-pbook>Book appointment</button><button class="btn primary" data-pbill>New bill</button></div></div>
+    <div class="vact">${p.phone?`<a class="btn callbtn" href="tel:${esc(String(p.phone).replace(/[^0-9+]/g,""))}">Call</a>`:""}<button class="btn" data-pedit>Edit</button><button class="btn" data-plab>Lab case</button><button class="btn" data-prx>💊 Prescription</button><button class="btn" data-pbook>Book appointment</button><button class="btn primary" data-pbill>New bill</button></div></div>
   ${p.alerts?`<div class="alertbar">Medical alert: ${esc(p.alerts)}</div>`:""}
   <div class="ptabs" role="tablist" aria-label="Patient sections">${[["treat","Treatment"],["chart","Chart"],["xray","X-rays"],["visits","Visits"],["notes","Notes"]].map(([k,n])=>`<button type="button" role="tab" data-psec="${k}" aria-selected="${pSec===k}">${n}</button>`).join("")}</div>
   <div class="pgrid">
@@ -2666,6 +2666,7 @@ $("patDetail").addEventListener("click",e=>{
   if(t.closest("[data-pedit]"))return openPat(selPat);
   if(t.closest("[data-pbook]"))return openAp(null,{patientId:selPat});
   if(t.closest("[data-plab]"))return openLC(null,{patientId:selPat});
+  if(t.closest("[data-prx]"))return openRx();
   if(t.closest("[data-pbill]"))return openBill(null,{patientId:selPat});
   const th=t.closest("[data-tooth]");if(th){const n=+th.dataset.tooth;toothSel=toothSel===n?null:n;render();return}
   const ts=t.closest("[data-tst]");if(ts&&toothSel){const p=P[selPat],teeth={...(p.teeth||{})};if(ts.dataset.tst)teeth[toothSel]=ts.dataset.tst;else delete teeth[toothSel];toothSel=null;cset("patients",selPat,{...p,teeth});return}
@@ -5221,7 +5222,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v90";let updShown=false;
+const APP_BUILD="ds-v91";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
