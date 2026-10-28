@@ -1360,10 +1360,12 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="actions"><button type="button" class="btn" id="vd-skip">Just mark done</button><div><button type="button" class="btn" id="vd-cancel">Cancel</button><button type="submit" class="btn primary" id="vd-save">Save</button></div></div>
 </form></dialog>
 <dialog id="nxdlg"><div class="dlg">
-  <h2>📅 Next appointment?</h2>
-  <p class="muted" id="nx-sub" style="margin:0"></p>
+  <h2>📅 Add another appointment?</h2>
+  <p id="nx-sub" style="margin:0;font-size:16px"></p>
+  <p class="muted small" id="nx-has" style="margin:6px 0 0" hidden></p>
+  <div class="actions" style="margin-top:14px"><button type="button" class="btn" id="nx-no">No</button><button type="button" class="btn primary" id="nx-pick">Yes, book it</button></div>
+  <p class="muted small" style="margin:12px 0 0">Or choose when:</p>
   <div class="nxq" id="nx-q"></div>
-  <div class="actions"><button type="button" class="btn" id="nx-no">No, not now</button><button type="button" class="btn primary" id="nx-pick">Pick date &amp; time</button></div>
 </div></dialog>
 <dialog id="shdlg"><form class="dlg" id="shForm" novalidate>
   <h2>Dentist shares</h2>
@@ -3075,18 +3077,19 @@ $("vdForm").addEventListener("submit",e=>{e.preventDefault();const id=vdAp,a=A[i
     chartFromBill(pid,done.map(l=>({desc:l.desc,tooth:l.tooth})))}
   cset("appts",id,{...A[id],status:"done",doneAt:new Date().toISOString()});vdAp=null;$("vddlg").close();
   if(billId){toast("Visit done · chart updated · bill "+billNo+" made");openBillView(billId)}else toast(done.length?"Visit done · chart updated":"Marked done");setTimeout(()=>askNext(id),300)});
-$("apView").addEventListener("change",e=>{const s=e.target.closest("[data-st]");if(!s)return;const a=A[s.dataset.st];s.blur();if(s.value==="done"&&a.status!=="done"&&a.patientId&&P[a.patientId]){visitDone(s.dataset.st);return}cset("appts",s.dataset.st,{...a,status:s.value});if(s.value==="noshow")toast("Marked no-show. You can send a 'missed visit' WhatsApp.");if(s.value==="done")toast("Marked done. Tap Bill to charge for the treatment.")});
+$("apView").addEventListener("change",e=>{const s=e.target.closest("[data-st]");if(!s)return;const a=A[s.dataset.st];s.blur();if(s.value==="done"&&a.status!=="done"&&a.patientId&&P[a.patientId]){visitDone(s.dataset.st);return}cset("appts",s.dataset.st,{...a,status:s.value});if(s.value==="noshow")toast("Marked no-show. You can send a 'missed visit' WhatsApp.");if(s.value==="done"){toast("Marked done. Tap Bill to charge for the treatment.");setTimeout(()=>askNext(s.dataset.st),300)}});
 
 /* ---- ask to book the next appointment after a visit ---- */
 let nxFrom=null;
 function nextVisitOf(a){const r=visitRule(a.treatment||"");if(!r||!a.visit)return "";const V=r.visits||[],i=V.findIndex(v=>v===a.visit||v.startsWith(a.visit));return i>=0&&i<V.length-1?V[i+1]:""}
-function askNext(apId){const a=A[apId];if(!a||!a.patientId||!P[a.patientId])return;
-  const future=Object.values(A).some(x=>x.patientId===a.patientId&&x.date>ymd(new Date())&&!["cancelled","noshow","done"].includes(x.status));if(future)return;
-  nxFrom=apId;const nv=nextVisitOf(a);$("nx-sub").textContent=`Book ${P[a.patientId].name}'s next visit${nv?` (${a.treatment} · ${nv})`:a.treatment?` (${a.treatment})`:""}?`;
+function askNext(apId){const a=A[apId];if(!a||!(a.patientId||a.patientName))return;const nm=(P[a.patientId]||{}).name||a.patientName;
+  const fut=Object.values(A).filter(x=>(a.patientId?x.patientId===a.patientId:x.patientName===a.patientName)&&x.date>ymd(new Date())&&!["cancelled","noshow","done"].includes(x.status)).sort((x,y)=>(x.date+x.time).localeCompare(y.date+y.time))[0];
+  nxFrom=apId;const nv=nextVisitOf(a);$("nx-sub").innerHTML=`Do you want to add another appointment for <b>${esc(nm)}</b>${nv?` (${esc(a.treatment)} · ${esc(nv)})`:a.treatment?` (${esc(a.treatment)})`:""}?`;
+  $("nx-has").hidden=!fut;if(fut)$("nx-has").textContent=`Already booked: ${dayName(fut.date)} ${fmtDate(fut.date)}, ${fmtTime(fut.time)}.`;
   $("nx-q").innerHTML=[[3,"In 3 days"],[7,"In 1 week"],[14,"In 2 weeks"],[30,"In 1 month"],[90,"In 3 months"],[180,"In 6 months"]].map(([d,l])=>`<button type="button" class="btn small" data-nxd="${d}">${l}<small>${esc(fmtDate(nextOpen(addDays(ymd(new Date()),d))))}</small></button>`).join("");
   openD($("nxdlg"))}
 function nxBook(days){const a=A[nxFrom];$("nxdlg").close();if(!a)return;const d=nextOpen(addDays(ymd(new Date()),days||7)),nv=nextVisitOf(a);
-  openAp(null,{patientId:a.patientId,dentist:a.dentist||"",treatment:a.treatment||"",visit:nv,date:d,chair:a.chair||"1"});nxFrom=null}
+  openAp(null,{patientId:a.patientId||"",patientName:a.patientId?undefined:a.patientName,dentist:a.dentist||"",treatment:a.treatment||"",visit:nv,date:d,chair:a.chair||"1",dur:a.dur||30});nxFrom=null}
 $("nx-q").addEventListener("click",e=>{const b=e.target.closest("[data-nxd]");if(b)nxBook(+b.dataset.nxd)});
 $("nx-pick").addEventListener("click",()=>nxBook(7));
 $("nx-no").addEventListener("click",()=>{nxFrom=null;$("nxdlg").close()});
@@ -5379,7 +5382,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v104";let updShown=false;
+const APP_BUILD="ds-v105";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
