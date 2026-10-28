@@ -688,6 +688,8 @@ body.no-lab_edit select[data-lcst],body.no-inv_count .stepper,body.no-appt_edit 
 .tstot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:10px 12px;border-radius:12px;background:#0F4F45;color:#fff}.tstot b{font-size:18px}.tstot small{display:block;font-size:11px;opacity:.8}
 .tsbox{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.tsbox div{border-radius:12px;padding:8px 10px;border:2px solid transparent}.tsbox small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}.tsbox b{font-size:16px}.tsbox .t{background:var(--bg)}.tsbox .p{background:#E3F2E8;color:#1F6B45;border-color:#9FD3B4}.tsbox .d{background:#FDECEA;color:#A4231B;border-color:#F0A9A2}.tsbox .d.z{background:#E3F2E8;color:#1F6B45;border-color:#9FD3B4}
 .tsact{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.tsmore{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}.tsmore summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}.tsmore .tpexp{margin-top:8px}
+.nxq{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:12px 0 4px}.nxq .btn{display:grid;gap:2px;text-align:center;padding:10px 6px}.nxq .btn small{font-weight:400;font-size:11.5px;color:var(--muted)}
+.rxnext{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:4px}.rxnl{font-weight:700;font-size:14px}.rxnq{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 .stq{flex-wrap:wrap}
 body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
@@ -1346,6 +1348,12 @@ input[type=date]{min-width:0;max-width:100%}
   <p class="perr" id="vd-err" hidden></p>
   <div class="actions"><button type="button" class="btn" id="vd-skip">Just mark done</button><div><button type="button" class="btn" id="vd-cancel">Cancel</button><button type="submit" class="btn primary" id="vd-save">Save</button></div></div>
 </form></dialog>
+<dialog id="nxdlg"><div class="dlg">
+  <h2>📅 Next appointment?</h2>
+  <p class="muted" id="nx-sub" style="margin:0"></p>
+  <div class="nxq" id="nx-q"></div>
+  <div class="actions"><button type="button" class="btn" id="nx-no">No, not now</button><button type="button" class="btn primary" id="nx-pick">Pick date &amp; time</button></div>
+</div></dialog>
 <dialog id="shdlg"><form class="dlg" id="shForm" novalidate>
   <h2>Dentist shares</h2>
   <p class="muted small" style="margin:0">🔒 Share of what each dentist's patients pay. The rest is clinic profit. Lab fees are split 50/50 between the dentist who treated the patient and the clinic.</p>
@@ -1605,6 +1613,7 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="field" id="rx-fw" hidden><label for="rx-file">Photo of the prescription or PDF (you can pick several pages)</label><input id="rx-file" type="file" accept="image/*,application/pdf" multiple>
    <button type="button" class="btn small" id="rx-ocr" style="margin-top:8px;align-self:flex-start">🔍 Read medicines from the photo</button><span class="muted small" id="rx-ocrst"></span></div>
   <div class="field"><label for="rx-note" id="rx-notel">Advice / note (optional)</label><select id="rx-adv" aria-label="Add ready-made advice"><option value="">＋ Add ready-made advice…</option></select><textarea id="rx-note" rows="4" maxlength="2000" placeholder="e.g. Warm saline rinses, soft diet for 2 days" style="margin-top:6px"></textarea></div>
+  <div class="rxnext"><label class="rxnl">📅 Next visit <small class="muted">(optional · booked automatically)</small></label><div class="rxnq" id="rx-nq"></div><div class="grid2"><div class="field"><label for="rx-nd">Date</label><input id="rx-nd" type="date"></div><div class="field"><label for="rx-nt">Time</label><select id="rx-nt"></select></div></div><p class="muted small" id="rx-nh" style="margin:0"></p></div>
   <p class="perr" id="rx-err" hidden></p>
   <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
@@ -2645,21 +2654,31 @@ function rxTodayTx(pid,d){const tr=[],th=new Set();const add=(t,tooth)=>{t=Strin
   const pl=(P[pid]||{}).plan;if(pl)for(const i of pl.items||[])if(i.done&&String(i.doneAt||i.doneOn||"").slice(0,10)===d)add(i.tr,i.tooth);
   for(const a of Object.values(A))if(a.patientId===pid&&a.date===d&&a.status!=="cancelled")add(a.treatment+(a.visit?" ("+a.visit+")":""),"");
   return {tr:tr.join(", "),teeth:[...th].join(", ")}}
-function openRx(){rxSetMode("write");{const g=rxTodayTx(selPat,ymd(new Date()));$("rx-tr").value=g.tr;$("rx-teeth").value=g.teeth}try{trOpts()}catch(e){}$("rx-list").innerHTML=RX_DB.map(x=>`<option value="${esc(x[1])}" label="${esc(x[0])}">`).join("")+rxUsed().filter(m=>!rxFind(m)).map(m=>`<option value="${esc(m)}" label="Added by you">`).join("");$("rx-ocrst").textContent="";$("rx-meds").innerHTML=rxRow();$("rx-date").value=ymd(new Date());$("rx-by").innerHTML=`<option value="">—</option>`+dentists().map(d=>`<option${d.name===myName?" selected":""}>${esc(d.name)}</option>`).join("");for(const k of ["rx-note","rx-file"])$(k).value="";$("rx-err").hidden=true;openD($("rxdlg"))}
+function rxNextTimes(){const d=$("rx-nd").value,dent=$("rx-by").value,sel=$("rx-nt"),cur=sel.value;if(!d){sel.innerHTML=`<option value="">—</option>`;$("rx-nh").textContent="";return}
+  if(!isOpen(d)){sel.innerHTML=`<option value="">Clinic closed</option>`;$("rx-nh").textContent=`The clinic is closed on ${dayName(d)}s.`;return}
+  const free=slots().filter(t=>[1,2].some(ch=>!overlaps(d,ch,t,30,null,dent).length)&&!(d===ymd(new Date())&&toMin(t)<=new Date().getHours()*60+new Date().getMinutes()));
+  sel.innerHTML=`<option value="">Choose time</option>`+free.map(t=>`<option value="${t}"${t===cur?" selected":""}>${fmtTime(t)}</option>`).join("");$("rx-nh").textContent=free.length?`${free.length} free times on ${dayName(d)} ${fmtDate(d)}`:"No free time that day."}
+$("rx-nd").addEventListener("change",rxNextTimes);$("rx-by").addEventListener("change",()=>{if($("rx-nd").value)rxNextTimes()});
+$("rx-nq").addEventListener("click",e=>{const b=e.target.closest("[data-rxnq]");if(!b)return;$("rx-nd").value=nextOpen(addDays(ymd(new Date()),+b.dataset.rxnq));rxNextTimes()});
+function rxBookNext(pid,x){const d=$("rx-nd").value,t=$("rx-nt").value;if(!d||!t)return null;const p=P[pid],dent=x.by||"";let chair=0;for(const ch of [1,2])if(!overlaps(d,ch,t,30,null,dent).length){chair=ch;break}if(!chair)return null;
+  const id=nid("a");cset("appts",id,{status:"booked",createdAt:new Date().toISOString(),...me,patientId:pid,patientName:p.name,phone:p.phone||"",date:d,time:t,dur:30,chair:String(chair),dentist:dent,treatment:x.tx?x.tx+" — follow-up":"Follow-up",visit:"",note:"Booked from prescription"});return {date:d,time:t,apId:id,chair}}
+function openRx(){rxSetMode("write");$("rx-nd").value="";$("rx-nh").textContent="";$("rx-nq").innerHTML=[[3,"3 days"],[7,"1 week"],[14,"2 weeks"],[30,"1 month"],[180,"6 months"]].map(([d,l])=>`<button type="button" class="btn small" data-rxnq="${d}">${l}</button>`).join("");{const g=rxTodayTx(selPat,ymd(new Date()));$("rx-tr").value=g.tr;$("rx-teeth").value=g.teeth}try{trOpts()}catch(e){}$("rx-list").innerHTML=RX_DB.map(x=>`<option value="${esc(x[1])}" label="${esc(x[0])}">`).join("")+rxUsed().filter(m=>!rxFind(m)).map(m=>`<option value="${esc(m)}" label="Added by you">`).join("");$("rx-ocrst").textContent="";$("rx-meds").innerHTML=rxRow();$("rx-date").value=ymd(new Date());$("rx-by").innerHTML=`<option value="">—</option>`+dentists().map(d=>`<option${d.name===myName?" selected":""}>${esc(d.name)}</option>`).join("");for(const k of ["rx-note","rx-file"])$(k).value="";$("rx-err").hidden=true;rxNextTimes();openD($("rxdlg"))}
 function rxUsed(){const s=new Set();for(const p of Object.values(P))for(const x of p.rx||[])for(const m of x.meds||[])if(m.m)s.add(m.m);return [...s]}
 $("rx-date").addEventListener("change",()=>{const g=rxTodayTx(selPat,$("rx-date").value);if(g.tr||g.teeth){$("rx-tr").value=g.tr;$("rx-teeth").value=g.teeth}});
 $("rxForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("rx-err"),fs=[...($("rx-file").files||[])].slice(0,8);
   if(rxMode==="write"){const meds=[...document.querySelectorAll("#rx-meds .rxrow")].map(r=>({m:r.querySelector(".rx-m").value.trim(),d:r.querySelector(".rx-d").value.trim(),f:r.querySelector(".rx-f").value,n:r.querySelector(".rx-n").value.trim(),i:r.querySelector(".rx-i").value.trim()})).filter(m=>m.m);
     if(!meds.length){err.textContent="Write at least one medicine.";err.hidden=false;return}const pid=selPat;if(!pid||!P[pid])return;const p=P[pid];
     let fileId="",pdf=false;if(fs.length){const sb=$("rxForm").querySelector("button[type=submit]");sb.disabled=true;sb.textContent="Uploading photo…";try{const f=fs[0];pdf=isPdfFile(f);fileId=await saveFileDoc(pdf?f:await compressXray(f),(p.name+" prescription "+($("rx-date").value||"")).replace(/[^\w\- ]+/g,"").trim()+(pdf?".pdf":".jpg"))}catch(ex){}sb.disabled=false;sb.textContent="Save"}
-    const x={...me,id:nid("rx"),meds,date:$("rx-date").value||ymd(new Date()),by:$("rx-by").value,tx:$("rx-tr").value.trim(),teeth:$("rx-teeth").value.trim(),note:$("rx-note").value.trim(),...(fileId?{fileId,pdf}:{})};cset("patients",pid,{...p,rx:[x,...(p.rx||[])]});$("rxdlg").close();toast("Prescription saved");setTimeout(()=>rxView(pid,x.id),200);return}
+    const x={...me,id:nid("rx"),meds,date:$("rx-date").value||ymd(new Date()),by:$("rx-by").value,tx:$("rx-tr").value.trim(),teeth:$("rx-teeth").value.trim(),note:$("rx-note").value.trim(),...(fileId?{fileId,pdf}:{})};
+    if($("rx-nd").value&&$("rx-nt").value){const nb=rxBookNext(pid,x);if(nb)x.next=nb;else{err.textContent="That next-visit time was just taken. Choose another time.";err.hidden=false;rxNextTimes();return}}
+    cset("patients",pid,{...P[pid],rx:[x,...(P[pid].rx||[])]});$("rxdlg").close();toast(x.next?`Prescription saved · next visit booked ${fmtDate(x.next.date)}, ${fmtTime(x.next.time)}`:"Prescription saved");setTimeout(()=>rxView(pid,x.id),200);return}
   if(!fs.length){err.textContent="Take a photo of the prescription or choose a PDF.";err.hidden=false;return}
   const pid=selPat;if(!pid||!P[pid])return;const sb=$("rxForm").querySelector("button[type=submit]");sb.disabled=true;const add=[];
   try{for(let i=0;i<fs.length;i++){sb.textContent=`Uploading ${i+1} of ${fs.length}…`;const f=fs[i],pdf=isPdfFile(f);
       const blob=pdf?f:await compressXray(f);const fileId=await saveFileDoc(blob,(P[pid].name+" prescription "+($("rx-date").value||"")).replace(/[^\w\- ]+/g,"").trim()+(pdf?".pdf":".jpg"));
       add.push({...me,id:nid("rx"),fileId,pdf,date:$("rx-date").value||ymd(new Date()),by:$("rx-by").value,tx:$("rx-tr").value.trim(),teeth:$("rx-teeth").value.trim(),note:$("rx-note").value.trim()})}}
   catch(ex){err.textContent=ex&&ex.code==="big"?"That file is over 8 MB. Use a smaller one.":"Couldn't upload. Check your connection and try again.";err.hidden=false;sb.disabled=false;sb.textContent="Save";return}
-  sb.disabled=false;sb.textContent="Save";const p=P[pid];cset("patients",pid,{...p,rx:[...add,...(p.rx||[])]});$("rxdlg").close();toast(add.length>1?pl(add.length,"prescription page")+" saved":"Prescription saved")});
+  sb.disabled=false;sb.textContent="Save";if(add[0]&&$("rx-nd").value&&$("rx-nt").value){const nb=rxBookNext(pid,add[0]);if(nb)add[0].next=nb}const p=P[pid];cset("patients",pid,{...p,rx:[...add,...(p.rx||[])]});$("rxdlg").close();toast((add.length>1?pl(add.length,"prescription page")+" saved":"Prescription saved")+(add[0]&&add[0].next?" · next visit booked":""))});
 function rxTeethMap(t){const ns=String(t||"").split(/[^0-9]+/).map(Number).filter(n=>n>=11&&n<=85&&n%10>=1&&n%10<=8);
   const on=new Set(ns.map(n=>{const k=Math.floor(n/10);return (k>4?k-4:k)*10+n%10}));
   const W=[8.6,6.6,7.8,7,6.8,10,9.2,8.4],tot=W.reduce((a,b)=>a+b,0),cx=110,A=68,B=88,SPAN=1.5,K=1.95;
@@ -2694,7 +2713,7 @@ ${invDocsHTML()}
  <div class="blk"><h5>Tooth</h5><div class="v">${esc(x.teeth||"—")}</div>${rxTeethMap(x.teeth)}</div>
  <div class="blk"><h5>Medical history</h5><div class="m">${esc(p.alerts||"None reported")}</div></div>
  <div class="blk"><h5>Treated by</h5><div class="m"><b>${esc(x.by||c.doctor||"")}</b>${dm&&dm.title?"<br>"+esc(dm.title):""}</div></div>
- <div class="blk"><h5>Next visit</h5><div class="line"></div></div>
+ <div class="blk"><h5>Next visit</h5>${x.next?`<div class="v">${esc(dayName(x.next.date).slice(0,3)+", "+fmtDate(x.next.date))}<br>${esc(fmtTime(x.next.time))}</div>`:`<div class="line"></div>`}</div>
 </div><div class="main"><div class="rxs">℞</div>
  <ol class="ml">${(x.meds||[]).map(m=>`<li><div><b>${esc(m.m)}</b><span class="dz"><i>${esc(m.d||"")}</i><i>${esc(fq(m))}</i>${m.n?`<i>${esc(m.n)} days</i>`:""}</span>${m.i?`<small>${esc(m.i)}</small>`:""}</div></li>`).join("")}</ol>
  ${x.note?`<div class="adv"><h5>Advice</h5>${advLines.map(l=>l.trim()?`<p class="${/:$/.test(l.trim())&&!/^•/.test(l.trim())?"h":""}">${esc(l)}</p>`:"").join("")}</div>`:""}
@@ -2704,11 +2723,11 @@ ${invContactHTML()}
 <p class="gen">${esc(c.name)} · prescription · ${esc(p.name||"")} · ${esc(fmtDate(x.date))}</p></div>`}
 let rxCur=null;
 function rxView(pid,id){const x=((P[pid]||{}).rx||[]).find(y=>y.id===id);if(!x)return;rxCur={pid,id};const p=P[pid];
-  $("rxv-body").innerHTML=`${x.tx||x.teeth?`<p class="rxvt">🦷 <b>${esc(x.tx||"Treatment")}</b>${x.teeth?" · tooth "+esc(x.teeth):""}</p>`:""}<div class="rxvl">${x.meds.map((m,i)=>`<div><b>${i+1}. ${esc(m.m)}</b><span>${esc(m.d||"")} · ${esc((RX_FREQ.find(f=>f[0]===m.f)||[0,m.f])[1])}${m.n?" · "+esc(m.n)+" days":""}${m.i?" · "+esc(m.i):""}</span></div>`).join("")}</div>${x.note?`<p class="small" style="white-space:pre-line"><b>Advice:</b> ${esc(x.note)}</p>`:""}<p class="muted small" style="margin:0">${esc(fmtDate(x.date))}${x.by?" · "+esc(x.by):""}${x.fileId?` · <button type="button" class="linkbtn" id="rxv-ph">📷 See original photo</button>`:""}</p>`;
+  $("rxv-body").innerHTML=`${x.tx||x.teeth?`<p class="rxvt">🦷 <b>${esc(x.tx||"Treatment")}</b>${x.teeth?" · tooth "+esc(x.teeth):""}</p>`:""}<div class="rxvl">${x.meds.map((m,i)=>`<div><b>${i+1}. ${esc(m.m)}</b><span>${esc(m.d||"")} · ${esc((RX_FREQ.find(f=>f[0]===m.f)||[0,m.f])[1])}${m.n?" · "+esc(m.n)+" days":""}${m.i?" · "+esc(m.i):""}</span></div>`).join("")}</div>${x.note?`<p class="small" style="white-space:pre-line"><b>Advice:</b> ${esc(x.note)}</p>`:""}<p class="muted small" style="margin:0">${esc(fmtDate(x.date))}${x.by?" · "+esc(x.by):""}${x.fileId?` · <button type="button" class="linkbtn" id="rxv-ph">📷 See original photo</button>`:""}</p>${x.next?`<p class="rxvt" style="margin-top:8px">📅 Next visit: <b>${esc(dayName(x.next.date)+" "+fmtDate(x.next.date))}, ${esc(fmtTime(x.next.time))}</b></p>`:""}`;
   $("rxv-t").textContent="℞ "+(p.name||"")+" · "+fmtDate(x.date);$("rxv-wa").hidden=!waNum(p.phone||"");openD($("rxvdlg"))}
 const rxFile=(p,x)=>`Prescription-${String(p.name||"patient").replace(/[^A-Za-z0-9]+/g,"-")}-${x.date}.pdf`;
 async function rxPdf(send){if(!rxCur)return;const p=P[rxCur.pid],x=(p.rx||[]).find(y=>y.id===rxCur.id);if(!x)return;const b=send?$("rxv-wa"):$("rxv-pdf"),old=b.innerHTML;b.disabled=true;b.textContent="Preparing PDF…";
-  try{const blob=await htmlPdfBlob(rxInner(rxCur.pid,x)),name=rxFile(p,x),msg=`Salam ${p.name||""},\n\nYour prescription from *${S().clinic.name}* (${fmtDate(x.date)})${x.tx?"\nTreatment: "+x.tx+(x.teeth?" (tooth "+x.teeth+")":""):""}:\n\n${rxText(x)}${x.note?"\n\nAdvice: "+x.note:""}\n\nFor any query call ${S().clinic.phone}.`;
+  try{const blob=await htmlPdfBlob(rxInner(rxCur.pid,x)),name=rxFile(p,x),msg=`Salam ${p.name||""},\n\nYour prescription from *${S().clinic.name}* (${fmtDate(x.date)})${x.tx?"\nTreatment: "+x.tx+(x.teeth?" (tooth "+x.teeth+")":""):""}:\n\n${rxText(x)}${x.note?"\n\nAdvice: "+x.note:""}${x.next?"\n\n📅 Next visit: "+dayName(x.next.date)+" "+fmtDate(x.next.date)+", "+fmtTime(x.next.time):""}\n\nFor any query call ${S().clinic.phone}.`;
     if(send&&!window.claude&&navigator.canShare){const file=new File([blob],name,{type:"application/pdf"});if(navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"Prescription",text:msg});return}catch(e){if(e&&e.name==="AbortError")return}}}
     if(send){window.open(waHref(p.phone,msg),"_blank");return}
     await propSave(blob,name)}catch(e){toast("Couldn't make the PDF. Check the internet connection and try again.")}finally{b.disabled=false;b.innerHTML=old}}
@@ -3000,7 +3019,7 @@ $("vd-list").addEventListener("click",e=>{const b=e.target.closest("[data-vbill]
 $("vd-add").addEventListener("click",()=>{vdLines.push({key:nid("v"),src:"new",desc:"",tooth:"",qty:1,price:0,done:true,bill:null});vdRender();const r=$("vd-list").lastElementChild;if(r){const i=r.querySelector('[data-vf="desc"]');if(i)i.focus()}});
 $("vd-cancel").addEventListener("click",()=>{vdAp=null;$("vddlg").close();renderAppts()});
 $("vddlg").addEventListener("close",()=>{if(vdAp){vdAp=null;try{renderAppts()}catch(e){}}});
-$("vd-skip").addEventListener("click",()=>{const id=vdAp,a=A[id];vdAp=null;$("vddlg").close();if(a)cset("appts",id,{...a,status:"done",doneAt:new Date().toISOString()});toast("Marked done")});
+$("vd-skip").addEventListener("click",()=>{const id=vdAp,a=A[id];vdAp=null;$("vddlg").close();if(a)cset("appts",id,{...a,status:"done",doneAt:new Date().toISOString()});toast("Marked done");setTimeout(()=>askNext(id),250)});
 $("vdForm").addEventListener("submit",e=>{e.preventDefault();const id=vdAp,a=A[id],err=$("vd-err");if(!a)return;const canB=can("bill_edit");
   const done=vdLines.filter(l=>l.done&&String(l.desc||"").trim());
   if(canB&&done.some(l=>l.src==="new"&&l.bill===null)){err.textContent="For the work you added, choose Yes or No for adding it to the bill.";err.hidden=false;return}
@@ -3014,9 +3033,22 @@ $("vdForm").addEventListener("submit",e=>{e.preventDefault();const id=vdAp,a=A[i
     cset("patients",pid,{...P[pid],plan:{...pl,items,updatedAt:new Date().toISOString(),createdAt:pl.createdAt||new Date().toISOString()}});
     chartFromBill(pid,done.map(l=>({desc:l.desc,tooth:l.tooth})))}
   cset("appts",id,{...A[id],status:"done",doneAt:new Date().toISOString()});vdAp=null;$("vddlg").close();
-  if(billId){toast("Visit done · chart updated · bill "+billNo+" made");openBillView(billId)}else toast(done.length?"Visit done · chart updated":"Marked done")});
+  if(billId){toast("Visit done · chart updated · bill "+billNo+" made");openBillView(billId)}else toast(done.length?"Visit done · chart updated":"Marked done");setTimeout(()=>askNext(id),300)});
 $("apView").addEventListener("change",e=>{const s=e.target.closest("[data-st]");if(!s)return;const a=A[s.dataset.st];s.blur();if(s.value==="done"&&a.status!=="done"&&a.patientId&&P[a.patientId]){visitDone(s.dataset.st);return}cset("appts",s.dataset.st,{...a,status:s.value});if(s.value==="noshow")toast("Marked no-show. You can send a 'missed visit' WhatsApp.");if(s.value==="done")toast("Marked done. Tap Bill to charge for the treatment.")});
 
+/* ---- ask to book the next appointment after a visit ---- */
+let nxFrom=null;
+function nextVisitOf(a){const r=visitRule(a.treatment||"");if(!r||!a.visit)return "";const V=r.visits||[],i=V.findIndex(v=>v===a.visit||v.startsWith(a.visit));return i>=0&&i<V.length-1?V[i+1]:""}
+function askNext(apId){const a=A[apId];if(!a||!a.patientId||!P[a.patientId])return;
+  const future=Object.values(A).some(x=>x.patientId===a.patientId&&x.date>ymd(new Date())&&!["cancelled","noshow","done"].includes(x.status));if(future)return;
+  nxFrom=apId;const nv=nextVisitOf(a);$("nx-sub").textContent=`Book ${P[a.patientId].name}'s next visit${nv?` (${a.treatment} · ${nv})`:a.treatment?` (${a.treatment})`:""}?`;
+  $("nx-q").innerHTML=[[3,"In 3 days"],[7,"In 1 week"],[14,"In 2 weeks"],[30,"In 1 month"],[90,"In 3 months"],[180,"In 6 months"]].map(([d,l])=>`<button type="button" class="btn small" data-nxd="${d}">${l}<small>${esc(fmtDate(nextOpen(addDays(ymd(new Date()),d))))}</small></button>`).join("");
+  openD($("nxdlg"))}
+function nxBook(days){const a=A[nxFrom];$("nxdlg").close();if(!a)return;const d=nextOpen(addDays(ymd(new Date()),days||7)),nv=nextVisitOf(a);
+  openAp(null,{patientId:a.patientId,dentist:a.dentist||"",treatment:a.treatment||"",visit:nv,date:d,chair:a.chair||"1"});nxFrom=null}
+$("nx-q").addEventListener("click",e=>{const b=e.target.closest("[data-nxd]");if(b)nxBook(+b.dataset.nxd)});
+$("nx-pick").addEventListener("click",()=>nxBook(7));
+$("nx-no").addEventListener("click",()=>{nxFrom=null;$("nxdlg").close()});
 /* --- billing --- */
 function renderBilling(){
   const today=ymd(new Date()),mk=today.slice(0,7);
@@ -5300,7 +5332,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v96";let updShown=false;
+const APP_BUILD="ds-v97";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
