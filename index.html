@@ -64,6 +64,10 @@ a.btn.primary{color:var(--accent-ink)}
 .prow .pq{text-align:right;font-variant-numeric:tabular-nums;font-size:.9rem}
 .prow .pq span{display:block;font-size:.75rem;color:var(--muted)}
 .prow .pt{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;min-width:5.5em}
+.prow2x{padding:10px 4px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px;cursor:pointer;border-radius:8px}.prow2x:hover{background:var(--bg)}
+.prow2x.pend{box-shadow:inset 3px 0 0 var(--warn)}.prow2x .px1{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.prow2x .px1 b{overflow-wrap:anywhere}.prow2x .pxt{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.prow2x .px2{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:.82rem;color:var(--muted)}.prow2x .px3{display:flex;gap:6px;margin-top:4px}
+.msh{align-items:center;gap:6px!important}
 .ldel{width:28px;height:28px;border-radius:7px;border:1px solid transparent;background:none;color:var(--muted);font-size:1.1rem}
 .ldel:hover{border-color:var(--line);color:var(--bad)}
 .pconf{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:8px 10px;font-size:.85rem}
@@ -77,7 +81,9 @@ a.btn.primary{color:var(--accent-ink)}
 .ogrp{margin-bottom:12px}
 .ogrp header{display:flex;justify-content:space-between;gap:8px;align-items:baseline;margin-bottom:6px}
 .ogrp header h3{margin:0;color:var(--ink);font-size:.95rem;letter-spacing:0;text-transform:none}
-.orow{display:grid;grid-template-columns:24px minmax(0,1fr) 92px 90px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.ostep{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}.ostep button{width:36px;height:38px;border:0;background:var(--bg);font-size:1.15rem;font-weight:700;color:var(--ink);cursor:pointer}.ostep span{min-width:52px;text-align:center;display:flex;flex-direction:column;line-height:1.05}.ostep b{font-variant-numeric:tabular-nums}.ostep small{font-size:.66rem;color:var(--muted)}
+.ogrp header>div{display:flex;flex-direction:column}
+.orow{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
 .orow input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
 .orow .on b{display:block;overflow-wrap:anywhere}.orow .on span{font-size:.78rem;color:var(--muted)}
 .orow .why{font-weight:700}.why.out{color:var(--bad)}.why.low,.why.soon{color:var(--warn)}
@@ -86,7 +92,7 @@ a.btn.primary{color:var(--accent-ink)}
 .orow .oq small{color:var(--muted);font-size:.75rem;overflow:hidden;text-overflow:ellipsis}
 .orow .oc{text-align:right;font-variant-numeric:tabular-nums;font-size:.88rem}
 .orow.off{opacity:.45}
-@media (max-width:560px){.orow{grid-template-columns:24px minmax(0,1fr) auto}.orow .oc{grid-column:2/-1;text-align:left;font-size:.8rem;color:var(--muted)}}
+@media (max-width:560px){.orow .oc{display:none}}
 .ofoot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center;font-weight:700;padding:12px 14px;background:var(--accent-soft);border-radius:12px}
 /* dialogs */
 .pinfo{background:var(--accent-soft);border-radius:10px;padding:8px 12px;display:flex;flex-direction:column;gap:2px}
@@ -155,7 +161,7 @@ header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:spac
 .stat.out b{color:var(--bad)} .stat.low b{color:var(--warn)} .stat.exp b{color:var(--warn)}
 .stat[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 .stat:hover{border-color:var(--muted)}
-@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat.all{display:none}}
+@media (max-width:640px){.stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.stat.all{display:none}.stats .stat{padding:8px 6px!important;text-align:center}.stats .stat small{font-size:.62rem!important;letter-spacing:0!important;line-height:1.15;display:block}.stats .stat b{font-size:1.25rem!important}}
 
 .tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;border-bottom:1px solid var(--line);margin-bottom:12px;padding-bottom:0}
 .tab{flex:none;border:0;background:none;padding:10px 12px;border-bottom:3px solid transparent;color:var(--muted);font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:6px;white-space:nowrap}
@@ -203,6 +209,7 @@ header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:spac
 @media (max-width:640px){.mainnav{grid-template-columns:repeat(4,minmax(0,1fr));width:100%}.mainbtn{flex-direction:column;gap:3px;padding:8px 2px;font-size:.68rem;letter-spacing:-.02em}.mainbtn span{max-width:100%;overflow:hidden;text-overflow:ellipsis}}
 .invnav{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 14px;padding:10px 0 0;border-top:1px solid var(--line)}
 .invnav .viewbtn{font-size:.85rem;padding:7px 14px}
+@media (max-width:560px){.invnav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.invnav .viewbtn{padding:9px 4px;text-align:center;font-size:.82rem}}
 .mgbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mgbox small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mgbox span{font-size:.82rem;color:var(--muted)}
 .invbig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.invbig[hidden]{display:none}
 .invbig button{display:flex;align-items:center;gap:12px;text-align:left;padding:16px 18px;border-radius:16px;border:2px solid var(--mod,var(--accent));font:inherit;cursor:pointer;min-height:72px}
@@ -247,7 +254,7 @@ header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:spac
 .name{min-width:0}
 .name strong{display:block;font-weight:700;overflow-wrap:anywhere}
 .name .meta{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.78rem;color:var(--muted);margin-top:2px}
-.name .meta .catlbl{color:var(--accent)}
+.name .meta .catlbl{color:var(--accent)}.name .meta .mo{display:none}@media (max-width:720px){.name .meta .mo{display:inline}}
 .stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden;width:max-content}
 .stepper button{width:34px;height:34px;border:0;background:var(--idle-soft);font-size:1.1rem;line-height:1}
 .stepper button:hover{background:var(--accent-soft)}
@@ -271,10 +278,10 @@ header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:spac
 
 @media (max-width:720px){
   .row.head{display:none}
-  .row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name edit" "step pill" "unit min";gap:8px 12px}
-  .name{grid-area:name}.stepper{grid-area:step}.statuscell{grid-area:pill;justify-self:end}
-  .unit{grid-area:unit}.min{grid-area:min;justify-self:end}.acts{grid-area:edit}
-  .unit::before{content:"Unit: "}.min::before{content:"Reorder at "}.min.na::before{content:""}
+  .row{grid-template-columns:auto auto minmax(0,1fr) auto;grid-template-areas:"name name name pill" "step unit . edit";gap:8px 10px;padding:12px 14px}
+  .name{grid-area:name}.stepper{grid-area:step}.statuscell{grid-area:pill;justify-self:end;align-self:start}
+  .unit{grid-area:unit;font-size:.82rem}.min{display:none}.acts{grid-area:edit;justify-self:end}
+  .name strong{font-size:1rem}
 }
 
 dialog{border:0;border-radius:16px;padding:0;background:var(--surface);color:var(--ink);width:min(480px,calc(100vw - 32px));box-shadow:0 20px 60px rgba(0,0,0,.3)}
@@ -1162,7 +1169,7 @@ input[type=date]{min-width:0;max-width:100%}
   </header>
 
   <nav class="invnav" id="invnav" aria-label="Inventory">
-    <button class="viewbtn" data-view="list" aria-pressed="true">Stock list</button><button class="viewbtn" data-view="cabinet" aria-pressed="false">Cabinet map</button><button class="viewbtn" data-view="purch" aria-pressed="false">Monthly summary</button><button class="viewbtn" data-view="order" aria-pressed="false">Order list<span class="nb" id="orderCount"></span></button>
+    <button class="viewbtn" data-view="list" aria-pressed="true">📦 Stock</button><button class="viewbtn" data-view="order" aria-pressed="false">🛒 To order<span class="nb" id="orderCount"></span></button><button class="viewbtn" data-view="purch" aria-pressed="false">🧾 This month</button>
   </nav>
   <div class="invbig" id="invbig" hidden>
     <button type="button" class="ib1" id="ib-single"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 11h10.2L20 8H7"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="16.5" cy="19.5" r="1.3"/></svg><span><b>Record single purchase</b><small>One item</small></span></button>
@@ -1229,23 +1236,23 @@ input[type=date]{min-width:0;max-width:100%}
     <button class="stat all" id="st-all" data-f="" aria-pressed="true"><small>All items</small><b id="c-all">0</b></button>
     <button class="stat out" id="st-out" data-f="out" aria-pressed="false"><small>Out of stock</small><b id="c-out">0</b></button>
     <button class="stat low" id="st-low" data-f="low" aria-pressed="false"><small>Low stock</small><b id="c-low">0</b></button>
-    <button class="stat exp" id="st-exp" data-f="exp" aria-pressed="false"><small>Expiring ≤60d</small><b id="c-exp">0</b></button>
+    <button class="stat exp" id="st-exp" data-f="exp" aria-pressed="false"><small>Expiring soon</small><b id="c-exp">0</b></button>
     <button class="stat" id="st-unc" data-f="uncounted" aria-pressed="false"><small>Not counted</small><b id="c-unc">0</b></button>
   </div>
 
   <section id="cabinet" hidden>
-    <div class="cab-head"><div><h2>Consumables cabinet</h2><p>Drawer 1 is the top drawer. Tap an item to change its count or move it to another drawer.</p></div>
+    <div class="cab-head"><div><button type="button" class="btn small" id="cabBack">‹ Back to stock</button><h2>Consumables cabinet</h2><p>Drawer 1 is the top drawer. Tap an item to change its count or move it to another drawer.</p></div>
       <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="cq" type="search" placeholder="Where is… e.g. MTA, alginate" aria-label="Find an item in the cabinet"></div></div>
     <div class="cab" id="cabGrid"></div>
   </section>
   <section id="purch" class="view" hidden>
     <div class="vhead">
       <div class="mnav"><button class="btn" id="m-prev" aria-label="Previous month">‹</button><h2 id="m-label"></h2><button class="btn" id="m-next" aria-label="Next month">›</button></div>
-      <div class="vact"><button class="btn" id="m-pdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 12v6m-3-3 3 3 3-3"/></svg>PDF statement</button><button class="btn" id="m-copy">Copy summary</button><a class="btn" id="m-wa" target="_blank" rel="noopener">WhatsApp summary</a><button class="btn" id="m-vbill">+ Vendor bill</button><button class="btn" id="m-order">+ Multiple items order</button><button class="btn primary" id="m-buy">+ Record purchase</button></div>
+      <div class="vact msh"><span class="muted small">Share:</span><a class="btn small" id="m-wa" target="_blank" rel="noopener">WhatsApp</a><button class="btn small" id="m-pdf">PDF</button><button class="btn small" id="m-copy">Copy</button><button class="btn small" id="m-vbill">Upload vendor bill</button><button class="btn" id="m-order" hidden></button><button class="btn" id="m-buy" hidden></button></div>
     </div>
     <div class="tiles" id="m-tiles"></div>
     <div class="pgrid">
-      <div class="card"><div class="dh"><h3>Purchases</h3><div class="seg sm" id="pur-f"><button data-purf="all">All</button><button data-purf="paid">Paid</button><button data-purf="pending">Pending</button></div></div><div id="p-list"></div></div>
+      <div class="card"><div class="dh"><h3>Purchases</h3><div class="seg sm" id="pur-f"><button data-purf="all">All</button><button data-purf="paid">Paid</button><button data-purf="pending">Not paid</button></div></div><p class="muted small" style="margin:0 0 6px">Tap a purchase to change or delete it.</p><div id="p-list"></div></div>
       <div class="side">
         <div class="card"><h3>Spend by section</h3><div id="p-secs"></div></div>
         <div class="card"><h3>Suppliers</h3><div id="p-supl"></div></div>
@@ -1255,8 +1262,8 @@ input[type=date]{min-width:0;max-width:100%}
   </section>
   <section id="order" class="view" hidden>
     <div class="vhead">
-      <div><h2>Order list</h2><p class="muted">Built automatically from items that are out, low, or will run out within 2 weeks at your current rate of use. Change quantities or untick items, then send it to your supplier.</p></div>
-      <div class="vact"><button class="btn" id="o-copy">Copy order</button><a class="btn primary" id="o-wa" target="_blank" rel="noopener">Send on WhatsApp</a></div>
+      <div><h2>To order</h2><p class="muted">Items that are finished or running low. Untick what you don't need, set how many, then send to the supplier.</p></div>
+      <div class="vact"><button class="btn" id="o-copy">Copy all</button><a class="btn primary" id="o-wa" target="_blank" rel="noopener">WhatsApp all</a></div>
     </div>
     <div id="o-list"></div>
   </section>
@@ -1270,7 +1277,7 @@ input[type=date]{min-width:0;max-width:100%}
       <input id="q" type="search" placeholder="Search all items, e.g. composite, gloves, K-file" aria-label="Search items">
     </div>
     <div class="subsel" id="subsel"><label for="sub">Show</label><select id="sub"></select></div>
-    <button class="btn" id="orderBtn">+ Multiple items order</button>
+    <button class="btn" id="orderBtn" hidden>+ Multiple items order</button>
     <button class="btn primary" id="addBtn">+ Add item</button>
   </div>
   <p class="ctx" id="ctx"></p>
@@ -1326,6 +1333,7 @@ input[type=date]{min-width:0;max-width:100%}
     <p class="phint" id="p-hint" hidden></p>
     <p class="perr" id="p-err" hidden></p>
     <button type="button" class="btn" id="p-more" style="align-self:flex-start">+ Add more items to this order</button>
+    <button type="button" class="btn danger-outline" id="p-del" hidden style="align-self:flex-start">Delete this purchase</button>
     <div class="actions"><span></span><div><button type="button" class="btn" id="p-cancel">Cancel</button><button type="submit" class="btn primary">Save purchase</button></div></div>
   </form>
 </dialog>
@@ -1864,7 +1872,7 @@ const BASE_IDS=new Set(BASE.map(b=>b.id));
 let overrides={};          // id -> stored doc from db
 let db=null, canWrite=true;
 let main="dashboard";
-let view=["list","cabinet","purch","order"].includes(localGet("aa-view"))?localGet("aa-view"):"list";
+let view=["list","purch","order"].includes(localGet("aa-view"))?localGet("aa-view"):"list";
 let activeGroup=localGet("aa-group")||"materials", activeSub=localGet("aa-sub")||"", activeType="", statusF="", query="";
 if(!GROUPS.some(g=>g.k===activeGroup))activeGroup="instruments";
 const pending={}, writing={};
@@ -1942,7 +1950,7 @@ function render(){try{syncSimple()}catch(e){}
 
   const fl={out:"out of stock",low:"low on stock",exp:"expiring within 60 days",uncounted:"not counted yet"};
   $("ctx").innerHTML=global?`Showing ${rows.length} item${rows.length===1?"":"s"} across all tabs${statusF?" "+fl[statusF]:""}${q?` matching “${esc(query)}”`:""}. <button class="btn ghost" id="clearF">Clear filter</button>`
-    :`${esc(grp.n)} › ${esc(activeSub?subName(activeSub):"All")}${activeType?" › "+esc(activeType):""} · ${rows.length} items. Type a count or use − / +. Status turns amber at the reorder level.`;
+    :`${esc(grp.n)} › ${esc(activeSub?subName(activeSub):"All")}${activeType?" › "+esc(activeType):""} · ${rows.length} items. Use − / + to change the count.`;
 
   const head=`<div class="row head" role="row"><span>Item</span><span>In stock</span><span>Unit</span><span>Reorder at</span><span>Status</span><span></span></div>`;
   const secBy=global||statusF==="exp"?null:!activeSub?(i=>subName(i.sub)):(!activeType&&types.length>1)?typeOf:null;
@@ -1970,7 +1978,7 @@ function renderCabinet(live){
   const inv=main==="inventory";
   document.body.dataset.main=main;
   $("cabinet").hidden=!inv||view!=="cabinet"; $("listView").hidden=!inv||view!=="list"; $("purch").hidden=!inv||view!=="purch"; $("order").hidden=!inv||view!=="order"; $("stats").hidden=!inv||view!=="list";
-  $("invnav").hidden=!inv; $("invbig").hidden=!inv||!canWrite; $("soon").hidden=true; $("patView").hidden=main!=="patients"; $("apView").hidden=main!=="appointments"; $("billView").hidden=main!=="billing"; $("dashView").hidden=main!=="dashboard"; $("labView").hidden=main!=="lab"; $("repView").hidden=main!=="reports";
+  $("invnav").hidden=!inv; $("invbig").hidden=!inv||!canWrite||view==="cabinet";$("invnav").hidden=!inv||view==="cabinet"; $("soon").hidden=true; $("patView").hidden=main!=="patients"; $("apView").hidden=main!=="appointments"; $("billView").hidden=main!=="billing"; $("dashView").hidden=main!=="dashboard"; $("labView").hidden=main!=="lab"; $("repView").hidden=main!=="reports";
   for(const b of document.querySelectorAll(".viewbtn"))b.setAttribute("aria-pressed",String(b.dataset.view===view));
   for(const b of document.querySelectorAll(".mainbtn"))b.setAttribute("aria-pressed",String(b.dataset.main===main||(main==="reports"&&b.dataset.main==="dashboard")));
   if(!inv)renderClinic();
@@ -1987,14 +1995,16 @@ function rowHTML(i){
   const s=status(i), d=daysTo(i.expiry);
   const meta=[];
   if(query||statusF)meta.push(`<span class="catlbl">${esc((GROUPS.find(g=>g.k===i.g)||{}).n)} › ${esc(subName(i.sub))}</span>`);
-  if(i.loc)meta.push(`<span class="loc">${esc(locLabel(i.loc))}</span>`);
+
   const dl=daysLeft(i); if(dl!==null&&dl<=45)meta.push(`<span class="fc${dl<=14?" soon":""}">≈ ${dl} day${dl===1?"":"s"} left at current use</span>`);
   if(i.expiry)meta.push(`<span class="${d!==null&&d<=60?"exp-flag":""}">Exp ${esc(fmtDate(i.expiry))}${d!==null&&d<0?" · expired":d!==null&&d<=60?` · ${d}d left`:""}</span>`);
   if(i.price)meta.push(`<span>${rs(i.price)} / ${esc(i.unit||"unit")}</span>`);
   if(i.supplier)meta.push(`<span>${esc(i.supplier)}</span>`);
+  if(!i.asset)meta.push(`<span class="mo">Reorder at ${i.min??0}</span>`);
+  if(i.loc)meta.push(`<span class="mo">${esc(locLabel(i.loc))}</span>`);
   const dis=canWrite?"":"disabled";
   return `<div class="row" role="row" data-id="${esc(i.id)}">
-    <div class="name"><strong>${esc(i.name)}</strong>${meta.length?`<div class="meta">${meta.join("")}</div>`:""}${i.asset?"":`<div class="iu"><span class="iuc${+i.inUse?" on":""}">In stock <b>${i.qty??0}</b> · In use <b>${+i.inUse||0}</b></span><button type="button" class="iub" data-iuopen ${dis||((+i.qty||0)<=0?"disabled":"")} title="Take one out of stock and start using it">Open one</button>${+i.inUse?`<button type="button" class="iub" data-iudone ${dis} title="The opened one is used up">Finished</button>`:""}</div>`}</div>
+    <div class="name"><strong>${esc(i.name)}</strong>${meta.length?`<div class="meta">${meta.join("")}</div>`:""}${i.asset?"":`<div class="iu">${+i.inUse?`<span class="iuc on">In use <b>${+i.inUse}</b></span>`:""}<button type="button" class="iub" data-iuopen ${dis||((+i.qty||0)<=0?"disabled":"")} title="Take one out of stock and start using it">Open one</button>${+i.inUse?`<button type="button" class="iub" data-iudone ${dis} title="The opened one is used up">Finished</button>`:""}</div>`}</div>
     <div class="stepper"><button data-step="-1" aria-label="Decrease ${esc(i.name)}" ${dis}>−</button><input class="qty" id="q-${esc(i.id)}" type="number" min="0" inputmode="numeric" value="${i.qty??""}" placeholder="—" aria-label="${esc(i.name)} in stock" ${dis}><button data-step="1" aria-label="Increase ${esc(i.name)}" ${dis}>+</button></div>
     <div class="unit">${esc(i.unit)}</div>
     <div class="min num${i.asset?" na":""}">${i.asset?`<span class="noreorder">No reorder</span>`:(i.min??0)}</div>
@@ -2219,7 +2229,7 @@ const itemLabel=i=>i.name+" — "+subName(i.sub);
 let editLogId=null;
 function openBuy(id){
   if(!canWrite)return toast("You don't have edit access.");
-  editLogId=null;$("p-more").hidden=false;$("p-title").textContent="Record purchase";$("pform").querySelector("button[type=submit]").textContent="Save purchase";
+  editLogId=null;$("p-more").hidden=false;$("p-del").hidden=true;$("p-title").textContent="Record purchase";$("pform").querySelector("button[type=submit]").textContent="Save purchase";
   $("p-pick").hidden=!!id; $("p-item").value=""; $("p-err").hidden=true;
   $("p-items").innerHTML=id?"":items().filter(i=>!i.hidden).map(i=>`<option value="${esc(itemLabel(i))}">`).join("");
   for(const f of ["p-qty","p-price","p-total","p-inv","p-exp","p-photo"])$(f).value="";$("p-paid").value="paid";$("p-prev").hidden=true;
@@ -2250,11 +2260,15 @@ $("p-qty").addEventListener("input",()=>{const q=+$("p-qty").value,p=+$("p-price
 $("p-price").addEventListener("input",()=>{const q=+$("p-qty").value,p=+$("p-price").value;if(q&&p)$("p-total").value=Math.round(q*p);priceHint()});
 $("p-total").addEventListener("input",()=>{const q=+$("p-qty").value,t=+$("p-total").value;if(q&&t)$("p-price").value=Math.round(t/q*100)/100;priceHint()});
 $("p-cancel").addEventListener("click",()=>pdlg.close());
+$("p-del").addEventListener("click",()=>{const b=$("p-del"),lid=editLogId,l=logs[lid];if(!l)return;
+  if(!b.dataset.sure){b.dataset.sure="1";b.textContent=`Tap again to delete (takes ${l.qty} ${l.unit||""} off stock)`;return}
+  if(l.kind==="purchase"){const it=current(l.itemId);if(it&&it.qty!=null)patch(l.itemId,{qty:Math.max(0,(+it.qty||0)-(+l.qty||0))},true,{noLog:true})}
+  delLog(lid);editLogId=null;pdlg.close();toast("Purchase deleted")});
 function openBuyEdit(lid){
   const l=logs[lid];if(!l)return;if(!canWrite)return toast("You don't have edit access.");
   openBuy(l.itemId);
   if(!current(l.itemId)){buyId=l.itemId;$("p-info").hidden=false;$("p-info").innerHTML=`<b>${esc(l.name)}</b><span>${esc(secName(l.sub))}</span>`;$("p-unit").textContent="("+(l.unit||"")+")"}
-  editLogId=lid;$("p-more").hidden=true;$("p-title").textContent="Edit purchase";$("pform").querySelector("button[type=submit]").textContent="Save changes";
+  editLogId=lid;$("p-more").hidden=true;$("p-del").hidden=false;$("p-del").textContent="Delete this purchase";delete $("p-del").dataset.sure;$("p-title").textContent="Edit purchase";$("pform").querySelector("button[type=submit]").textContent="Save changes";
   $("p-qty").value=l.qty||"";$("p-price").value=l.unitPrice||"";$("p-total").value=l.total||"";$("p-sup").value=l.supplier||"";$("p-inv").value=l.invoice||"";
   $("p-date").value=l.date||ymd(new Date());$("p-paid").value=l.paid===false?"pending":"paid";$("p-exp").value=(current(l.itemId)||{}).expiry||"";
   supSync("p-sup");priceHint();
@@ -2309,8 +2323,9 @@ function renderPurch(){
   for(const l of shown){
     if(l.date!==lastD){lastD=l.date;const day=shown.filter(x=>x.date===l.date).reduce((s,x)=>s+(+x.total||0),0);html+=`<div class="pday"><span>${new Date(l.date+"T00:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"short"})}</span><span>${rs(day)}</span></div>`}
     const who=byName(l);
-    html+=`<div class="prow"><div class="pn"><b>${esc(l.name)}</b><span>${esc(secName(l.sub))}${l.supplier?" · "+esc(l.supplier):""}${l.invoice?" · Bill "+esc(l.invoice):""}${who?" · by "+esc(who):""}</span><span class="pchips">${l.paid===false?`<span class="chip2 warn">Pending</span><button class="btn small" data-lpaid="${esc(l.id)}">Mark paid</button>`:`<span class="chip2 ok">Paid${l.paidOn&&l.paidOn!==l.date?" "+esc(fmtDate(l.paidOn)):""}</span>`}${l.photoId?`<button class="btn small" data-lphoto="${esc(l.photoId)}" data-lphototitle="${esc(l.name+" · "+fmtDate(l.date))}">Bill</button>`:""}${canWrite?`<button class="btn small" data-ledit="${esc(l.id)}">Edit</button>`:""}</span></div><div class="pq">${l.qty} ${esc(l.unit)}${l.unitPrice?`<span>@ ${rs(l.unitPrice)}</span>`:""}</div><div class="pt">${l.total?rs(l.total):`<span class="muted">no price</span>`}</div><button class="ldel" data-ldel="${esc(l.id)}" aria-label="Delete this purchase record" ${canWrite?"":"disabled"}>×</button>
-      ${pendingDel===l.id?`<div class="pconf"><span>Delete this record and take ${l.qty} ${esc(l.unit)} back off the stock count?</span><span style="display:flex;gap:6px"><button class="btn small" data-lkeep>Keep</button><button class="btn small danger" data-lyes="${esc(l.id)}">Delete</button></span></div>`:""}</div>`;
+    html+=`<div class="prow2x${l.paid===false?" pend":""}" data-ledit="${esc(l.id)}" role="button" tabindex="0"><div class="px1"><b>${esc(l.name)}</b><span class="pxt">${l.total?rs(l.total):`<span class="muted">no price</span>`}</span></div>
+      <div class="px2"><span>${l.qty} ${esc(l.unit)}${l.unitPrice?` × ${rs(l.unitPrice)}`:""}${l.supplier?" · "+esc(l.supplier):""}${l.invoice?" · Bill "+esc(l.invoice):""}</span>${l.paid===false?`<span class="chip2 warn">Not paid</span>`:`<span class="chip2 ok">Paid</span>`}</div>
+      ${l.paid===false||l.photoId?`<div class="px3">${l.paid===false&&canWrite?`<button class="btn small primary" data-lpaid="${esc(l.id)}">Mark paid</button>`:""}${l.photoId?`<button class="btn small" data-lphoto="${esc(l.photoId)}" data-lphototitle="${esc(l.name+" · "+fmtDate(l.date))}">See bill</button>`:""}</div>`:""}</div>`;
   }
   $("p-list").innerHTML=shown.length?html:buys.length?`<div class="empty">No ${purF==="pending"?"pending":"paid"} purchases this month.</div>`:`<div class="empty">No purchases recorded in ${esc(monthLabel(monthKey))}.<br>When new stock arrives, tap the <b>cart button</b> next to the item, or <b>+ Record purchase</b> above. The summary builds itself.</div>`;
   const secs=groupSum(buys,l=>l.sub||"",l=>+l.total||0).filter(x=>x[1]>0), max=Math.max(1,...secs.map(x=>x[1]));
@@ -2338,7 +2353,7 @@ $("m-buy").addEventListener("click",()=>openBuy(null));
 $("m-copy").addEventListener("click",()=>copyText(monthText(),"Summary copied. Paste it into WhatsApp or an email."));
 $("p-list").addEventListener("click",e=>{
   const lp=e.target.closest("[data-lpaid]");if(lp){updLog(lp.dataset.lpaid,{paid:true,paidOn:ymd(new Date())});toast("Marked as paid");return}
-  const le=e.target.closest("[data-ledit]");if(le){openBuyEdit(le.dataset.ledit);return}
+  {const ph0=e.target.closest("[data-lphoto]");const le=e.target.closest("[data-ledit]");if(le&&!ph0){if(canWrite)openBuyEdit(le.dataset.ledit);return}}
   const ph=e.target.closest("[data-lphoto]");if(ph){showPhoto(ph.dataset.lphoto,ph.dataset.lphototitle);return}
   const d=e.target.closest("[data-ldel]");if(d){pendingDel=d.dataset.ldel;render();return}
   if(e.target.closest("[data-lkeep]")){pendingDel=null;render();return}
@@ -2372,20 +2387,22 @@ function renderOrder(){
   let total=0, priced=true;
   const html=names.map(sp=>{
     const rows=groups[sp].map(o=>{const on=!orderSkip[o.i.id];const cost=o.price?o.price*o.qty:null;if(on){if(cost)total+=cost;else priced=false}
-      return `<div class="orow${on?"":" off"}"><input type="checkbox" data-oon="${esc(o.i.id)}" ${on?"checked":""} aria-label="Include ${esc(o.i.name)}"><div class="on"><b>${esc(o.i.name)}</b><span><span class="why ${o.why[0]}">${esc(o.why[1])}</span> · have ${o.i.qty??0}, reorder at ${o.i.min??0}</span></div><div class="oq"><input type="number" min="1" inputmode="numeric" value="${o.qty}" data-oq="${esc(o.i.id)}" aria-label="Quantity to order of ${esc(o.i.name)}"><small>${esc(o.i.unit)}</small></div><div class="oc">${cost?"≈ "+rs(cost):o.price===null?'<span class="muted">no price yet</span>':""}</div></div>`}).join("");
-    return `<div class="card ogrp"><header><h3>${esc(sp||"Supplier not set")}</h3><span class="muted">${groups[sp].length} item${groups[sp].length>1?"s":""}</span></header>${rows}</div>`;
+      return `<div class="orow${on?"":" off"}"><input type="checkbox" data-oon="${esc(o.i.id)}" ${on?"checked":""} aria-label="Include ${esc(o.i.name)}"><div class="on"><b>${esc(o.i.name)}</b><span><span class="why ${o.why[0]}">${o.why[0]==="out"?"Finished":o.why[0]==="low"?"Low":"Running out"}</span> · have ${o.i.qty??0}${cost?` · ≈ ${rs(cost)}`:""}</span></div><div class="ostep"><button type="button" data-ostep="-1" data-oid="${esc(o.i.id)}" aria-label="Less">−</button><span><b>${o.qty}</b><small>${esc(o.i.unit)}</small></span><button type="button" data-ostep="1" data-oid="${esc(o.i.id)}" aria-label="More">+</button></div></div>`;
+    }).join("");
+    return `<div class="card ogrp"><header><div><h3>${esc(sp||"Supplier not set")}</h3><span class="muted small">${groups[sp].length} item${groups[sp].length>1?"s":""}</span></div><a class="btn small primary" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(orderText(sp))}">Send to ${esc(sp||"supplier")}</a></header>${rows}</div>`;
   }).join("");
   $("o-list").innerHTML=html+`<div class="ofoot"><span>Estimated total</span><span>${rs(total)}${priced?"":" + items without a price"}</span></div>`;
   $("o-wa").href="https://wa.me/?text="+encodeURIComponent(orderText());
 }
-function orderText(){
-  const list=orderItems().filter(o=>!orderSkip[o.i.id]);
+function orderText(only){
+  const list=orderItems().filter(o=>!orderSkip[o.i.id]&&(only===undefined||(o.supplier||"")===only));
   const groups={};for(const o of list)(groups[o.supplier||""]=groups[o.supplier||""]||[]).push(o);
   const lines=[`${S().clinic.name} — Order list (${fmtDate(ymd(new Date()))})`];
   for(const sp of Object.keys(groups)){lines.push("",sp?`Supplier: ${sp}`:"Supplier: (choose)");for(const o of groups[sp])lines.push(`• ${o.i.name} — ${o.qty} ${o.i.unit}`)}
   lines.push("","Please confirm availability and price. Thank you.");
   return lines.join("\n");
 }
+$("o-list").addEventListener("click",e=>{const b=e.target.closest("[data-ostep]");if(!b)return;const id=b.dataset.oid,o=orderItems().find(x=>x.i.id===id);if(!o)return;orderQty[id]=Math.max(1,o.qty+(+b.dataset.ostep));render()});
 $("o-list").addEventListener("change",e=>{
   const q=e.target.closest("[data-oq]");if(q){orderQty[q.dataset.oq]=Math.max(1,Math.floor(+q.value||1));render();return}
   const c=e.target.closest("[data-oon]");if(c){orderSkip[c.dataset.oon]=!c.checked;render()}
@@ -4190,6 +4207,7 @@ $("p-more").addEventListener("click",()=>{const it=buyId?current(buyId):null,q=$
   const carry={sup:$("p-sup").value.trim(),inv:$("p-inv").value.trim(),date:$("p-date").value,paid:$("p-paid").value,
     row:it?{...vbBlank(),oname:it.name,itemId:it.id,qty:q||"1",price:pr,total:tt}:null};
   pdlg.close();openOrder(carry)});$("orderBtn").addEventListener("click",()=>openOrder());
+$("cabBack").addEventListener("click",()=>{view="list";localSet("aa-view",view);render();window.scrollTo(0,0)});
 $("ib-single").addEventListener("click",()=>openBuy(null));$("ib-multi").addEventListener("click",()=>openOrder());
 function openVb(){if(!canWrite)return;vbSetMode("bill");vbRows=[];vbFile=null;vbOpts="";$("vb-file").value="";$("vb-text").value="";$("vb-txw").open=false;$("vb-err").hidden=true;$("vb-err2").hidden=true;$("vb-s1").hidden=false;$("vb-s2").hidden=true;$("vb-read").disabled=false;$("vb-read").textContent="Read bill";openD(vbdlg)}
 $("m-vbill").addEventListener("click",openVb);
@@ -5266,6 +5284,7 @@ function openMore(){const b=document.body,vis=id=>{const x=$(id);return x&&!x.hi
   const items=[
     isSimple()&&!b.classList.contains("no-tab_lab")&&["lab","Lab work","#A8357A",'<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/>'],
     isSimple()&&!b.classList.contains("no-tab_inventory")&&["inventory","Stock","#6A48B2",'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/>'],
+    !b.classList.contains("no-tab_inventory")&&["cabinet","Cabinet map (where things are kept)","#6A48B2",'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 6h4M10 12h4M10 18h4"/>'],
     !b.classList.contains("no-tab_reports")&&["reports","Reports & income","#25587A",'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'],
     canShares()&&["shares","Dentist shares","#B7791F",'<circle cx="8" cy="8" r="5"/><circle cx="16" cy="16" r="5"/>'],
     !b.classList.contains("is-staff")&&["visits","Treatment visits","#1D5F53",'<path d="M8 3v4M16 3v4"/><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 13h3M8 17h6"/>'],
@@ -5280,6 +5299,7 @@ $("moreBtn").addEventListener("click",openMore);$("menuBtn").addEventListener("c
 $("moreList").addEventListener("click",e=>{const b=e.target.closest("[data-mi]");if(!b)return;const k=b.dataset.mi;$("moredlg").close();
   if(["lab","inventory","reports"].includes(k))return goMain(k);
   if(k==="prices")return openPrices();
+  if(k==="cabinet"){view="cabinet";return goMain("inventory")}
   if(k==="visits")return openVisitStages();
   if(k==="online")return openOnline();
   if(k==="help")return openHelp();
@@ -5493,7 +5513,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v114";let updShown=false;
+const APP_BUILD="ds-v115";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
