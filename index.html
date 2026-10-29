@@ -1297,7 +1297,7 @@ input[type=date]{min-width:0;max-width:100%}
 </dialog>
 <dialog id="pdlg">
   <form class="dlg" id="pform" novalidate>
-    <h2>Record purchase</h2>
+    <h2 id="p-title">Record purchase</h2>
     <div class="field" id="p-pick"><label for="p-item">Item</label><input id="p-item" list="p-items" autocomplete="off" placeholder="Start typing, e.g. Composite A2"><datalist id="p-items"></datalist></div>
     <div class="pinfo" id="p-info" hidden></div>
     <div class="grid2">
@@ -2190,8 +2190,10 @@ async function updLog(id,fields){if(!logs[id])return;const v={...logs[id],...fie
 const pdlg=$("pdlg"); let buyId=null;
 previewInput($("p-photo"),$("p-prev"));
 const itemLabel=i=>i.name+" — "+subName(i.sub);
+let editLogId=null;
 function openBuy(id){
   if(!canWrite)return toast("You don't have edit access.");
+  editLogId=null;$("p-title").textContent="Record purchase";$("pform").querySelector("button[type=submit]").textContent="Save purchase";
   $("p-pick").hidden=!!id; $("p-item").value=""; $("p-err").hidden=true;
   $("p-items").innerHTML=id?"":items().filter(i=>!i.hidden).map(i=>`<option value="${esc(itemLabel(i))}">`).join("");
   for(const f of ["p-qty","p-price","p-total","p-inv","p-exp","p-photo"])$(f).value="";$("p-paid").value="paid";$("p-prev").hidden=true;
@@ -2211,7 +2213,7 @@ function setBuyItem(it){
   supSync("p-sup");priceHint();
 }
 function priceHint(){
-  const h=$("p-hint"); const lb=buyId?lastBuys(buyId).find(l=>l.unitPrice):null;
+  const h=$("p-hint"); const lb=buyId?lastBuys(buyId).find(l=>l.unitPrice&&l.id!==editLogId):null;
   if(!lb){h.hidden=true;return}
   const p=+$("p-price").value; let t=`Last bought ${esc(fmtDate(lb.date))}: ${lb.qty} ${esc(lb.unit)} at ${rs(lb.unitPrice)} each${lb.supplier?" from "+esc(lb.supplier):""}.`, cls="";
   if(p){const ch=Math.round((p-lb.unitPrice)/lb.unitPrice*100);if(ch>=10){t+=` <b>Price is up ${ch}%.</b>`;cls=" up"}else if(ch<=-10){t+=` <b>Price is down ${-ch}%.</b>`;cls=" down"}}
@@ -2222,13 +2224,30 @@ $("p-qty").addEventListener("input",()=>{const q=+$("p-qty").value,p=+$("p-price
 $("p-price").addEventListener("input",()=>{const q=+$("p-qty").value,p=+$("p-price").value;if(q&&p)$("p-total").value=Math.round(q*p);priceHint()});
 $("p-total").addEventListener("input",()=>{const q=+$("p-qty").value,t=+$("p-total").value;if(q&&t)$("p-price").value=Math.round(t/q*100)/100;priceHint()});
 $("p-cancel").addEventListener("click",()=>pdlg.close());
+function openBuyEdit(lid){
+  const l=logs[lid];if(!l)return;if(!canWrite)return toast("You don't have edit access.");
+  openBuy(l.itemId);
+  if(!current(l.itemId)){buyId=l.itemId;$("p-info").hidden=false;$("p-info").innerHTML=`<b>${esc(l.name)}</b><span>${esc(secName(l.sub))}</span>`;$("p-unit").textContent="("+(l.unit||"")+")"}
+  editLogId=lid;$("p-title").textContent="Edit purchase";$("pform").querySelector("button[type=submit]").textContent="Save changes";
+  $("p-qty").value=l.qty||"";$("p-price").value=l.unitPrice||"";$("p-total").value=l.total||"";$("p-sup").value=l.supplier||"";$("p-inv").value=l.invoice||"";
+  $("p-date").value=l.date||ymd(new Date());$("p-paid").value=l.paid===false?"pending":"paid";$("p-exp").value=(current(l.itemId)||{}).expiry||"";
+  supSync("p-sup");priceHint();
+}
 $("pform").addEventListener("submit",async e=>{
   e.preventDefault(); const err=$("p-err");
   if(!buyId){err.textContent="Choose an item from the list as you type.";err.hidden=false;$("p-item").focus();return}
   const q=Math.floor(+$("p-qty").value);
   if(!(q>0)){err.textContent="Enter how many you received.";err.hidden=false;$("p-qty").focus();return}
   const it=current(buyId), price=+$("p-price").value||null, total=+$("p-total").value||(price?Math.round(price*q):null);
-  const sup=$("p-sup").value.trim(), exp=$("p-exp").value, now=(+it.qty||0)+q;
+  const sup=$("p-sup").value.trim(), exp=$("p-exp").value;
+  if(editLogId){const lid=editLogId,old=logs[lid];if(!old){pdlg.close();return}
+    const pf=$("p-photo").files&&$("p-photo").files[0],paidSel=$("p-paid").value!=="pending";let photoId=old.photoId||null;
+    if(pf){const sb=$("pform").querySelector("button[type=submit]");sb.disabled=true;sb.textContent="Saving photo…";try{photoId=await saveAny(pf)}finally{sb.disabled=false;sb.textContent="Save changes"}}
+    const d=q-(+old.qty||0),f={};if(it&&it.qty!=null&&d)f.qty=Math.max(0,(+it.qty||0)+d);if(exp&&it)f.expiry=exp;if(it&&Object.keys(f).length)patch(old.itemId,f,true,{noLog:true});
+    const date=$("p-date").value||old.date;
+    updLog(lid,{qty:q,unitPrice:price||(total?Math.round(total/q*100)/100:null),total,supplier:sup,invoice:$("p-inv").value.trim(),date,paid:paidSel,paidOn:paidSel?(old.paid!==false&&old.paidOn?old.paidOn:ymd(new Date())):null,photoId,editedAt:new Date().toISOString(),editedBy:myName||""});
+    editLogId=null;pdlg.close();toast("Purchase updated"+(d&&it?` · stock now ${f.qty??it.qty} ${it.unit}`:""));return}
+  const now=(+it.qty||0)+q;
   const f={qty:now}; if(sup)f.supplier=sup; if(exp)f.expiry=exp;
   const bid=buyId,pf=$("p-photo").files&&$("p-photo").files[0],paidSel=$("p-paid").value!=="pending";
   let photoId=null;if(pf){const sb=$("pform").querySelector("button[type=submit]");sb.disabled=true;sb.textContent="Saving photo…";try{photoId=await saveAny(pf)}finally{sb.disabled=false;sb.textContent="Save purchase"}}
@@ -2264,7 +2283,7 @@ function renderPurch(){
   for(const l of shown){
     if(l.date!==lastD){lastD=l.date;const day=shown.filter(x=>x.date===l.date).reduce((s,x)=>s+(+x.total||0),0);html+=`<div class="pday"><span>${new Date(l.date+"T00:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"short"})}</span><span>${rs(day)}</span></div>`}
     const who=byName(l);
-    html+=`<div class="prow"><div class="pn"><b>${esc(l.name)}</b><span>${esc(secName(l.sub))}${l.supplier?" · "+esc(l.supplier):""}${l.invoice?" · Bill "+esc(l.invoice):""}${who?" · by "+esc(who):""}</span><span class="pchips">${l.paid===false?`<span class="chip2 warn">Pending</span><button class="btn small" data-lpaid="${esc(l.id)}">Mark paid</button>`:`<span class="chip2 ok">Paid${l.paidOn&&l.paidOn!==l.date?" "+esc(fmtDate(l.paidOn)):""}</span>`}${l.photoId?`<button class="btn small" data-lphoto="${esc(l.photoId)}" data-lphototitle="${esc(l.name+" · "+fmtDate(l.date))}">Bill</button>`:""}</span></div><div class="pq">${l.qty} ${esc(l.unit)}${l.unitPrice?`<span>@ ${rs(l.unitPrice)}</span>`:""}</div><div class="pt">${l.total?rs(l.total):`<span class="muted">no price</span>`}</div><button class="ldel" data-ldel="${esc(l.id)}" aria-label="Delete this purchase record" ${canWrite?"":"disabled"}>×</button>
+    html+=`<div class="prow"><div class="pn"><b>${esc(l.name)}</b><span>${esc(secName(l.sub))}${l.supplier?" · "+esc(l.supplier):""}${l.invoice?" · Bill "+esc(l.invoice):""}${who?" · by "+esc(who):""}</span><span class="pchips">${l.paid===false?`<span class="chip2 warn">Pending</span><button class="btn small" data-lpaid="${esc(l.id)}">Mark paid</button>`:`<span class="chip2 ok">Paid${l.paidOn&&l.paidOn!==l.date?" "+esc(fmtDate(l.paidOn)):""}</span>`}${l.photoId?`<button class="btn small" data-lphoto="${esc(l.photoId)}" data-lphototitle="${esc(l.name+" · "+fmtDate(l.date))}">Bill</button>`:""}${canWrite?`<button class="btn small" data-ledit="${esc(l.id)}">Edit</button>`:""}</span></div><div class="pq">${l.qty} ${esc(l.unit)}${l.unitPrice?`<span>@ ${rs(l.unitPrice)}</span>`:""}</div><div class="pt">${l.total?rs(l.total):`<span class="muted">no price</span>`}</div><button class="ldel" data-ldel="${esc(l.id)}" aria-label="Delete this purchase record" ${canWrite?"":"disabled"}>×</button>
       ${pendingDel===l.id?`<div class="pconf"><span>Delete this record and take ${l.qty} ${esc(l.unit)} back off the stock count?</span><span style="display:flex;gap:6px"><button class="btn small" data-lkeep>Keep</button><button class="btn small danger" data-lyes="${esc(l.id)}">Delete</button></span></div>`:""}</div>`;
   }
   $("p-list").innerHTML=shown.length?html:buys.length?`<div class="empty">No ${purF==="pending"?"pending":"paid"} purchases this month.</div>`:`<div class="empty">No purchases recorded in ${esc(monthLabel(monthKey))}.<br>When new stock arrives, tap the <b>cart button</b> next to the item, or <b>+ Record purchase</b> above. The summary builds itself.</div>`;
@@ -2293,6 +2312,7 @@ $("m-buy").addEventListener("click",()=>openBuy(null));
 $("m-copy").addEventListener("click",()=>copyText(monthText(),"Summary copied. Paste it into WhatsApp or an email."));
 $("p-list").addEventListener("click",e=>{
   const lp=e.target.closest("[data-lpaid]");if(lp){updLog(lp.dataset.lpaid,{paid:true,paidOn:ymd(new Date())});toast("Marked as paid");return}
+  const le=e.target.closest("[data-ledit]");if(le){openBuyEdit(le.dataset.ledit);return}
   const ph=e.target.closest("[data-lphoto]");if(ph){showPhoto(ph.dataset.lphoto,ph.dataset.lphototitle);return}
   const d=e.target.closest("[data-ldel]");if(d){pendingDel=d.dataset.ldel;render();return}
   if(e.target.closest("[data-lkeep]")){pendingDel=null;render();return}
@@ -5388,7 +5408,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v110";let updShown=false;
+const APP_BUILD="ds-v111";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
