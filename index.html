@@ -762,10 +762,10 @@ body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .vbtx summary{cursor:pointer;font-weight:600;color:var(--mod,var(--accent))}.vbtx textarea,#vb-text{width:100%;box-sizing:border-box;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:inherit;margin-top:6px}
 .vbrows{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto}
 .vbrow{display:grid;grid-template-columns:28px 1fr;gap:8px;border:1px solid var(--line);border-radius:12px;padding:10px}
-.vbrow.off{opacity:.55}.vbrow.bad{border-color:var(--bad,#c0392b)}
+.vbrow.ord{grid-template-columns:1fr}.vbrows.ord{max-height:none;overflow:visible}.vbrow.off{opacity:.55}.vbrow.bad{border-color:var(--bad,#c0392b)}
 .vbsrc{font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vbf{display:flex;flex-direction:column;gap:6px;min-width:0}
-.vbg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.vbg2{display:grid;grid-template-columns:2fr 1.4fr .8fr;gap:6px}
+.vbg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.vbo{display:flex;gap:6px;align-items:flex-end}.vbo .vbn{flex:1;min-width:0}.vbo input{width:100%}.vbrm{border:1px solid var(--line);background:none;border-radius:8px;width:34px;height:34px;color:var(--muted);font-size:1.1rem;flex:none}.vbrm:hover{color:var(--bad)}.vbg2{display:grid;grid-template-columns:2fr 1.4fr .8fr;gap:6px}
 .vbf input,.vbf select{width:100%;box-sizing:border-box;min-width:0}
 .vbf label.mini{font-size:.72rem;color:var(--muted);display:block}
 .vbtag{font-size:.72rem;font-weight:700;border-radius:999px;padding:1px 8px;align-self:flex-start}.vbtag.ok{background:var(--ok-soft,#e3f3ea);color:var(--ok,#1f7a4a)}.vbtag.new{background:var(--warn-soft,#fbefd9);color:var(--warn,#a86200)}
@@ -1230,7 +1230,7 @@ input[type=date]{min-width:0;max-width:100%}
   <section id="purch" class="view" hidden>
     <div class="vhead">
       <div class="mnav"><button class="btn" id="m-prev" aria-label="Previous month">‹</button><h2 id="m-label"></h2><button class="btn" id="m-next" aria-label="Next month">›</button></div>
-      <div class="vact"><button class="btn" id="m-pdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 12v6m-3-3 3 3 3-3"/></svg>PDF statement</button><button class="btn" id="m-copy">Copy summary</button><a class="btn" id="m-wa" target="_blank" rel="noopener">WhatsApp summary</a><button class="btn" id="m-vbill">+ Vendor bill</button><button class="btn primary" id="m-buy">+ Record purchase</button></div>
+      <div class="vact"><button class="btn" id="m-pdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 12v6m-3-3 3 3 3-3"/></svg>PDF statement</button><button class="btn" id="m-copy">Copy summary</button><a class="btn" id="m-wa" target="_blank" rel="noopener">WhatsApp summary</a><button class="btn" id="m-vbill">+ Vendor bill</button><button class="btn" id="m-order">+ Multiple items order</button><button class="btn primary" id="m-buy">+ Record purchase</button></div>
     </div>
     <div class="tiles" id="m-tiles"></div>
     <div class="pgrid">
@@ -1259,6 +1259,7 @@ input[type=date]{min-width:0;max-width:100%}
       <input id="q" type="search" placeholder="Search all items, e.g. composite, gloves, K-file" aria-label="Search items">
     </div>
     <div class="subsel" id="subsel"><label for="sub">Show</label><select id="sub"></select></div>
+    <button class="btn" id="orderBtn">+ Multiple items order</button>
     <button class="btn primary" id="addBtn">+ Add item</button>
   </div>
   <p class="ctx" id="ctx"></p>
@@ -1313,6 +1314,7 @@ input[type=date]{min-width:0;max-width:100%}
     <img id="p-prev" class="pprev" hidden alt="Bill photo preview">
     <p class="phint" id="p-hint" hidden></p>
     <p class="perr" id="p-err" hidden></p>
+    <button type="button" class="btn" id="p-more" style="align-self:flex-start">+ Add more items to this order</button>
     <div class="actions"><span></span><div><button type="button" class="btn" id="p-cancel">Cancel</button><button type="submit" class="btn primary">Save purchase</button></div></div>
   </form>
 </dialog>
@@ -1564,7 +1566,7 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save labs</button></div></div>
 </form></dialog>
 <dialog id="vbdlg" class="wide"><div class="dlg">
-  <h2>Add stock from a vendor bill</h2>
+  <h2 id="vb-title">Add stock from a vendor bill</h2>
   <div id="vb-s1" class="vbstep">
     <p class="muted small" style="margin:0">Upload the supplier's bill. The app reads the items, matches them to your stock list and adds each one to its own section. You check everything before it's saved.</p>
     <div class="field"><label for="vb-file">Vendor bill (PDF or photo)</label><input id="vb-file" type="file" accept="application/pdf,image/*"></div>
@@ -1580,9 +1582,10 @@ input[type=date]{min-width:0;max-width:100%}
       <div class="field"><label for="vb-inv">Bill / invoice no.</label><input id="vb-inv" maxlength="40"></div>
       <div class="field"><label for="vb-date">Bill date</label><input id="vb-date" type="date"></div>
       <div class="field"><label for="vb-paid">Payment to supplier</label><select id="vb-paid"><option value="paid">Paid</option><option value="pending">Pending (on credit)</option></select></div>
+      <div class="field" id="vb-ofw" hidden><label for="vb-ofile">Bill (photo or PDF, optional)</label><input id="vb-ofile" type="file" accept="image/*,application/pdf"></div>
     </div>
     <p class="muted small" id="vb-found" style="margin:0"></p>
-    <div id="vb-rows" class="vbrows"></div>
+    <div id="vb-rows" class="vbrows"></div><datalist id="vb-names"></datalist>
     <button type="button" class="btn small" id="vb-add" style="align-self:flex-start">+ Add a line</button>
     <p class="perr" id="vb-err2" hidden></p>
     <div class="actions"><span class="muted small" id="vb-sum"></span><div><button class="btn" id="vb-back" type="button">Back</button><button class="btn primary" id="vb-save" type="button">Add to stock</button></div></div>
@@ -1965,6 +1968,7 @@ function rowHTML(i){
   if(i.loc)meta.push(`<span class="loc">${esc(locLabel(i.loc))}</span>`);
   const dl=daysLeft(i); if(dl!==null&&dl<=45)meta.push(`<span class="fc${dl<=14?" soon":""}">≈ ${dl} day${dl===1?"":"s"} left at current use</span>`);
   if(i.expiry)meta.push(`<span class="${d!==null&&d<=60?"exp-flag":""}">Exp ${esc(fmtDate(i.expiry))}${d!==null&&d<0?" · expired":d!==null&&d<=60?` · ${d}d left`:""}</span>`);
+  if(i.price)meta.push(`<span>${rs(i.price)} / ${esc(i.unit||"unit")}</span>`);
   if(i.supplier)meta.push(`<span>${esc(i.supplier)}</span>`);
   const dis=canWrite?"":"disabled";
   return `<div class="row" role="row" data-id="${esc(i.id)}">
@@ -2193,7 +2197,7 @@ const itemLabel=i=>i.name+" — "+subName(i.sub);
 let editLogId=null;
 function openBuy(id){
   if(!canWrite)return toast("You don't have edit access.");
-  editLogId=null;$("p-title").textContent="Record purchase";$("pform").querySelector("button[type=submit]").textContent="Save purchase";
+  editLogId=null;$("p-more").hidden=false;$("p-title").textContent="Record purchase";$("pform").querySelector("button[type=submit]").textContent="Save purchase";
   $("p-pick").hidden=!!id; $("p-item").value=""; $("p-err").hidden=true;
   $("p-items").innerHTML=id?"":items().filter(i=>!i.hidden).map(i=>`<option value="${esc(itemLabel(i))}">`).join("");
   for(const f of ["p-qty","p-price","p-total","p-inv","p-exp","p-photo"])$(f).value="";$("p-paid").value="paid";$("p-prev").hidden=true;
@@ -2228,7 +2232,7 @@ function openBuyEdit(lid){
   const l=logs[lid];if(!l)return;if(!canWrite)return toast("You don't have edit access.");
   openBuy(l.itemId);
   if(!current(l.itemId)){buyId=l.itemId;$("p-info").hidden=false;$("p-info").innerHTML=`<b>${esc(l.name)}</b><span>${esc(secName(l.sub))}</span>`;$("p-unit").textContent="("+(l.unit||"")+")"}
-  editLogId=lid;$("p-title").textContent="Edit purchase";$("pform").querySelector("button[type=submit]").textContent="Save changes";
+  editLogId=lid;$("p-more").hidden=true;$("p-title").textContent="Edit purchase";$("pform").querySelector("button[type=submit]").textContent="Save changes";
   $("p-qty").value=l.qty||"";$("p-price").value=l.unitPrice||"";$("p-total").value=l.total||"";$("p-sup").value=l.supplier||"";$("p-inv").value=l.invoice||"";
   $("p-date").value=l.date||ymd(new Date());$("p-paid").value=l.paid===false?"pending":"paid";$("p-exp").value=(current(l.itemId)||{}).expiry||"";
   supSync("p-sup");priceHint();
@@ -2248,7 +2252,7 @@ $("pform").addEventListener("submit",async e=>{
     updLog(lid,{qty:q,unitPrice:price||(total?Math.round(total/q*100)/100:null),total,supplier:sup,invoice:$("p-inv").value.trim(),date,paid:paidSel,paidOn:paidSel?(old.paid!==false&&old.paidOn?old.paidOn:ymd(new Date())):null,photoId,editedAt:new Date().toISOString(),editedBy:myName||""});
     editLogId=null;pdlg.close();toast("Purchase updated"+(d&&it?` · stock now ${f.qty??it.qty} ${it.unit}`:""));return}
   const now=(+it.qty||0)+q;
-  const f={qty:now}; if(sup)f.supplier=sup; if(exp)f.expiry=exp;
+  const f={qty:now}; if(sup)f.supplier=sup; if(exp)f.expiry=exp; {const up=price||(total?Math.round(total/q*100)/100:null);if(up)f.price=up}
   const bid=buyId,pf=$("p-photo").files&&$("p-photo").files[0],paidSel=$("p-paid").value!=="pending";
   let photoId=null;if(pf){const sb=$("pform").querySelector("button[type=submit]");sb.disabled=true;sb.textContent="Saving photo…";try{photoId=await saveAny(pf)}finally{sb.disabled=false;sb.textContent="Save purchase"}}
   patch(bid,f,true,{noLog:true});
@@ -4074,7 +4078,21 @@ $("ph-body").addEventListener("click",async e=>{
 
 
 /* --- Vendor bill → stock --- */
-const vbdlg=$("vbdlg");let vbRows=[],vbFile=null,vbOpts="";
+const vbdlg=$("vbdlg");let vbRows=[],vbFile=null,vbOpts="",vbMode="bill";
+const vbFind=n=>{const v=String(n||"").trim().toLowerCase();if(!v)return null;return items().find(i=>!i.hidden&&(i.name.toLowerCase()===v||itemLabel(i).toLowerCase()===v))||null};
+function vbOrderRow(r,i){const it=r.itemId&&r.itemId!=="__new"?current(r.itemId):null,isNew=r.itemId==="__new";
+  return `<div class="vbrow ord" data-i="${i}"><div class="vbf">
+    <div class="vbo"><div class="vbn"><label class="mini">Item ${i+1}</label><input data-k="oname" list="vb-names" value="${esc(r.oname||"")}" maxlength="80" placeholder="Type name, e.g. Composite A2, Mouth mirror" autocomplete="off"></div><button type="button" class="vbrm" data-vbrm="${i}" aria-label="Remove this item">×</button></div>
+    <span class="vbtag ${isNew?"new":it?"ok":""}" data-tag>${isNew?"New item · goes to the section below":it?"In your stock list · "+esc(secName(it.sub)):"Type the item name"}</span>
+    <div class="vbg2" data-newf ${isNew?"":"hidden"}><div class="vbn"><label class="mini">Section</label><select data-k="newSub">${vbSubOpts(r.newSub)}</select></div><div><label class="mini">Unit</label><input data-k="unit" value="${esc(r.unit||"pcs")}" maxlength="20"></div></div>
+    <div class="vbg"><div><label class="mini">Qty</label><input data-k="qty" type="number" min="1" inputmode="numeric" value="${esc(r.qty)}"></div><div><label class="mini">Price / unit</label><input data-k="price" type="number" min="0" step="any" inputmode="decimal" value="${esc(r.price)}"></div><div><label class="mini">Total</label><input data-k="total" type="number" min="0" step="any" inputmode="decimal" value="${esc(r.total)}"></div></div>
+  </div></div>`}
+function vbOName(el,r){const v=el.value.trim();r.oname=el.value;const it=vbFind(v),row=el.closest(".vbrow");
+  if(it){r.itemId=it.id;r.newName=""}else if(v){r.itemId="__new";r.newName=v;if(!r.subSet){const g=matchItem(v,.34);if(g){r.newSub=g.sub;r.unit=g.unit||r.unit}}}else{r.itemId="";r.newName=""}
+  const tag=row.querySelector("[data-tag]"),nf=row.querySelector("[data-newf]");
+  tag.className="vbtag "+(r.itemId==="__new"?"new":it?"ok":"");tag.textContent=r.itemId==="__new"?"New item · goes to the section below":it?"In your stock list · "+secName(it.sub):"Type the item name";
+  nf.hidden=r.itemId!=="__new";if(r.itemId==="__new"){nf.querySelector("[data-k=newSub]").value=r.newSub;nf.querySelector("[data-k=unit]").value=r.unit||"pcs"}
+  if(it&&!r.price){const lb=lastBuys(it.id).find(l=>l.unitPrice)||{};const p=it.price||lb.unitPrice;if(p){r.price=String(p);row.querySelector("[data-k=price]").value=r.price;if(+r.qty>0){r.total=String(Math.round(p*+r.qty));row.querySelector("[data-k=total]").value=r.total}}}}
 const VB_SYN=[[/\blidocaine\b/g,"lignocaine"],[/\bxylocaine\b/g,"lignocaine"],[/\bg\s?p\b/g,"gutta percha"],[/\bguttapercha\b/g,"gutta percha"],[/\bpp\b/g,"paper point"],[/\bgic\b/g,"gic"]];
 const normT=s=>{let t=String(s||"").toLowerCase().replace(/([a-z]{2,})(\d)/g,"$1 $2").replace(/(\d)([a-z])/g,"$1 $2").replace(/[^a-z0-9]+/g," ");for(const [r,v] of VB_SYN)t=t.replace(r,v);return t.split(" ").filter(Boolean).map(w=>w.length>3&&w.endsWith("s")&&!w.endsWith("ss")?w.slice(0,-1):w).join(" ")};
 function matchItem(line,min){const lt=" "+normT(line)+" ",toks=new Set(lt.trim().split(" "));let best=null,bs=0;
@@ -4110,11 +4128,13 @@ function vbParse(lines){
 }
 function vbItemOpts(){const all=items().filter(i=>!i.hidden);return `<option value="">— Choose item —</option><option value="__new">+ New item (add to a section)</option>`+GROUPS.map(g=>g.subs.map(s=>{const its=all.filter(i=>i.sub===s.k).sort((a,b)=>a.name.localeCompare(b.name));return its.length?`<optgroup label="${esc(g.n+" › "+s.n)}">${its.map(i=>`<option value="${esc(i.id)}">${esc(i.name)}</option>`).join("")}</optgroup>`:""}).join("")).join("")}
 function vbSubOpts(sel){return GROUPS.map(g=>`<optgroup label="${esc(g.n)}">${g.subs.map(s=>`<option value="${s.k}"${s.k===sel?" selected":""}>${esc(s.n)}</option>`).join("")}</optgroup>`).join("")}
-function vbWarn(r){if(!r.on)return "";if(!r.itemId)return "Choose the item.";if(r.itemId==="__new"&&!r.newName.trim())return "Name the new item.";if(!(Math.floor(+r.qty)>0))return "Enter the quantity.";return ""}
-function vbCount(){const on=vbRows.filter(r=>r.on),bad=on.filter(vbWarn).length,sum=on.reduce((s,r)=>s+(+r.total||(+r.price||0)*(+r.qty||0)),0);
+function vbWarn(r){if(!r.on)return "";if(vbMode==="order"&&!String(r.oname||"").trim())return "";if(!r.itemId)return vbMode==="order"?"Type the item name.":"Choose the item.";if(r.itemId==="__new"&&!r.newName.trim())return "Name the new item.";if(!(Math.floor(+r.qty)>0))return "Enter the quantity.";return ""}
+function vbCount(){const on=vbRows.filter(r=>r.on&&(vbMode!=="order"||String(r.oname||"").trim())),bad=on.filter(vbWarn).length,sum=on.reduce((s,r)=>s+(+r.total||(+r.price||0)*(+r.qty||0)),0);
   $("vb-sum").textContent=`${pl(on.length,"item")} · ${rs(sum)}${bad?` · ${bad} need fixing`:""}`;$("vb-save").disabled=!on.length||!!bad;
   for(const el of $("vb-rows").querySelectorAll(".vbrow")){const r=vbRows[+el.dataset.i];el.classList.toggle("off",!r.on);el.classList.toggle("bad",!!vbWarn(r))}}
 function renderVb(){
+  if(vbMode==="order"){$("vb-found").textContent="Add every item you bought: materials, instruments, anything. Type a name from your stock list, or a new name and choose its section.";
+    $("vb-rows").innerHTML=vbRows.map(vbOrderRow).join("");vbCount();return}
   vbOpts=vbOpts||vbItemOpts();
   $("vb-found").textContent=vbRows.length?`Found ${pl(vbRows.length,"line")}: ${vbRows.filter(r=>r.matched).length} matched to your stock list${vbRows.some(r=>!r.matched)?", the rest will be added as new items. Untick any line that isn't stock (delivery charges etc.).":"."}`:"No items found. Add the lines yourself.";
   $("vb-rows").innerHTML=vbRows.map((r,i)=>`<div class="vbrow" data-i="${i}"><label class="phon"><input type="checkbox" data-k="on" ${r.on?"checked":""} aria-label="Include this line"></label><div class="vbf">
@@ -4127,16 +4147,30 @@ function renderVb(){
   $("vb-rows").querySelectorAll("select[data-k=itemId]").forEach((s,i)=>{s.value=vbRows[i].itemId});
   vbCount();
 }
-$("vb-rows").addEventListener("input",e=>{const el=e.target.closest("[data-k]");if(!el)return;const i=+el.closest(".vbrow").dataset.i,k=el.dataset.k,r=vbRows[i];r[k]=k==="on"?el.checked:el.value;
+$("vb-rows").addEventListener("click",e=>{const x=e.target.closest("[data-vbrm]");if(!x)return;vbRows.splice(+x.dataset.vbrm,1);if(!vbRows.length)vbRows.push(vbBlank());renderVb()});
+$("vb-rows").addEventListener("input",e=>{const el=e.target.closest("[data-k]");if(!el)return;const i=+el.closest(".vbrow").dataset.i,k=el.dataset.k,r=vbRows[i];
+  if(k==="oname"){vbOName(el,r);vbCount();return}
+  r[k]=k==="on"?el.checked:el.value;
   if(k==="qty"||k==="price"){if(+r.qty>0&&+r.price>0){r.total=String(Math.round(+r.qty*+r.price));const t=el.closest(".vbrow").querySelector("[data-k=total]");if(t)t.value=r.total}}
   if(k==="total"&&+r.qty>0&&+r.total>0){r.price=String(Math.round(+r.total/+r.qty*100)/100);const p=el.closest(".vbrow").querySelector("[data-k=price]");if(p)p.value=r.price}
   if(k==="itemId"){if(r.itemId==="__new"&&!r.newName){const g=r.src?r.src.replace(/(?:rs\.?\s*)?(?<![\w#.%])\d[\d,]*(?:\.\d+)?(?![\w%])/gi," ").replace(/\s+/g," ").trim().slice(0,60):"";r.newName=g;r.newSub=r.newSub||"restor_m";r.unit=r.unit||"pcs"}renderVb();return}
   vbCount()});
-$("vb-rows").addEventListener("change",e=>{const el=e.target.closest("[data-k=itemId],[data-k=on],[data-k=newSub]");if(!el)return;const i=+el.closest(".vbrow").dataset.i;vbRows[i][el.dataset.k]=el.dataset.k==="on"?el.checked:el.value;if(el.dataset.k==="itemId")renderVb();else vbCount()});
-function openVb(){if(!canWrite)return;vbRows=[];vbFile=null;vbOpts="";$("vb-file").value="";$("vb-text").value="";$("vb-txw").open=false;$("vb-err").hidden=true;$("vb-err2").hidden=true;$("vb-s1").hidden=false;$("vb-s2").hidden=true;$("vb-read").disabled=false;$("vb-read").textContent="Read bill";openD(vbdlg)}
+$("vb-rows").addEventListener("change",e=>{const el=e.target.closest("[data-k=itemId],[data-k=on],[data-k=newSub]");if(!el)return;const i=+el.closest(".vbrow").dataset.i;vbRows[i][el.dataset.k]=el.dataset.k==="on"?el.checked:el.value;if(el.dataset.k==="newSub")vbRows[i].subSet=true;if(el.dataset.k==="itemId")renderVb();else vbCount()});
+const vbBlank=()=>({on:true,src:"",oname:"",itemId:"",newName:"",newSub:"restor_m",unit:"pcs",qty:"1",price:"",total:"",matched:false});
+function vbSetMode(m){vbMode=m;const o=m==="order";$("vb-rows").classList.toggle("ord",o);$("vb-title").textContent=o?"New order · multiple items":"Add stock from a vendor bill";$("vb-ofw").hidden=!o;$("vb-back").hidden=o;$("vb-add").textContent=o?"+ Add another item":"+ Add a line";$("vb-save").textContent=o?"Done · add to stock":"Add to stock"}
+function openOrder(c){c=c||{};if(!canWrite)return toast("You don't have edit access.");vbSetMode("order");vbFile=null;vbOpts="";$("vb-ofile").value="";$("vb-err2").hidden=true;
+  $("vb-names").innerHTML=items().filter(i=>!i.hidden).map(i=>`<option value="${esc(i.name)}" label="${esc(secName(i.sub))}">`).join("");
+  vbRows=c.row?[c.row,vbBlank()]:[vbBlank()];$("vb-sup").value=c.sup||"";supSync("vb-sup");$("vb-inv").value=c.inv||"";$("vb-date").value=c.date||ymd(new Date());$("vb-paid").value=c.paid||"paid";
+  $("vb-s1").hidden=true;$("vb-s2").hidden=false;renderVb();openD(vbdlg);setTimeout(()=>{const f=[...$("vb-rows").querySelectorAll("[data-k=oname]")].pop();if(f)f.focus()},60)}
+$("m-order").addEventListener("click",()=>openOrder());
+$("p-more").addEventListener("click",()=>{const it=buyId?current(buyId):null,q=$("p-qty").value,pr=$("p-price").value,tt=$("p-total").value;
+  const carry={sup:$("p-sup").value.trim(),inv:$("p-inv").value.trim(),date:$("p-date").value,paid:$("p-paid").value,
+    row:it?{...vbBlank(),oname:it.name,itemId:it.id,qty:q||"1",price:pr,total:tt}:null};
+  pdlg.close();openOrder(carry)});$("orderBtn").addEventListener("click",()=>openOrder());
+function openVb(){if(!canWrite)return;vbSetMode("bill");vbRows=[];vbFile=null;vbOpts="";$("vb-file").value="";$("vb-text").value="";$("vb-txw").open=false;$("vb-err").hidden=true;$("vb-err2").hidden=true;$("vb-s1").hidden=false;$("vb-s2").hidden=true;$("vb-read").disabled=false;$("vb-read").textContent="Read bill";openD(vbdlg)}
 $("m-vbill").addEventListener("click",openVb);
 $("vb-back").addEventListener("click",()=>{$("vb-s1").hidden=false;$("vb-s2").hidden=true});
-$("vb-add").addEventListener("click",()=>{vbRows.push({on:true,src:"",itemId:"",newName:"",newSub:"restor_m",unit:"pcs",qty:"1",price:"",total:"",matched:false});renderVb();const el=$("vb-rows").lastElementChild;if(el)el.scrollIntoView({block:"nearest"})});
+$("vb-add").addEventListener("click",()=>{vbRows.push(vbBlank());renderVb();const el=$("vb-rows").lastElementChild;if(el){el.scrollIntoView({block:"nearest"});const f=el.querySelector("[data-k=oname]");if(f)f.focus()}});
 $("vb-read").addEventListener("click",async()=>{
   const err=$("vb-err"),f=$("vb-file").files&&$("vb-file").files[0],txt=$("vb-text").value.trim();err.hidden=true;
   if(!f&&!txt){err.textContent="Choose the bill file, or scan / paste its text.";err.hidden=false;return}
@@ -4151,18 +4185,19 @@ $("vb-read").addEventListener("click",async()=>{
   $("vb-s1").hidden=true;$("vb-s2").hidden=false;renderVb();
 });
 $("vb-save").addEventListener("click",async()=>{
-  const on=vbRows.filter(r=>r.on);if(!on.length||on.some(vbWarn))return;
+  const on=vbRows.filter(r=>r.on&&(vbMode!=="order"||String(r.oname||"").trim()));if(!on.length||on.some(vbWarn))return;
   const b=$("vb-save");b.disabled=true;b.textContent="Saving…";
+  if(vbMode==="order"){const of=$("vb-ofile").files&&$("vb-ofile").files[0];vbFile=of||null}
   let fileId=null;if(vbFile){fileId=await saveAny(vbFile)}
   const sup=$("vb-sup").value.trim(),inv=$("vb-inv").value.trim(),date=$("vb-date").value||ymd(new Date()),paid=$("vb-paid").value!=="pending",run={};let added=0,made=0;
   for(const r of on){const q=Math.floor(+r.qty),total=+r.total||(+r.price?Math.round(+r.price*q):null),price=+r.price||(total?Math.round(total/q*100)/100:null);let id=r.itemId;
     if(id==="__new"){const nm=r.newName.trim(),ex=items().find(i=>i.name.toLowerCase()===nm.toLowerCase());
-      if(ex)id=ex.id;else{id="custom--"+slug(nm)+"-"+Date.now().toString(36)+made;made++;run[id]=q;patch(id,{name:nm,sub:r.newSub||"restor_m",unit:(r.unit||"pcs").trim(),qty:q,min:0,expiry:"",supplier:sup,custom:true,hidden:false,type:""},true,{noLog:true});
+      if(ex)id=ex.id;else{id="custom--"+slug(nm)+"-"+Date.now().toString(36)+made;made++;run[id]=q;patch(id,{name:nm,sub:r.newSub||"restor_m",unit:(r.unit||"pcs").trim(),qty:q,min:0,expiry:"",supplier:sup,custom:true,hidden:false,type:"",...(price?{price}:{})},true,{noLog:true});
         await addLog({itemId:id,kind:"purchase",qty:q,unitPrice:price,total,supplier:sup,invoice:inv,date,paid,photoId:fileId});added++;continue}}
     const it=current(id);if(!it)continue;run[id]=(run[id]!=null?run[id]:(+it.qty||0))+q;
-    const f={qty:run[id]};if(sup)f.supplier=sup;patch(id,f,true,{noLog:true});
+    const f={qty:run[id]};if(sup)f.supplier=sup;if(price)f.price=price;patch(id,f,true,{noLog:true});
     await addLog({itemId:id,kind:"purchase",qty:q,unitPrice:price,total,supplier:sup,invoice:inv,date,paid,photoId:fileId});added++}
-  b.disabled=false;b.textContent="Add to stock";vbdlg.close();
+  b.disabled=false;vbSetMode(vbMode);vbdlg.close();
   toast(`${pl(added,"item")} added to stock${made?` (${made} new)`:""}${fileId?" · bill attached":""}`);
 });
 
@@ -5408,7 +5443,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v111";let updShown=false;
+const APP_BUILD="ds-v112";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
