@@ -203,6 +203,7 @@ header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:spac
 @media (max-width:640px){.mainnav{grid-template-columns:repeat(4,minmax(0,1fr));width:100%}.mainbtn{flex-direction:column;gap:3px;padding:8px 2px;font-size:.68rem;letter-spacing:-.02em}.mainbtn span{max-width:100%;overflow:hidden;text-overflow:ellipsis}}
 .invnav{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 14px;padding:10px 0 0;border-top:1px solid var(--line)}
 .invnav .viewbtn{font-size:.85rem;padding:7px 14px}
+.mgbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mgbox small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mgbox span{font-size:.82rem;color:var(--muted)}
 .invbig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.invbig[hidden]{display:none}
 .invbig button{display:flex;align-items:center;gap:12px;text-align:left;padding:16px 18px;border-radius:16px;border:2px solid var(--mod,var(--accent));font:inherit;cursor:pointer;min-height:72px}
 .invbig .ib1{background:var(--surface);color:var(--mod,var(--accent))}.invbig .ib2{background:var(--mod,var(--accent));color:#fff}
@@ -645,7 +646,7 @@ body.no-tab_dashboard .mainbtn[data-main="dashboard"],body.no-tab_patients .main
 body.no-tab_reports [data-go="reports"],body.no-tab_reports #d-rep,body.no-money #d-rep,body.no-money .d-money,body.no-money .d-pay,body.no-money #d-kpis>*:nth-child(4),
 body.is-staff #ap-team,body.is-staff #ap-set,body.is-staff #b-prices,body.is-staff #lab-set,body.is-staff [data-exnew],
 body.no-pat_edit #patNew,body.no-pat_edit [data-pedit],body.no-pat_edit #ap-newpat,
-body.no-pat_del [data-ndel],body.no-pat_del [data-pdelp],body.no-pat_del .xrx,body.no-pat_del #pt-del,
+body.no-pat_del [data-ndel],body.no-pat_del [data-pmerge],body.no-pat_del [data-pdelp],body.no-pat_del .xrx,body.no-pat_del #pt-del,
 body.no-plan .tpcard,body.no-plan [data-tpadd],
 body.no-appt_edit #ap-new,body.no-appt_edit #ap-multi,body.no-appt_edit #ap-text,body.no-appt_edit #ap-photo,body.no-appt_edit [data-apedit],body.no-appt_edit [data-apres],body.no-appt_edit [data-free],body.no-appt_edit [data-newap],body.no-appt_edit [data-calnew],body.no-appt_edit [data-pbook],body.no-appt_edit [data-lcbook],
 body.no-appt_del #ap-del,
@@ -1627,6 +1628,17 @@ input[type=date]{min-width:0;max-width:100%}
   <p class="perr" id="xr-err" hidden></p>
   <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
+<dialog id="mgdlg"><form class="dlg" id="mgForm" novalidate>
+  <h2>Merge two patients into one</h2>
+  <p class="muted small" style="margin:0">Use this when the same person has two files. Everything from both files ends up in one: bills, payments, appointments, lab cases, prescriptions, notes, X-rays, tooth chart and treatment plans.</p>
+  <div class="mgbox"><small>This patient</small><b id="mg-a"></b><span id="mg-ac"></span></div>
+  <div class="field"><label for="mg-q">Merge with (the other file)</label><input id="mg-q" list="mg-list" autocomplete="off" placeholder="Type name, file no. or phone"><datalist id="mg-list"></datalist></div>
+  <div class="mgbox" id="mg-bw" hidden><small>Other file</small><b id="mg-b"></b><span id="mg-bc"></span></div>
+  <div class="field" id="mg-kw" hidden><label for="mg-keep">Keep name, file no. and phone of</label><select id="mg-keep"></select><small class="muted">Missing details (phone, age, CNIC, address…) are filled in from the other file.</small></div>
+  <p class="phint" id="mg-sum" hidden></p>
+  <p class="perr" id="mg-err" hidden></p>
+  <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary" id="mg-go">Merge into one</button></div></div>
+</form></dialog>
 <dialog id="rxdlg"><form class="dlg" id="rxForm" novalidate>
   <h2>💊 Add prescription</h2>
   <div class="grid2">
@@ -2597,7 +2609,7 @@ function renderPatDetail(id){setTimeout(loadXThumbs,0);
   const PL=planTeeth(p),shT=chShowT();const tooth=n=>{const st=teeth[n]||"";return `<button type="button" class="tooth tpic${n>=31?" lower":""}${toothSel===n?" sel":""}${TH[n]?" hx":""}${PL.has(n)?" pl":""}" data-tooth="${n}" aria-label="Tooth ${n}${st?", "+TOOTH_ST[st]:""}">${toothPic(n,st)}<span class="tn">${n}</span></button>`};
   $("patDetail").dataset.psec=pSec;$("patDetail").innerHTML=`<div class="pd-back"><button class="btn" data-back>‹ All patients</button></div>
   <div class="card pd-top"><div class="pd-id"><span class="av big">${esc(initials(p.name))}</span><div><h2>${esc(p.name)}</h2><p class="muted">${[p.fileNo,p.age?p.age+" years":"",p.gender,p.cnic?"CNIC "+p.cnic:"",p.ref?"Referred by "+p.ref:""].filter(Boolean).map(esc).join(" · ")}</p><p class="phline"><span class="seltxt">${esc(p.phone||"No phone")}</span>${waNum(p.phone)?` <a class="wa sm" href="${esc(waHref(p.phone,""))}" target="_blank" rel="noopener">${WA_IC}<span>WhatsApp</span></a>`:""}</p>${p.address?`<p class="muted">${esc(p.address)}</p>`:""}</div></div>
-    <div class="vact">${p.phone?`<a class="btn callbtn" href="tel:${esc(String(p.phone).replace(/[^0-9+]/g,""))}">Call</a>`:""}<button class="btn" data-pedit>Edit</button><button class="btn" data-plab>Lab case</button><button class="btn" data-prx>💊 Prescription</button><button class="btn" data-pbook>Book appointment</button><button class="btn primary" data-pbill>New bill</button></div></div>
+    <div class="vact">${p.phone?`<a class="btn callbtn" href="tel:${esc(String(p.phone).replace(/[^0-9+]/g,""))}">Call</a>`:""}<button class="btn" data-pedit>Edit</button><button class="btn" data-plab>Lab case</button><button class="btn" data-prx>💊 Prescription</button><button class="btn" data-pmerge title="Merge another patient file into this one">Merge</button><button class="btn" data-pbook>Book appointment</button><button class="btn primary" data-pbill>New bill</button></div></div>
   ${p.alerts?`<div class="alertbar">Medical alert: ${esc(p.alerts)}</div>`:""}
   <div class="ptabs" role="tablist" aria-label="Patient sections">${[["treat","Treatment"],["chart","Chart"],["xray","X-rays"],["visits","Visits"],["notes","Notes"]].map(([k,n])=>`<button type="button" role="tab" data-psec="${k}" aria-selected="${pSec===k}">${n}</button>`).join("")}</div>
   <div class="pgrid">
@@ -2839,6 +2851,7 @@ $("patDetail").addEventListener("click",e=>{
   if(t.closest("[data-pbook]"))return openAp(null,{patientId:selPat});
   if(t.closest("[data-plab]"))return openLC(null,{patientId:selPat});
   if(t.closest("[data-prx]"))return openRx(null);
+  if(t.closest("[data-pmerge]"))return openMerge(selPat);
   if(t.closest("[data-pbill]"))return openBill(null,{patientId:selPat});
   const th=t.closest("[data-tooth]");if(th){const n=+th.dataset.tooth;toothSel=toothSel===n?null:n;render();return}
   const ts=t.closest("[data-tst]");if(ts&&toothSel){const p=P[selPat],teeth={...(p.teeth||{})};if(ts.dataset.tst)teeth[toothSel]=ts.dataset.tst;else delete teeth[toothSel];toothSel=null;cset("patients",selPat,{...p,teeth});return}
@@ -4422,8 +4435,34 @@ function mergePatients(keep,drop){if(!P[keep]||!P[drop]||keep===drop)return;cons
   for(const [id,a] of Object.entries(A))if(a.patientId===drop)cset("appts",id,{...a,patientId:keep,patientName:k.name});
   for(const [id,c] of Object.entries(LC))if(c.patientId===drop)cset("labcases",id,{...c,patientId:keep,patientName:k.name});
   const mp=(x,y)=>x&&x.items&&x.items.length?(y&&y.items&&y.items.length?{...x,items:[...x.items,...y.items]}:x):(y||x);
-  const nk={...d,...k,phone:k.phone||d.phone||"",age:k.age||d.age||"",gender:k.gender||d.gender||"",alerts:[k.alerts,d.alerts].filter(Boolean).join("; "),notes:[...(k.notes||[]),...(d.notes||[])],xrays:[...(k.xrays||[]),...(d.xrays||[])],rx:[...(k.rx||[]),...(d.rx||[])],teeth:{...(d.teeth||{}),...(k.teeth||{})},plan:mp(k.plan,d.plan),proposal:mp(k.proposal,d.proposal),mergedFrom:[...(k.mergedFrom||[]),{name:d.name,fileNo:d.fileNo||"",at:new Date().toISOString()}]};
+  const empty=v=>v==null||v===""||(Array.isArray(v)&&!v.length)||(typeof v==="object"&&!Array.isArray(v)&&!Object.keys(v).length);
+  const nk={...k};
+  for(const [key,v] of Object.entries(d)){if(["mergedFrom","plan","proposal","teeth","alerts"].includes(key))continue;const kv=k[key];
+    if(empty(kv))nk[key]=v;else if(Array.isArray(kv)&&Array.isArray(v)){const seen=new Set(kv.map(x=>JSON.stringify(x)));nk[key]=[...kv,...v.filter(x=>!seen.has(JSON.stringify(x)))]}
+    else if(key==="medical"&&typeof kv==="string"&&typeof v==="string"&&v.trim()&&!kv.includes(v.trim()))nk[key]=kv+"; "+v}
+  nk.alerts=[...new Set([k.alerts,d.alerts].filter(Boolean))].join("; ");nk.teeth={...(d.teeth||{}),...(k.teeth||{})};
+  nk.plan=mp(k.plan,d.plan);nk.proposal=mp(k.proposal,d.proposal);
+  nk.mergedFrom=[...(k.mergedFrom||[]),...(d.mergedFrom||[]),{name:d.name,fileNo:d.fileNo||"",phone:d.phone||"",at:new Date().toISOString(),by:myName||""}];
   for(const x of ["plan","proposal"])if(!nk[x])delete nk[x];cset("patients",keep,nk);cdel("patients",drop);if(selPat===drop)selPat=keep}
+const mgdlg=$("mgdlg");let mgA=null,mgB=null;
+const mgLbl=p=>[p.name,p.fileNo,p.phone].filter(Boolean).join(" · ");
+function mgCount(id){const p=P[id]||{};const n=(o,f)=>Object.values(o).filter(f).length;
+  const parts=[[n(B,b=>b.patientId===id),"bill"],[n(A,a=>a.patientId===id),"appointment"],[n(LC,c=>c.patientId===id),"lab case"],[(p.rx||[]).length,"prescription"],[(p.notes||[]).length,"note"],[(p.xrays||[]).length,"X-ray"],[((p.plan||{}).items||[]).length,"plan item"]];
+  return parts.filter(x=>x[0]).map(x=>pl(x[0],x[1])).join(", ")||"No records yet"}
+function openMerge(id){if(!P[id])return;mgA=id;mgB=null;const a=P[id];$("mg-a").textContent=mgLbl(a);$("mg-ac").textContent=mgCount(id);
+  $("mg-q").value="";$("mg-bw").hidden=true;$("mg-kw").hidden=true;$("mg-sum").hidden=true;$("mg-err").hidden=true;$("mg-go").disabled=true;
+  const fn=String(a.name||"").trim().toLowerCase().split(/\s+/)[0];
+  const ps=Object.entries(P).filter(([k])=>k!==id).sort((x,y)=>{const sx=String(x[1].name||"").toLowerCase().startsWith(fn)?0:1,sy=String(y[1].name||"").toLowerCase().startsWith(fn)?0:1;return sx-sy||String(x[1].name||"").localeCompare(String(y[1].name||""))});
+  $("mg-list").innerHTML=ps.map(([k,p])=>`<option value="${esc(mgLbl(p))}">`).join("");openD(mgdlg);setTimeout(()=>$("mg-q").focus(),60)}
+$("mg-q").addEventListener("input",()=>{const v=$("mg-q").value.trim().toLowerCase();const hit=Object.entries(P).find(([k,p])=>k!==mgA&&mgLbl(p).toLowerCase()===v);
+  mgB=hit?hit[0]:null;$("mg-bw").hidden=!mgB;$("mg-kw").hidden=!mgB;$("mg-sum").hidden=!mgB;$("mg-go").disabled=!mgB;if(!mgB)return;
+  const b=P[mgB];$("mg-b").textContent=mgLbl(b);$("mg-bc").textContent=mgCount(mgB);
+  $("mg-keep").innerHTML=`<option value="a">${esc(mgLbl(P[mgA]))}</option><option value="b">${esc(mgLbl(b))}</option>`;mgSum()});
+$("mg-keep").addEventListener("change",mgSum);
+function mgSum(){const keep=$("mg-keep").value==="b"?P[mgB]:P[mgA],drop=$("mg-keep").value==="b"?P[mgA]:P[mgB];
+  $("mg-sum").innerHTML=`All records move into <b>${esc(keep.name)}${keep.fileNo?" ("+esc(keep.fileNo)+")":""}</b>. The file <b>${esc(drop.name)}${drop.fileNo?" ("+esc(drop.fileNo)+")":""}</b> is then removed. This can't be undone.`}
+$("mgForm").addEventListener("submit",e=>{e.preventDefault();if(!mgA||!mgB)return;const kb=$("mg-keep").value==="b",keep=kb?mgB:mgA,drop=kb?mgA:mgB,nm=P[keep].name;
+  mergePatients(keep,drop);selPat=keep;mgdlg.close();render();toast(`Merged into one file · ${nm}`)});
 async function hbImport(){const R=(HB||[]).filter(r=>r.on&&!r.done);if(!R.length)return;const b=$("hb-go");b.disabled=true;b.textContent="Importing…";let ne=0,nb=0,np=0,nm=0;
   const idmap={};for(const g of HB_G){if(HBANS[g.key]!=="same")continue;const ps=g.ks.filter(k=>k.startsWith("p:")).map(k=>k.slice(2)).filter(id=>P[id]).sort((a,b)=>String(P[a].fileNo||"").localeCompare(String(P[b].fileNo||""))||String(P[a].createdAt||"").localeCompare(String(P[b].createdAt||"")));
     let target=ps[0]||"";for(const d of ps.slice(1)){mergePatients(target,d);nm++}if(!target){const rows=g.rows.filter(r=>r.on);const nmx=HBNAME[g.key]||(rows[0]||g.rows[0]).x.desc;target=nid("p");cset("patients",target,{name:nmx.replace(/\s+/g," ").trim(),phone:"",createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[],alerts:"",fromHb:true});np++}
@@ -5454,7 +5493,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v113";let updShown=false;
+const APP_BUILD="ds-v114";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
