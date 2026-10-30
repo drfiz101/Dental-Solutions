@@ -1,6 +1,6 @@
 // Dental Solutions works offline: the app and its libraries are kept on the device.
 // Clinic data is saved on the device by Firebase and uploads when the internet is back.
-const CACHE = "ds-v135";
+const CACHE = "ds-v136";
 const SHELL = ["./", "./index.html", "./firebase-config.js", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png", "./icons/logo.jpg", "./icons/logo-full.jpg"];
 const LIBS = [
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
