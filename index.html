@@ -1194,7 +1194,7 @@ input[type=date]{min-width:0;max-width:100%}
   function show(msg,detail){if(shown)return;shown=true;var e=document.getElementById("bootErr");if(!e)return;if(msg)document.getElementById("bootMsg").textContent=msg;document.getElementById("bootDetail").textContent=detail||"";e.style.display="block"}
   window.__bootFail=show;
   window.addEventListener("error",function(ev){if(window.__appReady)return;var t=ev&&ev.target;if(t&&t.tagName){if(t.tagName==="SCRIPT"&&t.src&&/gstatic|firebase-config/.test(t.src))show("Part of the app couldn't download. Check your internet connection and tap Repair app.",t.src);return}show(null,(ev&&ev.message)||"")},true);
-  setTimeout(function(){if(window.__appReady)return;var vis=function(id){var x=document.getElementById(id);return x&&!x.hidden&&x.offsetParent!==null};if(!vis("login")&&!vis("who")&&!vis("gate"))show("The app is taking too long to start. Check your internet connection and tap Repair app.","")},20000);
+  setTimeout(function(){if(window.__appReady)return;var vis=function(id){var x=document.getElementById(id);return x&&!x.hidden&&x.offsetParent!==null};if(!vis("login")&&!vis("who")&&!vis("gate"))show("The app is taking too long to start. Check your internet connection and tap Repair app.","")},30000);
   document.getElementById("bootRepair").onclick=function(){var b=this;b.disabled=true;b.textContent="Repairing…";
     var jobs=[];try{if(window.caches)jobs.push(caches.keys().then(function(k){return Promise.all(k.map(function(n){return caches.delete(n)}))}))}catch(e){}
     try{if(navigator.serviceWorker)jobs.push(navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister()}))}))}catch(e){}
@@ -5715,7 +5715,9 @@ $("lkForm").addEventListener("submit",async e=>{e.preventDefault();const pw=$("l
     lsSet("ds-locked-"+uid,null);$("lockScr").hidden=true;$("lk-pw").value="";aoStart(uid);toast("Unlocked")}
   finally{$("lk-go").disabled=false;$("lk-go").textContent="Unlock"}});
 $("lk-out").addEventListener("click",()=>{if(!isOnline()&&!confirm("You're offline. After signing out you can't sign in again until the internet is back. Sign out anyway?"))return;const uid=lkUid();if(uid)lsSet("ds-locked-"+uid,null);$("lockScr").hidden=true;$("lp").value="";firebase.auth().signOut()});
-function getFast(ref){if(!isOnline())return ref.get({source:"cache"}).catch(()=>ref.get());return Promise.race([ref.get(),new Promise((_,rej)=>setTimeout(()=>rej(new Error("slow")),7000))]).catch(()=>ref.get({source:"cache"}))}
+/* open from the copy saved on this phone first (instant); live listeners update it from the server right after */
+async function getFast(ref){try{const c=await ref.get({source:"cache"});if(c&&c.exists)return c}catch(e){}
+  if(!isOnline())return ref.get();return Promise.race([ref.get(),new Promise((_,rej)=>setTimeout(()=>rej(new Error("slow")),7000))]).catch(()=>ref.get({source:"cache"}))}
 function aoMinutes(){const v=((SET&&SET.clinic)||{}).autoOut;if(v===0||v==="0")return 0;return +v>0?+v:AO_DEF}
 function aoLimit(){let m;if(SET_LOADED){m=aoMinutes();lsSet("ds-ao",String(m))}else{const st=lsGet("ds-ao");m=st!==null&&st!==""&&+st>=0?+st:AO_DEF}return m*60000}
 function aoLast(){return +lsGet("ds-last-"+aoUid)||0}
@@ -5840,7 +5842,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v136";let updShown=false;
+const APP_BUILD="ds-v137";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}

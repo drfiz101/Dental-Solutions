@@ -1,6 +1,6 @@
 // Dental Solutions works offline: the app and its libraries are kept on the device.
 // Clinic data is saved on the device by Firebase and uploads when the internet is back.
-const CACHE = "ds-v136";
+const CACHE = "ds-v137";
 const SHELL = ["./", "./index.html", "./firebase-config.js", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png", "./icons/logo.jpg", "./icons/logo-full.jpg"];
 const LIBS = [
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
@@ -26,6 +26,8 @@ self.addEventListener("fetch", e => {
   // Firebase syncs its own data
   if (url.hostname.includes("firestore.googleapis.com") || url.hostname.includes("identitytoolkit") || url.hostname.includes("securetoken") || url.hostname.includes("api.anthropic.com")) return;
   const mine = url.origin === location.origin, lib = CDN(url.hostname);
+  // the version check must always see the real file on the internet
+  if (mine && /sw\.js$/.test(url.pathname)) return;
   if (!mine && !lib) return;
   // Versioned libraries never change: use a good saved copy straight away, otherwise download it
   if (lib) {
@@ -39,14 +41,10 @@ self.addEventListener("fetch", e => {
     }));
     return;
   }
-  // App files: try the internet for the newest version, but don't wait more than 4 seconds on a weak connection
-  e.respondWith(new Promise(resolve => {
-    let done = false;
-    const fallback = () => caches.match(req).then(r => r || caches.match("./index.html"));
-    const timer = setTimeout(() => fallback().then(r => { if (r && !done) { done = true; resolve(r); } }), 4000);
-    fetch(req).then(res => {
-      if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
-      clearTimeout(timer); if (!done) { done = true; resolve(res); }
-    }).catch(() => { clearTimeout(timer); fallback().then(r => { if (!done) { done = true; resolve(r || Response.error()); } }); });
-  }));
+  // App files: open instantly from the saved copy, and fetch the newest version in the background for next time
+  e.respondWith(caches.open(CACHE).then(c => c.match(req, { ignoreSearch: true }).then(hit => {
+    const net = fetch(req).then(res => { if (res && res.ok) c.put(req, res.clone()); return res; });
+    if (hit) { e.waitUntil(net.catch(() => {})); return hit; }
+    return net.catch(() => c.match("./index.html").then(r => r || Response.error()));
+  })));
 });
