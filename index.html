@@ -713,7 +713,7 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 20%,var(--c-
 .acc.isadmin .acg{display:none}
 @media (max-width:620px){.acc .ach{grid-template-columns:1fr}}
 body.no-tab_dashboard .mainbtn[data-main="dashboard"],body.no-tab_patients .mainbtn[data-main="patients"],body.no-tab_appointments .mainbtn[data-main="appointments"],body.no-tab_billing .mainbtn[data-main="billing"],body.no-tab_lab .mainbtn[data-main="lab"],body.no-tab_inventory .mainbtn[data-main="inventory"],
-body.no-tab_reports [data-go="reports"],body.no-tab_reports #d-rep,body.no-money #d-rep,body.no-money .d-money,body.no-money .d-pay,body.no-money #d-kpis>*:nth-child(4),
+body.no-money #b-tiles .tile.mon,body.no-money #b-pdf,body.no-tab_reports [data-go="reports"],body.no-tab_reports #d-rep,body.no-money #d-rep,body.no-money .d-money,body.no-money .d-pay,body.no-money #d-kpis>*:nth-child(4),
 body.is-staff #ap-team,body.is-staff #ap-set,body.is-staff #b-prices,body.is-staff #lab-set,body.is-staff [data-exnew],
 body.no-pat_edit #patNew,body.no-pat_edit [data-pedit],body.no-pat_edit #ap-newpat,
 body.no-pat_del [data-ndel],body.no-pat_del [data-pmerge],body.no-pat_del [data-pdelp],body.no-pat_del .xrx,body.no-pat_del #pt-del,
@@ -1798,7 +1798,7 @@ input[type=date]{min-width:0;max-width:100%}
 </form></dialog>
 <dialog id="acdlg" class="wide"><form class="dlg" id="acForm" novalidate>
   <h2>Staff access</h2>
-  <p class="muted small" style="margin:0">Create a login for each person: they sign in with your clinic code, their username and password. Admins see and do everything; for staff, tick the tabs and tasks they may use.</p>
+  <p class="muted small" style="margin:0">Create a login for each person: they sign in with your clinic code, their username and password. Pick a role: <b>Admin</b> sees and does everything. <b>Dentist</b>, <b>Receptionist</b> and <b>Staff</b> get the tasks ticked below (picking a role ticks the usual ones, and you can change them).</p>
   <div id="ac-list" class="aclist"></div>
   <button type="button" class="btn small" id="ac-add" style="align-self:flex-start">+ Add person</button>
   <p class="muted small" style="margin:0" id="ac-note"></p>
@@ -3302,7 +3302,7 @@ function renderBilling(){
   const all=Object.entries(B).map(([id,b])=>({id,...b,_t:billCalc(b)}));
   let colT=0,colM=0;for(const b of all)for(const p of b.payments||[]){if(p.date===today)colT+=+p.amount||0;if((p.date||"").startsWith(mk))colM+=+p.amount||0}
   const billedM=all.filter(b=>(b.date||"").startsWith(mk)).reduce((s,b)=>s+b._t.total,0),out=all.reduce((s,b)=>s+b._t.bal,0),dueN=all.filter(b=>b._t.bal>0).length;
-  $("b-tiles").innerHTML=`<div class="tile big"><small>Collected today</small><b>${rs(colT)}</b><span>${esc(dayName(today))} ${esc(fmtDate(today))}</span></div><div class="tile"><small>Collected in ${esc(monthLabel(mk).split(" ")[0])}</small><b>${rs(colM)}</b><span>billed ${rs(billedM)}</span></div><div class="tile"><small>Outstanding</small><b>${rs(out)}</b><span>${pl(dueN,"unpaid bill")}</span></div>`;
+  $("b-tiles").innerHTML=`<div class="tile big"><small>Collected today</small><b>${rs(colT)}</b><span>${esc(dayName(today))} ${esc(fmtDate(today))}</span></div><div class="tile mon"><small>Collected in ${esc(monthLabel(mk).split(" ")[0])}</small><b>${rs(colM)}</b><span>billed ${rs(billedM)}</span></div><div class="tile"><small>Outstanding</small><b>${rs(out)}</b><span>${pl(dueN,"unpaid bill")}</span></div>`;
   for(const b of document.querySelectorAll("[data-bf]"))b.setAttribute("aria-pressed",String(b.dataset.bf===billF));
   const q=$("b-q").value.trim().toLowerCase();let list=all;
   if(billF==="due")list=list.filter(b=>b._t.bal>0);else if(billF==="today")list=list.filter(b=>b.date===today||(b.payments||[]).some(p=>p.date===today));
@@ -4835,13 +4835,18 @@ const PERMS=[
  {k:"pat_edit",g:"Patients",n:"Add & edit patients"},{k:"pat_del",g:"Patients",n:"Delete patients, notes & X-rays"},{k:"plan",g:"Patients",n:"Treatment plans & proposals"},
  {k:"appt_edit",g:"Appointments",n:"Book, move & update appointments"},{k:"appt_del",g:"Appointments",n:"Delete appointments"},
  {k:"lab_edit",g:"Lab & stock",n:"Add & update lab cases"},{k:"inv_count",g:"Lab & stock",n:"Change stock counts"},{k:"inv_buy",g:"Lab & stock",n:"Record purchases & vendor bills"},{k:"inv_edit",g:"Lab & stock",n:"Add, edit & hide stock items"}];
+const ADMIN_ONLY=["money","tab_reports"];
+const ROLES=[["admin","Admin"],["dentist","Dentist"],["receptionist","Receptionist"],["staff","Staff"]];
+const roleOf=p=>p&&p.role==="admin"?"admin":(p&&["dentist","receptionist","staff"].includes(p.title)?p.title:"staff");
+const roleName=k=>(ROLES.find(r=>r[0]===k)||ROLES[3])[1];
 const PRESETS={
  "Receptionist":["tab_dashboard","tab_patients","tab_appointments","tab_billing","bill_edit","pdf","pat_edit","appt_edit"],
+ "Staff":["tab_dashboard","tab_patients","tab_appointments","tab_billing","tab_lab","tab_inventory","bill_edit","pdf","pat_edit","appt_edit","lab_edit","inv_count","inv_buy"],
  "Dental assistant":["tab_dashboard","tab_patients","tab_appointments","tab_lab","tab_inventory","pat_edit","appt_edit","lab_edit","inv_count","inv_buy"],
  "Dentist":["tab_dashboard","tab_patients","tab_appointments","tab_billing","tab_lab","bill_edit","pdf","pat_edit","plan","appt_edit","lab_edit","inv_count"]};
 const DEF_STAFF=["tab_dashboard","tab_patients","tab_appointments","tab_lab","tab_inventory","pat_edit","plan","appt_edit","lab_edit","inv_count"];
 function myRole(){if(!MEM)return "admin";return MEM.role==="admin"?"admin":"staff"}
-function myPerms(){if(myRole()==="admin")return new Set(PERMS.map(p=>p.k));return new Set(Array.isArray(MEM.perms)?MEM.perms:DEF_STAFF)}
+function myPerms(){if(myRole()==="admin")return new Set(PERMS.map(p=>p.k));const s=new Set(Array.isArray(MEM.perms)?MEM.perms:DEF_STAFF);for(const k of ADMIN_ONLY)s.delete(k);return s}
 const can=k=>myPerms().has(k);
 const TAB_OF={dashboard:"tab_dashboard",patients:"tab_patients",appointments:"tab_appointments",billing:"tab_billing",lab:"tab_lab",inventory:"tab_inventory",reports:"tab_reports"};
 function initialsLogo(name){const ini=String(name||"Clinic").split(/\s+/).filter(w=>/^[A-Za-z]/.test(w)&&!/^(dental|clinic|the|and|of|&)$/i.test(w)).slice(0,2).map(w=>w[0].toUpperCase()).join("")||"DC";
@@ -4854,7 +4859,7 @@ function renderHeader(){const c=S().clinic;$("hName").textContent=c.name||"";$("
 function applyAccess(){const role=myRole(),ps=myPerms(),b=document.body;b.classList.toggle("is-staff",role==="staff");for(const p of PERMS)b.classList.toggle("no-"+p.k,!ps.has(p.k));
   if(TAB_OF[main]&&!ps.has(TAB_OF[main])){const first=["dashboard","patients","appointments","billing","lab","inventory"].find(t=>ps.has(TAB_OF[t]));if(first)main=first}
   const ab=$("acBtn");if(ab)ab.hidden=role!=="admin";if($("profBtn"))$("profBtn").hidden=role!=="admin";
-  const rc=$("roleChip");if(rc){rc.textContent=role==="admin"?"Admin":"Staff";rc.className="rolechip"+(role==="admin"?"":" staff");rc.hidden=false}
+  const rc=$("roleChip");if(rc){rc.textContent=roleName(roleOf(MEM||{role:"admin"}));rc.className="rolechip"+(role==="admin"?"":" staff");rc.hidden=false}
   if($("consoleBtn"))$("consoleBtn").hidden=!(fsRoot&&isSuper());if($("pwBtn"))$("pwBtn").hidden=!fsRoot;
   try{renderHeader()}catch(e){}}
 const memCol=()=>fsRoot.collection("clinics").doc(CLINIC).collection("members");
@@ -4868,12 +4873,13 @@ const authMsg=x=>{const c=(x&&x.code)||"";return /email-already-in-use/.test(c)?
 const acdlg=$("acdlg");let acMembers=[];
 function acCard(p,kind){const isNew=kind==="new",admin=p.role==="admin",me2=p.uid&&window.firebase&&firebase.apps.length&&firebase.auth().currentUser&&p.uid===firebase.auth().currentUser.uid,ps=new Set(Array.isArray(p.perms)?p.perms:DEF_STAFF),groups=[...new Set(PERMS.map(x=>x.g))];
   return `<div class="acc${admin?" isadmin":""}" data-kind="${kind}" data-uid="${esc(p.uid||"")}">
-  ${isNew?`<div><b>New login</b></div><div class="ach new"><input class="ac-n" placeholder="Name, e.g. Bilal" maxlength="40" aria-label="Name"><input class="ac-u" placeholder="Username, e.g. bilal" maxlength="30" autocapitalize="none" spellcheck="false" aria-label="Username"><input class="ac-p" placeholder="Password (6+)" autocomplete="off" aria-label="Password"><select class="ac-r" aria-label="Role"><option value="staff" selected>Staff</option><option value="admin">Admin</option></select></div>`:
-  `<div class="ach"><input class="ac-n" value="${esc(p.name||"")}" maxlength="40" aria-label="Name"><input value="${esc(p.username||p.email||"")}" readonly aria-label="Username"><select class="ac-r" aria-label="Role" ${me2||p.owner?"disabled":""}><option value="staff"${admin?"":" selected"}>Staff</option><option value="admin"${admin?" selected":""}>Admin</option></select></div>
+  ${isNew?`<div><b>New login</b></div><div class="ach new"><input class="ac-n" placeholder="Name, e.g. Bilal" maxlength="40" aria-label="Name"><input class="ac-u" placeholder="Username, e.g. bilal" maxlength="30" autocapitalize="none" spellcheck="false" aria-label="Username"><input class="ac-p" placeholder="Password (6+)" autocomplete="off" aria-label="Password"><select class="ac-r" aria-label="Role">${ROLES.map(([k,n])=>`<option value="${k}"${k==="staff"?" selected":""}>${n}</option>`).join("")}</select></div>`:
+  `<div class="ach"><input class="ac-n" value="${esc(p.name||"")}" maxlength="40" aria-label="Name"><input value="${esc(p.username||p.email||"")}" readonly aria-label="Username"><select class="ac-r" aria-label="Role" ${me2||p.owner?"disabled":""}>${ROLES.map(([k,n])=>`<option value="${k}"${k===roleOf(p)?" selected":""}>${n}</option>`).join("")}</select></div>
    <div class="acp">${p.owner?`<span class="rolechip">Clinic owner</span>`:""}${me2?`<span class="rolechip">You</span>`:""}${p.active===false?`<span class="offchip">LOGIN TURNED OFF</span>`:""}${!me2&&!p.owner?`<label style="margin-left:auto"><input type="checkbox" class="ac-a" ${p.active===false?"":"checked"}> Login allowed</label>`:""}</div>
    <div class="acp acx">${me2?`<button type="button" class="btn small" data-acmypw>🔑 Change my password</button>`:`<button type="button" class="btn small" data-acpw="${esc(p.uid)}">🔑 Set new password</button>${p.owner?"":`<button type="button" class="btn small danger-outline" data-acdel="${esc(p.uid)}">🗑 Delete login</button>`}`}</div>`}
   <div class="acg"><div class="acp"><span>Quick set:</span>${Object.keys(PRESETS).map(k=>`<button type="button" class="btn small" data-preset="${esc(k)}">${esc(k)}</button>`).join("")}<button type="button" class="btn small" data-preset="__all">Everything</button><button type="button" class="btn small" data-preset="__none">Nothing</button></div>
-   ${groups.map(g=>`<h4>${esc(g)}</h4><div class="chks">${PERMS.filter(x=>x.g===g).map(x=>`<label><input type="checkbox" data-perm="${x.k}" ${ps.has(x.k)?"checked":""}> ${esc(x.n)}</label>`).join("")}</div>`).join("")}</div>
+   <p class="muted small" style="margin:4px 0 0">🔒 Monthly income, profit and Reports are only for Admin.</p>
+   ${groups.map(g=>`<h4>${esc(g)}</h4><div class="chks">${PERMS.filter(x=>x.g===g&&!ADMIN_ONLY.includes(x.k)).map(x=>`<label><input type="checkbox" data-perm="${x.k}" ${ps.has(x.k)?"checked":""}> ${esc(x.n)}</label>`).join("")}</div>`).join("")}</div>
   ${isNew?`<button type="button" class="btn small danger-outline" data-acrm style="align-self:flex-start">Cancel</button>`:""}</div>`}
 async function openAccess(){if(!fsRoot){toast("Staff logins are managed in the online app.");return}
   $("ac-list").innerHTML=`<div class="phload"><div class="spin"></div></div>`;$("ac-err").hidden=true;$("ac-note").innerHTML=`Staff sign in with clinic code <b>${esc(CLINIC)}</b>, their username and password. Tap <b>Set new password</b> on anyone's card to give them a new password (they keep the same username), or <b>Delete login</b> to remove them.`;openD(acdlg);
@@ -4889,15 +4895,16 @@ $("ac-list").addEventListener("click",async e=>{const c=e.target.closest(".acc")
   const pw=e.target.closest("[data-acpw]");if(pw){const m=acMembers.find(x=>x.uid===pw.dataset.acpw);if(m)await adminSetPassword(m,c);return}
   if(e.target.closest("[data-acrm]")){c.remove();return}
   const pr=e.target.closest("[data-preset]");if(pr){const k=pr.dataset.preset,set=new Set(k==="__all"?PERMS.map(x=>x.k):k==="__none"?[]:PRESETS[k]);for(const i of c.querySelectorAll("[data-perm]"))i.checked=set.has(i.dataset.perm)}});
-$("ac-list").addEventListener("change",e=>{const r=e.target.closest(".ac-r");if(r)r.closest(".acc").classList.toggle("isadmin",r.value==="admin")});
+$("ac-list").addEventListener("change",e=>{const r=e.target.closest(".ac-r");if(!r)return;const c=r.closest(".acc");c.classList.toggle("isadmin",r.value==="admin");
+  const pk={dentist:"Dentist",receptionist:"Receptionist",staff:"Staff"}[r.value];if(pk){const set=new Set(PRESETS[pk]);for(const i of c.querySelectorAll("[data-perm]"))i.checked=set.has(i.dataset.perm)}});
 $("acForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("ac-err"),sb=$("acForm").querySelector("button[type=submit]");err.hidden=true;sb.disabled=true;sb.textContent="Saving…";
-  try{for(const c of $("ac-list").querySelectorAll(".acc")){const perms=[...c.querySelectorAll("[data-perm]:checked")].map(i=>i.dataset.perm),role=c.querySelector(".ac-r").value,name=c.querySelector(".ac-n").value.trim();
+  try{for(const c of $("ac-list").querySelectorAll(".acc")){const perms=[...c.querySelectorAll("[data-perm]:checked")].map(i=>i.dataset.perm),rv=c.querySelector(".ac-r").value,role=rv==="admin"?"admin":"staff",title=rv==="admin"?"":rv,name=c.querySelector(".ac-n").value.trim();
       if(c.dataset.kind==="new"){const u=c.querySelector(".ac-u").value.trim().toLowerCase(),pw=c.querySelector(".ac-p").value;if(!u&&!name)continue;
         if(!okUser(u))throw {msg:`Username "${u}" can use 3–30 letters, numbers, dots or dashes.`};if(pw.length<6)throw {msg:`Password for ${u} must be at least 6 characters.`};
         let uid;try{uid=await makeLogin(userEmail(u,CLINIC),pw)}catch(x){throw {msg:authMsg(x)}}
-        await memCol().doc(uid).set({username:u,name:name||u,role,perms,active:true,createdAt:new Date().toISOString(),by:myName});c.dataset.kind="member";c.dataset.uid=uid;continue}
+        await memCol().doc(uid).set({username:u,name:name||u,role,title,perms,active:true,createdAt:new Date().toISOString(),by:myName});c.dataset.kind="member";c.dataset.uid=uid;continue}
       const uid=c.dataset.uid,m=acMembers.find(x=>x.uid===uid);if(!m)continue;const act=c.querySelector(".ac-a"),active=act?act.checked:m.active!==false;
-      const nv={...m,name:name||m.name,role:c.querySelector(".ac-r").disabled?m.role:role,perms,active};delete nv.uid;
+      const dis=c.querySelector(".ac-r").disabled,nv={...m,name:name||m.name,role:dis?m.role:role,title:dis?(m.title||""):title,perms,active};delete nv.uid;
       if(JSON.stringify(nv)!==JSON.stringify({...m,uid:undefined}))await memCol().doc(uid).set(nv)}
     acdlg.close();toast("Logins saved")}
   catch(x){err.textContent=x&&x.msg?x.msg:authMsg(x);err.hidden=false}
@@ -5661,7 +5668,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v125";let updShown=false;
+const APP_BUILD="ds-v126";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
