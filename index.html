@@ -268,6 +268,7 @@ body.spopen{overflow:hidden}
 .shbox{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:baseline;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.shbox small{color:var(--muted);font-size:.75rem}.shbox b{word-break:break-all}
 .shqr{display:grid;place-items:center}.shqr img{border-radius:12px;border:1px solid var(--line);background:#fff;padding:6px}
 .shbtns{display:flex;flex-wrap:wrap;gap:8px}.shbtns .wa{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:10px;background:#25D366;color:#fff;font-weight:700;text-decoration:none}.shbtns .wa svg{width:18px;height:18px}
+.pctin select{border:1px solid var(--line);border-radius:8px;padding:6px;background:var(--bg);font:inherit;font-size:.85rem;max-width:58%}
 .acpw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.85rem;padding:6px 8px;border-radius:8px;background:var(--bg)}.acpw code{font-size:.95rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
 .mgbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mgbox small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mgbox span{font-size:.82rem;color:var(--muted)}
 .invbig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.invbig[hidden]{display:none}
@@ -789,7 +790,7 @@ body[data-main="reports"]{--mod:var(--c-dash);--mod-soft:var(--c-dash-soft)}
 .rpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px}
 .rpnav{display:flex;align-items:center;gap:8px}.rpnav b{min-width:150px;text-align:center;color:var(--mod)}
 .rgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}.rgrid>.card{margin:0;min-width:0}
-.r-k{grid-column:1/-1}.r-sh{grid-column:1/-1}.r-sh .shl{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}.r-sh .shg{grid-template-columns:repeat(2,minmax(0,1fr))}.shg>div{white-space:nowrap}.r-tr{grid-column:1/-1}.r-in,.r-ex{grid-column:span 6}.r-pt,.r-out{grid-column:span 6}.r-oe{grid-column:span 6}.r-tx{grid-column:span 6}
+.r-k{grid-column:1/-1}.r-sh,.r-ref{grid-column:1/-1}.r-ref .shl,.r-sh .shl{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}.r-sh .shg{grid-template-columns:repeat(2,minmax(0,1fr))}.r-ref .shg{grid-template-columns:repeat(3,minmax(0,1fr))}.shg>div{white-space:nowrap}.r-tr{grid-column:1/-1}.r-in,.r-ex{grid-column:span 6}.r-pt,.r-out{grid-column:span 6}.r-oe{grid-column:span 6}.r-tx{grid-column:span 6}
 @media (max-width:900px){.rgrid>.card{grid-column:1/-1!important}}
 .rkpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .rkpi{border-radius:12px;padding:12px 14px;background:var(--c-dash-soft);display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -1563,7 +1564,10 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="grid2"><div class="field"><label for="b-pat">Patient</label><input id="b-pat" list="b-pats" autocomplete="off" placeholder="Type name or mobile number"><datalist id="b-pats"></datalist></div><div class="field"><label for="b-d">Date</label><input id="b-d" type="date"></div></div>
   <div class="field"><label>Treatments</label><div class="lhead"><span>Treatment</span><span>Teeth</span><span>Qty</span><span>Price</span><span></span></div><div class="lines" id="b-lines"></div><button type="button" class="btn small" id="b-add" style="align-self:flex-start;margin-top:6px">+ Add treatment</button><button type="button" class="btn small" id="b-old" style="align-self:flex-start;margin-top:6px">+ Previous outstanding balance</button><div class="field" id="b-oldw" hidden style="margin-top:8px;max-width:260px"><label for="b-oldd">Date of the original treatment</label><input id="b-oldd" type="date"></div><div class="prevbal" id="b-prev" hidden></div></div>
   <div class="grid2"><div class="field"><label for="b-disc">Discount (Rs)</label><input id="b-disc" type="number" min="0" inputmode="numeric"></div><div class="field"><label for="b-note">Note</label><input id="b-note" maxlength="120" placeholder="Optional"></div></div>
-  <div class="grid2 bshw" id="b-shw" hidden><div class="field"><label for="b-dent">Treated by 🔒</label><select id="b-dent"></select></div><div class="field"><label for="b-pct">Dentist share for this bill 🔒</label><div class="pctin"><input id="b-pct" type="number" min="0" max="100" inputmode="numeric" placeholder="Normal rate">%</div><small class="muted" id="b-pcth"></small></div></div>
+  <div class="grid2 bshw" id="b-shw" hidden><div class="field"><label for="b-dent">Treated by 🔒</label><select id="b-dent"></select></div><div class="field"><label for="b-pct">Dentist share for this bill 🔒</label><div class="pctin"><input id="b-pct" type="number" min="0" max="100" inputmode="numeric" placeholder="Normal rate">%</div><small class="muted" id="b-pcth"></small></div>
+    <div class="field"><label for="b-ref">Referred by 🔒</label><input id="b-ref" list="ref-names" maxlength="60" placeholder="Dentist who sent this patient (optional)" autocomplete="off"></div>
+    <div class="field" id="b-refw"><label for="b-refv">Referral cash to pay (Rs) 🔒</label><input id="b-refv" type="number" min="0" step="1" inputmode="numeric" placeholder="e.g. 5000"></div></div>
+  <datalist id="ref-names"></datalist>
   <div class="grid2" id="b-paywrap"><div class="field"><label for="b-pay">Paid now (Rs)</label><input id="b-pay" type="number" min="0" inputmode="numeric"></div><div class="field"><label for="b-meth">Method</label><select id="b-meth"><option>Cash</option><option>Bank transfer</option><option>Easypaisa</option><option>JazzCash</option><option>NayaPay</option><option>SadaPay</option><option>Card</option><option>Other</option></select></div></div>
   <div class="field" id="b-bankw" hidden><label for="b-bank">Bank</label><select id="b-bank" data-banksel></select></div>
   <div class="totbox" id="b-tot"></div>
@@ -1792,6 +1796,7 @@ input[type=date]{min-width:0;max-width:100%}
     <div class="field"><label for="ex-date">Date</label><input id="ex-date" type="date"></div>
     <div class="field"><label for="ex-paid">Payment</label><select id="ex-paid"><option value="paid">Paid</option><option value="pending">Pending</option></select></div>
   </div>
+  <div class="field" id="ex-dentw" hidden><label for="ex-dent">Paid to (dentist)</label><input id="ex-dent" list="ref-names" maxlength="60" autocomplete="off" placeholder="Dentist's name"></div>
   <div class="field"><label for="ex-note">Note</label><input id="ex-note" maxlength="140" placeholder="e.g. October rent, Atif salary, K-Electric bill"></div>
   <p class="perr" id="ex-err" hidden></p>
   <div class="actions"><button type="button" class="btn danger-outline" id="ex-del">Delete</button><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
@@ -3340,7 +3345,8 @@ function openBill(id,pre){
   $("b-d").value=b.date;$("b-lines").innerHTML=(b.items&&b.items.length?b.items:[{}]).map(lineHTML).join("");
   $("b-disc").value=b.discount||"";$("b-note").value=b.note||"";$("b-pay").value="";$("b-paywrap").hidden=!!id;$("b-bank").innerHTML="";bankSync("b-meth","b-bank","b-bankw");if(id)$("b-bankw").hidden=true;$("b-err").hidden=true;
   {const ol=(b.items||[]).find(i=>/^(old balance|previous outstanding balance)/i.test(i.desc||""));$("b-oldw").hidden=!ol;$("b-oldd").value=(ol&&ol.oldDate)||""}
-  {const sh=canShares();$("b-shw").hidden=!sh;if(sh){const bb=id?{...b,id}:b,d=b.dentist||(id?billDentist(bb):"")||(bFromAp&&A[bFromAp]&&A[bFromAp].dentist)||"";$("b-dent").innerHTML=`<option value="">Not assigned</option>`+[...new Set([...dentists().map(x=>x.name),d].filter(Boolean))].map(n=>`<option${n===d?" selected":""}>${esc(n)}</option>`).join("");$("b-pct").value=b.sharePct??"";bPctHint()}}
+  {const sh=canShares();$("b-shw").hidden=!sh;if(sh){const bb=id?{...b,id}:b,d=b.dentist||(id?billDentist(bb):"")||(bFromAp&&A[bFromAp]&&A[bFromAp].dentist)||"";$("b-dent").innerHTML=`<option value="">Not assigned</option>`+[...new Set([...dentists().map(x=>x.name),d].filter(Boolean))].map(n=>`<option${n===d?" selected":""}>${esc(n)}</option>`).join("");$("b-pct").value=b.sharePct??"";bPctHint();
+    $("ref-names").innerHTML=refNames().map(n=>`<option value="${esc(n)}">`).join("");$("b-ref").value=b.refBy||"";$("b-refv").value=b.refAmt??""}}
   billTotals();bPrevUI();openD(bdlg);
 }
 const readLines=()=>[...$("b-lines").querySelectorAll(".line")].map(r=>({desc:r.querySelector(".l-t").value.trim(),tooth:r.querySelector(".l-th").value.trim(),qty:Math.max(1,+r.querySelector(".l-q").value||1),price:+r.querySelector(".l-p").value||0})).filter(l=>l.desc||l.price);
@@ -3362,7 +3368,8 @@ $("bForm").addEventListener("submit",e=>{
   const base=bEdit?B[bEdit]:{no:nextBillNo(date),createdAt:new Date().toISOString(),payments:[],...me};
   const doc={...base,patientId:pid,patientName:p.name,phone:p.phone||"",date,items,discount:+$("b-disc").value||0,note:$("b-note").value.trim()};
   if(bFromAp)doc.apId=bFromAp;
-  if(canShares()){const dv=$("b-dent").value,pv=$("b-pct").value.trim();if(dv)doc.dentist=dv;else delete doc.dentist;if(dv&&pv!==""&&!shOwner(dv))doc.sharePct=Math.max(0,Math.min(100,Math.round(+pv||0)));else delete doc.sharePct}
+  if(canShares()){const dv=$("b-dent").value,pv=$("b-pct").value.trim();if(dv)doc.dentist=dv;else delete doc.dentist;if(dv&&pv!==""&&!shOwner(dv))doc.sharePct=Math.max(0,Math.min(100,Math.round(+pv||0)));else delete doc.sharePct;
+    const rb=$("b-ref").value.trim(),rv=$("b-refv").value.trim();delete doc.refPct;delete doc.refAmt;if(rb){doc.refBy=rb;if(rv!=="")doc.refAmt=Math.max(0,Math.round(+rv||0))}else delete doc.refBy}
   const pay=+$("b-pay").value||0;if(!bEdit&&pay>0)doc.payments=[{date:ymd(new Date()),amount:pay,method:$("b-meth").value,...($("b-meth").value==="Bank transfer"&&$("b-bank").value&&$("b-bank").value!=="+"?{bank:$("b-bank").value}:{}),...me}];
   const id=bEdit||nid("b");cset("bills",id,doc);const chg=chartFromBill(pid,items);if(!bEdit&&bPlanIds&&bPlanIds.pid===pid){const pp=P[pid],pl=planOf(pp);cset("patients",pid,{...pp,plan:{...pl,items:pl.items.map(i=>bPlanIds.ids.includes(i.id)?{...i,billNo:doc.no,billId:id}:i)}})}bPlanIds=null;bdlg.close();openBillView(id);if(chg)toast("Bill saved · tooth chart updated");
 });
@@ -4392,7 +4399,7 @@ $("vb-save").addEventListener("click",async()=>{
 
 /* ================= REPORTS ================= */
 let rpPer=localGet("aa-rp")||"month",rpAnchor=ymd(new Date());
-const EXCATS=["Rent","Salaries","Dentist share paid","Clinic materials","Electricity","Gas","Water","Internet & phone","Maintenance & repairs","Equipment","Marketing","Fuel & transport","Taxes & fees","Refreshments & cleaning","Other"];
+const EXCATS=["Rent","Salaries","Dentist share paid","Referral payment","Clinic materials","Electricity","Gas","Water","Internet & phone","Maintenance & repairs","Equipment","Marketing","Fuel & transport","Taxes & fees","Refreshments & cleaning","Other"];
 $("ex-cat").innerHTML=EXCATS.map(c=>`<option>${c}</option>`).join("");
 function rpRange(per,a){const d=new Date(a+"T00:00:00");
   if(per==="day")return [a,a];
@@ -4453,6 +4460,20 @@ function shareData(f,t){const m={},row=n=>m[n]||(m[n]={name:n,rec:0,lab:0,sh:0,c
   for(const c of lcList())if(c.kind!=="bill"&&+c.cost&&inR(c.sent||(c.createdAt||"").slice(0,10),f,t)){const r=row(labDentist(c)||"Not assigned");r.lab+=+c.cost||0}
   for(const d of dentists())row(d.name);
   return Object.values(m).map(r=>{const own=r.name!=="Not assigned"&&shOwner(r.name),na=r.name==="Not assigned"||own,pct=na?0:shRate(r.name),dl=na?0:r.lab/2,dr=na?0:r.sh-dl,cl=r.rec-(na?0:r.sh)-(r.lab-dl);return {...r,n:r.pats.size,pct,dr,cl,na,own}}).filter(r=>r.own||!r.na||r.rec||r.lab).sort((a,b)=>((a.na&&!a.own)-(b.na&&!b.own))||(b.rec-a.rec))}
+function refNames(){return [...new Set([...dentists().map(d=>d.name),...Object.values(B).map(b=>b.refBy),...expList().filter(e=>e.cat==="Referral payment").map(e=>e.dentist)].filter(Boolean))].sort()}
+function refFee(b,f,t){if(!b.refBy||b.refAmt==null||b.refAmt==="")return 0;return inR(b.date||"",f,t)?+b.refAmt||0:0}
+const refPaid=(n,f,t)=>expList().filter(e=>e.cat==="Referral payment"&&e.dentist===n&&inR(e.date,f,t)).reduce((a,e)=>a+(+e.amount||0),0);
+const refPaidAll=n=>expList().filter(e=>e.cat==="Referral payment"&&e.dentist===n).reduce((a,e)=>a+(+e.amount||0),0);
+function refData(f,t){const m={};const row=n=>m[n]||(m[n]={name:n,earned:0,earnedAll:0,pats:new Set(),bills:[],unset:0});
+  for(const [id,b] of Object.entries(B)){if(!b.refBy)continue;const r=row(b.refBy),e=refFee(b,f,t);r.earnedAll+=refFee(b,"0000-01-01","9999-12-31");if((b.refAmt==null||b.refAmt==="")&&inR(b.date||"",f,t))r.unset++;if(e||inR(b.date||"",f,t)){r.earned+=e;r.pats.add(b.patientId);r.bills.push({...b,id,fee:e})}}
+  for(const e of expList())if(e.cat==="Referral payment"&&e.dentist)row(e.dentist);
+  return Object.values(m).map(r=>{const paid=refPaid(r.name,f,t),paidAll=refPaidAll(r.name);return {...r,n:r.pats.size,paid,due:Math.max(0,Math.round(r.earnedAll-paidAll))}}).filter(r=>r.earned||r.paid||r.due).sort((a,b)=>b.due-a.due||b.earned-a.earned)}
+function refCard(f,t){if(!canShares())return "";const rows=refData(f,t);
+  return `<div class="card r-ref"><div class="dh"><h3>Referral fees</h3><button type="button" class="btn small" data-refpay="">+ Pay referral</button></div>
+  <p class="muted small" style="margin:0 0 8px">🔒 Money the clinic owes dentists who send patients. Earned and Paid are for this period; Still to pay is everything owed so far. Set <b>Referred by</b> and the cash amount on the patient's bill.</p>
+  ${rows.length?`<div class="shl">${rows.map(r=>`<div class="shi"><div class="shh"><b>${esc(r.name)}</b><span>${pl(r.n,"patient")} referred${r.unset?` · <span class="pend">${r.unset} bill${r.unset>1?"s":""} without an amount</span>`:""}</span>${r.due>0?`<button type="button" class="btn small primary" data-refpay="${esc(r.name)}" data-refdue="${r.due}">Pay ${rs(r.due)}</button>`:`<span class="chip2 ok">Settled ✓</span>`}</div>
+    <div class="shg"><div><small>Earned</small>${rs(r.earned)}</div><div><small>Paid</small>${rs(r.paid)}</div><div class="shd"><small>Still to pay</small>${rs(r.due)}</div></div></div>`).join("")}</div>`:`<p class="muted small" style="margin:0">No referrals yet. On a bill, fill <b>Referred by</b> and the referral cash amount.</p>`}</div>`}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-refpay]");if(!b||!canShares())return;openEx(null,{cat:"Referral payment",dentist:b.dataset.refpay||"",amount:+b.dataset.refdue||"",note:b.dataset.refpay?"Referral fee":""})});
 const shPaid=(n,f,t)=>expList().filter(e=>e.cat==="Dentist share paid"&&e.dentist===n&&inR(e.date,f,t)).reduce((a,e)=>a+(+e.amount||0),0);
 function sharesCard(f,t){if(!canShares())return "";const rows=shareData(f,t),T=rows.reduce((a,r)=>({rec:a.rec+r.rec,lab:a.lab+r.lab,dr:a.dr+r.dr,cl:a.cl+r.cl}),{rec:0,lab:0,dr:0,cl:0});
   return `<div class="card r-sh"><div class="dh"><h3>Dentist shares</h3><button type="button" class="btn small" data-shset>⚙ Change shares</button></div>
@@ -4520,6 +4541,7 @@ function renderReports(){
     ${r.bySup.length?`<div class="rsec"><h4>By supplier</h4>${r.bySup.slice(0,6).map(([k,v])=>rl(esc(k),rs(v))).join("")}</div>`:""}
     ${r.lbills.length?`<div class="rsec"><h4>Lab bills uploaded</h4>${r.lbills.map(b=>rl(esc(b.lab)+(b.billNo?" · "+esc(b.billNo):""),rs(b.amount),"",fmtDate(b.date)+(b.paid===false?' · <span class="pend">pending</span>':" · paid"))).join("")}<p class="muted small" style="margin:4px 0 0">Shown for reference; lab work above uses each case's charge.</p></div>`:""}</div>
   ${sharesCard(f,t)}
+  ${refCard(f,t)}
   <div class="card r-pt"><h3>Patients &amp; appointments</h3>${rl("New patients registered",r.newPat)}${rl("Appointments booked",r.nAp)}${rl("Visits completed",r.apDone)}${rl("No-shows",r.apNo,r.apNo?"":"")}${rl("Cancelled",r.apCan)}${rl("Average bill",r.nBills?rs(r.billed/r.nBills):"—")}</div>
   <div class="card r-out"><div class="dh"><h3>Still to be paid (today)</h3></div>
     ${rl("Patients owe the clinic",`<span class="pend">${rs(r.duesTot)}</span>`,"",pl(r.dues.length,"patient"))}
@@ -4674,14 +4696,18 @@ $("repView").addEventListener("click",e=>{const t=e.target;
   const gp=t.closest("[data-gopat]");if(gp){main="patients";selPat=gp.dataset.gopat;render();window.scrollTo(0,0)}});
 /* other expenses */
 const exdlg=$("exdlg");let exEdit=null;
-function openEx(id){exEdit=id;const e=id?logs[id]:{date:(()=>{const [f,t]=rpRange(rpPer,rpAnchor),td=ymd(new Date());return td>=f&&td<=t?td:f})(),cat:"Rent",paid:true};
-  $("exT").textContent=id?"Edit expense":"Add expense";$("ex-cat").value=e.cat||"Other";$("ex-amt").value=e.amount||"";$("ex-date").value=e.date||ymd(new Date());$("ex-paid").value=e.paid===false?"pending":"paid";$("ex-note").value=e.note||"";$("ex-del").hidden=!id;$("ex-err").hidden=true;openD(exdlg);setTimeout(()=>$("ex-amt").focus(),50)}
+function exDentSync(){const c=$("ex-cat").value;$("ex-dentw").hidden=!(c==="Referral payment"||c==="Dentist share paid")}
+function openEx(id,pre){exEdit=id;const e=id?logs[id]:{date:(()=>{const [f,t]=rpRange(rpPer,rpAnchor),td=ymd(new Date());return td>=f&&td<=t?td:f})(),cat:"Rent",paid:true,...(pre||{})};
+  $("ref-names").innerHTML=refNames().map(n=>`<option value="${esc(n)}">`).join("");$("ex-dent").value=e.dentist||"";
+  $("exT").textContent=id?"Edit expense":"Add expense";$("ex-cat").value=e.cat||"Other";$("ex-amt").value=e.amount||"";$("ex-date").value=e.date||ymd(new Date());$("ex-paid").value=e.paid===false?"pending":"paid";$("ex-note").value=e.note||"";$("ex-del").hidden=!id;$("ex-err").hidden=true;exDentSync();openD(exdlg);setTimeout(()=>$("ex-amt").focus(),50)}
 $("exForm").addEventListener("submit",async e=>{e.preventDefault();const amt=Math.round(+$("ex-amt").value||0);if(!(amt>0)){$("ex-err").textContent="Enter the amount.";$("ex-err").hidden=false;return}
   const paid=$("ex-paid").value==="paid",doc={kind:"expense",cat:$("ex-cat").value,amount:amt,date:$("ex-date").value||ymd(new Date()),paid,paidOn:paid?($("ex-date").value||ymd(new Date())):null,note:$("ex-note").value.trim(),at:new Date().toISOString(),...me};
+  if(!$("ex-dentw").hidden){const dn=$("ex-dent").value.trim();if(!dn){$("ex-err").textContent="Enter the dentist's name.";$("ex-err").hidden=false;return}doc.dentist=dn}
   exdlg.close();
   if(exEdit){const v={...logs[exEdit],...doc};logs[exEdit]=v;render();if(db&&!exEdit.startsWith("local-"))W(db.collection("logs").doc(exEdit).set(v));toast("Expense saved");return}
   if(!db){logs["local-"+Date.now()]=doc;render();toast("Expense added");return}
   const ref=db.collection("logs").doc();logs[ref.id]=doc;render();W(ref.set(doc));toast("Expense added")});
+$("ex-cat").addEventListener("change",exDentSync);
 $("ex-del").addEventListener("click",()=>{const id=exEdit;exdlg.close();delLog(id);if(!db||id.startsWith("local-")){}toast("Expense deleted")});
 /* report PDF */
 function repInner(){const [f,t]=rpRange(rpPer,rpAnchor),r=repData(rpPer,f,t),c=S().clinic,logo=(document.querySelector(".head-logo img")||{}).src||"";
@@ -5709,7 +5735,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v128";let updShown=false;
+const APP_BUILD="ds-v131";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
