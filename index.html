@@ -269,6 +269,16 @@ body.spopen{overflow:hidden}
 .shqr{display:grid;place-items:center}.shqr img{border-radius:12px;border:1px solid var(--line);background:#fff;padding:6px}
 .shbtns{display:flex;flex-wrap:wrap;gap:8px}.shbtns .wa{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:10px;background:#25D366;color:#fff;font-weight:700;text-decoration:none}.shbtns .wa svg{width:18px;height:18px}
 .pctin select{border:1px solid var(--line);border-radius:8px;padding:6px;background:var(--bg);font:inherit;font-size:.85rem;max-width:58%}
+#labView.impmode .vhead .vact{display:none}
+.labmode{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:color-mix(in srgb,var(--muted) 12%,transparent);margin:0 0 12px}.labmode button{border:0;background:none;border-radius:11px;padding:10px 6px;font:inherit;font-weight:700;color:var(--muted);cursor:pointer}.labmode button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.impitems{display:flex;flex-direction:column;gap:8px}.impit{display:grid;grid-template-columns:100px minmax(0,1fr) 56px 96px 32px;gap:6px;align-items:end;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.impit label{font-size:.68rem;color:var(--muted);display:block}.impit input,.impit select{width:100%;box-sizing:border-box;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font:inherit;font-size:.88rem}
+.impit .impx{border:0;background:none;color:var(--muted);font-size:1.2rem;height:34px;cursor:pointer}
+@media (max-width:560px){.impit{grid-template-columns:1fr 1fr 32px}.impit .ity{grid-column:1/3}.impit .ids{grid-column:1/-1;order:2}.impit .iq{order:3}.impit .ip{order:4}.impit .impx{grid-row:1;grid-column:3}}
+.impadd{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.imptot{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;background:var(--mod-soft,var(--accent-soft));font-weight:700}.imptot b{font-size:1.1rem}
+.imprw{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:11px 14px;border-top:1px solid var(--line);cursor:pointer}.imprw:first-child{border-top:0}.imprw:hover{background:var(--bg)}
+.imprw .ip1 b{display:block}.imprw .ip1 small{color:var(--muted);font-size:.78rem}.imprw .ip2{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}.imprw .ip3{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.ichip{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--line)}.ichip.Implant{color:#B45309;border-color:#F3D19C;background:#FEF6E7}.ichip.Bone{color:#475569;border-color:#CBD5E1;background:#F1F5F9}.ichip.Membrane{color:#0E7490;border-color:#A5E3F0;background:#ECFBFE}.ichip.Others{color:#6D28D9;border-color:#DDD0FB;background:#F5F1FF}
 .acpw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.85rem;padding:6px 8px;border-radius:8px;background:var(--bg)}.acpw code{font-size:.95rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
 .mgbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mgbox small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mgbox span{font-size:.82rem;color:var(--muted)}
 .invbig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.invbig[hidden]{display:none}
@@ -721,7 +731,7 @@ body.no-tab_dashboard .mainbtn[data-main="dashboard"],body.no-tab_patients .main
 body.no-money #b-tiles .tile.mon,body.no-money #b-pdf,body.no-tab_reports [data-go="reports"],body.no-tab_reports #d-rep,body.no-money #d-rep,body.no-money .d-money,body.no-money .d-pay,body.no-money #d-kpis>*:nth-child(4),
 body.is-staff #ap-team,body.is-staff #ap-set,body.is-staff #b-prices,body.is-staff #lab-set,body.is-staff [data-exnew],
 body.no-pat_edit #patNew,body.no-pat_edit [data-pedit],body.no-pat_edit #ap-newpat,
-body.no-pat_del [data-ndel],body.no-pat_del [data-pmerge],body.no-pat_del [data-pdelp],body.no-pat_del .xrx,body.no-pat_del #pt-del,
+body.no-lab_pay [data-pimp],body.no-lab_pay #imp-new,body.no-pat_del [data-ndel],body.no-pat_del [data-pmerge],body.no-pat_del [data-pdelp],body.no-pat_del .xrx,body.no-pat_del #pt-del,
 body.no-plan .tpcard,body.no-plan [data-tpadd],
 body.no-appt_edit #ap-new,body.no-appt_edit #ap-multi,body.no-appt_edit #ap-text,body.no-appt_edit #ap-photo,body.no-appt_edit [data-apedit],body.no-appt_edit [data-apres],body.no-appt_edit [data-free],body.no-appt_edit [data-newap],body.no-appt_edit [data-calnew],body.no-appt_edit [data-pbook],body.no-appt_edit [data-lcbook],
 body.no-appt_del #ap-del,
@@ -1246,12 +1256,21 @@ input[type=date]{min-width:0;max-width:100%}
   <section id="soon" class="view" hidden><div class="card soon"><div class="soon-ic" id="soon-ic"></div><h2 id="soon-t"></h2><p class="muted" id="soon-p"></p><ul id="soon-l"></ul><p class="tag">Coming soon</p></div></section>
   <section id="labView" class="view cview" hidden>
     <div class="vhead"><div><h2>Lab work</h2><p class="muted">Every case sent to your labs, from impression to fitting.</p></div><div class="vact"><button class="btn" id="lab-pdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 12v6m-3-3 3 3 3-3"/></svg>Statement PDF</button><button class="btn" id="lab-set">Labs</button><button class="btn primary" id="lab-new">+ New lab case</button></div></div>
+    <div class="labmode" id="lab-mode" role="tablist"><button data-lm="lab" role="tab">🧪 Lab work</button><button data-lm="imp" role="tab">🦷 Implant suppliers</button></div>
+    <div id="labMain">
     <div class="tiles" id="lab-tiles"></div>
     <div class="toolbar"><div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="lab-q" type="search" placeholder="Search patient, work or lab" aria-label="Search lab cases"></div><div class="seg" id="lab-f"><button data-lf="open">In progress</button><button data-lf="late">Late</button><button data-lf="ready">Ready to fit</button><button data-lf="done">Fitted</button><button data-lf="all">All</button></div></div>
     <div class="labchips" id="lab-labs"></div>
     <div class="card flush" id="lab-rows"></div>
     <div class="card" id="lab-dues" style="margin-top:12px"></div>
     <div class="card" id="lab-bills" style="margin-top:12px"></div>
+    </div>
+    <div id="impMain" hidden>
+      <div class="tiles t3" id="imp-tiles"></div>
+      <div class="toolbar"><div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="imp-q" type="search" placeholder="Search patient or supplier" aria-label="Search implant entries"></div><div class="seg" id="imp-f"><button data-if="all">All</button><button data-if="pending">Not paid</button><button data-if="paid">Paid</button></div><button class="btn primary" id="imp-new">+ Add implant materials</button></div>
+      <div class="card flush" id="imp-rows"></div>
+      <div class="card" id="imp-sups" style="margin-top:12px"></div>
+    </div>
   </section>
   <section id="repView" class="view cview" hidden>
     <div class="vhead"><div><h2>Reports</h2><p class="muted">Income, expenses, profit and everything still to be paid.</p></div><div class="vact"><button class="btn" data-go="dashboard">‹ Dashboard</button><button class="btn" id="rp-print">Print</button><button class="btn primary" id="rp-pdf">Download PDF</button></div></div>
@@ -1566,7 +1585,7 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="grid2"><div class="field"><label for="b-disc">Discount (Rs)</label><input id="b-disc" type="number" min="0" inputmode="numeric"></div><div class="field"><label for="b-note">Note</label><input id="b-note" maxlength="120" placeholder="Optional"></div></div>
   <div class="grid2 bshw" id="b-shw" hidden><div class="field"><label for="b-dent">Treated by 🔒</label><select id="b-dent"></select></div><div class="field"><label for="b-pct">Dentist share for this bill 🔒</label><div class="pctin"><input id="b-pct" type="number" min="0" max="100" inputmode="numeric" placeholder="Normal rate">%</div><small class="muted" id="b-pcth"></small></div>
     <div class="field"><label for="b-ref">Referred by 🔒</label><input id="b-ref" list="ref-names" maxlength="60" placeholder="Dentist who sent this patient (optional)" autocomplete="off"></div>
-    <div class="field" id="b-refw"><label for="b-refv">Referral cash to pay (Rs) 🔒</label><input id="b-refv" type="number" min="0" step="1" inputmode="numeric" placeholder="e.g. 5000"></div></div>
+    <div class="field" id="b-refw"><label for="b-refv">Referral cash paid (Rs) 🔒</label><input id="b-refv" type="number" min="0" step="1" inputmode="numeric" placeholder="e.g. 5000"></div></div>
   <datalist id="ref-names"></datalist>
   <div class="grid2" id="b-paywrap"><div class="field"><label for="b-pay">Paid now (Rs)</label><input id="b-pay" type="number" min="0" inputmode="numeric"></div><div class="field"><label for="b-meth">Method</label><select id="b-meth"><option>Cash</option><option>Bank transfer</option><option>Easypaisa</option><option>JazzCash</option><option>NayaPay</option><option>SadaPay</option><option>Card</option><option>Other</option></select></div></div>
   <div class="field" id="b-bankw" hidden><label for="b-bank">Bank</label><select id="b-bank" data-banksel></select></div>
@@ -1710,6 +1729,21 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="field"><label for="xr-note">Finding / note</label><input id="xr-note" maxlength="300" placeholder="e.g. Periapical radiolucency 36, impacted 38"></div>
   <p class="perr" id="xr-err" hidden></p>
   <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
+</form></dialog>
+<dialog id="impdlg" class="wide"><form class="dlg" id="impForm" novalidate>
+  <h2 id="imp-t">🦷 Implant materials</h2>
+  <div class="grid2">
+    <div class="field"><label for="imp-pat">Patient</label><input id="imp-pat" list="imp-pats" autocomplete="off" placeholder="Type name or mobile number"><datalist id="imp-pats"></datalist></div>
+    <div class="field"><label for="imp-date">Date</label><input id="imp-date" type="date"></div>
+    <div class="field"><label for="imp-sup">Implant supplier</label><input id="imp-sup" list="imp-supl" maxlength="60" autocomplete="off" placeholder="e.g. Osstem rep, Ali Implants"><datalist id="imp-supl"></datalist></div>
+    <div class="field"><label for="imp-dent">Done by (optional)</label><select id="imp-dent"></select></div>
+  </div>
+  <div id="imp-items" class="impitems"></div>
+  <div class="impadd"><span class="muted small">Add:</span><button type="button" class="btn small" data-impadd="Implant">+ Implant</button><button type="button" class="btn small" data-impadd="Bone">+ Bone</button><button type="button" class="btn small" data-impadd="Membrane">+ Membrane</button><button type="button" class="btn small" data-impadd="Others">+ Others</button></div>
+  <div class="grid2"><div class="field"><label for="imp-paid">Payment to supplier</label><select id="imp-paid"><option value="paid">Paid</option><option value="pending">Not paid yet</option></select></div><div class="field"><label for="imp-note">Note</label><input id="imp-note" maxlength="120" placeholder="Optional, e.g. tooth 36, GBR"></div></div>
+  <div class="imptot"><span>Total to supplier</span><b id="imp-total">Rs 0</b></div>
+  <p class="perr" id="imp-err" hidden></p>
+  <div class="actions"><button type="button" class="btn danger-outline" id="imp-del">Delete</button><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
 <dialog id="appshdlg"><div class="dlg">
   <h2>📲 Share the app</h2>
@@ -2776,7 +2810,7 @@ function renderPatDetail(id){setTimeout(loadXThumbs,0);
   const PL=planTeeth(p),shT=chShowT();const tooth=n=>{const st=teeth[n]||"";return `<button type="button" class="tooth tpic${n>=31?" lower":""}${toothSel===n?" sel":""}${TH[n]?" hx":""}${PL.has(n)?" pl":""}" data-tooth="${n}" aria-label="Tooth ${n}${st?", "+TOOTH_ST[st]:""}">${toothPic(n,st)}<span class="tn">${n}</span></button>`};
   $("patDetail").dataset.psec=pSec;$("patDetail").innerHTML=`<div class="pd-back"><button class="btn" data-back>‹ All patients</button></div>
   <div class="card pd-top"><div class="pd-id"><span class="av big">${esc(initials(p.name))}</span><div><h2>${esc(p.name)}</h2><p class="muted">${[p.fileNo,p.age?p.age+" years":"",p.gender,p.cnic?"CNIC "+p.cnic:"",p.ref?"Referred by "+p.ref:""].filter(Boolean).map(esc).join(" · ")}</p><p class="phline"><span class="seltxt">${esc(p.phone||"No phone")}</span>${waNum(p.phone)?` <a class="wa sm" href="${esc(waHref(p.phone,""))}" target="_blank" rel="noopener">${WA_IC}<span>WhatsApp</span></a>`:""}</p>${p.address?`<p class="muted">${esc(p.address)}</p>`:""}</div></div>
-    <div class="vact">${p.phone?`<a class="btn callbtn" href="tel:${esc(String(p.phone).replace(/[^0-9+]/g,""))}">Call</a>`:""}<button class="btn" data-pedit>Edit</button><button class="btn" data-plab>Lab case</button><button class="btn" data-prx>💊 Prescription</button><button class="btn" data-pmerge title="Merge another patient file into this one">Merge</button><button class="btn" data-pbook>Book appointment</button><button class="btn primary" data-pbill>New bill</button></div></div>
+    <div class="vact">${p.phone?`<a class="btn callbtn" href="tel:${esc(String(p.phone).replace(/[^0-9+]/g,""))}">Call</a>`:""}<button class="btn" data-pedit>Edit</button><button class="btn" data-plab>Lab case</button><button class="btn" data-prx>💊 Prescription</button><button class="btn" data-pimp>🦷 Implant</button><button class="btn" data-pmerge title="Merge another patient file into this one">Merge</button><button class="btn" data-pbook>Book appointment</button><button class="btn primary" data-pbill>New bill</button></div></div>
   ${p.alerts?`<div class="alertbar">Medical alert: ${esc(p.alerts)}</div>`:""}
   <div class="ptabs" role="tablist" aria-label="Patient sections">${[["treat","Treatment"],["chart","Chart"],["xray","X-rays"],["visits","Visits"],["notes","Notes"]].map(([k,n])=>`<button type="button" role="tab" data-psec="${k}" aria-selected="${pSec===k}">${n}</button>`).join("")}</div>
   <div class="pgrid">
@@ -3018,6 +3052,7 @@ $("patDetail").addEventListener("click",e=>{
   if(t.closest("[data-pbook]"))return openAp(null,{patientId:selPat});
   if(t.closest("[data-plab]"))return openLC(null,{patientId:selPat});
   if(t.closest("[data-prx]"))return openRx(null);
+  if(t.closest("[data-pimp]"))return openImp(null,{patientId:selPat,patientName:(P[selPat]||{}).name});
   if(t.closest("[data-pmerge]"))return openMerge(selPat);
   if(t.closest("[data-pbill]"))return openBill(null,{patientId:selPat});
   const th=t.closest("[data-tooth]");if(th){const n=+th.dataset.tooth;toothSel=toothSel===n?null:n;render();return}
@@ -3371,7 +3406,7 @@ $("bForm").addEventListener("submit",e=>{
   if(canShares()){const dv=$("b-dent").value,pv=$("b-pct").value.trim();if(dv)doc.dentist=dv;else delete doc.dentist;if(dv&&pv!==""&&!shOwner(dv))doc.sharePct=Math.max(0,Math.min(100,Math.round(+pv||0)));else delete doc.sharePct;
     const rb=$("b-ref").value.trim(),rv=$("b-refv").value.trim();delete doc.refPct;delete doc.refAmt;if(rb){doc.refBy=rb;if(rv!=="")doc.refAmt=Math.max(0,Math.round(+rv||0))}else delete doc.refBy}
   const pay=+$("b-pay").value||0;if(!bEdit&&pay>0)doc.payments=[{date:ymd(new Date()),amount:pay,method:$("b-meth").value,...($("b-meth").value==="Bank transfer"&&$("b-bank").value&&$("b-bank").value!=="+"?{bank:$("b-bank").value}:{}),...me}];
-  const id=bEdit||nid("b");cset("bills",id,doc);const chg=chartFromBill(pid,items);if(!bEdit&&bPlanIds&&bPlanIds.pid===pid){const pp=P[pid],pl=planOf(pp);cset("patients",pid,{...pp,plan:{...pl,items:pl.items.map(i=>bPlanIds.ids.includes(i.id)?{...i,billNo:doc.no,billId:id}:i)}})}bPlanIds=null;bdlg.close();openBillView(id);if(chg)toast("Bill saved · tooth chart updated");
+  const id=bEdit||nid("b");cset("bills",id,doc);try{refSync(id,doc)}catch(x){}const chg=chartFromBill(pid,items);if(!bEdit&&bPlanIds&&bPlanIds.pid===pid){const pp=P[pid],pl=planOf(pp);cset("patients",pid,{...pp,plan:{...pl,items:pl.items.map(i=>bPlanIds.ids.includes(i.id)?{...i,billNo:doc.no,billId:id}:i)}})}bPlanIds=null;bdlg.close();openBillView(id);if(chg)toast("Bill saved · tooth chart updated");
 });
 const bvdlg=$("bvdlg");let bvId=null,bvConf=false,bvSent=false;
 function openBillView(id){bvId=id;bvConf=false;bvSent=false;renderBV();openD(bvdlg)}
@@ -3383,7 +3418,7 @@ function renderBV(){
   <h3 class="h3s">Payments</h3>${(b.payments||[]).length?b.payments.map((p,ix)=>`<div class="kv"><span>${esc(fmtDate(p.date))} · ${esc(payLbl(p))}${p.ref?" · "+esc(p.ref):""}${p.receipt?` <button type="button" class="rcchip" data-prc="${esc(p.receipt)}">🧾 Receipt</button>`:""}</span><span class="kvr"><b>${rs(p.amount)}</b><button type="button" class="pedit" data-ppedit="${ix}" aria-label="Edit this payment">✎ Edit</button><button type="button" class="ldel" data-pdel="${ix}" aria-label="Remove this payment">×</button></span></div>`).join(""):`<p class="muted" style="margin:0">No payments yet.</p>`}
   <div class="kv tot"><span>Balance</span><b>${rs(t.bal)}</b></div>
   ${t.bal>0?`<label class="fulltick"><input type="checkbox" data-bvfull> Paid in full — ${rs(t.bal)} received</label><form class="payform" id="payForm"><input id="pay-amt" type="number" min="1" inputmode="numeric" value="${t.bal}" aria-label="Payment amount in rupees"><select id="pay-m" aria-label="Payment method"><option>Cash</option><option>Bank transfer</option><option>Easypaisa</option><option>JazzCash</option><option>NayaPay</option><option>SadaPay</option><option>Card</option><option>Other</option></select><select id="pay-bank" data-banksel aria-label="Bank" hidden></select><label class="btn rcpick" title="Attach payment receipt / screenshot">📎<span id="pay-rcl">Receipt</span><input id="pay-rc" type="file" accept="image/*" hidden></label><button class="btn primary" type="submit">Add payment</button></form>`:""}
-  ${canShares()?(()=>{const bb={...b,id:bvId},d=billDentist(bb),pct=d?billPct(bb,d):0,dflt=d?shRate(d):0,cust=b.sharePct!==undefined&&b.sharePct!==null&&b.sharePct!=="",fromPl=!cust&&d&&pct!==dflt,rec=(b.payments||[]).reduce((a,x)=>a+(+x.amount||0),0);return `<div class="bvsh"><h4>🔒 Dentist share · only ${isClinicOwner()?"you":"owner & admins"} see this</h4><label class="small muted" for="bv-dent">Treated by</label><select id="bv-dent"><option value="">Not assigned</option>${[...new Set([...dentists().map(x=>x.name),d].filter(Boolean))].map(n=>`<option${n===d?" selected":""}>${esc(n)}</option>`).join("")}</select>${d&&!shOwner(d)?`<div class="bvpct"><label for="bv-pct">Share for this bill</label><span><input id="bv-pct" type="number" min="0" max="100" inputmode="numeric" value="${pct}">%</span>${cust?`<button type="button" class="linkbtn" data-bvpctreset>Use normal ${dflt}%</button>`:`<small class="muted">${fromPl?"From the treatment plan":"Normal rate"}</small>`}</div>`:""}${d&&shOwner(d)?`<div class="kv"><span>${esc(d)} is the owner</span><b>All ${rs(rec)} to clinic</b></div>`:d?`<div class="kv"><span>${esc(d)} (${pct}%) of ${rs(rec)} received</span><b>${rs(rec*pct/100)}</b></div><div class="kv"><span>Clinic profit</span><b>${rs(rec*(100-pct)/100)}</b></div><p class="muted small" style="margin:4px 0 0">Change the % above for this bill only. Lab fees are split 50/50 with the clinic in Reports → Dentist shares.</p>`:`<p class="muted small" style="margin:6px 0 0">Choose who treated this patient so the share is counted.</p>`}</div>`})():""}
+  ${canShares()?(()=>{const bb={...b,id:bvId},d=billDentist(bb),pct=d?billPct(bb,d):0,dflt=d?shRate(d):0,cust=b.sharePct!==undefined&&b.sharePct!==null&&b.sharePct!=="",fromPl=!cust&&d&&pct!==dflt,rec=(b.payments||[]).reduce((a,x)=>a+(+x.amount||0),0);return `<div class="bvsh"><h4>🔒 Dentist share · only ${isClinicOwner()?"you":"owner & admins"} see this</h4><label class="small muted" for="bv-dent">Treated by</label><select id="bv-dent"><option value="">Not assigned</option>${[...new Set([...dentists().map(x=>x.name),d].filter(Boolean))].map(n=>`<option${n===d?" selected":""}>${esc(n)}</option>`).join("")}</select>${d&&!shOwner(d)?`<div class="bvpct"><label for="bv-pct">Share for this bill</label><span><input id="bv-pct" type="number" min="0" max="100" inputmode="numeric" value="${pct}">%</span>${cust?`<button type="button" class="linkbtn" data-bvpctreset>Use normal ${dflt}%</button>`:`<small class="muted">${fromPl?"From the treatment plan":"Normal rate"}</small>`}</div>`:""}${d&&shOwner(d)?`<div class="kv"><span>${esc(d)} is the owner</span><b>All ${rs(rec)} to clinic</b></div>`:d?`<div class="kv"><span>${esc(d)} (${pct}%) of ${rs(rec)} received</span><b>${rs(rec*pct/100)}</b></div><div class="kv"><span>Clinic profit</span><b>${rs(rec*(100-pct)/100)}</b></div><p class="muted small" style="margin:4px 0 0">Change the % above for this bill only. Lab fees are split 50/50 with the clinic in Reports → Dentist shares.</p>`:`<p class="muted small" style="margin:6px 0 0">Choose who treated this patient so the share is counted.</p>`}${b.refBy?`<p class="small" style="margin:8px 0 0">🤝 Referred by <b>${esc(b.refBy)}</b>${+b.refAmt>0?` · referral ${rs(b.refAmt)} paid ✓`:` · <span class="pend">no referral amount set</span>`}</p>`:""}</div>`})():""}
   ${(()=>{const pb=prevBills({...b,id:bvId}).filter(x=>x.id!==bvId),old=pb.reduce((a,x)=>a+billCalc(x).bal,0);return old?`<label class="fulltick" style="background:#FDECEA;color:#A4231B"><input type="checkbox" data-bvprev ${b.showPrev===false?"":"checked"}> Show old balance (${rs(old)} from ${pl(pb.length,"earlier bill")}) on this bill · total due now ${rs(t.bal+old)}</label>`:""})()}
   ${b.note?`<p class="muted small">Note: ${esc(b.note)}</p>`:""}
   <div class="vact prt">${canPrint?`<button type="button" class="btn" data-bvprint><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>Print bill</button>`:""}<button type="button" class="btn" data-bvpdf><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Download PDF</button></div>
@@ -3400,7 +3435,7 @@ $("bv").addEventListener("click",e=>{
   const pd=t.closest("[data-pdel]");if(pd){const pays=[...(b.payments||[])];pays.splice(+pd.dataset.pdel,1);cset("bills",bvId,{...b,payments:pays});renderBV();toast("Payment removed");return}
   if(t.closest("[data-bvdel]")){bvConf=true;renderBV();return}
   if(t.closest("[data-bvno]")){bvConf=false;renderBV();return}
-  if(t.closest("[data-bvyes]")){cdel("bills",bvId);bvdlg.close();toast("Bill deleted");return}
+  if(t.closest("[data-bvyes]")){try{refSync(bvId,null)}catch(x){}cdel("bills",bvId);bvdlg.close();toast("Bill deleted");return}
   if(t.closest("[data-bvedit]")){bvdlg.close();openBill(bvId);return}
   const pr=t.closest("[data-bvprint]");if(pr){printBill(bvId);return}
   const pd2=t.closest("[data-bvpdf]");if(pd2){downloadBill(bvId,pd2);return}
@@ -4425,7 +4460,8 @@ function repData(per,f,t){
   const lbills=lbList().filter(b=>inR(b.date,f,t));
   const ex=expList().filter(e=>inR(e.date,f,t)),other=ex.reduce((s,e)=>s+(+e.amount||0),0),otherPend=ex.filter(e=>e.paid===false).reduce((s,e)=>s+(+e.amount||0),0);
   const byCat={};for(const e of ex)byCat[e.cat||"Other"]=(byCat[e.cat||"Other"]||0)+(+e.amount||0);
-  const expenses=mat+lab+other,profit=income-expenses;
+  const imps=impList().filter(c=>inR(c.date||"",f,t)),imp=imps.reduce((s,c)=>s+impTot(c),0),impPend=imps.filter(c=>c.paid===false).reduce((s,c)=>s+impTot(c),0);
+  const expenses=mat+lab+imp+other,profit=income-expenses;
   const newPat=Object.values(P).filter(p=>inR((p.createdAt||"").slice(0,10),f,t)).length;
   const aps=Object.values(A).filter(a=>inR(a.date,f,t)),apDone=aps.filter(a=>a.status==="done").length,apNo=aps.filter(a=>a.status==="noshow").length,apCan=aps.filter(a=>a.status==="cancelled").length;
   // outstanding today
@@ -4436,8 +4472,8 @@ function repData(per,f,t){
   // trend buckets
   let bk=[];if(per==="week"||per==="month"){for(let d=f;d<=t;d=addDays(d,1))bk.push({k:d,l:per==="week"?dayName(d).slice(0,3):String(+d.slice(8)),f:d,t:d})}
   else if(per==="year"){for(let m=0;m<12;m++){const s=`${f.slice(0,4)}-${String(m+1).padStart(2,"0")}-01`,[a,b]=rpRange("month",s);bk.push({k:s,l:new Date(s+"T00:00:00").toLocaleDateString("en-GB",{month:"short"}),f:a,t:b})}}
-  for(const x of bk){x.in=pays.filter(p=>inR(p.date,x.f,x.t)).reduce((s,p)=>s+p.amount,0);x.out=buys.filter(l=>inR(l.date,x.f,x.t)).reduce((s,l)=>s+(+l.total||0),0)+cases.filter(c=>inR(c.sent||(c.createdAt||"").slice(0,10),x.f,x.t)).reduce((s,c)=>s+(+c.cost||0),0)+ex.filter(e=>inR(e.date,x.f,x.t)).reduce((s,e)=>s+(+e.amount||0),0)}
-  return {per,f,t,pays,income,billed,disc,nBills:bIn.length,tr:Object.entries(tr).sort((a,b)=>b[1].amt-a[1].amt),byDent:Object.entries(byDent).sort((a,b)=>b[1]-a[1]),byMeth:Object.entries(byMeth).sort((a,b)=>b[1]-a[1]),
+  for(const x of bk){x.in=pays.filter(p=>inR(p.date,x.f,x.t)).reduce((s,p)=>s+p.amount,0);x.out=buys.filter(l=>inR(l.date,x.f,x.t)).reduce((s,l)=>s+(+l.total||0),0)+cases.filter(c=>inR(c.sent||(c.createdAt||"").slice(0,10),x.f,x.t)).reduce((s,c)=>s+(+c.cost||0),0)+ex.filter(e=>inR(e.date,x.f,x.t)).reduce((s,e)=>s+(+e.amount||0),0)+imps.filter(c=>inR(c.date||"",x.f,x.t)).reduce((s,c)=>s+impTot(c),0)}
+  return {per,f,t,pays,income,billed,disc,nBills:bIn.length,imp,impPend,imps,tr:Object.entries(tr).sort((a,b)=>b[1].amt-a[1].amt),byDent:Object.entries(byDent).sort((a,b)=>b[1]-a[1]),byMeth:Object.entries(byMeth).sort((a,b)=>b[1]-a[1]),
     buys,mat,matPend,bySup:Object.entries(bySup).sort((a,b)=>b[1]-a[1]),cases,lab,labPend,byLab:Object.entries(byLab).sort((a,b)=>b[1].amt-a[1].amt),lbills,ex,other,otherPend,byCat:Object.entries(byCat).sort((a,b)=>b[1]-a[1]),
     expenses,profit,newPat,nAp:aps.length,apDone,apNo,apCan,dues,duesTot:dues.reduce((s,x)=>s+x.bal,0),supPend,labPendAll,exPendAll,bk}}
 const rl=(l,v,cls,sub)=>`<div class="rl${cls?" "+cls:""}"><span>${l}${sub?`<small>${sub}</small>`:""}</span><b>${v}</b></div>`;
@@ -4460,6 +4496,12 @@ function shareData(f,t){const m={},row=n=>m[n]||(m[n]={name:n,rec:0,lab:0,sh:0,c
   for(const c of lcList())if(c.kind!=="bill"&&+c.cost&&inR(c.sent||(c.createdAt||"").slice(0,10),f,t)){const r=row(labDentist(c)||"Not assigned");r.lab+=+c.cost||0}
   for(const d of dentists())row(d.name);
   return Object.values(m).map(r=>{const own=r.name!=="Not assigned"&&shOwner(r.name),na=r.name==="Not assigned"||own,pct=na?0:shRate(r.name),dl=na?0:r.lab/2,dr=na?0:r.sh-dl,cl=r.rec-(na?0:r.sh)-(r.lab-dl);return {...r,n:r.pats.size,pct,dr,cl,na,own}}).filter(r=>r.own||!r.na||r.rec||r.lab).sort((a,b)=>((a.na&&!a.own)-(b.na&&!b.own))||(b.rec-a.rec))}
+/* a referral amount on a bill is paid at once: it is saved as a "Referral payment" for that dentist, linked to the bill */
+function refSync(billId,b){if(!canShares())return;const ex=Object.entries(logs).find(([k,v])=>v&&v.kind==="expense"&&v.refBill===billId);
+  if(!b||!b.refBy||!(+b.refAmt>0)){if(ex)delLog(ex[0]);return}
+  const doc={...(ex?ex[1]:{}),kind:"expense",cat:"Referral payment",dentist:b.refBy,amount:Math.round(+b.refAmt),date:b.date||ymd(new Date()),paid:true,paidOn:b.date||ymd(new Date()),note:`Referral · ${b.patientName||""}${b.no?" · "+b.no:""}`,refBill:billId,at:(ex&&ex[1].at)||new Date().toISOString(),...me};
+  if(ex){logs[ex[0]]=doc;render();if(db&&!ex[0].startsWith("local-"))W(db.collection("logs").doc(ex[0]).set(doc));return}
+  if(!db){logs["local-"+Date.now()]=doc;render();return}const ref=db.collection("logs").doc();logs[ref.id]=doc;render();W(ref.set(doc))}
 function refNames(){return [...new Set([...dentists().map(d=>d.name),...Object.values(B).map(b=>b.refBy),...expList().filter(e=>e.cat==="Referral payment").map(e=>e.dentist)].filter(Boolean))].sort()}
 function refFee(b,f,t){if(!b.refBy||b.refAmt==null||b.refAmt==="")return 0;return inR(b.date||"",f,t)?+b.refAmt||0:0}
 const refPaid=(n,f,t)=>expList().filter(e=>e.cat==="Referral payment"&&e.dentist===n&&inR(e.date,f,t)).reduce((a,e)=>a+(+e.amount||0),0);
@@ -4469,16 +4511,16 @@ function refData(f,t){const m={};const row=n=>m[n]||(m[n]={name:n,earned:0,earne
   for(const e of expList())if(e.cat==="Referral payment"&&e.dentist)row(e.dentist);
   return Object.values(m).map(r=>{const paid=refPaid(r.name,f,t),paidAll=refPaidAll(r.name);return {...r,n:r.pats.size,paid,due:Math.max(0,Math.round(r.earnedAll-paidAll))}}).filter(r=>r.earned||r.paid||r.due).sort((a,b)=>b.due-a.due||b.earned-a.earned)}
 function refCard(f,t){if(!canShares())return "";const rows=refData(f,t);
-  return `<div class="card r-ref"><div class="dh"><h3>Referral fees</h3><button type="button" class="btn small" data-refpay="">+ Pay referral</button></div>
-  <p class="muted small" style="margin:0 0 8px">🔒 Money the clinic owes dentists who send patients. Earned and Paid are for this period; Still to pay is everything owed so far. Set <b>Referred by</b> and the cash amount on the patient's bill.</p>
-  ${rows.length?`<div class="shl">${rows.map(r=>`<div class="shi"><div class="shh"><b>${esc(r.name)}</b><span>${pl(r.n,"patient")} referred${r.unset?` · <span class="pend">${r.unset} bill${r.unset>1?"s":""} without an amount</span>`:""}</span>${r.due>0?`<button type="button" class="btn small primary" data-refpay="${esc(r.name)}" data-refdue="${r.due}">Pay ${rs(r.due)}</button>`:`<span class="chip2 ok">Settled ✓</span>`}</div>
-    <div class="shg"><div><small>Earned</small>${rs(r.earned)}</div><div><small>Paid</small>${rs(r.paid)}</div><div class="shd"><small>Still to pay</small>${rs(r.due)}</div></div></div>`).join("")}</div>`:`<p class="muted small" style="margin:0">No referrals yet. On a bill, fill <b>Referred by</b> and the referral cash amount.</p>`}</div>`}
+  return `<div class="card r-ref"><div class="dh"><h3>Referral fees</h3><button type="button" class="btn small" data-refpay="">+ Other referral payment</button></div>
+  <p class="muted small" style="margin:0 0 8px">🔒 Cash paid to dentists who send patients. Put <b>Referred by</b> and the cash amount on the patient's bill and it is recorded as paid straight away.</p>
+  ${rows.length?`<div class="shl">${rows.map(r=>`<div class="shi"><div class="shh"><b>${esc(r.name)}</b><span>${pl(r.n,"patient")} referred${r.unset?` · <span class="pend">${r.unset} bill${r.unset>1?"s":""} without an amount</span>`:""}</span>${r.due>0?`<button type="button" class="btn small primary" data-refpay="${esc(r.name)}" data-refdue="${r.due}">Pay ${rs(r.due)}</button>`:`<span class="chip2 ok">Paid ✓</span>`}</div>
+    <div class="shg"><div><small>Patients</small>${r.n}</div><div class="shd"><small>Paid this period</small>${rs(r.paid)}</div><div><small>Paid all time</small>${rs(refPaidAll(r.name))}</div></div></div>`).join("")}</div>`:`<p class="muted small" style="margin:0">No referrals yet. On a bill, fill <b>Referred by</b> and the referral cash amount.</p>`}</div>`}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-refpay]");if(!b||!canShares())return;openEx(null,{cat:"Referral payment",dentist:b.dataset.refpay||"",amount:+b.dataset.refdue||"",note:b.dataset.refpay?"Referral fee":""})});
 const shPaid=(n,f,t)=>expList().filter(e=>e.cat==="Dentist share paid"&&e.dentist===n&&inR(e.date,f,t)).reduce((a,e)=>a+(+e.amount||0),0);
 function sharesCard(f,t){if(!canShares())return "";const rows=shareData(f,t),T=rows.reduce((a,r)=>({rec:a.rec+r.rec,lab:a.lab+r.lab,dr:a.dr+r.dr,cl:a.cl+r.cl}),{rec:0,lab:0,dr:0,cl:0});
   return `<div class="card r-sh"><div class="dh"><h3>Dentist shares</h3><button type="button" class="btn small" data-shset>⚙ Change shares</button></div>
   <p class="muted small" style="margin:0 0 8px">🔒 Only ${isClinicOwner()?"you (clinic owner)":"the owner and admins"} can see this. Shares come from money received. Lab fees are split 50/50 between the treating dentist and the clinic.</p>
-  <div class="shl">${rows.map(r=>`<div class="shi"><div class="shh"><b>${esc(r.name)}</b><span>${r.own?"Owner · all to clinic · "+pl(r.n,"patient"):r.na?"Pick the dentist on these bills":r.pct+"%"+(r.cust?" (some bills custom)":"")+" · "+pl(r.n,"patient")}</span>${!r.na?`<button type="button" class="btn small shrep" data-shrep="${esc(r.name)}" data-shf="${esc(f)}" data-sht="${esc(t)}">📄 Report</button>`:""}</div><div class="shg"><div><small>Received</small>${rs(r.rec)}</div><div><small>Lab fees</small>${r.lab?rs(r.lab):"–"}</div><div class="shd"><small>${r.na?"Dentist":"Pay dentist"}</small>${r.na?"–":(r.dr<0?"− ":"")+rs(Math.abs(r.dr))}${(()=>{if(r.na)return "";const pd=shPaid(r.name,f,t);return pd?`<span class="shpd">Paid ${rs(pd)} · ${r.dr-pd>0?"left "+rs(r.dr-pd):r.dr-pd<0?"over "+rs(pd-r.dr):"settled ✓"}</span>`:""})()}</div><div class="shc"><small>Clinic</small>${(r.cl<0?"− ":"")+rs(Math.abs(r.cl))}</div></div></div>`).join("")}
+  <div class="shl">${rows.map(r=>`<div class="shi"><div class="shh"><b>${esc(r.name)}</b><span>${r.own?"Owner · all to clinic · "+pl(r.n,"patient"):r.na?"Pick the dentist on these bills":r.pct+"%"+(r.cust?" (some bills custom)":"")+" · "+pl(r.n,"patient")}</span>${!r.na?`<button type="button" class="btn small shrep" data-shrep="${esc(r.name)}" data-shf="${esc(f)}" data-sht="${esc(t)}">📄 Report</button>`:""}</div><div class="shg"><div><small>Received</small>${rs(r.rec)}</div><div><small>Lab fees</small>${r.lab?rs(r.lab):"–"}</div><div class="shd"><small>${r.na?"Dentist":"Pay dentist"}</small>${r.na?"–":(r.dr<0?"− ":"")+rs(Math.abs(r.dr))}${(()=>{if(r.na)return "";const pd=shPaid(r.name,f,t);return pd?`<span class="shpd">Paid ${rs(pd)} · ${r.dr-pd>0?"left "+rs(r.dr-pd):r.dr-pd<0?"over "+rs(pd-r.dr):"settled ✓"}</span>`:""})()}${(()=>{const rp=refPaid(r.name,f,t);return rp?`<span class="shpd">🤝 Referral paid ${rs(rp)}</span>`:""})()}</div><div class="shc"><small>Clinic</small>${(r.cl<0?"− ":"")+rs(Math.abs(r.cl))}</div></div></div>`).join("")}
   <div class="shi tot"><div class="shh"><b>Total</b></div><div class="shg"><div><small>Received</small>${rs(T.rec)}</div><div><small>Lab fees</small>${T.lab?rs(T.lab):"–"}</div><div class="shd"><small>Pay dentists</small>${rs(T.dr)}</div><div class="shc"><small>Clinic</small>${rs(T.cl)}</div></div></div></div>
   ${rows.some(r=>r.dr<0||r.cl<0)?`<p class="muted small" style="margin:8px 0 0">A minus amount means the half of the lab fees was more than that share in this period.</p>`:""}</div>`}
 function shDetail(n,f,t){const pays=[],labs=[];
@@ -4504,6 +4546,8 @@ ${ST_CSS}
 <h3 class="sh">Payments received from your patients</h3><div class="wide">${tb(["Date","Patient","Bill no.","Treatment","Paid by","Received",...(d.mixed?["%"]:[]),d.mixed?"Share":`Share ${d.pct}%`],d.pays.map(x=>[esc(fmtDate(x.date)),esc(x.pat),esc(x.no),esc(x.tr),esc(x.m),rs(x.amt),...(d.mixed?[x.pc+"%"]:[]),rs(x.amt*x.pc/100)]),["Total","","","","",rs(d.rec),...(d.mixed?[""]:[]),rs(d.sh)],d.mixed?[5,6,7]:[5,6])}</div>
 <h3 class="sh">Lab work for your patients</h3><div class="wide">${tb(["Sent","Patient","Work","Lab","Lab fee","Your half"],d.labs.map(x=>[esc(fmtDate(x.date)),esc(x.pat),esc(x.work)+(x.teeth?` <small>${esc(x.teeth)}</small>`:""),esc(x.lab),rs(x.cost),rs(d.own?0:x.cost/2)]),["Total","","","",rs(d.lab),rs(d.half)],[4,5])}</div>
 <div class="calc"><div><span>Your share of ${rs(d.rec)}${d.mixed?"":" ("+d.pct+"%)"}</span><b>${rs(d.sh)}</b></div><div><span>Less: half of lab fees</span><b>${d.half?"− "+rs(d.half):"–"}</b></div><div class="g"><span>Payable to you</span><b>${rr(d.own?0:d.net)}</b></div>${(()=>{const pd=shPaid(n,f,t);return pd&&!d.own?`<div><span>Already paid to you this period</span><b>− ${rs(pd)}</b></div><div class="g" style="background:${d.net-pd>0?"#A4231B":"#1F6B45"}"><span>${d.net-pd>0?"Balance still to pay":d.net-pd<0?"Paid in advance":"Settled"}</span><b>${rs(Math.abs(d.net-pd))}</b></div>`:""})()}</div>
+${(()=>{const rx=expList().filter(e=>e.cat==="Referral payment"&&e.dentist===n&&inR(e.date,f,t)).sort((a,b)=>a.date.localeCompare(b.date));if(!rx.length)return "";const tot=rx.reduce((a,e)=>a+(+e.amount||0),0);
+  return `<h3 class="sh">Referral fees paid to you</h3><div class="wide">${tb(["Date","Details","Paid"],rx.map(e=>[esc(fmtDate(e.date)),esc(e.note||"Referral"),rs(e.amount)]),["Total","",rs(tot)],[2])}</div>`})()}
 <div class="sgn"><div>Prepared by · ${esc(c.name)}</div><div>Received by · ${esc(n)}</div></div>
 ${invContactHTML()}
 <p class="gen" style="margin-top:22px">${esc(c.name)} · dentist share report · ${esc(n)} · ${esc(per)} · computer-generated</p></div>`}
@@ -4535,6 +4579,7 @@ function renderReports(){
   <div class="card r-ex"><h3>Expenses</h3>
     ${rl("Materials &amp; supplies",rs(r.mat),"",r.matPend?`<span class="pend">${rs(r.matPend)} unpaid</span>`:pl(r.buys.length,"purchase"))}
     ${rl("Lab work",rs(r.lab),"",r.labPend?`<span class="pend">${rs(r.labPend)} unpaid</span>`:pl(r.cases.length,"case"))}
+    ${r.imp?rl("Implant materials",rs(r.imp),"",r.impPend?`<span class="pend">${rs(r.impPend)} unpaid</span>`:pl(r.imps.length,"case")):""}
     ${rl("Other expenses",rs(r.other),"",r.otherPend?`<span class="pend">${rs(r.otherPend)} unpaid</span>`:pl(r.ex.length,"entry"))}
     ${rl("Total expenses",rs(r.expenses),"tot")}
     ${r.byLab.length?`<div class="rsec"><h4>By lab</h4>${r.byLab.map(([k,v])=>rl(esc(k),rs(v.amt),"",`${pl(v.n,"case")}${v.pend?` · <span class="pend">${rs(v.pend)} unpaid</span>`:""}`)).join("")}</div>`:""}
@@ -5159,7 +5204,59 @@ const labs=()=>S().labs.filter(l=>l.name);
 const lcList=()=>Object.entries(LC).filter(([,c])=>!c.kind).map(([id,c])=>({id,...c}));
 const lcLate=c=>["imp","sent","remake","trial"].includes(c.status||"sent")&&c.due&&c.due<ymd(new Date());
 function lcMsg(c){const l=labs().find(x=>x.name===c.lab)||{};return `Assalam o Alaikum${l.name?" "+l.name:""},\n\nNew case from *${S().clinic.name}*:\nPatient: ${c.patientName}\nWork: ${c.work||"-"}\nTeeth: ${c.teeth||"-"}\nShade: ${shadeText(c)||"-"}\nDentist: ${c.dentist||"-"}\nNeeded by: ${c.due?dayName(c.due)+" "+fmtDate(c.due):"-"}${c.note?"\nInstructions: "+c.note:""}\n\nJazakAllah.`}
-function renderLab(){
+
+/* ===== Implant suppliers (implant, bone, membrane, others) — saved with lab cases as kind "implant" ===== */
+const IMP_T=["Implant","Bone","Membrane","Others"];
+let labMode=localGet("ds-labmode")||"lab",impF="all",impEdit=null,impRows=[];
+const impList=()=>Object.entries(LC).filter(([,c])=>c.kind==="implant").map(([id,c])=>({id,...c})).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+const impTot=c=>(c.items||[]).reduce((a,i)=>a+(+i.qty||1)*(+i.price||0),0);
+const impSups=()=>[...new Set(impList().map(c=>c.supplier).filter(Boolean))].sort();
+function renderImp(){
+  for(const b of document.querySelectorAll("[data-lm]"))b.setAttribute("aria-pressed",String(b.dataset.lm===labMode));
+  $("labMain").hidden=labMode!=="lab";$("impMain").hidden=labMode!=="imp";const lv=$("labView");lv.classList.toggle("impmode",labMode==="imp");
+  {const h=lv.querySelector(".vhead h2"),p=lv.querySelector(".vhead p");if(h)h.textContent=labMode==="imp"?"Implant suppliers":"Lab work";if(p)p.textContent=labMode==="imp"?"Implants, bone, membranes and other materials you pay implant suppliers for.":"Every case sent to your labs, from impression to fitting."}
+  if(labMode!=="imp")return;
+  const all=impList(),mk=thisMonth(),inM=all.filter(c=>(c.date||"").startsWith(mk)),pend=all.filter(c=>c.paid===false);
+  $("imp-tiles").innerHTML=`<div class="tile big"><small>Spent in ${esc(monthLabel(mk).split(" ")[0])}</small><b>${rs(inM.reduce((a,c)=>a+impTot(c),0))}</b><span>${pl(inM.length,"case")}</span></div><div class="tile"><small>Not paid yet</small><b>${rs(pend.reduce((a,c)=>a+impTot(c),0))}</b><span>${pl(pend.length,"case")}</span></div><div class="tile"><small>Implants this month</small><b>${inM.reduce((a,c)=>a+(c.items||[]).filter(i=>i.type==="Implant").reduce((x,i)=>x+(+i.qty||1),0),0)}</b><span>placed</span></div>`;
+  for(const b of document.querySelectorAll("[data-if]"))b.setAttribute("aria-pressed",String(b.dataset.if===impF));
+  const q=$("imp-q").value.trim().toLowerCase();
+  let list=all.filter(c=>impF==="all"||(impF==="pending"?c.paid===false:c.paid!==false));
+  if(q)list=list.filter(c=>((c.patientName||"")+" "+(c.supplier||"")+" "+(c.note||"")).toLowerCase().includes(q));
+  $("imp-rows").innerHTML=list.length?list.map(c=>{const ch=IMP_T.map(t=>{const its=(c.items||[]).filter(i=>i.type===t);if(!its.length)return "";const n=its.reduce((a,i)=>a+(+i.qty||1),0);return `<span class="ichip ${t}">${t}${n>1?" ×"+n:""}${its[0].desc?" · "+esc(its.map(i=>i.desc).filter(Boolean).join(", ")):""}</span>`}).join("");
+    return `<div class="imprw" data-impedit="${esc(c.id)}"><div class="ip1"><b>${esc(c.patientName||"Patient")}</b><small>${esc(fmtDate(c.date))}${c.supplier?" · "+esc(c.supplier):""}${c.dentist?" · "+esc(c.dentist):""}${c.note?" · "+esc(c.note):""}</small></div><div class="ip2">${rs(impTot(c))}</div><div class="ip3">${ch}${c.paid===false?`<span class="chip2 warn">Not paid</span>${can("lab_pay")?`<button type="button" class="btn small primary" data-imppaid="${esc(c.id)}">Mark paid</button>`:""}`:`<span class="chip2 ok">Paid</span>`}</div></div>`}).join(""):`<div class="empty">${all.length?"Nothing matches.":"No implant materials yet.<br>Tap <b>+ Add implant materials</b> after an implant, GBR or bone graft."}</div>`;
+  const by={};for(const c of all){const k=c.supplier||"Supplier not set";by[k]=by[k]||{tot:0,pend:0,n:0,m:0};by[k].tot+=impTot(c);by[k].n++;if(c.paid===false)by[k].pend+=impTot(c);if((c.date||"").startsWith(mk))by[k].m+=impTot(c)}
+  const ks=Object.keys(by).sort((a,b)=>by[b].pend-by[a].pend||by[b].tot-by[a].tot);
+  $("imp-sups").innerHTML=`<h3>Implant suppliers</h3>`+(ks.length?ks.map(k=>`<div class="kv"><span>${esc(k)}<br><small class="muted">${rs(by[k].m)} this month · ${pl(by[k].n,"case")} in all</small></span><span style="text-align:right">${by[k].pend?`<b class="duetxt">${rs(by[k].pend)} to pay</b><br>${can("lab_pay")?`<button type="button" class="btn small" data-imppayall="${esc(k)}">Mark all paid</button>`:""}`:`<span class="chip2 ok">Settled ✓</span>`}</span></div>`).join(""):`<p class="muted small" style="margin:0">Suppliers appear here once you add implant materials.</p>`);
+}
+function impItemsHTML(){return impRows.map((r,i)=>`<div class="impit" data-ii="${i}"><div class="ity"><label>Type</label><select data-ik="type">${IMP_T.map(t=>`<option${t===r.type?" selected":""}>${t}</option>`).join("")}</select></div><div class="ids"><label>Details</label><input data-ik="desc" value="${esc(r.desc||"")}" maxlength="60" placeholder="${r.type==="Implant"?"Brand & size, e.g. Osstem 4.0×10":r.type==="Bone"?"e.g. Bio-Oss 0.5 g":r.type==="Membrane"?"e.g. Bio-Gide 25×25":"e.g. healing cap, screw"}"></div><div class="iq"><label>Qty</label><input data-ik="qty" type="number" min="1" inputmode="numeric" value="${esc(r.qty||1)}"></div><div class="ip"><label>Price (Rs)</label><input data-ik="price" type="number" min="0" inputmode="numeric" value="${esc(r.price||"")}"></div><button type="button" class="impx" data-irm="${i}" aria-label="Remove">×</button></div>`).join("")}
+function impSum(){$("imp-total").textContent=rs(impRows.reduce((a,r)=>a+(+r.qty||1)*(+r.price||0),0))}
+function lastImpPrice(type,desc){const d=String(desc||"").trim().toLowerCase();for(const c of impList())for(const i of c.items||[])if(i.type===type&&(!d||String(i.desc||"").trim().toLowerCase()===d)&&+i.price)return +i.price;return ""}
+function openImp(id,pre){if(!can("lab_pay")&&!can("lab_edit"))return toast("You don't have access to this.");impEdit=id||null;const c=id?LC[id]:{date:ymd(new Date()),paid:false,...(pre||{})};
+  $("imp-t").textContent=id?"🦷 Edit implant materials":"🦷 Implant materials";$("imp-pats").innerHTML=patOpts();$("imp-pat").value=c.patientId&&P[c.patientId]?patLabel(P[c.patientId]):(c.patientName||"");
+  $("imp-date").value=c.date||ymd(new Date());$("imp-supl").innerHTML=impSups().map(x=>`<option value="${esc(x)}">`).join("");$("imp-sup").value=c.supplier||(id?"":(impSups()[0]||""));
+  $("imp-dent").innerHTML=`<option value="">—</option>`+dentists().map(d=>`<option${d.name===c.dentist?" selected":""}>${esc(d.name)}</option>`).join("");
+  impRows=(c.items&&c.items.length?c.items:[{type:"Implant",qty:1,price:lastImpPrice("Implant")}]).map(x=>({...x}));$("imp-items").innerHTML=impItemsHTML();impSum();
+  $("imp-paid").value=c.paid===false?"pending":"paid";$("imp-note").value=c.note||"";$("imp-del").hidden=!id;$("imp-err").hidden=true;openD($("impdlg"))}
+$("imp-items").addEventListener("input",e=>{const el=e.target.closest("[data-ik]");if(!el)return;const i=+el.closest(".impit").dataset.ii,k=el.dataset.ik;impRows[i][k]=el.value;
+  if(k==="type"||k==="desc"){const p=lastImpPrice(impRows[i].type,k==="desc"?impRows[i].desc:"");if(p&&(k==="desc"||!impRows[i].price)){impRows[i].price=p;el.closest(".impit").querySelector("[data-ik=price]").value=p}}if(k==="type")el.closest(".impit").querySelector("[data-ik=desc]").placeholder="";impSum()});
+$("imp-items").addEventListener("change",e=>{const el=e.target.closest("[data-ik=type]");if(el){impRows[+el.closest(".impit").dataset.ii].type=el.value;impSum()}});
+$("imp-items").addEventListener("click",e=>{const x=e.target.closest("[data-irm]");if(!x)return;impRows.splice(+x.dataset.irm,1);$("imp-items").innerHTML=impItemsHTML();impSum()});
+$("impForm").addEventListener("click",e=>{const a=e.target.closest("[data-impadd]");if(!a)return;impRows.push({type:a.dataset.impadd,qty:1,price:lastImpPrice(a.dataset.impadd)});$("imp-items").innerHTML=impItemsHTML();impSum();const l=$("imp-items").lastElementChild;if(l)l.querySelector("[data-ik=desc]").focus()});
+$("impForm").addEventListener("submit",e=>{e.preventDefault();const err=$("imp-err"),pid=findPat($("imp-pat").value),its=impRows.filter(r=>+r.price>0||String(r.desc||"").trim()).map(r=>({type:r.type,desc:String(r.desc||"").trim(),qty:Math.max(1,Math.round(+r.qty||1)),price:Math.max(0,Math.round(+r.price||0))}));
+  if(!pid){err.textContent="Choose the patient from the list.";err.hidden=false;return}if(!its.length){err.textContent="Add at least one item with its price.";err.hidden=false;return}
+  const sup=$("imp-sup").value.trim(),paid=$("imp-paid").value==="paid",old=impEdit?LC[impEdit]:{},date=$("imp-date").value||ymd(new Date());
+  const doc={...old,kind:"implant",patientId:pid,patientName:P[pid].name,date,supplier:sup,items:its,total:its.reduce((a,i)=>a+i.qty*i.price,0),paid,paidOn:paid?(old.paid!==false&&old.paidOn?old.paidOn:ymd(new Date())):null,note:$("imp-note").value.trim(),...(impEdit?{}:{createdAt:new Date().toISOString(),...me})};
+  const dv=$("imp-dent").value;if(dv)doc.dentist=dv;else delete doc.dentist;
+  cset("labcases",impEdit||nid("im"),doc);$("impdlg").close();toast(`Saved · ${rs(doc.total)} to ${sup||"supplier"}${paid?" (paid)":" (not paid yet)"}`)});
+$("imp-del").addEventListener("click",()=>{if(!impEdit)return;if(!confirm("Delete this implant entry?"))return;cdel("labcases",impEdit);$("impdlg").close();toast("Deleted")});
+$("lab-mode").addEventListener("click",e=>{const b=e.target.closest("[data-lm]");if(!b)return;labMode=b.dataset.lm;try{localStorage.setItem("ds-labmode",labMode)}catch(x){}render()});
+$("imp-new").addEventListener("click",()=>openImp(null));
+$("imp-q").addEventListener("input",()=>renderImp());
+$("imp-f").addEventListener("click",e=>{const b=e.target.closest("[data-if]");if(b){impF=b.dataset.if;renderImp()}});
+$("impMain").addEventListener("click",e=>{const pd=e.target.closest("[data-imppaid]");if(pd){const c=LC[pd.dataset.imppaid];if(c)cset("labcases",pd.dataset.imppaid,{...c,paid:true,paidOn:ymd(new Date())});toast("Marked paid");return}
+  const pa=e.target.closest("[data-imppayall]");if(pa){const k=pa.dataset.imppayall,ls=impList().filter(c=>c.paid===false&&(c.supplier||"Supplier not set")===k);if(!confirm(`Mark ${pl(ls.length,"entry")} for ${k} as paid (${rs(ls.reduce((a,c)=>a+impTot(c),0))})?`))return;for(const c of ls){const {id,...d}=c;cset("labcases",id,{...d,paid:true,paidOn:ymd(new Date())})}toast("All marked paid");return}
+  const ed=e.target.closest("[data-impedit]");if(ed)openImp(ed.dataset.impedit)});
+function renderLab(){try{renderImp()}catch(e){console.error(e)}
   const today=ymd(new Date()),all=lcList(),open=all.filter(c=>c.status!=="fitted");
   const late=open.filter(lcLate),ready=all.filter(c=>c.status==="back"),atLab=all.filter(c=>["sent","trial","remake"].includes(c.status||"sent"));
   const dueAll=all.filter(c=>c.paid===false&&+c.cost);
@@ -5374,7 +5471,7 @@ swipeDel($("patRows"),".prow2","[data-pdelp]");swipeDel($("list"),".row","[data-
     const mo=$("moredlg");if(mo&&mo.open){mo.close();return}
     if(navBack())toast("‹ Back")},{passive:true})})();
 /* swipe to delete everywhere else (asks first, follows staff permissions) */
-const delBill=id=>{const b=B[id];if(!b||!can("bill_del"))return null;return ()=>{if(confirm("Delete bill "+(b.no||"")+" for "+(b.patientName||"")+"?\n\nIts payments ("+rs(billCalc(b).paid)+") will be removed too.")){cdel("bills",id);toast("Bill deleted")}}};
+const delBill=id=>{const b=B[id];if(!b||!can("bill_del"))return null;return ()=>{if(confirm("Delete bill "+(b.no||"")+" for "+(b.patientName||"")+"?\n\nIts payments ("+rs(billCalc(b).paid)+") will be removed too.")){try{refSync(id,null)}catch(x){}cdel("bills",id);toast("Bill deleted")}}};
 const delAppt=id=>{const a=A[id];if(!a||!can("appt_del"))return null;return ()=>{if(confirm("Delete the appointment for "+(a.patientName||"")+" on "+fmtDate(a.date)+" at "+fmtTime(a.time)+"?")){cdel("appts",id);toast("Appointment deleted")}}};
 const delLab=id=>{const c=LC[id];if(!c||!can("lab_edit"))return null;return ()=>{if(confirm("Delete the lab case for "+(c.patientName||"")+(c.work?" ("+c.work+")":"")+"?")){cdel("labcases",id);toast("Lab case deleted")}}};
 const delExp=id=>{const e=logs[id];if(!e||!can("money"))return null;return ()=>{if(confirm("Delete this expense: "+(e.cat||"")+" "+rs(e.amount)+"?")){delLog(id);toast("Expense deleted")}}};
@@ -5735,7 +5832,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v131";let updShown=false;
+const APP_BUILD="ds-v133";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
