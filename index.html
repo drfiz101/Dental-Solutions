@@ -265,6 +265,10 @@ body.spopen{overflow:hidden}
 @media (max-width:560px){.invnav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.invnav .viewbtn{padding:9px 4px;text-align:center;font-size:.82rem}}
 .isg{display:flex;flex-direction:column;gap:6px}.isg button{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font:inherit;font-weight:600;text-align:left;cursor:pointer;color:var(--ink)}.isg button span{font-size:1.15rem}.isg button:hover{background:var(--bg)}.isg .isdel{color:var(--bad)}.isg button[hidden]{display:none}
 .sentnote{margin-top:6px;text-align:right;font-size:.74rem;color:var(--ok,#276B43);background:color-mix(in srgb,var(--ok,#276B43) 9%,transparent);border-radius:8px;padding:4px 8px}.sentnote b{font-weight:700}
+.shbox{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:baseline;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.shbox small{color:var(--muted);font-size:.75rem}.shbox b{word-break:break-all}
+.shqr{display:grid;place-items:center}.shqr img{border-radius:12px;border:1px solid var(--line);background:#fff;padding:6px}
+.shbtns{display:flex;flex-wrap:wrap;gap:8px}.shbtns .wa{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:10px;background:#25D366;color:#fff;font-weight:700;text-decoration:none}.shbtns .wa svg{width:18px;height:18px}
+.acpw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.85rem;padding:6px 8px;border-radius:8px;background:var(--bg)}.acpw code{font-size:.95rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
 .mgbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mgbox small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mgbox span{font-size:.82rem;color:var(--muted)}
 .invbig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.invbig[hidden]{display:none}
 .invbig button{display:flex;align-items:center;gap:12px;text-align:left;padding:16px 18px;border-radius:16px;border:2px solid var(--mod,var(--accent));font:inherit;cursor:pointer;min-height:72px}
@@ -1703,6 +1707,14 @@ input[type=date]{min-width:0;max-width:100%}
   <p class="perr" id="xr-err" hidden></p>
   <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
+<dialog id="appshdlg"><div class="dlg">
+  <h2>📲 Share the app</h2>
+  <p class="muted small" style="margin:0">Send this to new staff. They open the link, sign in with the clinic code plus the username and password you made for them in <b>Staff access</b>, then tap "Add to Home Screen".</p>
+  <div class="shbox"><small>App link</small><b id="sh-url"></b><small>Clinic code</small><b id="sh-code"></b></div>
+  <div class="shqr" id="sh-qr"></div>
+  <div class="shbtns"><a class="wa" id="sh-wa" target="_blank" rel="noopener"><span>Send on WhatsApp</span></a><button type="button" class="btn" id="sh-copy">Copy</button><button type="button" class="btn" id="sh-native" hidden>Share…</button></div>
+  <div class="actions"><span></span><button type="button" class="btn" data-close>Close</button></div>
+</div></dialog>
 <dialog id="isdlg"><div class="dlg">
   <div><h2 id="is-n"></h2><p class="muted small" id="is-m" style="margin:4px 0 0"></p></div>
   <div class="isg">
@@ -1800,7 +1812,7 @@ input[type=date]{min-width:0;max-width:100%}
   <h2>Staff access</h2>
   <p class="muted small" style="margin:0">Create a login for each person: they sign in with your clinic code, their username and password. Pick a role: <b>Admin</b> sees and does everything. <b>Dentist</b>, <b>Receptionist</b> and <b>Staff</b> get the tasks ticked below (picking a role ticks the usual ones, and you can change them).</p>
   <div id="ac-list" class="aclist"></div>
-  <button type="button" class="btn small" id="ac-add" style="align-self:flex-start">+ Add person</button>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small" id="ac-add">+ Add person</button><button type="button" class="btn small" id="ac-share">📲 Share app link</button></div>
   <p class="muted small" style="margin:0" id="ac-note"></p>
   <p class="perr" id="ac-err" hidden></p>
   <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save access</button></div></div>
@@ -4863,6 +4875,24 @@ function applyAccess(){const role=myRole(),ps=myPerms(),b=document.body;b.classL
   if($("consoleBtn"))$("consoleBtn").hidden=!(fsRoot&&isSuper());if($("pwBtn"))$("pwBtn").hidden=!fsRoot;
   try{renderHeader()}catch(e){}}
 const memCol=()=>fsRoot.collection("clinics").doc(CLINIC).collection("members");
+
+/* ---- share the app link ---- */
+function appUrl(){try{if(/^https?:/.test(location.protocol)){let p=location.pathname.replace(/index\.html$/,"");return location.origin+p}}catch(e){}return "https://drfiz101.github.io/Dental-Solutions/"}
+function shareText(extra){const c=S().clinic;return `Salam! You've been added to *${c.name||"our clinic"}* on Dental Solutions.\n\n1. Open: ${appUrl()}\n2. Clinic code: *${CLINIC||"alawan"}*${extra||"\n3. Use the username and password I gave you"}\n\nTip: in the browser menu tap *Add to Home Screen* to install it like an app.`}
+function openShareApp(){const u=appUrl();$("sh-url").textContent=u;$("sh-code").textContent=CLINIC||"alawan";
+  const w=$("sh-wa");w.href="https://wa.me/?text="+encodeURIComponent(shareText());if(!w.querySelector("svg"))w.insertAdjacentHTML("afterbegin",WA_IC);
+  $("sh-native").hidden=!navigator.share;
+  $("sh-qr").innerHTML=`<img alt="QR code for the app link" width="150" height="150" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=6&data=${encodeURIComponent(u)}" onerror="this.parentNode.hidden=true">`;
+  openD($("appshdlg"))}
+$("ac-share").addEventListener("click",openShareApp);
+$("sh-copy").addEventListener("click",()=>copyText(shareText(),"Copied. Paste it in WhatsApp or SMS."));
+$("sh-native").addEventListener("click",async()=>{try{await navigator.share({title:"Dental Solutions",text:shareText(),url:appUrl()})}catch(e){}});
+/* admin-only password book: a copy of each login's password, saved when it is set or typed at sign-in */
+let pwPending=null,pwBook={};
+const pwCol=()=>fsRoot.collection("clinics").doc(CLINIC).collection("pwvault");
+function pwSave(uid,pw,username){if(!fsRoot||!CLINIC||!uid||!pw)return;try{pwCol().doc(uid).set({pw,username:username||"",at:new Date().toISOString(),by:myName||""}).catch(()=>{})}catch(e){}}
+function pwFlush(){if(!pwPending||!MEM||!CLINIC)return;const p=pwPending;pwPending=null;const u=window.firebase&&firebase.auth().currentUser;if(!u||(p.uid&&p.uid!==u.uid))return;pwSave(u.uid,p.pw,MEM.username||"")}
+async function pwLoad(){pwBook={};try{const sn=await pwCol().get();for(const d of sn.docs)pwBook[d.id]=d.data()}catch(e){pwBook=null}}
 const userEmail=(u,code)=>u.includes("@")?u.trim().toLowerCase():`${u.trim().toLowerCase()}@${code}.${USER_DOMAIN}`;
 const slugCode=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]+/g,"").slice(0,20);
 const okUser=v=>/^[a-z0-9._-]{3,30}$/.test(v);
@@ -4876,19 +4906,28 @@ function acCard(p,kind){const isNew=kind==="new",admin=p.role==="admin",me2=p.ui
   ${isNew?`<div><b>New login</b></div><div class="ach new"><input class="ac-n" placeholder="Name, e.g. Bilal" maxlength="40" aria-label="Name"><input class="ac-u" placeholder="Username, e.g. bilal" maxlength="30" autocapitalize="none" spellcheck="false" aria-label="Username"><input class="ac-p" placeholder="Password (6+)" autocomplete="off" aria-label="Password"><select class="ac-r" aria-label="Role">${ROLES.map(([k,n])=>`<option value="${k}"${k==="staff"?" selected":""}>${n}</option>`).join("")}</select></div>`:
   `<div class="ach"><input class="ac-n" value="${esc(p.name||"")}" maxlength="40" aria-label="Name"><input value="${esc(p.username||p.email||"")}" readonly aria-label="Username"><select class="ac-r" aria-label="Role" ${me2||p.owner?"disabled":""}>${ROLES.map(([k,n])=>`<option value="${k}"${k===roleOf(p)?" selected":""}>${n}</option>`).join("")}</select></div>
    <div class="acp">${p.owner?`<span class="rolechip">Clinic owner</span>`:""}${me2?`<span class="rolechip">You</span>`:""}${p.active===false?`<span class="offchip">LOGIN TURNED OFF</span>`:""}${!me2&&!p.owner?`<label style="margin-left:auto"><input type="checkbox" class="ac-a" ${p.active===false?"":"checked"}> Login allowed</label>`:""}</div>
-   <div class="acp acx">${me2?`<button type="button" class="btn small" data-acmypw>🔑 Change my password</button>`:`<button type="button" class="btn small" data-acpw="${esc(p.uid)}">🔑 Set new password</button>${p.owner?"":`<button type="button" class="btn small danger-outline" data-acdel="${esc(p.uid)}">🗑 Delete login</button>`}`}</div>`}
+   ${p.username&&!String(p.username).includes("@")||pwBook&&pwBook[p.uid]?`<div class="acpw">🔑 Password: ${pwBook===null?`<span class="muted">locked: publish the new Firebase rules to see passwords</span>`:pwBook[p.uid]?`<code class="pwv" data-pw="${esc(pwBook[p.uid].pw)}">••••••••</code><button type="button" class="btn small" data-pwshow>Show</button><button type="button" class="btn small" data-pwcopy>Copy</button>`:`<span class="muted">not known yet: shows after they next sign in, or set a new one</span>`}</div>`:""}
+   <div class="acp acx">${me2?`<button type="button" class="btn small" data-acmypw>🔑 Change my password</button>`:`<button type="button" class="btn small" data-acpw="${esc(p.uid)}">🔑 Set new password</button><button type="button" class="btn small" data-acsend="${esc(p.uid)}">📲 Send login details</button>${p.owner?"":`<button type="button" class="btn small danger-outline" data-acdel="${esc(p.uid)}">🗑 Delete login</button>`}`}</div>`}
   <div class="acg"><div class="acp"><span>Quick set:</span>${Object.keys(PRESETS).map(k=>`<button type="button" class="btn small" data-preset="${esc(k)}">${esc(k)}</button>`).join("")}<button type="button" class="btn small" data-preset="__all">Everything</button><button type="button" class="btn small" data-preset="__none">Nothing</button></div>
    <p class="muted small" style="margin:4px 0 0">🔒 Monthly income, profit and Reports are only for Admin.</p>
    ${groups.map(g=>`<h4>${esc(g)}</h4><div class="chks">${PERMS.filter(x=>x.g===g&&!ADMIN_ONLY.includes(x.k)).map(x=>`<label><input type="checkbox" data-perm="${x.k}" ${ps.has(x.k)?"checked":""}> ${esc(x.n)}</label>`).join("")}</div>`).join("")}</div>
   ${isNew?`<button type="button" class="btn small danger-outline" data-acrm style="align-self:flex-start">Cancel</button>`:""}</div>`}
 async function openAccess(){if(!fsRoot){toast("Staff logins are managed in the online app.");return}
   $("ac-list").innerHTML=`<div class="phload"><div class="spin"></div></div>`;$("ac-err").hidden=true;$("ac-note").innerHTML=`Staff sign in with clinic code <b>${esc(CLINIC)}</b>, their username and password. Tap <b>Set new password</b> on anyone's card to give them a new password (they keep the same username), or <b>Delete login</b> to remove them.`;openD(acdlg);
+  await pwLoad();
   try{const sn=await memCol().get();acMembers=sn.docs.map(d=>({uid:d.id,...d.data()})).filter(m=>!m.deleted&&!m.replacedBy).sort((a,b)=>(b.role==="admin")-(a.role==="admin")||String(a.name||"").localeCompare(b.name||""));
     $("ac-list").innerHTML=acMembers.map(m=>acCard(m,"member")).join("")}catch(e){$("ac-list").innerHTML=`<p class="perr">Couldn't load logins. ${esc(authMsg(e))}</p>`}}
 $("acBtn").addEventListener("click",openAccess);
 $("ac-add").addEventListener("click",()=>{$("ac-list").insertAdjacentHTML("beforeend",acCard({role:"staff",perms:DEF_STAFF},"new"));const el=$("ac-list").lastElementChild;el.scrollIntoView({block:"nearest"});el.querySelector(".ac-n").focus()});
 $("ac-list").addEventListener("click",async e=>{const c=e.target.closest(".acc");if(!c)return;
   if(e.target.closest("[data-acmypw]")){$("pwBtn").click();return}
+  const sd=e.target.closest("[data-acsend]");if(sd){const m=acMembers.find(x=>x.uid===sd.dataset.acsend);if(!m)return;const pw=pwBook&&pwBook[m.uid]&&pwBook[m.uid].pw;
+    const txt=shareText(`
+3. Username: *${m.username}*
+4. Password: ${pw?`*${pw}*`:"(I'll tell you)"}`);const ph=(S().team||[]).find(t=>t.name===m.name);const num=ph&&waNum(ph.phone);
+    window.open((num?`https://wa.me/${num}?text=`:"https://wa.me/?text=")+encodeURIComponent(txt),"_blank","noopener");return}
+  const sh=e.target.closest("[data-pwshow]");if(sh){const v=c.querySelector(".pwv");const on=v.textContent.startsWith("•");v.textContent=on?v.dataset.pw:"••••••••";sh.textContent=on?"Hide":"Show";return}
+  if(e.target.closest("[data-pwcopy]")){const v=c.querySelector(".pwv");copyText(v.dataset.pw,"Password copied");return}
   const dl=e.target.closest("[data-acdel]");if(dl){const m=acMembers.find(x=>x.uid===dl.dataset.acdel);if(!m)return;
     if(!confirm("Delete the login for "+(m.name||m.username)+"?\n\nThey won't be able to sign in any more. Their past work (bills, appointments) stays."))return;
     try{const nv={...m,active:false,deleted:true,deletedAt:new Date().toISOString(),deletedBy:myName};delete nv.uid;await memCol().doc(m.uid).set(nv);acMembers=acMembers.filter(x=>x.uid!==m.uid);c.remove();toast((m.name||m.username)+"'s login deleted")}catch(x){toast(authMsg(x))}return}
@@ -4902,7 +4941,7 @@ $("acForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("
       if(c.dataset.kind==="new"){const u=c.querySelector(".ac-u").value.trim().toLowerCase(),pw=c.querySelector(".ac-p").value;if(!u&&!name)continue;
         if(!okUser(u))throw {msg:`Username "${u}" can use 3–30 letters, numbers, dots or dashes.`};if(pw.length<6)throw {msg:`Password for ${u} must be at least 6 characters.`};
         let uid;try{uid=await makeLogin(userEmail(u,CLINIC),pw)}catch(x){throw {msg:authMsg(x)}}
-        await memCol().doc(uid).set({username:u,name:name||u,role,title,perms,active:true,createdAt:new Date().toISOString(),by:myName});c.dataset.kind="member";c.dataset.uid=uid;continue}
+        pwSave(uid,pw,u);await memCol().doc(uid).set({username:u,name:name||u,role,title,perms,active:true,createdAt:new Date().toISOString(),by:myName});c.dataset.kind="member";c.dataset.uid=uid;continue}
       const uid=c.dataset.uid,m=acMembers.find(x=>x.uid===uid);if(!m)continue;const act=c.querySelector(".ac-a"),active=act?act.checked:m.active!==false;
       const dis=c.querySelector(".ac-r").disabled,nv={...m,name:name||m.name,role:dis?m.role:role,title:dis?(m.title||""):title,perms,active};delete nv.uid;
       if(JSON.stringify(nv)!==JSON.stringify({...m,uid:undefined}))await memCol().doc(uid).set(nv)}
@@ -4920,7 +4959,7 @@ async function adminSetPassword(m,card){const nm=m.name||m.username;
     try{await fsRoot.collection("logins").doc(CLINIC+"_"+m.username).set({code:CLINIC,username:m.username,email,uid:uid2,updatedAt:new Date().toISOString(),by:myName})}
     catch(x){throw {msg:"Couldn't save the new password. Please publish the updated Firebase rules first (see the setup message), then try again."}}
     const base={...m};delete base.uid;
-    await memCol().doc(uid2).set({...base,active:true,replaces:m.uid,pwChangedAt:new Date().toISOString(),pwChangedBy:myName});
+    await memCol().doc(uid2).set({...base,active:true,replaces:m.uid,pwChangedAt:new Date().toISOString(),pwChangedBy:myName});pwSave(uid2,pw,m.username);
     await memCol().doc(m.uid).set({...base,active:false,replacedBy:uid2});
     try{const ph=await getPhoto("user_"+m.uid);if(ph)await db.collection("photos").doc("user_"+uid2).set({data:ph,createdAt:new Date().toISOString()})}catch(x){}
     acMembers=acMembers.map(x=>x.uid===m.uid?{...base,uid:uid2,active:true}:x);if(card){card.dataset.uid=uid2;for(const b of card.querySelectorAll("[data-acpw],[data-acdel]")){if(b.dataset.acpw)b.dataset.acpw=uid2;if(b.dataset.acdel)b.dataset.acdel=uid2}}
@@ -5001,7 +5040,7 @@ $("payAskForm").addEventListener("submit",async e=>{e.preventDefault();const amt
 const pwdlg=$("pwdlg");
 $("pwBtn").addEventListener("click",()=>{$("pw-old").value="";$("pw-new").value="";$("pw-err").hidden=true;openD(pwdlg)});
 $("pwForm").addEventListener("submit",async e=>{e.preventDefault();const u=firebase.auth().currentUser,err=$("pw-err");err.hidden=true;if($("pw-new").value.length<6){err.textContent="New password must be at least 6 characters.";err.hidden=false;return}
-  try{await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,$("pw-old").value));await u.updatePassword($("pw-new").value);pwdlg.close();toast("Password changed")}
+  try{await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,$("pw-old").value));await u.updatePassword($("pw-new").value);pwSave(u.uid,$("pw-new").value,MEM&&MEM.username);pwdlg.close();toast("Password changed")}
   catch(x){err.textContent=/wrong-password|invalid-credential/.test(x.code||"")?"Current password is wrong.":authMsg(x);err.hidden=false}});
 /* owner console */
 const cndlg=$("cndlg");let cnErr={},cnDel=null,cnF="pending",cnRows=[],cnUnsub=null,cnMode=null;
@@ -5267,7 +5306,7 @@ async function enterClinic(u,seq){
 }
 function openWorkspace(u,code,mem,seq){
   if(!roleCheck){const st=lsGet("ds-ao"),lim=(st!==null&&st!==""&&+st>=0?+st:AO_DEF)*60000,last=+lsGet("ds-last-"+u.uid)||0;if(lim&&last&&Date.now()-last>=lim)lsSet("ds-locked-"+u.uid,"1")}
-  CLINIC=code;MEM=mem;useClinicDefaults(code,CDOC);
+  CLINIC=code;MEM=mem;useClinicDefaults(code,CDOC);setTimeout(pwFlush,1500);
   const legacy=code==="alawan";db={collection:n=>legacy?fsRoot.collection(n):fsRoot.collection("clinics").doc(code).collection(n)};
   me={by:mem.username||u.email,uid:u.uid};myName=mem.name||mem.username||u.email;
   document.body.classList.add("ws-on");hideGate();$("login").hidden=true;$("who").hidden=false;$("whoName").textContent=myName;canWrite=true;$("notice").hidden=true;
@@ -5446,6 +5485,7 @@ function openMore(){const b=document.body,vis=id=>{const x=$(id);return x&&!x.hi
     !b.classList.contains("is-staff")&&["online","🌐 Online booking (Instagram / Facebook)","#C13584",'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'],
     !b.classList.contains("is-staff")&&["prices","Treatment prices","#AD620B",'<path d="M4 7h16M4 12h16M4 17h10"/>'],
     vis("profBtn")&&["profBtn","Clinic profile & WhatsApp messages"],vis("acBtn")&&["acBtn","Staff access"],vis("consoleBtn")&&["consoleBtn","Owner console"],
+    ["share","📲 Share app link with staff","#16A34A",'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>'],
     vis("installBtn")&&["installBtn","Install app on this phone"],["myPhoto","My photo"],["alBtn","Alerts & sounds"],["lookBtn","Appearance & layout"],["help","❓ Help & how to use"],vis("pwBtn")&&["pwBtn","Change password"],isSimple()?["classic","Switch to classic layout"]:["simple","Switch to simple layout"],["lock","🔒 Lock app"],["signOut","Sign out"]].filter(Boolean);
   $("moreWho").innerHTML=`${myPhoto?`<img class="avimg" src="${myPhoto}" alt="">`:`<span class="av">${esc(initials(myName||""))}</span>`}<div><b>${esc(myName||"")}</b><div class="muted small">${esc((myRole()==="admin"?"Admin":"Staff")+" · "+((CDOC&&CDOC.name)||S().clinic.name||""))}</div></div>`;
   $("moreList").innerHTML=items.map(([k,n,c,ic])=>`<button type="button" class="mli${k==="signOut"?" out":""}" data-mi="${k}">${ic?`<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>`:""}<span>${esc(n)}</span></button>`).join("");
@@ -5458,6 +5498,7 @@ $("moreList").addEventListener("click",e=>{const b=e.target.closest("[data-mi]")
   if(k==="visits")return openVisitStages();
   if(k==="online")return openOnline();
   if(k==="help")return openHelp();
+  if(k==="share")return openShareApp();
   if(k==="lock")return lockApp();
   if(k==="shares")return openShares();
   if(k==="myPhoto")return pickMyPhoto();
@@ -5575,7 +5616,7 @@ $("loginForm").addEventListener("submit",async e=>{e.preventDefault();const err=
   roleCheck=true;lsSet("ds-code",code||null);$("loginBtn").disabled=true;$("loginBtn").textContent="Signing in…";
   if(!isOnline()){err.textContent="You're offline. Signing in needs the internet. Tip: when the app is already open on this phone, it locks instead of signing out, so you can unlock it offline with your password.";err.hidden=false;$("loginBtn").disabled=false;$("loginBtn").textContent="Sign in";return}
   try{try{await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(e){}
-    const cr=await firebase.auth().signInWithEmailAndPassword(await loginEmailFor(user,code),pw);try{const uid=(cr&&cr.user&&cr.user.uid)||lkUid();if(uid){lsSet("ds-lk-"+uid,await pwHash(uid,pw));lsSet("ds-locked-"+uid,null)}}catch(x){}if(!remember)$("lp").value=""}
+    const cr=await firebase.auth().signInWithEmailAndPassword(await loginEmailFor(user,code),pw);try{pwPending={pw,code:String(code||"").toLowerCase(),uid:cr&&cr.user&&cr.user.uid}}catch(x){}try{const uid=(cr&&cr.user&&cr.user.uid)||lkUid();if(uid){lsSet("ds-lk-"+uid,await pwHash(uid,pw));lsSet("ds-locked-"+uid,null)}}catch(x){}if(!remember)$("lp").value=""}
   catch(x){err.textContent=/user-not-found|wrong-password|invalid-credential|invalid-login|invalid-email/.test(x.code||"")?"Clinic code, username or password is wrong. Try again.":x.code==="auth/network-request-failed"?"No internet connection. Connect and try again.":x.code==="auth/too-many-requests"?"Too many tries. Wait a few minutes and try again.":"Couldn't sign in ("+(x.code||"error")+")";err.hidden=false}
   finally{$("loginBtn").disabled=false;$("loginBtn").textContent="Sign in"}
 });
@@ -5668,7 +5709,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v126";let updShown=false;
+const APP_BUILD="ds-v128";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}

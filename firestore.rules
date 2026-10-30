@@ -41,6 +41,13 @@ service cloud.firestore {
         allow update, delete: if isOwner() || (isClinicAdmin(c) && isActive(c));
       }
 
+      // Password book: only the clinic admin can read; each person can save their own, admins can save anyone's
+      match /pwvault/{uid} {
+        allow read: if isClinicAdmin(c) && isActive(c);
+        allow create, update: if (isClinicAdmin(c) && isActive(c)) || (isMember(c) && request.auth.uid == uid);
+        allow delete: if isClinicAdmin(c);
+      }
+
       match /settings/{docId} {
         allow read: if isMember(c) && isActive(c);
         allow write: if isClinicAdmin(c) && isActive(c);
