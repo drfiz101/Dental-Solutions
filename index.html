@@ -1611,7 +1611,7 @@ input[type=date]{min-width:0;max-width:100%}
     <div class="field"><label for="st-logo">Clinic logo</label><div style="display:flex;gap:8px;align-items:center"><img id="st-logoprev" class="logoprev" alt="" hidden><input id="st-logo" type="file" accept="image/*"></div></div>
     <div class="field"><label for="st-doctor">Doctor name</label><input id="st-doctor" maxlength="60" placeholder="Optional, use {doctor}"></div>
     <div class="field"><label for="st-slot">Booking slots</label><select id="st-slot"><option value="15">Every 15 min</option><option value="20">Every 20 min</option><option value="30">Every 30 min</option></select></div>
-    <div class="field"><label for="st-autoout">Auto log out</label><select id="st-autoout"><option value="0">Off (stay signed in)</option><option value="5">After 5 min of no use</option><option value="10">After 10 min of no use</option><option value="15">After 15 min of no use</option><option value="30">After 30 min of no use</option><option value="60">After 1 hour of no use</option><option value="120">After 2 hours of no use</option></select></div>
+    <div class="field" hidden><label for="st-autoout">Auto lock (staff only · admins stay open)</label><select id="st-autoout"><option value="0">Off (stay signed in)</option><option value="5">After 5 min of no use</option><option value="10">After 10 min of no use</option><option value="15">After 15 min of no use</option><option value="30">After 30 min of no use</option><option value="60">After 1 hour of no use</option><option value="120">After 2 hours of no use</option></select></div>
     <div class="field"><label for="st-open">Opens</label><input id="st-open" type="time"></div>
     <div class="field"><label for="st-close">Closes</label><input id="st-close" type="time"></div>
     <div class="field span2"><label for="st-docs">Doctors on the bill</label><textarea id="st-docs" rows="8" style="width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)" placeholder="Dr. Name&#10;BDS (RDS)&#10;C Implant&#10;&#10;Dr. Second Name&#10;BDS"></textarea><small class="muted">First line is the doctor's name, then one degree per line. Leave an empty line between doctors.</small></div>
@@ -5436,7 +5436,8 @@ async function enterClinic(u,seq){
     if(!CLINIC)openWorkspace(u,code,ms.data(),seq);else render()},()=>{});
 }
 function openWorkspace(u,code,mem,seq){
-  if(!roleCheck){const st=lsGet("ds-ao"),lim=(st!==null&&st!==""&&+st>=0?+st:AO_DEF)*60000,last=+lsGet("ds-last-"+u.uid)||0;if(lim&&last&&Date.now()-last>=lim)lsSet("ds-locked-"+u.uid,"1")}
+  if(lsGet("ds-lockfix1")!=="1"){lsSet("ds-lockfix1","1");lsSet("ds-locked-"+u.uid,null)}
+  if(false){const st=lsGet("ds-ao"),lim=(st!==null&&st!==""&&+st>=0?+st:AO_DEF)*60000,last=+lsGet("ds-last-"+u.uid)||0;if(lim&&last&&Date.now()-last>=lim)lsSet("ds-locked-"+u.uid,"1")}
   CLINIC=code;MEM=mem;useClinicDefaults(code,CDOC);setTimeout(pwFlush,1500);
   const legacy=code==="alawan";db={collection:n=>legacy?fsRoot.collection(n):fsRoot.collection("clinics").doc(code).collection(n)};
   me={by:mem.username||u.email,uid:u.uid};myName=mem.name||mem.username||u.email;
@@ -5719,7 +5720,7 @@ $("lk-out").addEventListener("click",()=>{if(!isOnline()&&!confirm("You're offli
 async function getFast(ref){try{const c=await ref.get({source:"cache"});if(c&&c.exists)return c}catch(e){}
   if(!isOnline())return ref.get();return Promise.race([ref.get(),new Promise((_,rej)=>setTimeout(()=>rej(new Error("slow")),7000))]).catch(()=>ref.get({source:"cache"}))}
 function aoMinutes(){const v=((SET&&SET.clinic)||{}).autoOut;if(v===0||v==="0")return 0;return +v>0?+v:AO_DEF}
-function aoLimit(){let m;if(SET_LOADED){m=aoMinutes();lsSet("ds-ao",String(m))}else{const st=lsGet("ds-ao");m=st!==null&&st!==""&&+st>=0?+st:AO_DEF}return m*60000}
+function aoLimit(){return 0;let m;if(SET_LOADED){m=aoMinutes();lsSet("ds-ao",String(m))}else{const st=lsGet("ds-ao");m=st!==null&&st!==""&&+st>=0?+st:AO_DEF}return m*60000}
 function aoLast(){return +lsGet("ds-last-"+aoUid)||0}
 function aoTouch(force){const n=Date.now();if(!force&&n-aoLastSave<5000)return;aoLastSave=n;lsSet("ds-last-"+aoUid,String(n))}
 function aoCheck(){if(!aoUid)return false;const lim=aoLimit();
@@ -5842,7 +5843,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v138";let updShown=false;
+const APP_BUILD="ds-v139";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
