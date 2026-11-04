@@ -262,7 +262,7 @@ body.spopen{overflow:hidden}
 @media (max-width:640px){.mainnav{grid-template-columns:repeat(4,minmax(0,1fr));width:100%}.mainbtn{flex-direction:column;gap:3px;padding:8px 2px;font-size:.68rem;letter-spacing:-.02em}.mainbtn span{max-width:100%;overflow:hidden;text-overflow:ellipsis}}
 .invnav{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 14px;padding:10px 0 0;border-top:1px solid var(--line)}
 .invnav .viewbtn{font-size:.85rem;padding:7px 14px}
-@media (max-width:560px){.invnav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.invnav .viewbtn{padding:9px 4px;text-align:center;font-size:.82rem}}
+@media (max-width:560px){.invnav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.invnav .viewbtn{padding:9px 4px;text-align:center;font-size:.82rem}}
 .isg{display:flex;flex-direction:column;gap:6px}.isg button{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font:inherit;font-weight:600;text-align:left;cursor:pointer;color:var(--ink)}.isg button span{font-size:1.15rem}.isg button:hover{background:var(--bg)}.isg .isdel{color:var(--bad)}.isg button[hidden]{display:none}
 .sentnote{margin-top:6px;text-align:right;font-size:.74rem;color:var(--ok,#276B43);background:color-mix(in srgb,var(--ok,#276B43) 9%,transparent);border-radius:8px;padding:4px 8px}.sentnote b{font-weight:700}
 .shbox{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:baseline;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.shbox small{color:var(--muted);font-size:.75rem}.shbox b{word-break:break-all}
@@ -286,6 +286,10 @@ body.spopen{overflow:hidden}
 .suplist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden}.supr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:10px 12px;border-top:1px solid var(--line);align-items:center}.supr:first-child{border-top:0}
 .supr b{display:block}.supr small{color:var(--muted);font-size:.78rem}.supr .supb{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.supr .supe{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto auto auto;gap:6px}.supr .supe input,.supr .supe select{padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font:inherit;min-width:0}
 @media (max-width:560px){.supr .supe{grid-template-columns:1fr 1fr}.supr .supe input:first-child{grid-column:1/-1}}
+.paybar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 14px!important;margin-bottom:12px}.paybar label{display:flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;color:var(--muted)}.paybar select,.paybar input{padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font:inherit;color:var(--ink)}
+.payday{margin-bottom:12px;padding:0!important;overflow:hidden}.payday header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;background:color-mix(in srgb,var(--warn) 8%,var(--surface));border-bottom:1px solid var(--line)}.payday header b{display:block}.payday header small{color:var(--muted)}
+.payrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px 10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}.payrow:first-of-type{border-top:0}.payrow b{display:block;overflow-wrap:anywhere}.payrow small{color:var(--muted);font-size:.78rem}.payrow .pa{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.paysup{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;border-top:1px dashed var(--line);background:var(--bg)}
 .acpw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.85rem;padding:6px 8px;border-radius:8px;background:var(--bg)}.acpw code{font-size:.95rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
 .mgbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mgbox small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mgbox span{font-size:.82rem;color:var(--muted)}
 .invbig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.invbig[hidden]{display:none}
@@ -1254,7 +1258,7 @@ input[type=date]{min-width:0;max-width:100%}
   </header>
 
   <nav class="invnav" id="invnav" aria-label="Inventory">
-    <button class="viewbtn" data-view="list" aria-pressed="true">📦 Stock</button><button class="viewbtn" data-view="order" aria-pressed="false">🛒 To order<span class="nb" id="orderCount"></span></button><button class="viewbtn" data-view="purch" aria-pressed="false">🧾 This month</button>
+    <button class="viewbtn" data-view="list" aria-pressed="true">📦 Stock</button><button class="viewbtn" data-view="order" aria-pressed="false">🛒 To order<span class="nb" id="orderCount"></span></button><button class="viewbtn" data-view="pay" aria-pressed="false">💳 To pay<span class="nb" id="payCount"></span></button><button class="viewbtn" data-view="purch" aria-pressed="false">🧾 This month</button>
   </nav>
   <div class="invbig" id="invbig" hidden>
     <button type="button" class="ib1" id="ib-single"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 11h10.2L20 8H7"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="16.5" cy="19.5" r="1.3"/></svg><span><b>Record single purchase</b><small>One item</small></span></button>
@@ -1353,6 +1357,13 @@ input[type=date]{min-width:0;max-width:100%}
         <div class="card"><h3>Most used this month</h3><div id="p-used"></div></div>
       </div>
     </div>
+  </section>
+  <section id="payv" class="view" hidden>
+    <div class="vhead"><div><h2>Bills to pay</h2><p class="muted">Every supplier bill not paid yet, newest first. Pay a whole day, a whole supplier, or one bill.</p></div></div>
+    <div class="tiles t3" id="pay-tiles"></div>
+    <div class="labmode" id="pay-g"><button type="button" data-pg="day">📅 By day</button><button type="button" data-pg="sup">🏪 By supplier</button></div>
+    <div class="card paybar"><label>Paid by <select id="pay-meth"><option>Cash</option><option>Bank transfer</option><option>Easypaisa</option><option>JazzCash</option><option>NayaPay</option><option>SadaPay</option><option>Cheque</option></select></label><label>Date <input type="date" id="pay-date"></label></div>
+    <div id="pay-list"></div>
   </section>
   <section id="order" class="view" hidden>
     <div class="vhead">
@@ -2049,7 +2060,7 @@ const BASE_IDS=new Set(BASE.map(b=>b.id));
 let overrides={};          // id -> stored doc from db
 let db=null, canWrite=true;
 let main="dashboard";
-let view=["list","purch","order"].includes(localGet("aa-view"))?localGet("aa-view"):"list";
+let view=["list","purch","order","pay"].includes(localGet("aa-view"))?localGet("aa-view"):"list";
 let secOpen=false;let activeGroup=localGet("aa-group")||"materials", activeSub=localGet("aa-sub")||"", activeType="", statusF="", query="";
 if(activeGroup==="supplies")activeGroup="materials";if(!GROUPS.some(g=>g.k===activeGroup))activeGroup="instruments";
 const pending={}, writing={};
@@ -2155,7 +2166,7 @@ function render(){try{syncSimple()}catch(e){}try{navTrack()}catch(e){}
       if(!pn.hidden){pn.classList.remove("show");pn.hidden=true;document.body.classList.remove("spopen")}}}
 
   renderCabinet(live);
-  renderPurch(); renderOrder();
+  renderPurch(); renderOrder(); try{renderPay()}catch(e){console.error(e)}
   const gone=all.filter(i=>i.hidden&&(global||(activeSub?i.sub===activeSub&&(!activeType||typeOf(i)===activeType):i.g===grp.k)));
   $("removed").hidden=!gone.length;
   $("removed").innerHTML=gone.length?`<details><summary>${gone.length} removed item${gone.length>1?"s":""}</summary><ul>${gone.map(i=>`<li><span>${esc(i.name)}</span><button class="btn ghost" data-restore="${esc(i.id)}">Restore</button></li>`).join("")}</ul></details>`:"";
@@ -2168,7 +2179,7 @@ const SOON={
 function renderCabinet(live){
   const inv=main==="inventory";
   document.body.dataset.main=main;
-  $("cabinet").hidden=!inv||view!=="cabinet"; $("listView").hidden=!inv||view!=="list"; $("purch").hidden=!inv||view!=="purch"; $("order").hidden=!inv||view!=="order"; $("stats").hidden=!inv||view!=="list";
+  $("payv").hidden=!inv||view!=="pay"; $("cabinet").hidden=!inv||view!=="cabinet"; $("listView").hidden=!inv||view!=="list"; $("purch").hidden=!inv||view!=="purch"; $("order").hidden=!inv||view!=="order"; $("stats").hidden=!inv||view!=="list";
   $("invnav").hidden=!inv; $("invbig").hidden=!inv||!canWrite||view==="cabinet";$("invnav").hidden=!inv||view==="cabinet"; $("soon").hidden=true; $("patView").hidden=main!=="patients"; $("apView").hidden=main!=="appointments"; $("billView").hidden=main!=="billing"; $("dashView").hidden=main!=="dashboard"; $("labView").hidden=main!=="lab"; $("repView").hidden=main!=="reports";
   for(const b of document.querySelectorAll(".viewbtn"))b.setAttribute("aria-pressed",String(b.dataset.view===view));
   for(const b of document.querySelectorAll(".mainbtn"))b.setAttribute("aria-pressed",String(b.dataset.main===main||(main==="reports"&&b.dataset.main==="dashboard")));
@@ -2570,6 +2581,33 @@ $("p-list").addEventListener("click",e=>{
     delLog(y.dataset.lyes);toast("Purchase record deleted")}
 });
 
+
+/* ===== Bills to pay (stock supplier bills not paid yet) ===== */
+function payPend(){return logList().filter(l=>l.kind==="purchase"&&l.paid===false).sort((a,b)=>(b.date+(b.at||"")).localeCompare(a.date+(a.at||"")))}
+function payMark(ls,label){if(!ls.length)return;const d=$("pay-date").value||ymd(new Date()),m=$("pay-meth").value,tot=ls.reduce((a,l)=>a+(+l.total||0),0);
+  if(ls.length>1&&!confirm(`Mark ${pl(ls.length,"bill")} as paid?\n\n${label}\nTotal ${rs(tot)} · ${m} · ${fmtDate(d)}`))return;
+  for(const l of ls)updLog(l.id,{paid:true,paidOn:d,payMethod:m,paidBy:myName||""});toast(`Paid ${rs(tot)}${ls.length>1?" · "+pl(ls.length,"bill"):""}`)}
+let payG=localGet("ds-payg")||"day";
+function renderPay(){const ls=payPend();for(const b of document.querySelectorAll("[data-pg]"))b.setAttribute("aria-pressed",String(b.dataset.pg===payG));$("payCount").textContent=ls.length||"";if(view!=="pay")return;if(!$("pay-date").value)$("pay-date").value=ymd(new Date());
+  const tot=ls.reduce((a,l)=>a+(+l.total||0),0),today=ymd(new Date()),tdy=ls.filter(l=>l.date===today),sups=new Set(ls.map(l=>l.supplier||"Supplier not set"));
+  $("pay-tiles").innerHTML=`<div class="tile big"><small>Still to pay</small><b>${rs(tot)}</b><span>${pl(ls.length,"bill")}</span></div><div class="tile"><small>From today</small><b>${rs(tdy.reduce((a,l)=>a+(+l.total||0),0))}</b><span>${pl(tdy.length,"bill")}</span></div><div class="tile"><small>Suppliers</small><b>${sups.size}</b><span>waiting for payment</span></div>`;
+  if(!ls.length){$("pay-list").innerHTML=`<div class="card empty">All supplier bills are paid ✓</div>`;return}
+  const can2=canWrite;
+  if(payG==="sup"){const by={};for(const l of ls)(by[l.supplier||"Supplier not set"]=by[l.supplier||"Supplier not set"]||[]).push(l);
+    $("pay-list").innerHTML=Object.keys(by).sort((a,b)=>by[b].reduce((x,l)=>x+(+l.total||0),0)-by[a].reduce((x,l)=>x+(+l.total||0),0)).map(k=>{const L=by[k],t=L.reduce((a,l)=>a+(+l.total||0),0),si=supInfo(k),num=si&&waNum(si.phone),ds=new Set(L.map(l=>l.date));
+      return `<div class="card payday"><header><div><b>${esc(k)}</b><small>${pl(L.length,"bill")} · ${pl(ds.size,"day")}${si&&si.phone?" · 📞 "+esc(si.phone):""}</small></div>${can2?`<button type="button" class="btn primary" data-paysupall="${esc(k)}">Pay all ${rs(t)}</button>`:`<b>${rs(t)}</b>`}</header>
+      ${L.map(l=>`<div class="payrow"><div><b>${esc(l.name||"Item")}</b><small>${esc(fmtDate(l.date))} · ${l.qty} ${esc(l.unit||"")}${l.unitPrice?` × ${rs(l.unitPrice)}`:""}${l.invoice?" · Bill "+esc(l.invoice):""}${l.note?" · 🏷 "+esc(l.note):""}</small></div><span class="pa">${l.total?rs(l.total):"no price"}</span>${can2?`<button type="button" class="btn small" data-payone="${esc(l.id)}">Paid</button>`:"<span></span>"}</div>`).join("")}
+      ${num?`<div class="paysup"><a class="btn small" target="_blank" rel="noopener" href="https://wa.me/${num}">WhatsApp ${esc(k)}</a></div>`:""}</div>`}).join("");return}
+  const days={};for(const l of ls)(days[l.date]=days[l.date]||[]).push(l);
+  $("pay-list").innerHTML=Object.keys(days).sort().reverse().map(d=>{const L=days[d],dt=L.reduce((a,l)=>a+(+l.total||0),0),bySup={};for(const l of L)(bySup[l.supplier||"Supplier not set"]=bySup[l.supplier||"Supplier not set"]||[]).push(l);const sk=Object.keys(bySup);
+    return `<div class="card payday"><header><div><b>${esc(dayName(d))} ${esc(fmtDate(d))}${d===today?" · today":""}</b><small>${pl(L.length,"bill")} · ${pl(sk.length,"supplier")}</small></div>${can2?`<button type="button" class="btn primary" data-payday="${esc(d)}">Pay all ${rs(dt)}</button>`:`<b>${rs(dt)}</b>`}</header>
+      ${L.map(l=>`<div class="payrow"><div><b>${esc(l.name||"Item")}</b><small>${l.qty} ${esc(l.unit||"")}${l.unitPrice?` × ${rs(l.unitPrice)}`:""} · ${esc(l.supplier||"Supplier not set")}${l.invoice?" · Bill "+esc(l.invoice):""}${l.note?" · 🏷 "+esc(l.note):""}</small></div><span class="pa">${l.total?rs(l.total):"no price"}</span>${can2?`<button type="button" class="btn small" data-payone="${esc(l.id)}">Paid</button>`:"<span></span>"}</div>`).join("")}
+      ${can2&&sk.length>1?`<div class="paysup"><small class="muted" style="align-self:center">Pay one supplier:</small>${sk.map(k=>`<button type="button" class="btn small" data-paysup="${esc(d)}|${esc(k)}">${esc(k)} · ${rs(bySup[k].reduce((a,l)=>a+(+l.total||0),0))}</button>`).join("")}</div>`:""}</div>`}).join("");}
+$("pay-g").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(!b)return;payG=b.dataset.pg;try{localStorage.setItem("ds-payg",payG)}catch(x){}renderPay()});
+$("pay-list").addEventListener("click",e=>{const pd=e.target.closest("[data-payday]");if(pd){const d=pd.dataset.payday;payMark(payPend().filter(l=>l.date===d),`All bills of ${dayName(d)} ${fmtDate(d)}`);return}
+  const ps=e.target.closest("[data-paysup]");if(ps){const [d,k]=ps.dataset.paysup.split("|");payMark(payPend().filter(l=>l.date===d&&(l.supplier||"Supplier not set")===k),`${k} · ${fmtDate(d)}`);return}
+  const pa=e.target.closest("[data-paysupall]");if(pa){const k=pa.dataset.paysupall;payMark(payPend().filter(l=>(l.supplier||"Supplier not set")===k),`All bills from ${k}`);return}
+  const po=e.target.closest("[data-payone]");if(po){const l=payPend().find(x=>x.id===po.dataset.payone);if(l)payMark([l],"")}});
 /* --- order list --- */
 function orderItems(){
   const out=[];
@@ -5926,7 +5964,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v142";let updShown=false;
+const APP_BUILD="ds-v143";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
