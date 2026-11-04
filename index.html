@@ -280,6 +280,11 @@ body.spopen{overflow:hidden}
 .imprw .ip1 b{display:block}.imprw .ip1 small{color:var(--muted);font-size:.78rem}.imprw .ip2{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}.imprw .ip3{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:5px;align-items:center}
 .ichip{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--line)}.ichip.Implant{color:#B45309;border-color:#F3D19C;background:#FEF6E7}.ichip.Bone{color:#475569;border-color:#CBD5E1;background:#F1F5F9}.ichip.Membrane{color:#0E7490;border-color:#A5E3F0;background:#ECFBFE}.ichip.Others{color:#6D28D9;border-color:#DDD0FB;background:#F5F1FF}
 .line .l-last{grid-column:1/-1;font-size:.74rem;color:var(--ok,#276B43);font-weight:600;margin-top:-2px}
+.supadd{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto;gap:6px}.supadd input,.supadd select{padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);font:inherit;min-width:0}
+@media (max-width:560px){.supadd{grid-template-columns:1fr 1fr}.supadd #sup-n{grid-column:1/-1}.supadd button{grid-column:1/-1}}
+.suplist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden}.supr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:10px 12px;border-top:1px solid var(--line);align-items:center}.supr:first-child{border-top:0}
+.supr b{display:block}.supr small{color:var(--muted);font-size:.78rem}.supr .supb{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.supr .supe{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto auto;gap:6px}.supr .supe input,.supr .supe select{padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font:inherit;min-width:0}
+@media (max-width:560px){.supr .supe{grid-template-columns:1fr 1fr}.supr .supe input:first-child{grid-column:1/-1}}
 .acpw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.85rem;padding:6px 8px;border-radius:8px;background:var(--bg)}.acpw code{font-size:.95rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
 .mgbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mgbox small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mgbox span{font-size:.82rem;color:var(--muted)}
 .invbig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.invbig[hidden]{display:none}
@@ -1351,7 +1356,7 @@ input[type=date]{min-width:0;max-width:100%}
   <section id="order" class="view" hidden>
     <div class="vhead">
       <div><h2>To order</h2><p class="muted">Items that are finished or running low. Untick what you don't need, set how many, then send to the supplier.</p></div>
-      <div class="vact"><button class="btn" id="o-copy">Copy all</button><a class="btn primary" id="o-wa" target="_blank" rel="noopener">WhatsApp all</a></div>
+      <div class="vact"><button class="btn" id="o-sups">🏪 Suppliers</button><button class="btn" id="o-copy">Copy all</button><a class="btn primary" id="o-wa" target="_blank" rel="noopener">WhatsApp all</a></div>
     </div>
     <div id="o-list"></div>
   </section>
@@ -1746,6 +1751,19 @@ input[type=date]{min-width:0;max-width:100%}
   <p class="perr" id="imp-err" hidden></p>
   <div class="actions"><button type="button" class="btn danger-outline" id="imp-del">Delete</button><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
+<dialog id="supdlg" class="wide"><div class="dlg">
+  <h2>🏪 Suppliers</h2>
+  <p class="muted small" style="margin:0" id="sup-note"></p>
+  <form class="supadd" id="supForm" novalidate>
+    <input id="sup-n" maxlength="60" placeholder="Supplier name" autocomplete="off" aria-label="Supplier name">
+    <input id="sup-p" maxlength="20" placeholder="WhatsApp / phone" inputmode="tel" autocomplete="off" aria-label="Phone">
+    <select id="sup-t" aria-label="Supplies"><option value="stock">Materials &amp; instruments</option><option value="implant">Implants</option><option value="both">Both</option></select>
+    <button type="submit" class="btn primary" id="sup-go">+ Add</button>
+  </form>
+  <p class="perr" id="sup-err" hidden></p>
+  <div class="suplist" id="sup-list"></div>
+  <div class="actions"><span></span><button type="button" class="btn" data-close>Close</button></div>
+</div></dialog>
 <dialog id="appshdlg"><div class="dlg">
   <h2>📲 Share the app</h2>
   <p class="muted small" style="margin:0">Send this to new staff. They open the link, sign in with the clinic code plus the username and password you made for them in <b>Staff access</b>, then tap "Add to Home Screen".</p>
@@ -2573,7 +2591,7 @@ function renderOrder(){
     const rows=groups[sp].map(o=>{const on=!orderSkip[o.i.id];const cost=o.price?o.price*o.qty:null;if(on){if(cost)total+=cost;else priced=false}
       return `<div class="orow${on?"":" off"}"><input type="checkbox" data-oon="${esc(o.i.id)}" ${on?"checked":""} aria-label="Include ${esc(o.i.name)}"><div class="on"><b>${esc(o.i.name)}</b><span><span class="why ${o.why[0]}">${o.why[0]==="out"?"Finished":o.why[0]==="low"?"Low":"Running out"}</span> · have ${o.i.qty??0}${cost?` · ≈ ${rs(cost)}`:""}</span></div><div class="ostep"><button type="button" data-ostep="-1" data-oid="${esc(o.i.id)}" aria-label="Less">−</button><span><b>${o.qty}</b><small>${esc(o.i.unit)}</small></span><button type="button" data-ostep="1" data-oid="${esc(o.i.id)}" aria-label="More">+</button></div></div>`;
     }).join("");
-    return `<div class="card ogrp"><header><div><h3>${esc(sp||"Supplier not set")}</h3><span class="muted small">${groups[sp].length} item${groups[sp].length>1?"s":""}</span></div><a class="btn small primary" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(orderText(sp))}">Send to ${esc(sp||"supplier")}</a></header>${rows}</div>`;
+    return `<div class="card ogrp"><header><div><h3>${esc(sp||"Supplier not set")}</h3><span class="muted small">${groups[sp].length} item${groups[sp].length>1?"s":""}</span></div>${(()=>{const si=supInfo(sp),num=si&&waNum(si.phone);return `<a class="btn small primary" target="_blank" rel="noopener" href="https://wa.me/${num||""}?text=${encodeURIComponent(orderText(sp))}">Send to ${esc(sp||"supplier")}${num?"":" ✎"}</a>`})()}</header>${rows}</div>`;
   }).join("");
   $("o-list").innerHTML=html+`<div class="ofoot"><span>Estimated total</span><span>${rs(total)}${priced?"":" + items without a price"}</span></div>`;
   $("o-wa").href="https://wa.me/?text="+encodeURIComponent(orderText());
@@ -2591,6 +2609,7 @@ $("o-list").addEventListener("change",e=>{
   const q=e.target.closest("[data-oq]");if(q){orderQty[q.dataset.oq]=Math.max(1,Math.floor(+q.value||1));render();return}
   const c=e.target.closest("[data-oon]");if(c){orderSkip[c.dataset.oon]=!c.checked;render()}
 });
+$("o-sups").addEventListener("click",()=>openSups());
 $("o-copy").addEventListener("click",()=>copyText(orderText(),"Order copied. Paste it into WhatsApp."));
 
 /* ================= CLINIC: patients, appointments, billing ================= */
@@ -5218,7 +5237,7 @@ const IMP_T=["Implant","Bone","Membrane","Others"];
 let labMode=localGet("ds-labmode")||"lab",impF="all",impEdit=null,impRows=[];
 const impList=()=>Object.entries(LC).filter(([,c])=>c.kind==="implant").map(([id,c])=>({id,...c})).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
 const impTot=c=>(c.items||[]).reduce((a,i)=>a+(+i.qty||1)*(+i.price||0),0);
-const impSups=()=>[...new Set(impList().map(c=>c.supplier).filter(Boolean))].sort();
+const impSups=()=>[...new Set([...supDir().filter(d=>d.type==="implant"||d.type==="both").map(d=>d.name),...impList().map(c=>c.supplier)].filter(Boolean))].sort();
 function renderImp(){
   for(const b of document.querySelectorAll("[data-lm]"))b.setAttribute("aria-pressed",String(b.dataset.lm===labMode));
   $("labMain").hidden=labMode!=="lab";$("impMain").hidden=labMode!=="imp";const lv=$("labView");lv.classList.toggle("impmode",labMode==="imp");
@@ -5610,6 +5629,7 @@ function openMore(){const b=document.body,vis=id=>{const x=$(id);return x&&!x.hi
   const items=[
     isSimple()&&!b.classList.contains("no-tab_lab")&&["lab","Lab work","#A8357A",'<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/>'],
     isSimple()&&!b.classList.contains("no-tab_inventory")&&["inventory","Stock","#6A48B2",'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/>'],
+    !b.classList.contains("no-tab_inventory")&&["suppliers","🏪 Suppliers","#0F766E",'<path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11h16V9"/><path d="M3 9h18M9 20v-6h6v6"/>'],
     !b.classList.contains("no-tab_inventory")&&["cabinet","Cabinet map (where things are kept)","#6A48B2",'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 6h4M10 12h4M10 18h4"/>'],
     !b.classList.contains("no-tab_reports")&&["reports","Reports & income","#25587A",'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'],
     canShares()&&["shares","Dentist shares","#B7791F",'<circle cx="8" cy="8" r="5"/><circle cx="16" cy="16" r="5"/>'],
@@ -5627,6 +5647,7 @@ $("moreList").addEventListener("click",e=>{const b=e.target.closest("[data-mi]")
   if(["lab","inventory","reports"].includes(k))return goMain(k);
   if(k==="prices")return openPrices();
   if(k==="cabinet"){view="cabinet";return goMain("inventory")}
+  if(k==="suppliers")return openSups();
   if(k==="visits")return openVisitStages();
   if(k==="online")return openOnline();
   if(k==="help")return openHelp();
@@ -5828,10 +5849,44 @@ $("vsForm").addEventListener("submit",e=>{e.preventDefault();const L=[...$("vs-l
 $("ap-pat").addEventListener("change",()=>{if(!$("ap-visitw").hidden&&!apEdit){$("ap-visit").value="";apVisitUI("")}});
 /* supplier dropdowns */
 const SUP_DEF=["Haseeb / Kashif","Mukhtiyar","E-Dental Mart","Hamayun Dental Supply","Aamar","Shah Sb","Aman Shah"];
+
+/* ===== Suppliers page ===== */
+let supEditN=null;
+const supT={stock:"Materials & instruments",implant:"Implants",both:"Materials & implants"};
+function supStats(n){const k=String(n).toLowerCase(),buys=logList().filter(l=>l.kind==="purchase"&&String(l.supplier||"").toLowerCase()===k),imps=impList().filter(c=>String(c.supplier||"").toLowerCase()===k);
+  return {n:buys.length+imps.length,pend:buys.filter(l=>l.paid===false).reduce((a,l)=>a+(+l.total||0),0)+imps.filter(c=>c.paid===false).reduce((a,c)=>a+impTot(c),0),items:items().filter(i=>!i.hidden&&String(i.supplier||"").toLowerCase()===k).length}}
+function renderSups(){const adm=myRole()==="admin",names=[...new Set([...supList(),...impSups()])].sort((a,b)=>a.localeCompare(b));
+  $("sup-note").textContent=adm?"Add your vendors with their WhatsApp number. They appear in every purchase, vendor bill and order list, and “Send to supplier” opens their chat directly.":"Only an admin can add or change suppliers.";
+  $("supForm").hidden=!adm;
+  $("sup-list").innerHTML=names.length?names.map(n=>{const d=supInfo(n)||{},st=supStats(n),ed=supEditN===n;
+    return `<div class="supr"><div><b>${esc(n)}</b><small>${d.phone?"📞 "+esc(d.phone)+" · ":""}${esc(supT[d.type||"stock"])}${st.n?` · ${pl(st.n,"purchase")}`:""}${st.items?` · ${pl(st.items,"item")}`:""}${st.pend?` · <span class="pend">${rs(st.pend)} unpaid</span>`:""}</small></div>
+    <div class="supb">${d.phone&&waNum(d.phone)?`<a class="btn small" target="_blank" rel="noopener" href="https://wa.me/${waNum(d.phone)}">WhatsApp</a>`:""}${adm&&!ed?`<button type="button" class="btn small" data-supedit="${esc(n)}">Edit</button>`:""}</div>
+    ${ed?`<div class="supe"><input data-sf="name" value="${esc(n)}" maxlength="60" aria-label="Name"><input data-sf="phone" value="${esc(d.phone||"")}" maxlength="20" inputmode="tel" placeholder="WhatsApp / phone" aria-label="Phone"><select data-sf="type">${Object.entries(supT).map(([k,v])=>`<option value="${k}"${k===(d.type||"stock")?" selected":""}>${esc(v)}</option>`).join("")}</select><button type="button" class="btn small primary" data-supsave="${esc(n)}">Save</button><button type="button" class="btn small danger-outline" data-suprm="${esc(n)}">Remove</button></div>`:""}</div>`}).join(""):`<p class="muted small" style="margin:10px">No suppliers yet.</p>`}
+function openSups(){supEditN=null;$("sup-err").hidden=true;$("sup-n").value="";$("sup-p").value="";renderSups();openD($("supdlg"))}
+function supSaveDir(dir,extra){saveSet({...SET,supDir:dir,...(extra||{})})}
+$("supForm").addEventListener("submit",e=>{e.preventDefault();const n=$("sup-n").value.trim().replace(/\s+/g," "),err=$("sup-err");if(!n){err.textContent="Type the supplier's name.";err.hidden=false;return}
+  if(supInfo(n)){err.textContent=n+" is already in the list.";err.hidden=false;return}err.hidden=true;
+  const hid=((SET.supHidden)||[]).filter(x=>x.toLowerCase()!==n.toLowerCase());
+  supSaveDir([...supDir(),{name:n,phone:$("sup-p").value.trim(),type:$("sup-t").value}],{supHidden:hid});$("sup-n").value="";$("sup-p").value="";renderSups();toast(n+" added")});
+$("sup-list").addEventListener("click",e=>{const ed=e.target.closest("[data-supedit]");if(ed){supEditN=ed.dataset.supedit;renderSups();return}
+  const sv=e.target.closest("[data-supsave]");if(sv){const old=sv.dataset.supsave,row=sv.closest(".supr"),v=k=>row.querySelector(`[data-sf=${k}]`).value.trim(),nn=v("name").replace(/\s+/g," ");if(!nn)return;
+    if(nn.toLowerCase()!==old.toLowerCase()&&supList().some(x=>x.toLowerCase()===nn.toLowerCase())&&!confirm(nn+" is already a supplier. Combine "+old+" into "+nn+"?"))return;
+    const dir=supDir().filter(d=>d.name.toLowerCase()!==old.toLowerCase()&&d.name.toLowerCase()!==nn.toLowerCase());dir.push({...(supInfo(nn)||{}),...(supInfo(old)||{}),name:nn,phone:v("phone"),type:v("type")});
+    let hid=(SET.supHidden||[]).filter(x=>x.toLowerCase()!==nn.toLowerCase());
+    if(nn!==old){hid=[...hid,old];const ol=old.toLowerCase();
+      for(const i of items())if(String(i.supplier||"").toLowerCase()===ol)patch(i.id,{supplier:nn},true,{noLog:true});
+      for(const [id,l] of Object.entries(logs))if(l&&String(l.supplier||"").toLowerCase()===ol)updLog(id,{supplier:nn});
+      for(const c of impList())if(String(c.supplier||"").toLowerCase()===ol){const {id,...d}=c;cset("labcases",id,{...d,supplier:nn})}}
+    supSaveDir(dir,{supHidden:hid});supEditN=null;renderSups();toast(nn!==old?`Renamed to ${nn} everywhere`:"Saved");return}
+  const rm=e.target.closest("[data-suprm]");if(rm){const n=rm.dataset.suprm;if(!confirm(`Remove ${n} from the supplier list?\n\nPast purchases keep their name.`))return;
+    supSaveDir(supDir().filter(d=>d.name.toLowerCase()!==n.toLowerCase()),{supHidden:[...(SET.supHidden||[]).filter(x=>x.toLowerCase()!==n.toLowerCase()),n]});supEditN=null;renderSups();toast(n+" removed")}});
 function supList(){let l=[];try{l=JSON.parse(localStorage.getItem("ds-sups")||"[]")}catch(e){}const seen=new Set(),out=[];
   const add=x=>{x=String(x||"").trim();if(!x)return;const k=x.toLowerCase();if(seen.has(k))return;seen.add(k);out.push(x)};
-  SUP_DEF.forEach(add);(Array.isArray(SET&&SET.suppliers)?SET.suppliers:[]).forEach(add);(Array.isArray(l)?l:[]).forEach(add);
-  try{items().forEach(i=>add(i.supplier));Object.values(logs).forEach(x=>add(x.supplier))}catch(e){}return out}
+  const hid=new Set(((SET&&SET.supHidden)||[]).map(x=>String(x).toLowerCase()));
+  supDir().forEach(d=>add(d.name));SUP_DEF.forEach(add);(Array.isArray(SET&&SET.suppliers)?SET.suppliers:[]).forEach(add);(Array.isArray(l)?l:[]).forEach(add);
+  try{items().forEach(i=>add(i.supplier));Object.values(logs).forEach(x=>add(x.supplier))}catch(e){}return out.filter(x=>!hid.has(x.toLowerCase())||supDir().some(d=>d.name.toLowerCase()===x.toLowerCase()))}
+const supDir=()=>Array.isArray(SET&&SET.supDir)?SET.supDir:[];
+const supInfo=n=>supDir().find(d=>d.name.toLowerCase()===String(n||"").trim().toLowerCase())||null;
 function supAdd(name){name=String(name||"").trim().slice(0,60);if(!name||supList().some(x=>x.toLowerCase()===name.toLowerCase()))return;
   let l=[];try{l=JSON.parse(localStorage.getItem("ds-sups")||"[]")}catch(e){}if(!Array.isArray(l))l=[];l.push(name);try{localStorage.setItem("ds-sups",JSON.stringify(l))}catch(e){}
   try{if(myRole()==="admin")saveSet({...SET,suppliers:[...(Array.isArray(SET.suppliers)?SET.suppliers:[]),name]})}catch(e){}}
@@ -5843,7 +5898,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v139";let updShown=false;
+const APP_BUILD="ds-v140";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
