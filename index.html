@@ -282,8 +282,9 @@ body.spopen{overflow:hidden}
 .line .l-last{grid-column:1/-1;font-size:.74rem;color:var(--ok,#276B43);font-weight:600;margin-top:-2px}
 .supadd{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto;gap:6px}.supadd input,.supadd select{padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);font:inherit;min-width:0}
 @media (max-width:560px){.supadd{grid-template-columns:1fr 1fr}.supadd #sup-n{grid-column:1/-1}.supadd button{grid-column:1/-1}}
+.supc{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.supc small{flex:1 1 220px;line-height:1.35}
 .suplist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden}.supr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:10px 12px;border-top:1px solid var(--line);align-items:center}.supr:first-child{border-top:0}
-.supr b{display:block}.supr small{color:var(--muted);font-size:.78rem}.supr .supb{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.supr .supe{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto auto;gap:6px}.supr .supe input,.supr .supe select{padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font:inherit;min-width:0}
+.supr b{display:block}.supr small{color:var(--muted);font-size:.78rem}.supr .supb{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.supr .supe{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto auto auto;gap:6px}.supr .supe input,.supr .supe select{padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font:inherit;min-width:0}
 @media (max-width:560px){.supr .supe{grid-template-columns:1fr 1fr}.supr .supe input:first-child{grid-column:1/-1}}
 .acpw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.85rem;padding:6px 8px;border-radius:8px;background:var(--bg)}.acpw code{font-size:.95rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
 .mgbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mgbox small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mgbox span{font-size:.82rem;color:var(--muted)}
@@ -1760,6 +1761,7 @@ input[type=date]{min-width:0;max-width:100%}
     <select id="sup-t" aria-label="Supplies"><option value="stock">Materials &amp; instruments</option><option value="implant">Implants</option><option value="both">Both</option></select>
     <button type="submit" class="btn primary" id="sup-go">+ Add</button>
   </form>
+  <div class="supc" id="sup-cw"><button type="button" class="btn small" id="sup-pick">📇 Add from my contacts</button><input type="file" id="sup-vcf" accept=".vcf,text/vcard,text/x-vcard,text/directory" multiple hidden><small class="muted" id="sup-ch"></small></div>
   <p class="perr" id="sup-err" hidden></p>
   <div class="suplist" id="sup-list"></div>
   <div class="actions"><span></span><button type="button" class="btn" data-close>Close</button></div>
@@ -5861,14 +5863,36 @@ function renderSups(){const adm=myRole()==="admin",names=[...new Set([...supList
   $("sup-list").innerHTML=names.length?names.map(n=>{const d=supInfo(n)||{},st=supStats(n),ed=supEditN===n;
     return `<div class="supr"><div><b>${esc(n)}</b><small>${d.phone?"📞 "+esc(d.phone)+" · ":""}${esc(supT[d.type||"stock"])}${st.n?` · ${pl(st.n,"purchase")}`:""}${st.items?` · ${pl(st.items,"item")}`:""}${st.pend?` · <span class="pend">${rs(st.pend)} unpaid</span>`:""}</small></div>
     <div class="supb">${d.phone&&waNum(d.phone)?`<a class="btn small" target="_blank" rel="noopener" href="https://wa.me/${waNum(d.phone)}">WhatsApp</a>`:""}${adm&&!ed?`<button type="button" class="btn small" data-supedit="${esc(n)}">Edit</button>`:""}</div>
-    ${ed?`<div class="supe"><input data-sf="name" value="${esc(n)}" maxlength="60" aria-label="Name"><input data-sf="phone" value="${esc(d.phone||"")}" maxlength="20" inputmode="tel" placeholder="WhatsApp / phone" aria-label="Phone"><select data-sf="type">${Object.entries(supT).map(([k,v])=>`<option value="${k}"${k===(d.type||"stock")?" selected":""}>${esc(v)}</option>`).join("")}</select><button type="button" class="btn small primary" data-supsave="${esc(n)}">Save</button><button type="button" class="btn small danger-outline" data-suprm="${esc(n)}">Remove</button></div>`:""}</div>`}).join(""):`<p class="muted small" style="margin:10px">No suppliers yet.</p>`}
-function openSups(){supEditN=null;$("sup-err").hidden=true;$("sup-n").value="";$("sup-p").value="";renderSups();openD($("supdlg"))}
+    ${ed?`<div class="supe"><input data-sf="name" value="${esc(n)}" maxlength="60" aria-label="Name"><input data-sf="phone" value="${esc(d.phone||"")}" maxlength="20" inputmode="tel" placeholder="WhatsApp / phone" aria-label="Phone"><select data-sf="type">${Object.entries(supT).map(([k,v])=>`<option value="${k}"${k===(d.type||"stock")?" selected":""}>${esc(v)}</option>`).join("")}</select><button type="button" class="btn small" data-supcp="${esc(n)}" title="Take the number from my contacts">📇</button><button type="button" class="btn small primary" data-supsave="${esc(n)}">Save</button><button type="button" class="btn small danger-outline" data-suprm="${esc(n)}">Remove</button></div>`:""}</div>`}).join(""):`<p class="muted small" style="margin:10px">No suppliers yet.</p>`}
+
+/* contacts: Android opens the phone's contact list; iPhone uses a shared contact card (.vcf) */
+const hasCPick=()=>!!(navigator.contacts&&navigator.contacts.select);
+function vcfParse(txt){const out=[];const unf=String(txt||"").replace(/\r\n[ \t]/g,"").replace(/\n[ \t]/g,"");
+  for(const card of unf.split(/BEGIN:VCARD/i).slice(1)){let fn="",n="",tels=[];for(const ln of card.split(/\r?\n/)){const m=ln.match(/^([^:;]+)([^:]*):(.*)$/);if(!m)continue;const k=m[1].replace(/^item\d+\./i,"").toUpperCase(),v=m[3].trim();
+      if(k==="FN")fn=v.replace(/\\,/g,",");else if(k==="N")n=v.split(";").filter(Boolean).reverse().join(" ");else if(k==="TEL"){const t=v.replace(/^tel:/i,"").replace(/[^\d+]/g,"");if(t)tels.push({t,mob:/CELL|MOBILE|IPHONE/i.test(m[2])})}}
+    const name=(fn||n).trim(),tel=(tels.find(x=>x.mob)||tels[0]||{}).t||"";if(name||tel)out.push({name:name||tel,phone:tel})}return out}
+function supFromContacts(list){list=list.filter(c=>c&&(c.name||c.phone));if(!list.length){toast("No contact found");return}
+  if(list.length===1){const c=list[0];$("sup-n").value=c.name||$("sup-n").value;$("sup-p").value=c.phone||"";$("sup-n").focus();toast("Filled from contact · tap + Add");return}
+  const dir=[...supDir()];let added=0;for(const c of list){if(!c.name||dir.some(d=>d.name.toLowerCase()===c.name.toLowerCase()))continue;dir.push({name:c.name,phone:c.phone||"",type:$("sup-t").value});added++}
+  if(added){supSaveDir(dir,{supHidden:(SET.supHidden||[]).filter(x=>!list.some(c=>c.name&&c.name.toLowerCase()===x.toLowerCase()))});renderSups()}toast(added?`${pl(added,"supplier")} added from contacts`:"Those suppliers are already in the list")}
+let supPickFor=null;
+async function supPick(forName){supPickFor=forName||null;
+  if(hasCPick()){try{const r=await navigator.contacts.select(["name","tel"],{multiple:!forName});const list=(r||[]).map(c=>({name:(c.name&&c.name[0])||"",phone:((c.tel&&c.tel[0])||"").replace(/[^\d+]/g,"")}));
+      if(forName){const row=[...document.querySelectorAll(".supr")].find(x=>x.querySelector("[data-supsave]"));if(row&&list[0]&&list[0].phone){row.querySelector("[data-sf=phone]").value=list[0].phone;toast("Number filled · tap Save")}return}
+      supFromContacts(list)}catch(e){}return}
+  $("sup-vcf").value="";$("sup-vcf").click()}
+$("sup-pick").addEventListener("click",()=>supPick());
+$("sup-vcf").addEventListener("change",async()=>{const fs=[...($("sup-vcf").files||[])];if(!fs.length)return;let list=[];for(const f of fs){try{list=list.concat(vcfParse(await f.text()))}catch(e){}}
+  if(supPickFor){const row=[...document.querySelectorAll(".supr")].find(x=>x.querySelector("[data-supsave]"));if(row&&list[0]&&list[0].phone){row.querySelector("[data-sf=phone]").value=list[0].phone;toast("Number filled · tap Save")}else toast("No phone number in that contact");supPickFor=null;return}
+  supFromContacts(list)});
+function openSups(){supEditN=null;$("sup-err").hidden=true;$("sup-cw").hidden=myRole()!=="admin";
+  $("sup-ch").innerHTML=hasCPick()?"Pick one or several people from your phone's contacts.":/iPhone|iPad/i.test(navigator.userAgent)?"On iPhone: in <b>Contacts</b>, open the person → <b>Share Contact</b> → <b>Save to Files</b>. Then tap this button and choose that file (you can pick several).":"Choose a contact card (.vcf) exported from your phone or Google Contacts.";$("sup-n").value="";$("sup-p").value="";renderSups();openD($("supdlg"))}
 function supSaveDir(dir,extra){saveSet({...SET,supDir:dir,...(extra||{})})}
 $("supForm").addEventListener("submit",e=>{e.preventDefault();const n=$("sup-n").value.trim().replace(/\s+/g," "),err=$("sup-err");if(!n){err.textContent="Type the supplier's name.";err.hidden=false;return}
   if(supInfo(n)){err.textContent=n+" is already in the list.";err.hidden=false;return}err.hidden=true;
   const hid=((SET.supHidden)||[]).filter(x=>x.toLowerCase()!==n.toLowerCase());
   supSaveDir([...supDir(),{name:n,phone:$("sup-p").value.trim(),type:$("sup-t").value}],{supHidden:hid});$("sup-n").value="";$("sup-p").value="";renderSups();toast(n+" added")});
-$("sup-list").addEventListener("click",e=>{const ed=e.target.closest("[data-supedit]");if(ed){supEditN=ed.dataset.supedit;renderSups();return}
+$("sup-list").addEventListener("click",e=>{const cp=e.target.closest("[data-supcp]");if(cp){supPick(cp.dataset.supcp);return}const ed=e.target.closest("[data-supedit]");if(ed){supEditN=ed.dataset.supedit;renderSups();return}
   const sv=e.target.closest("[data-supsave]");if(sv){const old=sv.dataset.supsave,row=sv.closest(".supr"),v=k=>row.querySelector(`[data-sf=${k}]`).value.trim(),nn=v("name").replace(/\s+/g," ");if(!nn)return;
     if(nn.toLowerCase()!==old.toLowerCase()&&supList().some(x=>x.toLowerCase()===nn.toLowerCase())&&!confirm(nn+" is already a supplier. Combine "+old+" into "+nn+"?"))return;
     const dir=supDir().filter(d=>d.name.toLowerCase()!==old.toLowerCase()&&d.name.toLowerCase()!==nn.toLowerCase());dir.push({...(supInfo(nn)||{}),...(supInfo(old)||{}),name:nn,phone:v("phone"),type:v("type")});
@@ -5898,7 +5922,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v140";let updShown=false;
+const APP_BUILD="ds-v141";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
