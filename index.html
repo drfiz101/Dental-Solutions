@@ -292,6 +292,24 @@ body.spopen{overflow:hidden}
 .paysup{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;border-top:1px dashed var(--line);background:var(--bg)}
 .hlps{margin:4px 0 0;flex:none!important}.hlps input{font-size:1rem}.hlpres{display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow:auto}
 .hlpa{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:0 12px}.hlpa summary{cursor:pointer;font-weight:700;padding:11px 0;list-style:none}.hlpa summary::-webkit-details-marker{display:none}.hlpa summary::before{content:"❯";display:inline-block;margin-right:8px;color:var(--muted);transition:transform .15s;font-size:.8rem}.hlpa[open] summary::before{transform:rotate(90deg)}.hlpa p{margin:0 0 10px;line-height:1.45}.hlpa a{display:inline-block;margin:0 0 10px}
+.apmode{margin:0 0 12px;grid-template-columns:repeat(3,1fr)}
+.apweek{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+.apday{padding:0!important;overflow:hidden}.apday.today{box-shadow:0 0 0 2px var(--mod,var(--accent))}.apday.closed{opacity:.6}
+.apdh{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;padding:11px 14px;border:0;border-bottom:1px solid var(--line);background:var(--mod-soft,var(--accent-soft));font:inherit;color:var(--ink);cursor:pointer;text-align:left}
+.apnone{margin:0;padding:12px 14px}
+.apr{display:grid;grid-template-columns:62px minmax(0,1fr) 28px 76px;gap:8px;align-items:center;width:100%;padding:9px 12px;border:0;border-top:1px solid var(--line);background:none;font:inherit;color:var(--ink);text-align:left;cursor:pointer}.apr:first-of-type{border-top:0}.apr:hover{background:var(--bg)}
+.apr .apt{font-weight:700;font-variant-numeric:tabular-nums;font-size:.86rem}.apr .apn b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.apr .apn small{display:block;color:var(--muted);font-size:.74rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apr .chip2{font-size:.66rem;padding:1px 7px}.apr.s-cancelled{opacity:.5}.apr.s-cancelled b{text-decoration:line-through}
+.apchr{font-size:.68rem;font-weight:800;border-radius:6px;padding:2px 0;color:#fff!important;text-align:center;width:28px;align-self:center;line-height:1.5;display:block}.apr .chip2{justify-self:end}.apchr.c1,.lg.c1,.apmdots .c1{background:#2563EB}.apchr.c2,.lg.c2,.apmdots .c2{background:#DB2777}
+.lg{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px}
+.apmonth{padding:10px!important}.apmh{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding-bottom:6px}
+.apmg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.apm{min-height:64px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:4px 5px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;font:inherit;color:var(--ink);cursor:pointer;text-align:left;overflow:hidden;position:relative}
+.apm.out{opacity:.35}.apm.closed{background:var(--bg)}.apm.today{border:2px solid var(--mod,var(--accent))}.apm.has{background:color-mix(in srgb,var(--mod,var(--accent)) 6%,var(--surface))}
+.apmd{font-size:.8rem;font-weight:700}.apmt{display:flex;justify-content:space-between;align-items:center;width:100%;gap:2px}.apmn{font-size:.66rem;font-weight:800;background:var(--mod,var(--accent));color:#fff;border-radius:99px;padding:0 6px;line-height:1.5}
+.apmdots{display:flex;width:100%;height:4px;border-radius:99px;overflow:hidden;gap:1px;margin-top:2px}.apmdots i{display:block;height:100%}
+.apmnames{display:none;flex-direction:column;width:100%}.apmnames em{font-style:normal;font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (min-width:720px){.apm{min-height:96px}.apmnames{display:flex}}
 .acpw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.85rem;padding:6px 8px;border-radius:8px;background:var(--bg)}.acpw code{font-size:.95rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
 .mgbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mgbox small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mgbox span{font-size:.82rem;color:var(--muted)}
 .invbig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.invbig[hidden]{display:none}
@@ -1323,9 +1341,11 @@ input[type=date]{min-width:0;max-width:100%}
       <div class="mnav"><button class="btn" id="ap-prev" aria-label="Previous day">‹</button><div class="dwrap"><h2 id="ap-label"></h2><input type="date" id="ap-date" aria-label="Go to date"></div><button class="btn" id="ap-next" aria-label="Next day">›</button><button class="btn small" id="ap-today">Today</button><button class="btn small primary" id="ap-share" title="Share this day's appointments as a picture">📤 Share day</button></div>
       <div class="vact"><button class="btn" id="ap-team">Team</button><button class="btn" id="ap-set">WhatsApp messages &amp; hours</button><button class="btn" id="ap-photo" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:17px;height:17px;vertical-align:-3px;margin-right:4px"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>From photo</button><input type="file" id="ph-file" accept="image/*" multiple hidden><button class="btn" id="ap-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:17px;height:17px;vertical-align:-3px;margin-right:4px"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M8 9h8M8 12h8M8 15h5"/></svg>Photo or text</button><button class="btn" id="ap-multi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:17px;height:17px;vertical-align:-3px;margin-right:4px"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M8 17h3M14 13h2M14 17h2"/></svg>Book several</button><button class="btn" id="ap-newpat">+ New patient</button><button class="btn primary" id="ap-new">+ Book appointment</button></div>
     </div>
+    <div class="labmode apmode" id="ap-mode"><button type="button" data-apm="day">📅 Day</button><button type="button" data-apm="week">🗓 Week</button><button type="button" data-apm="month">📆 Month</button></div>
     <div class="tiles t3" id="ap-tiles"></div>
     <div class="card remind" id="ap-remind"></div>
     <div class="chairs" id="ap-chairs"></div>
+    <div id="ap-range" hidden></div>
   </section>
   <section id="billView" class="view cview" hidden>
     <div class="vhead"><div><h2>Billing</h2><p class="muted">Bills, payments and balances. Prices fill in automatically from your treatment price list.</p></div><div class="vact"><button class="btn" id="b-pdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 12v6m-3-3 3 3 3-3"/></svg>Statement PDF</button><button class="btn" id="b-prices">Treatment prices</button><button class="btn primary" id="b-new">+ New bill</button></div></div>
@@ -3327,7 +3347,26 @@ function apCard(a){
     <div class="muted small">${a.dentist?`${docAv(a.dentist)}<b class="dent">${esc(a.dentist)}</b> · `:""}${esc(apTr(a))}${a.note?" · "+esc(a.note):""}</div>
     <div class="row3"><select class="stsel s-${st}" data-st="${esc(a.id)}" aria-label="Status of ${esc(a.patientName)}">${Object.entries(AST).map(([k,v])=>`<option value="${k}"${k===st?" selected":""}>${v[0]}</option>`).join("")}</select>${msgs}<button class="btn small" data-apedit="${esc(a.id)}">Edit</button>${st!=="done"?`<button class="btn small" data-apres="${esc(a.id)}">Reschedule</button>`:""}${st==="done"?`<button class="btn small primary" data-apbill="${esc(a.id)}">Bill</button>`:""}</div>${sentNote}</div></div>`;
 }
+let apMode=localGet("ds-apmode")||"day";
+const wkStart=d=>{const x=new Date(d+"T00:00:00"),k=(x.getDay()+6)%7;return addDays(d,-k)};
+const apOf=(f,t)=>Object.entries(A).filter(([,a])=>a.date>=f&&a.date<=t).map(([id,a])=>({id,...a})).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+function apRangeTiles(L){const live=L.filter(a=>a.status!=="cancelled");return `<div class="tile big"><small>Appointments</small><b>${live.length}</b><span>Chair 1: ${live.filter(a=>String(a.chair)==="1").length} · Chair 2: ${live.filter(a=>String(a.chair)==="2").length}</span></div><div class="tile"><small>Done</small><b>${L.filter(a=>a.status==="done").length}</b><span>${L.filter(a=>a.status==="noshow").length} no-show</span></div><div class="tile"><small>Still to come</small><b>${live.filter(a=>!["done","noshow"].includes(a.status)&&a.date>=ymd(new Date())).length}</b><span>${L.filter(a=>a.status==="cancelled").length} cancelled</span></div>`}
+function apRow(a){const st=a.status||"booked",S2=AST[st]||AST.booked;return `<button type="button" class="apr s-${st}" data-aprop="${esc(a.id)}"><span class="apt">${esc(fmtTime(a.time))}</span><span class="apn"><b>${esc(a.patientName||"")}</b><small>${esc(a.treatment||"")}${a.dentist?" · "+esc(a.dentist):""}</small></span><span class="apchr c${esc(a.chair)}">C${esc(a.chair)}</span><span class="chip2 ${S2[1]}">${S2[0]}</span></button>`}
+function renderApRange(){const box=$("ap-range"),today=ymd(new Date());
+  if(apMode==="week"){const f=wkStart(apDate),t=addDays(f,6),L=apOf(f,t);
+    $("ap-label").textContent=`${fmtDate(f).replace(/ \d{4}$/,"")} – ${fmtDate(t)}`;$("ap-tiles").innerHTML=apRangeTiles(L);
+    box.innerHTML=`<div class="apweek">${[0,1,2,3,4,5,6].map(i=>{const d=addDays(f,i),its=L.filter(a=>a.date===d),live=its.filter(a=>a.status!=="cancelled"),open=isOpen(d);
+      return `<div class="card apday${d===today?" today":""}${open?"":" closed"}"><button type="button" class="apdh" data-apday="${d}"><span><b>${esc(dayName(d))}</b> ${esc(fmtDate(d).replace(/ \d{4}$/,""))}${d===today?" · today":""}</span><span class="muted small">${open?pl(live.length,"appointment"):"Closed"} ›</span></button>${its.length?its.map(apRow).join(""):`<p class="muted small apnone">${open?"No appointments":"Clinic closed"}</p>`}</div>`}).join("")}</div>`;return}
+  const [y,m]=apDate.split("-").map(Number),first=`${y}-${String(m).padStart(2,"0")}-01`,last=ymd(new Date(y,m,0)),L=apOf(first,last);
+  $("ap-label").textContent=new Date(first+"T00:00:00").toLocaleDateString("en-GB",{month:"long",year:"numeric"});$("ap-tiles").innerHTML=apRangeTiles(L);
+  const g0=wkStart(first),cells=[];for(let d=g0;cells.length<42;d=addDays(d,1)){cells.push(d);if(cells.length%7===0&&d>=last)break}
+  box.innerHTML=`<div class="card apmonth"><div class="apmh">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(x=>`<span>${x}</span>`).join("")}</div><div class="apmg">${cells.map(d=>{const its=L.filter(a=>a.date===d&&a.status!=="cancelled"),inM=d.slice(0,7)===first.slice(0,7),open=isOpen(d),c1=its.filter(a=>String(a.chair)==="1").length,c2=its.length-c1;
+    return `<button type="button" class="apm${inM?"":" out"}${d===today?" today":""}${open?"":" closed"}${its.length?" has":""}" data-apday="${d}"><span class="apmt"><span class="apmd">${+d.slice(8)}</span>${its.length?`<span class="apmn">${its.length}</span>`:""}</span>${its.length?`<span class="apmdots">${c1?`<i class="c1" style="flex:${c1}"></i>`:""}${c2?`<i class="c2" style="flex:${c2}"></i>`:""}</span><span class="apmnames">${its.slice(0,3).map(a=>`<em>${esc(fmtTime(a.time).replace(/:00 /," "))} ${esc((a.patientName||"").split(" ")[0])}</em>`).join("")}${its.length>3?`<em>+${its.length-3} more</em>`:""}</span>`:""}</button>`}).join("")}</div><p class="muted small" style="margin:8px 2px 0"><i class="lg c1"></i> Chair 1 &nbsp; <i class="lg c2"></i> Chair 2 · tap a day to open it</p></div>`}
 function renderAppts(){
+  for(const b of document.querySelectorAll("[data-apm]"))b.setAttribute("aria-pressed",String(b.dataset.apm===apMode));
+  {const rng=apMode!=="day";$("ap-range").hidden=!rng;$("ap-remind").hidden=rng;$("ap-chairs").hidden=rng;$("ap-date").value=apDate;
+   $("ap-prev").setAttribute("aria-label",apMode==="day"?"Previous day":apMode==="week"?"Previous week":"Previous month");$("ap-next").setAttribute("aria-label",apMode==="day"?"Next day":apMode==="week"?"Next week":"Next month");
+   if(rng){renderApRange();return}}
   const today=ymd(new Date()),tom=addDays(today,1);
   $("ap-label").textContent=(apDate===today?"Today, ":apDate===tom?"Tomorrow, ":"")+new Date(apDate+"T00:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
   $("ap-date").value=apDate;
@@ -3340,8 +3379,11 @@ function renderAppts(){
   const col=c=>{const its=day.filter(a=>String(a.chair)===c);return `<div class="card chair"><h3><span>Chair ${c}</span><span class="muted">${pl(its.filter(a=>a.status!=="cancelled").length,"booking")}</span></h3>${its.length?its.map(apCard).join(""):""}${(()=>{const fr=freeSlots(apDate,c);return `<div class="free"><span class="muted small">${!isOpen(apDate)?"Clinic closed on "+dayName(apDate)+"s":fr.length?"Free times · tap to book":"No free times left on this day"}</span><div class="frees">${fr.map(t=>`<button class="fslot" data-free="${c}|${t}">${fmtTime(t)}</button>`).join("")}</div>${isOpen(apDate)?`<button class="btn small addap" data-newap="${c}">+ Book Chair ${c} at another time</button>`:""}</div>`})()}</div>`};
   $("ap-chairs").innerHTML=(isSimple()?`<div class="seg3" role="group" aria-label="Chair">${[["both","Both chairs"],["1","Chair 1"],["2","Chair 2"]].map(([v,n])=>`<button type="button" data-chairf="${v}" aria-pressed="${chairF===v}">${n}</button>`).join("")}</div>`:"")+col("1")+col("2");$("ap-chairs").dataset.cf=isSimple()?chairF:"both";
 }
-$("ap-prev").addEventListener("click",()=>{apDate=addDays(apDate,-1);render()});
-$("ap-next").addEventListener("click",()=>{apDate=addDays(apDate,1);render()});
+const apShift=k=>{if(apMode==="week")apDate=addDays(apDate,7*k);else if(apMode==="month"){const [y,m]=apDate.split("-").map(Number);apDate=ymd(new Date(y,m-1+k,1))}else apDate=addDays(apDate,k);render()};
+$("ap-prev").addEventListener("click",()=>apShift(-1));
+$("ap-next").addEventListener("click",()=>apShift(1));
+$("ap-mode").addEventListener("click",e=>{const b=e.target.closest("[data-apm]");if(!b)return;apMode=b.dataset.apm;try{localStorage.setItem("ds-apmode",apMode)}catch(x){}render()});
+$("ap-range").addEventListener("click",e=>{const r=e.target.closest("[data-aprop]");if(r){openAp(r.dataset.aprop);return}const d=e.target.closest("[data-apday]");if(d){apDate=d.dataset.apday;apMode="day";try{localStorage.setItem("ds-apmode","day")}catch(x){}render();window.scrollTo(0,0)}});
 $("ap-today").addEventListener("click",()=>{apDate=ymd(new Date());render()});
 $("ap-date").addEventListener("change",e=>{if(e.target.value){apDate=e.target.value;render()}});
 $("ap-new").addEventListener("click",()=>openAp(null));
@@ -6020,7 +6062,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v148";let updShown=false;
+const APP_BUILD="ds-v149";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
