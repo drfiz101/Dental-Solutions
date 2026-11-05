@@ -1460,7 +1460,7 @@ input[type=date]{min-width:0;max-width:100%}
   <h2 id="patT">New patient</h2>
   <div class="grid2">
     <div class="field span2"><div class="lrow"><label for="pt-name">Full name</label><button type="button" class="linkbtn" data-contact="pt">📇 From contacts</button></div><input id="pt-name" maxlength="80" autocomplete="off"></div>
-    <div class="field"><label for="pt-phone">Mobile (WhatsApp)</label><input id="pt-phone" type="tel" inputmode="tel" placeholder="03xx xxxxxxx" maxlength="20"></div>
+    <div class="field"><label for="pt-phone">Mobile (WhatsApp) · optional</label><input id="pt-phone" type="tel" inputmode="tel" placeholder="03xx xxxxxxx" maxlength="20"></div>
     <div class="field"><label for="pt-age">Age</label><input id="pt-age" type="number" min="0" max="120" inputmode="numeric"></div>
     <div class="field"><label for="pt-gender">Gender</label><select id="pt-gender"><option value="">Not set</option><option>Female</option><option>Male</option><option>Other</option></select></div>
     <div class="field"><label for="pt-cnic">CNIC</label><input id="pt-cnic" maxlength="20" placeholder="Optional"></div>
@@ -1585,7 +1585,7 @@ input[type=date]{min-width:0;max-width:100%}
 <dialog id="apdlg"><form class="dlg" id="apForm" novalidate>
   <h2 id="apT">Book appointment</h2>
   <div class="field"><div class="lrow"><label for="ap-pat">Patient</label><span style="display:flex;gap:12px"><button type="button" class="linkbtn" data-contact="ap">📇 From contacts</button><button type="button" class="linkbtn" id="ap-toggle-new">+ New patient</button></span></div><div id="ap-patwrap"><input id="ap-pat" list="ap-pats" autocomplete="off" placeholder="Type name or mobile number of a registered patient" style="width:100%"><datalist id="ap-pats"></datalist></div></div>
-  <div class="newp" id="ap-newp" hidden><p class="small" style="margin:0 0 8px;font-weight:700" id="ap-newmsg">New patient · a file number is given automatically</p><div class="grid2"><div class="field span2"><label for="ap-nname">Full name</label><input id="ap-nname" maxlength="80" autocomplete="off"></div><div class="field"><label for="ap-nphone">Mobile (WhatsApp)</label><input id="ap-nphone" type="tel" inputmode="tel" maxlength="20" placeholder="03xx xxxxxxx"></div><div class="field"><label for="ap-nage">Age</label><input id="ap-nage" type="number" min="0" max="120" inputmode="numeric"></div><div class="field"><label for="ap-ngender">Gender</label><select id="ap-ngender"><option value="">Not set</option><option>Female</option><option>Male</option><option>Other</option></select></div><div class="field"><label for="ap-nalert">Medical alert</label><input id="ap-nalert" maxlength="200" placeholder="e.g. Diabetes, blood thinners"></div></div></div>
+  <div class="newp" id="ap-newp" hidden><p class="small" style="margin:0 0 8px;font-weight:700" id="ap-newmsg">New patient · a file number is given automatically</p><div class="grid2"><div class="field span2"><label for="ap-nname">Full name</label><input id="ap-nname" maxlength="80" autocomplete="off"></div><div class="field"><label for="ap-nphone">Mobile (WhatsApp) · optional</label><input id="ap-nphone" type="tel" inputmode="tel" maxlength="20" placeholder="03xx xxxxxxx"></div><div class="field"><label for="ap-nage">Age</label><input id="ap-nage" type="number" min="0" max="120" inputmode="numeric"></div><div class="field"><label for="ap-ngender">Gender</label><select id="ap-ngender"><option value="">Not set</option><option>Female</option><option>Male</option><option>Other</option></select></div><div class="field"><label for="ap-nalert">Medical alert</label><input id="ap-nalert" maxlength="200" placeholder="e.g. Diabetes, blood thinners"></div></div></div>
   <div class="field"><label>Chair</label><div class="seg" id="ap-chair"><button type="button" data-ch="1">Chair 1</button><button type="button" data-ch="2">Chair 2</button></div></div>
   <div class="grid2">
     <div class="field"><label for="ap-d">Date</label><input id="ap-d" type="date"></div>
@@ -3244,8 +3244,8 @@ $("ap-pat").addEventListener("input",e=>{if(apNew)return;const v=e.target.value.
 $("apForm").addEventListener("submit",async e=>{
   e.preventDefault();const err=$("ap-err");let pid=apNew?null:findPat($("ap-pat").value);
   if(!pid){const n=$("ap-nname").value.trim(),ph=readPhone("ap-nphone");
-    if(!n){err.textContent="Choose a patient from the list, or type a new patient's name and mobile number.";err.hidden=false;$("ap-newp").hidden=false;return}
-    if(!waNum(ph)){err.textContent="Enter the new patient's mobile number so WhatsApp messages can be sent.";err.hidden=false;$("ap-newp").hidden=false;$("ap-nphone").focus();return}
+    if(!n){err.textContent="Choose a patient from the list, or type a new patient's name.";err.hidden=false;$("ap-newp").hidden=false;return}
+    if(ph&&!waNum(ph)){err.textContent="Check the mobile number, for example 0311 0053535, or leave it empty.";err.hidden=false;$("ap-newp").hidden=false;$("ap-nphone").focus();return}
     {const r=await dupCheck(n,ph);if(!r)return;if(r.startsWith("open:")){const id=r.slice(5);setApNew(false);$("ap-pat").value=patLabel(P[id]);$("ap-newp").hidden=true;err.hidden=true;toast("Chose "+P[id].name+" · tap Save to book");return}}
     pid=nid("p");cset("patients",pid,{name:n,phone:ph,age:$("ap-nage").value?+$("ap-nage").value:null,gender:$("ap-ngender").value,alerts:$("ap-nalert").value.trim(),createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[]})}
   const p=P[pid],d=$("ap-d").value,t=$("ap-t").value;
@@ -3801,7 +3801,7 @@ function normRow(r){
 }
 function phWarn(r,i){
   if(!r.name)return "Add the patient's name.";
-  if(!r.pid&&!waNum(r.phone))return "New patient: add a mobile number.";
+  if(!r.pid&&r.phone&&!waNum(r.phone))return "New patient: check the mobile number.";
   if(!r.date)return "Add the date.";if(!r.time)return "Choose the time.";
   if(!isOpen(r.date))return `Clinic is closed on ${dayName(r.date)}s.`;
   if(r.date<ymd(new Date()))return "This date has passed.";
@@ -3871,8 +3871,8 @@ $("ph-body").addEventListener("click",e=>{const a=e.target.closest("[data-mark]"
 let saveFile=null; // set where saving files is possible
 const canPrint=!window.claude;
 const INV_CSS=`
-.inv .psum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 36px 12px}
-.inv .psum div{border-radius:12px;padding:10px 14px;border:2px solid transparent;text-align:left}.inv .psum small{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.inv .psum b{display:block;font-size:22px;font-variant-numeric:tabular-nums;margin-top:2px}
+.inv .psum{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 36px 12px}
+.inv .psum div{border-radius:12px;padding:10px 14px;border:2px solid transparent;text-align:left}.inv .psum small{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.inv .psum b{display:block;font-size:20px;font-variant-numeric:tabular-nums;margin-top:2px;white-space:nowrap}.psum span{display:block;font-size:10.5px;opacity:.8;margin-top:1px}.psum .a{background:#F6F7F9;color:#334155;border-color:#E2E8F0}
 .inv .psum .t{background:#EEF2F1;color:#1d2b28}.inv .psum .p{background:#E3F2E8;color:#1F6B45;border-color:#9FD3B4}.inv .psum .d{background:#FDECEA;color:#A4231B;border-color:#F0A9A2}.inv .psum .d.z{background:#E3F2E8;color:#1F6B45;border-color:#9FD3B4}
 .inv .stamp{display:inline-block;margin-top:6px;padding:5px 14px;border:3px solid;border-radius:8px;font-weight:800;font-size:15px;letter-spacing:.1em;transform:rotate(-3deg)}.inv .stamp.due{color:#A4231B;border-color:#A4231B}.inv .stamp.ok{color:#1F6B45;border-color:#1F6B45}
 .inv .docs{display:flex;justify-content:space-between;gap:20px;margin:0 36px;padding:10px 0 12px;border-top:1px solid #dde6e3;border-bottom:1px solid #dde6e3}
@@ -3960,7 +3960,7 @@ function invoiceInner(b){
 <div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}<br>${esc(openDaysText())} · ${esc(fmtTime(c.open))} – ${esc(fmtTime(c.close))}</div></div></div>
 <div class="ttl"><h1>BILL</h1><p>No. <b>${esc(b.no||"")}</b></p><p>Date: <b>${esc(fmtDate(b.date))}</b></p><span class="stamp ${t.bal>0?"due":"ok"}">${t.bal>0?"PAYMENT DUE":"PAID IN FULL"}</span></div></div>
 ${invDocsHTML()}
-<div class="psum"><div class="t"><small>Total</small><b>${rs(t.total)}</b></div><div class="p"><small>Paid</small><b>${rs(t.paid)}</b></div><div class="d${t.bal>0?"":" z"}"><small>${t.bal>0?"Due (pending)":"Due"}</small><b>${rs(t.bal)}</b></div></div>
+<div class="psum"><div class="a"><small>Actual bill</small><b>${rs(t.sub)}</b><span>${pl((b.items||[]).length,"item")}</span></div><div class="t"><small>After discount</small><b>${rs(t.total)}</b><span>${t.sub>t.total?"− "+rs(t.sub-t.total)+" discount":"no discount"}</span></div><div class="p"><small>Paid</small><b>${rs(t.paid)}</b><span>${pl((b.payments||[]).length,"payment")}</span></div><div class="d${t.bal>0?"":" z"}"><small>Due</small><b>${rs(t.bal)}</b><span>${t.bal>0?"pending":"fully paid ✓"}</span></div></div>
 <div class="pt"><div><span>Patient</span><b>${esc(b.patientName||"")}</b></div><div><span>File no.</span>${esc(p.fileNo||"—")}</div>
 <div><span>Mobile</span>${esc(b.phone||p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div>
 ${den?`<div><span>Treated by</span><b>${esc(den)}</b></div>`:""}${ap?`<div><span>Visit</span>${esc(fmtDate(ap.date))}, ${esc(fmtTime(ap.time))}</div>`:""}</div>
@@ -4007,7 +4007,7 @@ function planBillInner(pid){const p=P[pid]||{},pl=planOf(p),cl=planCalc(pl),c=S(
 <div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}<br>${esc(openDaysText())} · ${esc(fmtTime(c.open))} – ${esc(fmtTime(c.close))}</div></div></div>
 <div class="ttl"><h1>TREATMENT BILL</h1><p>File no. <b>${esc(p.fileNo||"—")}</b></p><p>Date: <b>${esc(fmtDate(today))}</b></p><span class="stamp ${bal>0?"due":"ok"}">${bal>0?"PAYMENT DUE":"PAID IN FULL"}</span></div></div>
 ${invDocsHTML()}
-<div class="psum"><div class="t"><small>Total</small><b>${rs(cl.total)}</b></div><div class="p"><small>Paid</small><b>${rs(paid)}</b></div><div class="d${bal>0?"":" z"}"><small>${bal>0?"Due (pending)":"Due"}</small><b>${rs(bal)}</b></div></div>
+<div class="psum"><div class="a"><small>Actual bill</small><b>${rs(cl.sub)}</b><span>${cl.n} item${cl.n===1?"":"s"}</span></div><div class="t"><small>After discount</small><b>${rs(cl.total)}</b><span>${cl.disc?"− "+rs(cl.disc)+" discount":"no discount"}</span></div><div class="p"><small>Paid</small><b>${rs(paid)}</b><span>so far</span></div><div class="d${bal>0?"":" z"}"><small>Due</small><b>${rs(bal)}</b><span>${bal>0?"pending":"fully paid ✓"}</span></div></div>
 <div class="pt"><div><span>Patient</span><b>${esc(p.name||"")}</b></div><div><span>Mobile</span>${esc(p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div>${pl.dentist?`<div><span>Dentist</span>${esc(pl.dentist)}</div>`:""}</div>
 <table><thead><tr><th style="width:30px">#</th><th>Treatment</th><th style="width:90px">Teeth</th><th class="r" style="width:40px">Qty</th><th class="r" style="width:84px">Rate</th><th class="r" style="width:96px">Cost</th><th class="r" style="width:110px">Status</th></tr></thead><tbody>${rows}</tbody></table>
 <div class="bot"><div>${pays.length?`<div class="pay"><h4>Payments received</h4>${pays.map(x=>`<div><span>${esc(fmtDate(x.date))} · ${esc(payLbl(x))}${x.no?" · "+esc(x.no):""}</span><b>${rs(x.amount)}</b></div>`).join("")}</div>`:""}</div>
@@ -6020,7 +6020,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v146";let updShown=false;
+const APP_BUILD="ds-v148";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
