@@ -310,6 +310,8 @@ body.spopen{overflow:hidden}
 .apmdots{display:flex;width:100%;height:4px;border-radius:99px;overflow:hidden;gap:1px;margin-top:2px}.apmdots i{display:block;height:100%}
 .apmnames{display:none;flex-direction:column;width:100%}.apmnames em{font-style:normal;font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (min-width:720px){.apm{min-height:96px}.apmnames{display:flex}}
+.pvbar{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:#1E293B;color:#fff;font-size:.88rem;box-shadow:0 -6px 20px rgba(0,0,0,.25)}.pvbar button{flex:none;border:0;border-radius:10px;padding:9px 14px;background:#FBBF24;color:#1E293B;font:inherit;font-weight:800;cursor:pointer}
+body.pv-on{padding-bottom:64px}body.pv-on .shell,body.pv-on main{outline:3px dashed #FBBF24;outline-offset:-3px}
 .acpw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.85rem;padding:6px 8px;border-radius:8px;background:var(--bg)}.acpw code{font-size:.95rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
 .mgbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mgbox small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mgbox span{font-size:.82rem;color:var(--muted)}
 .invbig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.invbig[hidden]{display:none}
@@ -1132,6 +1134,8 @@ html,body{overflow-x:hidden;max-width:100%;overscroll-behavior-x:none}
 .hsi em{font-style:normal;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;white-space:nowrap}.hsi em.due{background:#FDECEA;color:#A4231B}.hsi em.ok{background:#E3F2E8;color:#1F6B45}
 html:root #dashView .dgrid>.card[data-wh]{display:none!important}
 html:root #dashView .dgrid>.card[data-ws]{display:block!important}
+/* permissions always beat "Customise home" */
+html:root body.no-money #dashView .dgrid>.card.d-rep,html:root body.no-money #dashView .dgrid>.card.d-pay,html:root body.no-money #dashView .dgrid>.card.d-money,html:root body.no-tab_reports #dashView .dgrid>.card.d-rep,html:root body.no-tab_inventory #dashView .dgrid>.card.d-stock,html:root body.no-tab_inventory #dashView .dgrid>.card.d-exp,html:root body.no-tab_appointments #dashView .dgrid>.card.d-appts,html:root body.no-tab_appointments #dashView .dgrid>.card.d-cal{display:none!important}
 .hwrow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}.hwrow label{flex:1;display:flex;gap:10px;align-items:center;min-height:44px;cursor:pointer;font-weight:600}.hwrow input{width:20px;height:20px;flex:none}
 .hwrow.off label{color:var(--muted);font-weight:400}
 .hwmv{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:1.1rem;font-weight:700}.hwmv:disabled{opacity:.35}
@@ -1806,6 +1810,7 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="suplist" id="sup-list"></div>
   <div class="actions"><span></span><button type="button" class="btn" data-close>Close</button></div>
 </div></dialog>
+<div class="pvbar" id="pvBar" hidden><span id="pvTxt"></span><button type="button" id="pvExit">Exit preview</button></div>
 <dialog id="appshdlg"><div class="dlg">
   <h2>📲 Share the app</h2>
   <p class="muted small" style="margin:0">Send this to new staff. They open the link, sign in with the clinic code plus the username and password you made for them in <b>Staff access</b>, then tap "Add to Home Screen".</p>
@@ -4599,7 +4604,7 @@ const rl=(l,v,cls,sub)=>`<div class="rl${cls?" "+cls:""}"><span>${l}${sub?`<smal
 function barsHTML(bk){if(!bk.length)return "";const mx=Math.max(1,...bk.map(x=>Math.max(x.in,x.out)));const nar=window.innerWidth<620,step=bk.length>(nar?8:16)?Math.ceil(bk.length/(nar?6:10)):1;
   return `<div class="rbars">${bk.map(x=>`<div class="bk" title="${esc(x.l)}: in ${rs(x.in)}, out ${rs(x.out)}"><i class="a" style="height:${x.in/mx*100}%"></i><i class="b" style="height:${x.out/mx*100}%"></i></div>`).join("")}</div><div class="rblab">${bk.map((x,i)=>`<span>${i%step===0?esc(x.l):""}</span>`).join("")}</div><div class="rleg"><span><i style="background:var(--ok)"></i>Income received</span><span><i style="background:var(--bad);opacity:.75"></i>Expenses</span></div>`}
 /* ===== dentist shares (clinic owner only) ===== */
-function isClinicOwner(){try{const uid=firebase.auth().currentUser.uid;if(MEM&&MEM.owner===true)return true;if(CDOC&&CDOC.ownerUid===uid)return true;if((CLINIC==="alawan"||!CLINIC)&&isSuper())return true}catch(e){}return false}
+function isClinicOwner(){if(pvReal)return false;try{const uid=firebase.auth().currentUser.uid;if(MEM&&MEM.owner===true)return true;if(CDOC&&CDOC.ownerUid===uid)return true;if((CLINIC==="alawan"||!CLINIC)&&isSuper())return true}catch(e){}return false}
 const shCfg=()=>(SET&&SET.shares)||{};
 const canShares=()=>isClinicOwner()||(myRole()==="admin"&&shCfg().admins===true);
 function shDefault(n){n=String(n||"");if(CLINIC==="alawan"||!CLINIC){if(/faizan/i.test(n))return 100;if(/shazia/i.test(n))return 50;if(/wahaj/i.test(n))return 50;if(/abu\s*bak/i.test(n))return 30}return 50}
@@ -5063,7 +5068,7 @@ function applyAccess(){const role=myRole(),ps=myPerms(),b=document.body;b.classL
   if(TAB_OF[main]&&!ps.has(TAB_OF[main])){const first=["dashboard","patients","appointments","billing","lab","inventory"].find(t=>ps.has(TAB_OF[t]));if(first)main=first}
   const ab=$("acBtn");if(ab)ab.hidden=role!=="admin";if($("profBtn"))$("profBtn").hidden=role!=="admin";
   const rc=$("roleChip");if(rc){rc.textContent=roleName(roleOf(MEM||{role:"admin"}));rc.className="rolechip"+(role==="admin"?"":" staff");rc.hidden=false}
-  if($("consoleBtn"))$("consoleBtn").hidden=!(fsRoot&&isSuper());if($("pwBtn"))$("pwBtn").hidden=!fsRoot;
+  if($("consoleBtn"))$("consoleBtn").hidden=!(fsRoot&&isSuper())||!!pvReal;if($("pwBtn"))$("pwBtn").hidden=!fsRoot;
   try{renderHeader()}catch(e){}}
 const memCol=()=>fsRoot.collection("clinics").doc(CLINIC).collection("members");
 
@@ -5098,20 +5103,30 @@ function acCard(p,kind){const isNew=kind==="new",admin=p.role==="admin",me2=p.ui
   `<div class="ach"><input class="ac-n" value="${esc(p.name||"")}" maxlength="40" aria-label="Name"><input value="${esc(p.username||p.email||"")}" readonly aria-label="Username"><select class="ac-r" aria-label="Role" ${me2||p.owner?"disabled":""}>${ROLES.map(([k,n])=>`<option value="${k}"${k===roleOf(p)?" selected":""}>${n}</option>`).join("")}</select></div>
    <div class="acp">${p.owner?`<span class="rolechip">Clinic owner</span>`:""}${me2?`<span class="rolechip">You</span>`:""}${p.active===false?`<span class="offchip">LOGIN TURNED OFF</span>`:""}${!me2&&!p.owner?`<label style="margin-left:auto"><input type="checkbox" class="ac-a" ${p.active===false?"":"checked"}> Login allowed</label>`:""}</div>
    ${p.username&&!String(p.username).includes("@")||pwBook&&pwBook[p.uid]?`<div class="acpw">🔑 Password: ${pwBook===null?`<span class="muted">locked: publish the new Firebase rules to see passwords</span>`:pwBook[p.uid]?`<code class="pwv" data-pw="${esc(pwBook[p.uid].pw)}">••••••••</code><button type="button" class="btn small" data-pwshow>Show</button><button type="button" class="btn small" data-pwcopy>Copy</button>`:`<span class="muted">not known yet: shows after they next sign in, or set a new one</span>`}</div>`:""}
-   <div class="acp acx">${me2?`<button type="button" class="btn small" data-acmypw>🔑 Change my password</button>`:`<button type="button" class="btn small" data-acpw="${esc(p.uid)}">🔑 Set new password</button><button type="button" class="btn small" data-acsend="${esc(p.uid)}">📲 Send login details</button>${p.owner?"":`<button type="button" class="btn small danger-outline" data-acdel="${esc(p.uid)}">🗑 Delete login</button>`}`}</div>`}
+   <div class="acp acx">${me2?`<button type="button" class="btn small" data-acmypw>🔑 Change my password</button>`:`<button type="button" class="btn small" data-acpw="${esc(p.uid)}">🔑 Set new password</button><button type="button" class="btn small" data-acsend="${esc(p.uid)}">📲 Send login details</button><button type="button" class="btn small" data-acprev>👁 Preview</button>${p.owner?"":`<button type="button" class="btn small danger-outline" data-acdel="${esc(p.uid)}">🗑 Delete login</button>`}`}</div>`}
   <div class="acg"><div class="acp"><span>Quick set:</span>${Object.keys(PRESETS).map(k=>`<button type="button" class="btn small" data-preset="${esc(k)}">${esc(k)}</button>`).join("")}<button type="button" class="btn small" data-preset="__all">Everything</button><button type="button" class="btn small" data-preset="__none">Nothing</button></div>
    <p class="muted small" style="margin:4px 0 0">🔒 Monthly income, profit and Reports are only for Admin.</p>
    ${groups.map(g=>`<h4>${esc(g)}</h4><div class="chks">${PERMS.filter(x=>x.g===g&&!ADMIN_ONLY.includes(x.k)).map(x=>`<label><input type="checkbox" data-perm="${x.k}" ${ps.has(x.k)?"checked":""}> ${esc(x.n)}</label>`).join("")}</div>`).join("")}</div>
-  ${isNew?`<button type="button" class="btn small danger-outline" data-acrm style="align-self:flex-start">Cancel</button>`:""}</div>`}
+  ${isNew?`<div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn small" data-acprev>👁 Preview what they'll see</button><button type="button" class="btn small danger-outline" data-acrm>Cancel</button></div>`:""}</div>`}
 async function openAccess(){if(!fsRoot){toast("Staff logins are managed in the online app.");return}
   $("ac-list").innerHTML=`<div class="phload"><div class="spin"></div></div>`;$("ac-err").hidden=true;$("ac-note").innerHTML=`Staff sign in with clinic code <b>${esc(CLINIC)}</b>, their username and password. Tap <b>Set new password</b> on anyone's card to give them a new password (they keep the same username), or <b>Delete login</b> to remove them.`;openD(acdlg);
   await pwLoad();
   try{const sn=await memCol().get();acMembers=sn.docs.map(d=>({uid:d.id,...d.data()})).filter(m=>!m.deleted&&!m.replacedBy).sort((a,b)=>(b.role==="admin")-(a.role==="admin")||String(a.name||"").localeCompare(b.name||""));
     $("ac-list").innerHTML=acMembers.map(m=>acCard(m,"member")).join("")}catch(e){$("ac-list").innerHTML=`<p class="perr">Couldn't load logins. ${esc(authMsg(e))}</p>`}}
+
+/* ===== Preview the app as a staff member (admin only, nothing is saved) ===== */
+let pvReal=null,pvMain=null;
+function startPreview(card){if(myRole()!=="admin"||pvReal)return;const rv=card.querySelector(".ac-r").value,nm=(card.querySelector(".ac-n").value||"").trim()||"this person",perms=[...card.querySelectorAll("[data-perm]:checked")].map(i=>i.dataset.perm);
+  pvReal=MEM;pvMain=main;MEM={...MEM,role:rv==="admin"?"admin":"staff",title:rv==="admin"?"":rv,perms,owner:false};
+  acdlg.close();applyAccess();if(!TAB_OF[main]||myPerms().has(TAB_OF[main])){}else{const first=["dashboard","patients","appointments","billing","lab","inventory"].find(t=>myPerms().has(TAB_OF[t]));if(first)main=first}
+  document.body.classList.add("pv-on");$("pvTxt").innerHTML=`👁 Previewing as <b>${esc(nm)}</b> · ${esc(roleName(rv))}. This is what they'll see.`;$("pvBar").hidden=false;render();window.scrollTo(0,0);toast("Preview: tap Exit preview when done")}
+function endPreview(reopen){if(!pvReal)return;MEM=pvReal;pvReal=null;document.body.classList.remove("pv-on");$("pvBar").hidden=true;applyAccess();if(pvMain)main=pvMain;render();if(reopen)openAccess()}
+$("pvExit").addEventListener("click",()=>endPreview(true));
 $("acBtn").addEventListener("click",openAccess);
 $("ac-add").addEventListener("click",()=>{$("ac-list").insertAdjacentHTML("beforeend",acCard({role:"staff",perms:DEF_STAFF},"new"));const el=$("ac-list").lastElementChild;el.scrollIntoView({block:"nearest"});el.querySelector(".ac-n").focus()});
 $("ac-list").addEventListener("click",async e=>{const c=e.target.closest(".acc");if(!c)return;
   if(e.target.closest("[data-acmypw]")){$("pwBtn").click();return}
+  if(e.target.closest("[data-acprev]")){startPreview(c);return}
   const sd=e.target.closest("[data-acsend]");if(sd){const m=acMembers.find(x=>x.uid===sd.dataset.acsend);if(!m)return;const pw=pwBook&&pwBook[m.uid]&&pwBook[m.uid].pw;
     const txt=shareText(`
 3. Username: *${m.username}*
@@ -5554,7 +5569,7 @@ function openWorkspace(u,code,mem,seq){
   const legacy=code==="alawan";db={collection:n=>legacy?fsRoot.collection(n):fsRoot.collection("clinics").doc(code).collection(n)};
   me={by:mem.username||u.email,uid:u.uid};myName=mem.name||mem.username||u.email;
   document.body.classList.add("ws-on");hideGate();$("login").hidden=true;$("who").hidden=false;$("whoName").textContent=myName;canWrite=true;$("notice").hidden=true;
-  memUnsub=fsRoot.collection("clinics").doc(code).collection("members").doc(u.uid).onSnapshot(sn=>{if(seq!==authSeq)return;const d=sn.data();if(!d||d.active===false){firebase.auth().signOut();return}MEM=d;myName=d.name||d.username;renderMeChip();render()},()=>{});
+  memUnsub=fsRoot.collection("clinics").doc(code).collection("members").doc(u.uid).onSnapshot(sn=>{if(seq!==authSeq)return;const d=sn.data();if(!d||d.active===false){firebase.auth().signOut();return}if(pvReal){pvReal=d;return}MEM=d;myName=d.name||d.username;renderMeChip();render()},()=>{});
   if(roleCheck){roleCheck=false;setTimeout(()=>{if(wantRole==="admin"&&myRole()!=="admin")toast("This login has staff access. Signed in as staff.");else toast("Signed in to "+(CDOC.name||code))},600)}
   main="dashboard";actPopDone=false;actLast={};aoStart(u.uid,roleCheck);setTimeout(()=>lkOpen(u.uid),50);netUI();netCheckQueued();setTimeout(()=>{loadMyPhoto();try{alCheck()}catch(e){}},2500);startLogs();startClinic();
   unsub=db.collection("items").onSnapshot({includeMetadataChanges:false},snap=>{
@@ -6062,7 +6077,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v149";let updShown=false;
+const APP_BUILD="ds-v150";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
