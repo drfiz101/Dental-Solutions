@@ -1181,7 +1181,8 @@ input[type=date]{min-width:0;max-width:100%}
 .pedit{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 10px;font-size:.8rem;font-weight:700;color:var(--accent);margin-left:8px;min-height:32px}
 /* more sheet */
 .mehead{display:flex;gap:12px;align-items:center;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:14px}
-.mle{justify-content:space-between;cursor:default}.mle .mlh{display:flex;align-items:center;gap:14px;min-width:0}.mle .mlb{display:flex;gap:6px;flex:none}.mle .mlb button{width:36px;height:34px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-size:.85rem;color:var(--ink);cursor:pointer}.mle .mlb button:disabled{opacity:.3}
+.mle{justify-content:space-between;cursor:default;background:var(--surface)}.mlgrip{flex:none;width:44px;height:40px;display:grid;place-items:center;font-size:1.35rem;color:var(--muted);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:9px}.mlgrip:active{cursor:grabbing;background:var(--bg)}
+.mldragging{box-shadow:0 10px 30px rgba(0,0,0,.25);border-radius:10px;opacity:.97}.mlph{border:2px dashed color-mix(in srgb,var(--mod,var(--accent)) 50%,transparent);border-radius:10px;background:color-mix(in srgb,var(--mod,var(--accent)) 6%,transparent)}.mle .mlh{display:flex;align-items:center;gap:14px;min-width:0}.mle .mlb{display:flex;gap:6px;flex:none}.mle .mlb button{width:36px;height:34px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-size:.85rem;color:var(--ink);cursor:pointer}.mle .mlb button:disabled{opacity:.3}
 .mlact{display:flex;gap:6px;align-items:center;padding:10px 2px 2px}.mlre{color:var(--muted)!important;font-size:.92rem!important}
 .mli{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;padding:0 14px;border:0;border-bottom:1px solid var(--line);background:none;font-size:1rem;text-align:left;color:var(--ink)}
 .mli svg{width:22px;height:22px;flex:none}.mli.out{color:var(--bad);font-weight:700;border-bottom:0}
@@ -5693,16 +5694,34 @@ const k_last=k=>k==="signOut";
 let menuItems=[],menuEdit=false;
 const miIc=(c,ic)=>ic?`<svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>`:"";
 function renderMoreList(){const adm=myRole()==="admin";
-  if(menuEdit){$("moreList").innerHTML=`<p class="muted small" style="margin:4px 2px 8px">Use ▲ ▼ to move items. The new order is used on every phone in the clinic.</p>`+menuItems.map(([k,n,c,ic],i)=>k_last(k)?"":`<div class="mli mle"><span class="mlh">${miIc(c,ic)}<span>${esc(n)}</span></span><span class="mlb"><button type="button" data-mmv="${i}|-1" aria-label="Move up" ${i===0?"disabled":""}>▲</button><button type="button" data-mmv="${i}|1" aria-label="Move down" ${i>=menuItems.filter(x=>!k_last(x[0])).length-1?"disabled":""}>▼</button></span></div>`).join("")+
+  if(menuEdit){$("moreList").innerHTML=`<p class="muted small" style="margin:4px 2px 8px">Hold <b>⠿</b> and drag an item up or down. The new order is used on every phone in the clinic.</p><div class="mldrag" id="mlDrag">`+menuItems.map(([k,n,c,ic],i)=>k_last(k)?"":`<div class="mli mle" data-mk="${esc(k)}"><span class="mlh">${miIc(c,ic)}<span>${esc(n)}</span></span><span class="mlgrip noswipe" aria-label="Drag to move">⠿</span></div>`).join("")+`</div>`+
     `<div class="mlact"><button type="button" class="btn small" data-mreset>Reset to default</button><span style="flex:1"></span><button type="button" class="btn small" data-mcancel>Cancel</button><button type="button" class="btn small primary" data-msave>Save order</button></div>`;return}
   $("moreList").innerHTML=menuItems.map(([k,n,c,ic])=>`<button type="button" class="mli${k==="signOut"?" out":""}" data-mi="${k}">${miIc(c,ic)}<span>${esc(n)}</span></button>`).join("")+(adm?`<button type="button" class="mli mlre" data-medit>↕<span>Rearrange menu</span></button>`:"")}
+
+/* drag to reorder the menu (finger or mouse) */
+(()=>{let d=null;const box=()=>$("mlDrag");
+  $("moreList").addEventListener("pointerdown",e=>{const g=e.target.closest(".mlgrip");if(!g)return;const row=g.closest(".mle");if(!row)return;e.preventDefault();
+    const r=row.getBoundingClientRect();d={row,dy:e.clientY-r.top,ph:document.createElement("div"),scr:row.closest(".dlg")||$("moredlg")};
+    d.ph.className="mlph";d.ph.style.height=r.height+"px";row.parentNode.insertBefore(d.ph,row);
+    Object.assign(row.style,{position:"fixed",left:r.left+"px",top:r.top+"px",width:r.width+"px",zIndex:9999});row.classList.add("mldragging");
+    try{g.setPointerCapture(e.pointerId)}catch(x){}});
+  const move=e=>{if(!d)return;e.preventDefault();const y=e.clientY;d.row.style.top=(y-d.dy)+"px";
+    const sc=$("moredlg"),sr=sc.getBoundingClientRect();if(y<sr.top+60)sc.scrollTop-=10;else if(y>sr.bottom-60)sc.scrollTop+=10;
+    const rows=[...box().querySelectorAll(".mle:not(.mldragging)")];let placed=false;
+    for(const r of rows){const b=r.getBoundingClientRect();if(y<b.top+b.height/2){if(d.ph.nextSibling!==r)box().insertBefore(d.ph,r);placed=true;break}}
+    if(!placed&&box().lastElementChild!==d.ph)box().appendChild(d.ph)};
+  const end=()=>{if(!d)return;const {row,ph}=d;d=null;row.removeAttribute("style");row.classList.remove("mldragging");ph.replaceWith(row)};
+  $("moreList").addEventListener("pointermove",move);$("moreList").addEventListener("pointerup",end);$("moreList").addEventListener("pointercancel",end);
+  document.addEventListener("pointerup",end);})();
 $("moreBtn").addEventListener("click",openMore);$("menuBtn").addEventListener("click",openMore);$("meBtn").addEventListener("click",openMore);
 $("moreList").addEventListener("click",e=>{
   if(e.target.closest("[data-medit]")){menuEdit=true;renderMoreList();return}
+  if(e.target.closest(".mlgrip"))return;
   const mv=e.target.closest("[data-mmv]");if(mv){const [i,d]=mv.dataset.mmv.split("|").map(Number),j=i+d;if(j<0||j>=menuItems.length||k_last(menuItems[j][0]))return;[menuItems[i],menuItems[j]]=[menuItems[j],menuItems[i]];renderMoreList();return}
   if(e.target.closest("[data-mcancel]")){openMore();return}
   if(e.target.closest("[data-mreset]")){if(!confirm("Put the menu back in its original order?"))return;saveSet({...SET,menuOrder:[]});toast("Menu order reset");setTimeout(openMore,50);return}
-  if(e.target.closest("[data-msave]")){saveSet({...SET,menuOrder:menuItems.map(x=>x[0]).filter(k=>!k_last(k))});menuEdit=false;renderMoreList();toast("Menu order saved for everyone");return}
+  if(e.target.closest("[data-msave]")){const dom=[...document.querySelectorAll("#mlDrag [data-mk]")].map(x=>x.dataset.mk);if(dom.length){const by=Object.fromEntries(menuItems.map(x=>[x[0],x]));menuItems=[...dom.map(k=>by[k]).filter(Boolean),...menuItems.filter(x=>k_last(x[0]))]}
+    saveSet({...SET,menuOrder:menuItems.map(x=>x[0]).filter(k=>!k_last(k))});menuEdit=false;renderMoreList();toast("Menu order saved for everyone");return}
   const b=e.target.closest("[data-mi]");if(!b)return;const k=b.dataset.mi;$("moredlg").close();
   if(["lab","inventory","reports"].includes(k))return goMain(k);
   if(k==="prices")return openPrices();
@@ -5980,7 +5999,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v144";let updShown=false;
+const APP_BUILD="ds-v145";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
