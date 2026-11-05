@@ -312,6 +312,11 @@ body.spopen{overflow:hidden}
 @media (min-width:720px){.apm{min-height:96px}.apmnames{display:flex}}
 .pvbar{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:#1E293B;color:#fff;font-size:.88rem;box-shadow:0 -6px 20px rgba(0,0,0,.25)}.pvbar button{flex:none;border:0;border-radius:10px;padding:9px 14px;background:#FBBF24;color:#1E293B;font:inherit;font-weight:800;cursor:pointer}
 body.pv-on{padding-bottom:64px}body.pv-on .shell,body.pv-on main{outline:3px dashed #FBBF24;outline-offset:-3px}
+.dkt{font:inherit;text-align:left;cursor:pointer;border:0;width:100%;color:inherit;transition:transform .08s}.dkt:active{transform:scale(.97)}button.kpi.dkt{display:block}
+.dkbig{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.dkbig b{font-size:1.7rem;font-variant-numeric:tabular-nums}.dkbig b.neg{color:var(--bad)}.dkbig span{color:var(--muted);font-size:.85rem}
+.dkbody{max-height:58vh;overflow:auto;display:flex;flex-direction:column}.dkh{margin:12px 0 4px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.dkr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 2px;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;color:var(--ink);text-align:left;width:100%}button.dkr{cursor:pointer}button.dkr:hover{background:var(--bg)}
+.dkr b{display:block;font-weight:650}.dkr small{display:block;color:var(--muted);font-size:.76rem}.dkv{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 .acpw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.85rem;padding:6px 8px;border-radius:8px;background:var(--bg)}.acpw code{font-size:.95rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
 .mgbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mgbox small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mgbox span{font-size:.82rem;color:var(--muted)}
 .invbig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.invbig[hidden]{display:none}
@@ -761,10 +766,10 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 20%,var(--c-
 .acc.isadmin .acg{display:none}
 @media (max-width:620px){.acc .ach{grid-template-columns:1fr}}
 body.no-tab_dashboard .mainbtn[data-main="dashboard"],body.no-tab_patients .mainbtn[data-main="patients"],body.no-tab_appointments .mainbtn[data-main="appointments"],body.no-tab_billing .mainbtn[data-main="billing"],body.no-tab_lab .mainbtn[data-main="lab"],body.no-tab_inventory .mainbtn[data-main="inventory"],
-body.no-money #b-tiles .tile.mon,body.no-money #b-pdf,body.no-tab_reports [data-go="reports"],body.no-tab_reports #d-rep,body.no-money #d-rep,body.no-money .d-money,body.no-money .d-pay,body.no-money #d-kpis>*:nth-child(4),
+body.no-lab_money .lmoney,body.no-lab_money #lab-dues,body.no-lab_money #lab-bills,body.no-lab_money #lab-pdf,body.no-lab_money [data-lcpay],body.no-lab_money [data-imppaid],body.no-lab_money [data-imppayall],body.no-money #b-tiles .tile.mon,body.no-money #b-pdf,body.no-tab_reports [data-go="reports"],body.no-tab_reports #d-rep,body.no-money #d-rep,body.no-money .d-money,body.no-money .d-pay,body.no-money #d-kpis>*:nth-child(4),
 body.is-staff #ap-team,body.is-staff #ap-set,body.is-staff #b-prices,body.is-staff #lab-set,body.is-staff [data-exnew],
 body.no-pat_edit #patNew,body.no-pat_edit [data-pedit],body.no-pat_edit #ap-newpat,
-body.no-lab_pay [data-pimp],body.no-lab_pay #imp-new,body.no-pat_del [data-ndel],body.no-pat_del [data-pmerge],body.no-pat_del [data-pdelp],body.no-pat_del .xrx,body.no-pat_del #pt-del,
+body.no-lab_pay.no-lab_edit [data-pimp],body.no-lab_pay.no-lab_edit #imp-new,body.no-pat_del [data-ndel],body.no-pat_del [data-pmerge],body.no-pat_del [data-pdelp],body.no-pat_del .xrx,body.no-pat_del #pt-del,
 body.no-plan .tpcard,body.no-plan [data-tpadd],
 body.no-appt_edit #ap-new,body.no-appt_edit #ap-multi,body.no-appt_edit #ap-text,body.no-appt_edit #ap-photo,body.no-appt_edit [data-apedit],body.no-appt_edit [data-apres],body.no-appt_edit [data-free],body.no-appt_edit [data-newap],body.no-appt_edit [data-calnew],body.no-appt_edit [data-pbook],body.no-appt_edit [data-lcbook],
 body.no-appt_del #ap-del,
@@ -1307,7 +1312,7 @@ input[type=date]{min-width:0;max-width:100%}
       <div class="tiles t3" id="imp-tiles"></div>
       <div class="toolbar"><div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="imp-q" type="search" placeholder="Search patient or supplier" aria-label="Search implant entries"></div><div class="seg" id="imp-f"><button data-if="all">All</button><button data-if="pending">Not paid</button><button data-if="paid">Paid</button></div><button class="btn primary" id="imp-new">+ Add implant materials</button></div>
       <div class="card flush" id="imp-rows"></div>
-      <div class="card" id="imp-sups" style="margin-top:12px"></div>
+      <div class="card lmoney" id="imp-sups" style="margin-top:12px"></div>
     </div>
   </section>
   <section id="repView" class="view cview" hidden>
@@ -1713,8 +1718,8 @@ input[type=date]{min-width:0;max-width:100%}
     <div class="field"><label for="lc-st">Stage</label><select id="lc-st"></select></div>
     <div class="field"><label for="lc-sent">Sent to lab</label><input id="lc-sent" type="date"></div>
     <div class="field"><label for="lc-due">Due back</label><input id="lc-due" type="date"></div>
-    <div class="field"><label for="lc-cost">Lab charges (Rs)</label><input id="lc-cost" type="number" min="0" inputmode="numeric" placeholder="Optional"><span class="muted small" id="lc-costh"></span></div>
-    <div class="field"><label for="lc-paid">Lab payment</label><select id="lc-paid"><option value="pending">Pending</option><option value="paid">Paid</option></select></div>
+    <div class="field lmoney"><label for="lc-cost">Lab charges (Rs)</label><input id="lc-cost" type="number" min="0" inputmode="numeric" placeholder="Optional"><span class="muted small" id="lc-costh"></span></div>
+    <div class="field lmoney"><label for="lc-paid">Lab payment</label><select id="lc-paid"><option value="pending">Pending</option><option value="paid">Paid</option></select></div>
   </div>
   <div class="field"><label for="lc-note">Instructions / note</label><textarea id="lc-note" rows="2" maxlength="400" placeholder="e.g. Light occlusion, metal collar lingual only"></textarea></div>
   <div class="grid2"><div class="field"><label for="lc-photo">Photo or lab slip (optional)</label><input id="lc-photo" type="file" accept="image/*,application/pdf"></div><div class="field" id="lc-photowrap"></div></div>
@@ -1791,8 +1796,8 @@ input[type=date]{min-width:0;max-width:100%}
   </div>
   <div id="imp-items" class="impitems"></div>
   <div class="impadd"><span class="muted small">Add:</span><button type="button" class="btn small" data-impadd="Implant">+ Implant</button><button type="button" class="btn small" data-impadd="Bone">+ Bone</button><button type="button" class="btn small" data-impadd="Membrane">+ Membrane</button><button type="button" class="btn small" data-impadd="Others">+ Others</button></div>
-  <div class="grid2"><div class="field"><label for="imp-paid">Payment to supplier</label><select id="imp-paid"><option value="paid">Paid</option><option value="pending">Not paid yet</option></select></div><div class="field"><label for="imp-note">Note</label><input id="imp-note" maxlength="120" placeholder="Optional, e.g. tooth 36, GBR"></div></div>
-  <div class="imptot"><span>Total to supplier</span><b id="imp-total">Rs 0</b></div>
+  <div class="grid2"><div class="field lmoney"><label for="imp-paid">Payment to supplier</label><select id="imp-paid"><option value="paid">Paid</option><option value="pending">Not paid yet</option></select></div><div class="field"><label for="imp-note">Note</label><input id="imp-note" maxlength="120" placeholder="Optional, e.g. tooth 36, GBR"></div></div>
+  <div class="imptot lmoney"><span>Total to supplier</span><b id="imp-total">Rs 0</b></div>
   <p class="perr" id="imp-err" hidden></p>
   <div class="actions"><button type="button" class="btn danger-outline" id="imp-del">Delete</button><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save</button></div></div>
 </form></dialog>
@@ -1811,6 +1816,12 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="actions"><span></span><button type="button" class="btn" data-close>Close</button></div>
 </div></dialog>
 <div class="pvbar" id="pvBar" hidden><span id="pvTxt"></span><button type="button" id="pvExit">Exit preview</button></div>
+<dialog id="dkdlg" class="wide"><div class="dlg">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 id="dk-t" style="margin:0"></h2><button type="button" class="btn small" data-close>Close</button></div>
+  <div class="dkbig" id="dk-sum"></div>
+  <div id="dk-body" class="dkbody"></div>
+  <div class="actions" id="dk-act"></div>
+</div></dialog>
 <dialog id="appshdlg"><div class="dlg">
   <h2>📲 Share the app</h2>
   <p class="muted small" style="margin:0">Send this to new staff. They open the link, sign in with the clinic code plus the username and password you made for them in <b>Staff access</b>, then tap "Add to Home Screen".</p>
@@ -3747,7 +3758,7 @@ function renderDash(){$("d-rep").innerHTML=dashRepCard();try{renderSimpleHome()}
   const day=Object.entries(A).filter(([,a])=>a.date===today&&a.status!=="cancelled").map(([id,a])=>({id,...a})).sort((a,b)=>a.time.localeCompare(b.time));
   const cnt=s=>day.filter(a=>(a.status||"booked")===s).length;
   let colT=0;for(const b of Object.values(B))for(const p of b.payments||[])if(p.date===today)colT+=+p.amount||0;
-  $("d-kpis").innerHTML=[["Appointments",day.length,""],["Waiting / in chair",cnt("arrived")+cnt("inchair"),"warn"],["Done",cnt("done"),"ok"],["Collected",rs(colT),"acc"]].map(([l,v,c])=>`<div class="kpi ${c}"><b>${v}</b><span>${l}</span></div>`).join("");
+  $("d-kpis").innerHTML=[["Appointments",day.length,"","appts"],["Waiting / in chair",cnt("arrived")+cnt("inchair"),"warn","wait"],["Done",cnt("done"),"ok","done"],["Collected",rs(colT),"acc","coll"]].map(([l,v,c,k])=>`<button type="button" class="kpi dkt ${c}" data-dk="${k}"><b>${v}</b><span>${l}</span></button>`).join("");
   const nextA=day.find(a=>["booked","confirmed","arrived"].includes(a.status||"booked")&&toMin(a.time)+(+a.dur||30)>nowM);
   if(day.length){$("d-appts").innerHTML=day.map(a=>{const st=AST[a.status||"booked"]||AST.booked,nx=nextA&&a.id===nextA.id;return `<button class="drow${nx?" next":""}" data-goday="${today}"><span class="dt">${esc(fmtTime(a.time))}</span><span class="dn"><b>${esc(a.patientName)}</b><small>${esc(apTr(a))}${a.dentist?" · "+esc(a.dentist):""}</small></span><span class="dch">Chair ${esc(a.chair)}</span><span class="chip2 ${nx?"acc":st[1]}">${nx?"Next":st[0]}</span></button>`}).join("")}
   else{const nd=nextOpen(isOpen(today)?tom:addDays(today,1)),nn=Object.values(A).filter(a=>a.date===nd&&a.status!=="cancelled").length;
@@ -4917,12 +4928,50 @@ $("rp-pdf").addEventListener("click",async()=>{const b=$("rp-pdf"),old=b.textCon
   try{const blob=await htmlPdfBlob(repInner()),name=repFile();
     if(!window.claude&&navigator.canShare&&/Android|iPhone|iPad/i.test(navigator.userAgent)){const file=new File([blob],name,{type:"application/pdf"});if(navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"Clinic report"});return}catch(e){if(e&&e.name==="AbortError")return}}}
     await propSave(blob,name)}catch(e){if(!(e&&(e.code==="cancelled"||e.code==="declined")))toast("Couldn't make the PDF. Check the internet connection and try again.")}finally{b.disabled=false;b.textContent=old}});
+
+/* ===== Home: tap any box to see what's inside it ===== */
+function dkRow(l,r,sub,attr){return `<${attr?"button type=\"button\"":"div"} class="dkr" ${attr||""}><span><b>${l}</b>${sub?`<small>${sub}</small>`:""}</span><span class="dkv">${r}</span></${attr?"button":"div"}>`}
+function dkSec(h,rows){return rows.length?`<h4 class="dkh">${h}</h4>`+rows.join(""):""}
+function openDk(k){const today=ymd(new Date()),[f,t]=rpRange("month",today),mn=monthLabel(thisMonth());let T="",sum="",body="",act="";
+  const dayAp=Object.entries(A).filter(([,a])=>a.date===today&&a.status!=="cancelled").map(([id,a])=>({id,...a})).sort((a,b)=>a.time.localeCompare(b.time));
+  const apRows=L=>L.map(a=>{const S2=AST[a.status||"booked"]||AST.booked;return dkRow(`${esc(fmtTime(a.time))} · ${esc(a.patientName||"")}`,`<span class="chip2 ${S2[1]}">${S2[0]}</span>`,`${esc(a.treatment||"")}${a.dentist?" · "+esc(a.dentist):""} · Chair ${esc(a.chair)}`,`data-dkap="${esc(a.id)}"`)});
+  if(k==="appts"||k==="wait"||k==="done"){const L=k==="appts"?dayAp:k==="wait"?dayAp.filter(a=>["arrived","inchair"].includes(a.status)):dayAp.filter(a=>a.status==="done");
+    T={appts:"📅 Today's appointments",wait:"🪑 Waiting / in chair",done:"✅ Done today"}[k];sum=`<b>${L.length}</b><span>${k==="appts"?`Chair 1: ${L.filter(a=>String(a.chair)==="1").length} · Chair 2: ${L.filter(a=>String(a.chair)==="2").length}`:"today"}</span>`;
+    body=L.length?apRows(L).join(""):`<p class="muted">Nobody here right now.</p>`;act=`<span></span><button type="button" class="btn primary" data-dkgo="appointments">Open appointments ›</button>`}
+  else{const r=repData("month",f,t),d=repData("day",today,today);
+    if(k==="coll"||k==="inc"){const P=k==="coll"?d.pays:r.pays;T=k==="coll"?"💰 Collected today":"💰 Income · "+mn;const tot=P.reduce((a,x)=>a+x.amount,0);
+      const bm={};for(const x of P)bm[x.method]=(bm[x.method]||0)+x.amount;
+      sum=`<b>${rs(tot)}</b><span>${pl(P.length,"payment")}${k==="inc"?" · today "+rs(d.income):""}</span>`;
+      body=dkSec("By payment method",Object.entries(bm).sort((a,b)=>b[1]-a[1]).map(([m,v])=>dkRow(esc(m),rs(v))))+
+        (k==="inc"?dkSec("By dentist",Object.entries(P.reduce((m,x)=>{const b=Object.values(B).find(y=>y.no===x.no);const dn=b?billDentist(b)||"Not assigned":"Not assigned";m[dn]=(m[dn]||0)+x.amount;return m},{})).sort((a,b)=>b[1]-a[1]).map(([n,v])=>dkRow(esc(n),rs(v)))):"")+
+        dkSec(k==="coll"?"Payments":"All payments",[...P].sort((a,b)=>b.date.localeCompare(a.date)).map(x=>dkRow(esc(x.patient||"Patient"),rs(x.amount),`${k==="inc"?esc(fmtDate(x.date))+" · ":""}${esc(x.no||"")} · ${esc(x.method)}`)));
+      if(!P.length)body=`<p class="muted">No payments yet.</p>`;act=`<span></span><button type="button" class="btn primary" data-dkgo="billing">Open billing ›</button>`}
+    else if(k==="exp"){T="🧾 Expenses · "+mn;sum=`<b>${rs(r.expenses)}</b><span>materials, lab, implants &amp; running costs</span>`;
+      const byCat={};for(const e of r.ex)byCat[e.cat||"Other"]=(byCat[e.cat||"Other"]||0)+(+e.amount||0);
+      body=dkSec("Summary",[dkRow("Materials &amp; supplies",rs(r.mat),`${pl(r.buys.length,"purchase")}${r.matPend?` · <span class="pend">${rs(r.matPend)} unpaid</span>`:""}`),dkRow("Lab work",rs(r.lab),`${pl(r.cases.length,"case")}${r.labPend?` · <span class="pend">${rs(r.labPend)} unpaid</span>`:""}`),...(r.imp?[dkRow("Implant materials",rs(r.imp),pl(r.imps.length,"case"))]:[]),dkRow("Other expenses",rs(r.other),pl(r.ex.length,"entry"))])+
+        dkSec("Other expenses by category",Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>dkRow(esc(c),rs(v))))+
+        dkSec("Biggest purchases",[...r.buys].sort((a,b)=>(+b.total||0)-(+a.total||0)).slice(0,8).map(l=>dkRow(esc(l.name||"Item"),rs(l.total),`${esc(fmtDate(l.date))}${l.supplier?" · "+esc(l.supplier):""}`)));
+      act=`<span></span><button type="button" class="btn primary" data-dkgo="reports">Full report ›</button>`}
+    else if(k==="prof"){T=(r.profit<0?"📉 Loss":"📈 Profit")+" · "+mn;sum=`<b class="${r.profit<0?"neg":""}">${r.profit<0?"− ":""}${rs(Math.abs(r.profit))}</b><span>income minus expenses</span>`;
+      body=dkSec("How it's worked out",[dkRow("Income received",rs(r.income),pl(r.pays.length,"payment")),dkRow("− Materials",rs(r.mat)),dkRow("− Lab work",rs(r.lab)),...(r.imp?[dkRow("− Implant materials",rs(r.imp))]:[]),dkRow("− Other expenses",rs(r.other)),dkRow(`<b>= ${r.profit<0?"Loss":"Profit"}</b>`,`<b>${rs(Math.abs(r.profit))}</b>`)])+
+        dkSec("Treatment billed this month",[dkRow("Bills made",String(r.nBills)),dkRow("Total billed",rs(r.billed),r.disc?rs(r.disc)+" discount given":""),dkRow("Not yet collected",rs(Math.max(0,r.billed-r.income)),"billed but not paid yet")]);
+      act=`<span></span><button type="button" class="btn primary" data-dkgo="reports">Full report ›</button>`}
+    else if(k==="owe"){T="💳 Money owed";sum=`<b>${rs(r.duesTot)}</b><span>${pl(r.dues.length,"patient")} ${r.dues.length===1?"owes":"owe"} the clinic</span>`;
+      body=dkSec("Patients who owe",r.dues.slice(0,30).map(x=>dkRow(esc(x.name||"Patient"),rs(x.bal),esc(x.phone||""),`data-dkpat="${esc(x.id)}"`)))+
+        dkSec("The clinic owes",[dkRow("Suppliers",rs(r.supPend),"stock bills not paid",`data-dkpay="1"`),dkRow("Labs",rs(r.labPendAll)),dkRow("Other expenses",rs(r.exPendAll))]);
+      act=`<span></span><button type="button" class="btn primary" data-dkgo="billing">Unpaid bills ›</button>`}}
+  $("dk-t").textContent=T;$("dk-sum").innerHTML=sum;$("dk-body").innerHTML=body;$("dk-act").innerHTML=act;openD($("dkdlg"))}
+document.addEventListener("click",e=>{const t=e.target.closest("[data-dk]");if(t&&t.closest("#dashView")){openDk(t.dataset.dk)}});
+$("dkdlg").addEventListener("click",e=>{const g=e.target.closest("[data-dkgo]");if(g){$("dkdlg").close();if(g.dataset.dkgo==="billing")billF="due";goMain(g.dataset.dkgo);return}
+  const a=e.target.closest("[data-dkap]");if(a){$("dkdlg").close();openAp(a.dataset.dkap);return}
+  const p=e.target.closest("[data-dkpat]");if(p){$("dkdlg").close();main="patients";selPat=p.dataset.dkpat;render();window.scrollTo(0,0);return}
+  if(e.target.closest("[data-dkpay]")){$("dkdlg").close();view="pay";goMain("inventory")}});
 function dashRepCard(){const [f,t]=rpRange("month",ymd(new Date())),r=repData("month",f,t),[df]=rpRange("day",ymd(new Date())),d=repData("day",df,df);
   return `<div class="dh"><h3>This month · ${esc(rpLabel("month",f,t))}</h3><button class="linkbtn" data-go="reports">Reports ›</button></div><div class="rkpis">
-  <div class="rkpi in"><small>Income</small><b>${rs(r.income)}</b><span>Today ${rs(d.income)}</span></div>
-  <div class="rkpi ex"><small>Expenses</small><b>${rs(r.expenses)}</b><span>Materials ${rs(r.mat)} · Lab ${rs(r.lab)}</span></div>
-  <div class="rkpi pr${r.profit<0?" neg":""}"><small>${r.profit<0?"Loss":"Profit"}</small><b>${rs(Math.abs(r.profit))}</b><span>${pl(r.nBills,"bill")} · ${rs(r.billed)} billed</span></div>
-  <div class="rkpi"><small>Patients owe</small><b>${rs(r.duesTot)}</b><span>${pl(r.dues.length,"patient")} · you owe ${rs(r.supPend+r.labPendAll+r.exPendAll)}</span></div></div>`}
+  <button type="button" class="rkpi dkt in" data-dk="inc"><small>Income</small><b>${rs(r.income)}</b><span>Today ${rs(d.income)}</span></button>
+  <button type="button" class="rkpi dkt ex" data-dk="exp"><small>Expenses</small><b>${rs(r.expenses)}</b><span>Materials ${rs(r.mat)} · Lab ${rs(r.lab)}</span></button>
+  <button type="button" class="rkpi dkt pr${r.profit<0?" neg":""}" data-dk="prof"><small>${r.profit<0?"Loss":"Profit"}</small><b>${rs(Math.abs(r.profit))}</b><span>${pl(r.nBills,"bill")} · ${rs(r.billed)} billed</span></button>
+  <button type="button" class="rkpi dkt" data-dk="owe"><small>Patients owe</small><b>${rs(r.duesTot)}</b><span>${pl(r.dues.length,"patient")} · you owe ${rs(r.supPend+r.labPendAll+r.exPendAll)}</span></button></div>`}
 
 
 /* ================= STATEMENTS (paid / pending PDFs) ================= */
@@ -5042,7 +5091,7 @@ const PERMS=[
  {k:"money",g:"Money",n:"See income & profit on the dashboard"},{k:"bill_edit",g:"Money",n:"Make bills & take payments"},{k:"bill_del",g:"Money",n:"Edit or delete bills & payments"},{k:"lab_pay",g:"Money",n:"Lab payments & lab bills"},{k:"pdf",g:"Money",n:"Statements, proposals & report PDFs"},
  {k:"pat_edit",g:"Patients",n:"Add & edit patients"},{k:"pat_del",g:"Patients",n:"Delete patients, notes & X-rays"},{k:"plan",g:"Patients",n:"Treatment plans & proposals"},
  {k:"appt_edit",g:"Appointments",n:"Book, move & update appointments"},{k:"appt_del",g:"Appointments",n:"Delete appointments"},
- {k:"lab_edit",g:"Lab & stock",n:"Add & update lab cases"},{k:"inv_count",g:"Lab & stock",n:"Change stock counts"},{k:"inv_buy",g:"Lab & stock",n:"Record purchases & vendor bills"},{k:"inv_edit",g:"Lab & stock",n:"Add, edit & hide stock items"}];
+ {k:"lab_edit",g:"Lab & stock",n:"Add & update lab cases"},{k:"lab_money",g:"Lab & stock",n:"See lab & implant costs and payments"},{k:"inv_count",g:"Lab & stock",n:"Change stock counts"},{k:"inv_buy",g:"Lab & stock",n:"Record purchases & vendor bills"},{k:"inv_edit",g:"Lab & stock",n:"Add, edit & hide stock items"}];
 const ADMIN_ONLY=["money","tab_reports"];
 const ROLES=[["admin","Admin"],["dentist","Dentist"],["receptionist","Receptionist"],["staff","Staff"]];
 const roleOf=p=>p&&p.role==="admin"?"admin":(p&&["dentist","receptionist","staff"].includes(p.title)?p.title:"staff");
@@ -5054,7 +5103,7 @@ const PRESETS={
  "Dentist":["tab_dashboard","tab_patients","tab_appointments","tab_billing","tab_lab","bill_edit","pdf","pat_edit","plan","appt_edit","lab_edit","inv_count"]};
 const DEF_STAFF=["tab_dashboard","tab_patients","tab_appointments","tab_lab","tab_inventory","pat_edit","plan","appt_edit","lab_edit","inv_count"];
 function myRole(){if(!MEM)return "admin";return MEM.role==="admin"?"admin":"staff"}
-function myPerms(){if(myRole()==="admin")return new Set(PERMS.map(p=>p.k));const s=new Set(Array.isArray(MEM.perms)?MEM.perms:DEF_STAFF);for(const k of ADMIN_ONLY)s.delete(k);return s}
+function myPerms(){if(myRole()==="admin")return new Set(PERMS.map(p=>p.k));const s=new Set(Array.isArray(MEM.perms)?MEM.perms:DEF_STAFF);for(const k of ADMIN_ONLY)s.delete(k);if(s.has("lab_pay"))s.add("lab_money");return s}
 const can=k=>myPerms().has(k);
 const TAB_OF={dashboard:"tab_dashboard",patients:"tab_patients",appointments:"tab_appointments",billing:"tab_billing",lab:"tab_lab",inventory:"tab_inventory",reports:"tab_reports"};
 function initialsLogo(name){const ini=String(name||"Clinic").split(/\s+/).filter(w=>/^[A-Za-z]/.test(w)&&!/^(dental|clinic|the|and|of|&)$/i.test(w)).slice(0,2).map(w=>w[0].toUpperCase()).join("")||"DC";
@@ -5140,7 +5189,8 @@ $("ac-list").addEventListener("click",async e=>{const c=e.target.closest(".acc")
   const pw=e.target.closest("[data-acpw]");if(pw){const m=acMembers.find(x=>x.uid===pw.dataset.acpw);if(m)await adminSetPassword(m,c);return}
   if(e.target.closest("[data-acrm]")){c.remove();return}
   const pr=e.target.closest("[data-preset]");if(pr){const k=pr.dataset.preset,set=new Set(k==="__all"?PERMS.map(x=>x.k):k==="__none"?[]:PRESETS[k]);for(const i of c.querySelectorAll("[data-perm]"))i.checked=set.has(i.dataset.perm)}});
-$("ac-list").addEventListener("change",e=>{const r=e.target.closest(".ac-r");if(!r)return;const c=r.closest(".acc");c.classList.toggle("isadmin",r.value==="admin");
+$("ac-list").addEventListener("change",e=>{const pm=e.target.closest("[data-perm]");if(pm){const c=pm.closest(".acc"),q=k=>c.querySelector(`[data-perm=${k}]`);if(pm.dataset.perm==="lab_pay"&&pm.checked&&q("lab_money"))q("lab_money").checked=true;if(pm.dataset.perm==="lab_money"&&!pm.checked&&q("lab_pay"))q("lab_pay").checked=false;return}
+  const r=e.target.closest(".ac-r");if(!r)return;const c=r.closest(".acc");c.classList.toggle("isadmin",r.value==="admin");
   const pk={dentist:"Dentist",receptionist:"Receptionist",staff:"Staff"}[r.value];if(pk){const set=new Set(PRESETS[pk]);for(const i of c.querySelectorAll("[data-perm]"))i.checked=set.has(i.dataset.perm)}});
 $("acForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("ac-err"),sb=$("acForm").querySelector("button[type=submit]");err.hidden=true;sb.disabled=true;sb.textContent="Saving…";
   try{for(const c of $("ac-list").querySelectorAll(".acc")){const perms=[...c.querySelectorAll("[data-perm]:checked")].map(i=>i.dataset.perm),rv=c.querySelector(".ac-r").value,role=rv==="admin"?"admin":"staff",title=rv==="admin"?"":rv,name=c.querySelector(".ac-n").value.trim();
@@ -5352,18 +5402,18 @@ function renderImp(){
   {const h=lv.querySelector(".vhead h2"),p=lv.querySelector(".vhead p");if(h)h.textContent=labMode==="imp"?"Implant suppliers":"Lab work";if(p)p.textContent=labMode==="imp"?"Implants, bone, membranes and other materials you pay implant suppliers for.":"Every case sent to your labs, from impression to fitting."}
   if(labMode!=="imp")return;
   const all=impList(),mk=thisMonth(),inM=all.filter(c=>(c.date||"").startsWith(mk)),pend=all.filter(c=>c.paid===false);
-  $("imp-tiles").innerHTML=`<div class="tile big"><small>Spent in ${esc(monthLabel(mk).split(" ")[0])}</small><b>${rs(inM.reduce((a,c)=>a+impTot(c),0))}</b><span>${pl(inM.length,"case")}</span></div><div class="tile"><small>Not paid yet</small><b>${rs(pend.reduce((a,c)=>a+impTot(c),0))}</b><span>${pl(pend.length,"case")}</span></div><div class="tile"><small>Implants this month</small><b>${inM.reduce((a,c)=>a+(c.items||[]).filter(i=>i.type==="Implant").reduce((x,i)=>x+(+i.qty||1),0),0)}</b><span>placed</span></div>`;
+  $("imp-tiles").innerHTML=(can("lab_money")?"":`<div class="tile big"><small>Cases in ${esc(monthLabel(mk).split(" ")[0])}</small><b>${inM.length}</b><span>implant, bone &amp; membrane</span></div>`)+`<div class="tile big lmoney"><small>Spent in ${esc(monthLabel(mk).split(" ")[0])}</small><b>${rs(inM.reduce((a,c)=>a+impTot(c),0))}</b><span>${pl(inM.length,"case")}</span></div><div class="tile lmoney"><small>Not paid yet</small><b>${rs(pend.reduce((a,c)=>a+impTot(c),0))}</b><span>${pl(pend.length,"case")}</span></div><div class="tile"><small>Implants this month</small><b>${inM.reduce((a,c)=>a+(c.items||[]).filter(i=>i.type==="Implant").reduce((x,i)=>x+(+i.qty||1),0),0)}</b><span>placed</span></div>`;
   for(const b of document.querySelectorAll("[data-if]"))b.setAttribute("aria-pressed",String(b.dataset.if===impF));
   const q=$("imp-q").value.trim().toLowerCase();
   let list=all.filter(c=>impF==="all"||(impF==="pending"?c.paid===false:c.paid!==false));
   if(q)list=list.filter(c=>((c.patientName||"")+" "+(c.supplier||"")+" "+(c.note||"")).toLowerCase().includes(q));
   $("imp-rows").innerHTML=list.length?list.map(c=>{const ch=IMP_T.map(t=>{const its=(c.items||[]).filter(i=>i.type===t);if(!its.length)return "";const n=its.reduce((a,i)=>a+(+i.qty||1),0);return `<span class="ichip ${t}">${t}${n>1?" ×"+n:""}${its[0].desc?" · "+esc(its.map(i=>i.desc).filter(Boolean).join(", ")):""}</span>`}).join("");
-    return `<div class="imprw" data-impedit="${esc(c.id)}"><div class="ip1"><b>${esc(c.patientName||"Patient")}</b><small>${esc(fmtDate(c.date))}${c.supplier?" · "+esc(c.supplier):""}${c.dentist?" · "+esc(c.dentist):""}${c.note?" · "+esc(c.note):""}</small></div><div class="ip2">${rs(impTot(c))}</div><div class="ip3">${ch}${c.paid===false?`<span class="chip2 warn">Not paid</span>${can("lab_pay")?`<button type="button" class="btn small primary" data-imppaid="${esc(c.id)}">Mark paid</button>`:""}`:`<span class="chip2 ok">Paid</span>`}</div></div>`}).join(""):`<div class="empty">${all.length?"Nothing matches.":"No implant materials yet.<br>Tap <b>+ Add implant materials</b> after an implant, GBR or bone graft."}</div>`;
+    return `<div class="imprw" data-impedit="${esc(c.id)}"><div class="ip1"><b>${esc(c.patientName||"Patient")}</b><small>${esc(fmtDate(c.date))}${c.supplier?" · "+esc(c.supplier):""}${c.dentist?" · "+esc(c.dentist):""}${c.note?" · "+esc(c.note):""}</small></div><div class="ip2 lmoney">${rs(impTot(c))}</div><div class="ip3">${ch}${c.paid===false?`<span class="chip2 warn lmoney">Not paid</span>${can("lab_pay")?`<button type="button" class="btn small primary" data-imppaid="${esc(c.id)}">Mark paid</button>`:""}`:`<span class="chip2 ok lmoney">Paid</span>`}</div></div>`}).join(""):`<div class="empty">${all.length?"Nothing matches.":"No implant materials yet.<br>Tap <b>+ Add implant materials</b> after an implant, GBR or bone graft."}</div>`;
   const by={};for(const c of all){const k=c.supplier||"Supplier not set";by[k]=by[k]||{tot:0,pend:0,n:0,m:0};by[k].tot+=impTot(c);by[k].n++;if(c.paid===false)by[k].pend+=impTot(c);if((c.date||"").startsWith(mk))by[k].m+=impTot(c)}
   const ks=Object.keys(by).sort((a,b)=>by[b].pend-by[a].pend||by[b].tot-by[a].tot);
   $("imp-sups").innerHTML=`<h3>Implant suppliers</h3>`+(ks.length?ks.map(k=>`<div class="kv"><span>${esc(k)}<br><small class="muted">${rs(by[k].m)} this month · ${pl(by[k].n,"case")} in all</small></span><span style="text-align:right">${by[k].pend?`<b class="duetxt">${rs(by[k].pend)} to pay</b><br>${can("lab_pay")?`<button type="button" class="btn small" data-imppayall="${esc(k)}">Mark all paid</button>`:""}`:`<span class="chip2 ok">Settled ✓</span>`}</span></div>`).join(""):`<p class="muted small" style="margin:0">Suppliers appear here once you add implant materials.</p>`);
 }
-function impItemsHTML(){return impRows.map((r,i)=>`<div class="impit" data-ii="${i}"><div class="ity"><label>Type</label><select data-ik="type">${IMP_T.map(t=>`<option${t===r.type?" selected":""}>${t}</option>`).join("")}</select></div><div class="ids"><label>Details</label><input data-ik="desc" value="${esc(r.desc||"")}" maxlength="60" placeholder="${r.type==="Implant"?"Brand & size, e.g. Osstem 4.0×10":r.type==="Bone"?"e.g. Bio-Oss 0.5 g":r.type==="Membrane"?"e.g. Bio-Gide 25×25":"e.g. healing cap, screw"}"></div><div class="iq"><label>Qty</label><input data-ik="qty" type="number" min="1" inputmode="numeric" value="${esc(r.qty||1)}"></div><div class="ip"><label>Price (Rs)</label><input data-ik="price" type="number" min="0" inputmode="numeric" value="${esc(r.price||"")}"></div><button type="button" class="impx" data-irm="${i}" aria-label="Remove">×</button></div>`).join("")}
+function impItemsHTML(){return impRows.map((r,i)=>`<div class="impit" data-ii="${i}"><div class="ity"><label>Type</label><select data-ik="type">${IMP_T.map(t=>`<option${t===r.type?" selected":""}>${t}</option>`).join("")}</select></div><div class="ids"><label>Details</label><input data-ik="desc" value="${esc(r.desc||"")}" maxlength="60" placeholder="${r.type==="Implant"?"Brand & size, e.g. Osstem 4.0×10":r.type==="Bone"?"e.g. Bio-Oss 0.5 g":r.type==="Membrane"?"e.g. Bio-Gide 25×25":"e.g. healing cap, screw"}"></div><div class="iq"><label>Qty</label><input data-ik="qty" type="number" min="1" inputmode="numeric" value="${esc(r.qty||1)}"></div><div class="ip lmoney"><label>Price (Rs)</label><input data-ik="price" type="number" min="0" inputmode="numeric" value="${esc(r.price||"")}"></div><button type="button" class="impx" data-irm="${i}" aria-label="Remove">×</button></div>`).join("")}
 function impSum(){$("imp-total").textContent=rs(impRows.reduce((a,r)=>a+(+r.qty||1)*(+r.price||0),0))}
 function lastImpPrice(type,desc){const d=String(desc||"").trim().toLowerCase();for(const c of impList())for(const i of c.items||[])if(i.type===type&&(!d||String(i.desc||"").trim().toLowerCase()===d)&&+i.price)return +i.price;return ""}
 function openImp(id,pre){if(!can("lab_pay")&&!can("lab_edit"))return toast("You don't have access to this.");impEdit=id||null;const c=id?LC[id]:{date:ymd(new Date()),paid:false,...(pre||{})};
@@ -5395,7 +5445,7 @@ function renderLab(){try{renderImp()}catch(e){console.error(e)}
   const today=ymd(new Date()),all=lcList(),open=all.filter(c=>c.status!=="fitted");
   const late=open.filter(lcLate),ready=all.filter(c=>c.status==="back"),atLab=all.filter(c=>["sent","trial","remake"].includes(c.status||"sent"));
   const dueAll=all.filter(c=>c.paid===false&&+c.cost);
-  $("lab-tiles").innerHTML=`<div class="tile big"><small>At the lab</small><b>${atLab.length}</b><span>${pl(late.length,"case")} late</span></div><div class="tile"><small>Ready to fit</small><b>${ready.length}</b><span>back from lab</span></div><div class="tile"><small>Fitted this month</small><b>${all.filter(c=>c.status==="fitted"&&(c.fittedOn||"").startsWith(thisMonth())).length}</b><span>${esc(monthLabel(thisMonth()))}</span></div><div class="tile${dueAll.length?" warnt":""}"><small>Owed to labs</small><b>${rs(dueAll.reduce((s,c)=>s+(+c.cost||0),0))}</b><span>${pl(dueAll.length,"unpaid case")}</span></div>`;
+  $("lab-tiles").innerHTML=`<div class="tile big"><small>At the lab</small><b>${atLab.length}</b><span>${pl(late.length,"case")} late</span></div><div class="tile"><small>Ready to fit</small><b>${ready.length}</b><span>back from lab</span></div><div class="tile"><small>Fitted this month</small><b>${all.filter(c=>c.status==="fitted"&&(c.fittedOn||"").startsWith(thisMonth())).length}</b><span>${esc(monthLabel(thisMonth()))}</span></div><div class="tile lmoney${dueAll.length?" warnt":""}"><small>Owed to labs</small><b>${rs(dueAll.reduce((s,c)=>s+(+c.cost||0),0))}</b><span>${pl(dueAll.length,"unpaid case")}</span></div>`;
   for(const x of document.querySelectorAll("[data-lf]"))x.setAttribute("aria-pressed",String(x.dataset.lf===labF));
   $("lab-labs").innerHTML=[{name:""},...labs()].map(l=>{const n=all.filter(c=>(!l.name||c.lab===l.name)&&c.status!=="fitted").length;return `<button class="chip" data-llab="${esc(l.name)}" aria-pressed="${labLab===l.name}">${esc(l.name||"All labs")} <span class="n">${n}</span></button>`}).join("");
   const q=$("lab-q").value.trim().toLowerCase();
@@ -5405,7 +5455,7 @@ function renderLab(){try{renderImp()}catch(e){console.error(e)}
   list.sort((a,b)=>(lcLate(b)-lcLate(a))||((a.due||"9")>(b.due||"9")?1:-1));
   $("lab-rows").innerHTML=list.length?list.map(c=>{const st=LST[c.status||"sent"]||LST.sent,lt=lcLate(c),l=labs().find(x=>x.name===c.lab),dd=c.due?daysTo(c.due):null;
     return `<div class="lcrow${lt?" late":""}"><div class="lcm"><button class="linkbtn strong" data-gopat="${esc(c.patientId)}">${esc(c.patientName)}</button><span class="sub2"><b>${esc(c.work||"Lab work")}</b>${c.teeth?" · teeth "+esc(c.teeth):""}${shadeText(c)?" · shade "+esc(shadeText(c)):""}</span><span class="sub2">${esc(c.lab||"")}${c.dentist?" · "+esc(c.dentist):""}</span></div>
-      <div class="lcd"><span>Sent ${c.sent?esc(fmtDate(c.sent)):"—"}</span><span class="${lt?"late":""}">${c.status==="fitted"?"Fitted "+esc(fmtDate(c.fittedOn||c.due||"")):c.due?(lt?`${-dd} day${dd===-1?"":"s"} late`:dd===0?"Due today":"Due "+esc(fmtDate(c.due))):"No due date"}</span>${+c.cost?`<span class="${c.paid===false?"duetxt":""}">Lab ${rs(c.cost)} · ${c.paid===false?"pending":"paid"}</span>`:""}</div>
+      <div class="lcd"><span>Sent ${c.sent?esc(fmtDate(c.sent)):"—"}</span><span class="${lt?"late":""}">${c.status==="fitted"?"Fitted "+esc(fmtDate(c.fittedOn||c.due||"")):c.due?(lt?`${-dd} day${dd===-1?"":"s"} late`:dd===0?"Due today":"Due "+esc(fmtDate(c.due))):"No due date"}</span>${+c.cost?`<span class="lmoney ${c.paid===false?"duetxt":""}">Lab ${rs(c.cost)} · ${c.paid===false?"pending":"paid"}</span>`:""}</div>
       <div class="lca"><select class="stsel lst-${c.status||"sent"}" data-lcst="${esc(c.id)}" aria-label="Stage">${Object.entries(LST).map(([k,v])=>`<option value="${k}"${k===(c.status||"sent")?" selected":""}>${v[0]}</option>`).join("")}</select>
         ${l&&waNum(l.phone)?`<a class="wa sm" href="${esc(waHref(l.phone,lcMsg(c)))}" target="_blank" rel="noopener">${WA_IC}<span>Lab</span></a>`:""}
         ${c.status==="back"||c.status==="trial"?`<button class="btn small primary" data-lcbook="${esc(c.id)}">Book ${c.status==="trial"?"trial":"fitting"}</button>`:""}
@@ -6077,7 +6127,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* tell the user when a newer version is published */
-const APP_BUILD="ds-v150";let updShown=false;
+const APP_BUILD="ds-v152";let updShown=false;
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
   if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
     const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
