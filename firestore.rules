@@ -61,6 +61,15 @@ service cloud.firestore {
       }
     }
 
+    // ---------- App usage (who opened the app, when). No patient or money data. ----------
+    // Each person writes only their own daily line; only the Dental Solutions owner can read it.
+    match /usage/{id} {
+      allow read, delete: if isOwner();
+      allow create, update: if isMember(request.resource.data.code)
+        && request.resource.data.uid == request.auth.uid
+        && id == request.resource.data.code + "_" + request.auth.uid + "_" + request.resource.data.date;
+    }
+
     // ---------- Username -> current login (used when an admin sets a new password) ----------
     match /logins/{id} {
       allow get: if true;

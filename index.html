@@ -317,6 +317,15 @@ body.pv-on{padding-bottom:64px}body.pv-on .shell,body.pv-on main{outline:3px das
 .dkbody{max-height:58vh;overflow:auto;display:flex;flex-direction:column}.dkh{margin:12px 0 4px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .dkr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 2px;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;color:var(--ink);text-align:left;width:100%}button.dkr{cursor:pointer}button.dkr:hover{background:var(--bg)}
 .dkr b{display:block;font-weight:650}.dkr small{display:block;color:var(--muted);font-size:.76rem}.dkv{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.uleg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.75rem;color:var(--muted)}.uleg span{display:inline-flex;align-items:center;gap:5px}
+.udot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none}.udot.now{background:#16A34A;box-shadow:0 0 0 3px rgba(22,163,74,.2)}.udot.today{background:#22C55E}.udot.week{background:#F59E0B}.udot.old{background:#EF4444}.udot.never{background:#CBD5E1}
+.useg{align-self:flex-start}.uacts>.upr{justify-content:flex-start;align-items:center}.upr>span{flex:1;min-width:0}.upr>span b{display:block;font-weight:600}.upr>span small{white-space:normal}.upr .upt{flex:none;text-align:right}.usum{display:grid;grid-template-columns:1fr 1fr;gap:6px}.usum>div{background:var(--bg);border-radius:10px;padding:8px 10px}.usum b{display:block;font-size:1.25rem}.usum small{display:block;color:var(--muted);font-size:.74rem}
+.ulist{display:flex;flex-direction:column;gap:6px;max-height:62vh;overflow:auto}.usr{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:0 12px}
+.usr summary{display:flex;align-items:center;gap:10px;padding:11px 0;cursor:pointer;list-style:none}.usr summary::-webkit-details-marker{display:none}
+.usr .un{flex:1;min-width:0}.usr .un b,.usr .ul b{display:block}.usr small{display:block;color:var(--muted);font-size:.74rem}.usr .ul{text-align:right}.usr .ul b{font-size:.86rem}
+.ug{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.ug>div{background:var(--bg);border-radius:9px;padding:7px 8px}.ug b{display:block;font-size:.95rem}
+@media (max-width:560px){.ug{grid-template-columns:1fr 1fr}}
+.uacts{margin:8px 0 12px;border-top:1px solid var(--line)}.uacts>div{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.82rem}.uacts small{white-space:nowrap}
 .acpw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.85rem;padding:6px 8px;border-radius:8px;background:var(--bg)}.acpw code{font-size:.95rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
 .mgbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mgbox small{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.mgbox span{font-size:.82rem;color:var(--muted)}
 .invbig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.invbig[hidden]{display:none}
@@ -1822,6 +1831,14 @@ input[type=date]{min-width:0;max-width:100%}
   <div id="dk-body" class="dkbody"></div>
   <div class="actions" id="dk-act"></div>
 </div></dialog>
+<dialog id="usedlg" class="wide"><div class="dlg">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="margin:0">👥 Who's using the app</h2><button type="button" class="btn small" data-close>Close</button></div>
+  <div class="seg useg" id="use-seg" hidden><button type="button" data-useg="me" aria-pressed="true">This clinic</button><button type="button" data-useg="all" aria-pressed="false">🌐 All clinics</button></div>
+  <div class="usum" id="use-sum" hidden></div>
+  <p class="muted small" style="margin:0" id="use-note"></p>
+  <div class="uleg"><span><i class="udot now"></i>Using now</span><span><i class="udot today"></i>Today</span><span><i class="udot week"></i>This week</span><span><i class="udot old"></i>Not recently</span><span><i class="udot never"></i>Never</span></div>
+  <div id="use-list" class="ulist"></div>
+</div></dialog>
 <dialog id="appshdlg"><div class="dlg">
   <h2>📲 Share the app</h2>
   <p class="muted small" style="margin:0">Send this to new staff. They open the link, sign in with the clinic code plus the username and password you made for them in <b>Staff access</b>, then tap "Add to Home Screen".</p>
@@ -1943,7 +1960,7 @@ input[type=date]{min-width:0;max-width:100%}
 <dialog id="cndlg" class="wide"><div class="dlg">
   <h2>Dental Solutions · Owner console</h2>
   <p class="muted small" style="margin:0">Approve, lock and manage clinics. You can't see any clinic's patients or money from here.</p>
-  <div class="cnbar"><div class="seg" id="cn-f"><button data-cf="pending" aria-pressed="true">Waiting</button><button data-cf="active">Active</button><button data-cf="locked">Locked</button><button data-cf="archived">Archived</button><button data-cf="all">All</button></div><button class="btn small primary" id="cn-new">+ Create clinic</button></div>
+  <div class="cnbar"><div class="seg" id="cn-f"><button data-cf="pending" aria-pressed="true">Waiting</button><button data-cf="active">Active</button><button data-cf="locked">Locked</button><button data-cf="archived">Archived</button><button data-cf="all">All</button></div><button class="btn small" id="cn-use">👥 Who's using</button><button class="btn small primary" id="cn-new">+ Create clinic</button></div>
   <div id="cn-done" class="cndone" hidden></div>
   <div id="cn-list" class="cnlist"></div>
   <form id="cnForm" class="cnform" novalidate hidden>
@@ -5163,6 +5180,52 @@ async function openAccess(){if(!fsRoot){toast("Staff logins are managed in the o
   try{const sn=await memCol().get();acMembers=sn.docs.map(d=>({uid:d.id,...d.data()})).filter(m=>!m.deleted&&!m.replacedBy).sort((a,b)=>(b.role==="admin")-(a.role==="admin")||String(a.name||"").localeCompare(b.name||""));
     $("ac-list").innerHTML=acMembers.map(m=>acCard(m,"member")).join("")}catch(e){$("ac-list").innerHTML=`<p class="perr">Couldn't load logins. ${esc(authMsg(e))}</p>`}}
 
+
+/* ===== Who is using the app (clinic owner only) ===== */
+function seenPing(open){try{if(!db||!MEM||pvReal)return;const u=firebase.auth().currentUser;if(!u)return;const d=ymd(new Date()),now=new Date().toISOString(),fk="ds-seen1-"+u.uid+"-"+d,first=lsGet(fk)!=="1";
+  const dev=/iPhone|iPad/i.test(navigator.userAgent)?"iPhone":/Android/i.test(navigator.userAgent)?"Android":/Mac/i.test(navigator.userAgent)?"Mac":/Windows/i.test(navigator.userAgent)?"Windows PC":"Browser";
+  const doc={kind:"seen",date:d,uid:u.uid,who:myName||"",user:MEM.username||"",role:roleOf(MEM),last:now,dev,ver:APP_BUILD};if(first){doc.first=now;lsSet(fk,"1")}
+  if(open){const FV=firebase.firestore.FieldValue;doc.opens=FV&&FV.increment?FV.increment(1):1}db.collection("logs").doc(`seen_${u.uid}_${d}`).set(doc,{merge:true}).catch(()=>{});
+  if(fsRoot&&CLINIC){const ud={...doc,code:CLINIC,clinic:(CDOC&&CDOC.name)||CLINIC};delete ud.kind;fsRoot.collection("usage").doc(`${CLINIC}_${u.uid}_${d}`).set(ud,{merge:true}).catch(()=>{})}}catch(e){}}
+setInterval(()=>{if(document.visibilityState==="visible")seenPing(false)},10*60000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")seenPing(true)});
+const canSeeUse=()=>!pvReal&&(isClinicOwner()||(myRole()==="admin"&&!(CDOC&&CDOC.ownerUid)));
+function agoTxt(iso){if(!iso)return "never";const m=(Date.now()-new Date(iso).getTime())/60000;if(m<15)return "using now";if(m<60)return Math.round(m)+" min ago";const h=m/60;if(h<24&&ymd(new Date(iso))===ymd(new Date()))return "today "+fmtTime(new Date(iso).toTimeString().slice(0,5));if(h<48)return "yesterday";return Math.round(h/24)+" days ago"}
+async function openUse(){if(!canSeeUse()&&!(isSuper()&&!pvReal))return;$("use-seg").hidden=!(fsRoot&&isSuper());$("use-sum").hidden=true;$("use-sum").innerHTML="";for(const b of document.querySelectorAll("[data-useg]"))b.setAttribute("aria-pressed",String(b.dataset.useg==="me"));if(!canSeeUse()){openD($("usedlg"));return openUseAll()}const box=$("use-list");box.innerHTML=`<p class="muted">Loading…</p>`;openD($("usedlg"));
+  let mem=[];try{const sn=await memCol().get();mem=sn.docs.map(d=>({uid:d.id,...d.data()})).filter(m=>m.active!==false&&!m.replacedBy&&m.uid!==(firebase.auth().currentUser||{}).uid)}catch(e){}
+  const seen=Object.values(logs).filter(l=>l.kind==="seen"),acts=actList(),d7=ymd(new Date(Date.now()-6*864e5)),d30=ymd(new Date(Date.now()-29*864e5)),today=ymd(new Date());
+  const keyOf=x=>x.uid||"";const byUid={};for(const m of mem)byUid[m.uid]=m;
+  const made=[];for(const [id,b] of Object.entries(B))if(b.createdAt&&b.uid)made.push({uid:b.uid,at:b.createdAt,text:`Bill ${b.no||""} · ${b.patientName||""}`,cat:"bill"});
+  for(const [id,a] of Object.entries(A))if(a.createdAt&&a.uid)made.push({uid:a.uid,at:a.createdAt,text:`Booked ${a.patientName||""} · ${fmtDate(a.date)} ${fmtTime(a.time||"")}`,cat:"appt"});
+  const rows=mem.map(m=>{const sv=seen.filter(x=>x.uid===m.uid),last=sv.map(x=>x.last).sort().pop()||"",days7=new Set(sv.filter(x=>x.date>=d7).map(x=>x.date)).size,days30=new Set(sv.filter(x=>x.date>=d30).map(x=>x.date)).size,opT=(sv.find(x=>x.date===today)||{}).opens||0,dev=[...new Set(sv.map(x=>x.dev).filter(Boolean))].join(", ");
+    const my=[...acts.filter(a=>a.uid===m.uid||(!a.uid&&a.who&&a.who===(m.name||m.username))),...made.filter(x=>x.uid===m.uid)].sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+    const lastAct=my[0]&&my[0].at||"",lastAny=[last,lastAct].sort().pop()||"",a7=my.filter(x=>String(x.at).slice(0,10)>=d7).length;
+    return {m,last,lastAny,days7,days30,opT,dev,my,a7}}).sort((a,b)=>String(b.lastAny).localeCompare(String(a.lastAny)));
+  const dot=r=>{if(!r.lastAny)return ["never","Never used"];const m=(Date.now()-new Date(r.lastAny).getTime())/60000;return m<15?["now","Using now"]:ymd(new Date(r.lastAny))===today?["today","Used today"]:m<7*1440?["week","This week"]:["old","Not recently"]};
+  box.innerHTML=rows.length?rows.map((r,i)=>{const [c,lbl]=dot(r);return `<details class="usr"${i===0?"":""}><summary><span class="udot ${c}" title="${lbl}"></span><span class="un"><b>${esc(r.m.name||r.m.username)}</b><small>${esc(roleName(roleOf(r.m)))} · @${esc(r.m.username||"")}</small></span><span class="ul"><b>${esc(r.lastAny?agoTxt(r.lastAny):"never")}</b><small>${lbl}</small></span></summary>
+    <div class="ug"><div><small>Opened app</small><b>${r.last?esc(agoTxt(r.last)):"—"}</b></div><div><small>Days used (7 / 30)</small><b>${r.days7} / ${r.days30}</b></div><div><small>Opened today</small><b>${r.opT}×</b></div><div><small>Actions (7 days)</small><b>${r.a7}</b></div></div>
+    ${r.dev?`<p class="muted small" style="margin:6px 0 0">📱 ${esc(r.dev)}</p>`:""}
+    ${r.my.length?`<div class="uacts">${r.my.slice(0,12).map(a=>`<div><span>${esc(a.text)}</span><small>${esc(agoTxt(a.at))}</small></div>`).join("")}</div>`:`<p class="muted small">No saved work yet.</p>`}</details>`}).join(""):`<p class="muted">No staff logins yet. Add people in Staff access, then share the app link.</p>`;
+  $("use-note").textContent=`${rows.filter(r=>r.lastAny&&ymd(new Date(r.lastAny))===today).length} of ${rows.length} people used the app today. "Opened app" is recorded from today onwards; saved work goes back further.`}
+/* ===== Dental Solutions owner: usage across all clinics (no patient or money data) ===== */
+async function openUseAll(){if(!fsRoot||!isSuper())return;const box=$("use-list"),sum=$("use-sum");box.innerHTML=`<div class="phload"><div class="spin"></div></div>`;$("use-note").textContent="";sum.hidden=true;
+  for(const b of document.querySelectorAll("[data-useg]"))b.setAttribute("aria-pressed",String(b.dataset.useg==="all"));
+  const today=ymd(new Date()),d7=ymd(new Date(Date.now()-6*864e5)),d30=ymd(new Date(Date.now()-29*864e5));let cl=[],us=[];
+  try{cl=(await fsRoot.collection("clinics").get()).docs.map(d=>({id:d.id,...d.data()})).filter(c=>c.status==="active"||c.status==="locked")}catch(e){box.innerHTML=`<p class="perr">Couldn't load clinics. ${esc(authMsg(e))}</p>`;return}
+  try{us=(await fsRoot.collection("usage").where("date",">=",d30).get()).docs.map(d=>d.data())}catch(e){us=[];$("use-note").innerHTML=`<span class="perr" style="display:inline">Usage needs the new Firebase rules. Publish them, then open this again.</span>`}
+  const mems={};await Promise.all(cl.map(async c=>{try{mems[c.id]=(await fsRoot.collection("clinics").doc(c.id).collection("members").get()).docs.map(d=>({uid:d.id,...d.data()})).filter(m=>m.active!==false&&!m.replacedBy)}catch(e){mems[c.id]=[]}}));
+  const dotOf=t=>{if(!t)return ["never","Never used"];const m=(Date.now()-new Date(t).getTime())/60000;return m<15?["now","Using now"]:ymd(new Date(t))===today?["today","Used today"]:m<7*1440?["week","This week"]:["old","Not recently"]};
+  const rows=cl.map(c=>{const u=us.filter(x=>x.code===c.id),ppl=(mems[c.id]||[]).map(m=>{const sv=u.filter(x=>x.uid===m.uid),last=sv.map(x=>x.last||"").sort().pop()||"";
+      return {m,last,d7:new Set(sv.filter(x=>x.date>=d7).map(x=>x.date)).size,d30:new Set(sv.map(x=>x.date)).size,opT:(sv.find(x=>x.date===today)||{}).opens||0,dev:[...new Set(sv.map(x=>x.dev).filter(Boolean))].join(", ")}}).sort((a,b)=>String(b.last).localeCompare(String(a.last)));
+    const last=ppl.map(p=>p.last).sort().pop()||"";return {c,ppl,last,tod:ppl.filter(p=>p.last&&ymd(new Date(p.last))===today).length,wk:ppl.filter(p=>p.d7).length,days30:new Set(u.map(x=>x.date)).size,opens7:u.filter(x=>x.date>=d7).reduce((s2,x)=>s2+(+x.opens||0),0)}}).sort((a,b)=>String(b.last).localeCompare(String(a.last))||String(a.c.name||a.c.id).localeCompare(b.c.name||b.c.id));
+  const tp=rows.reduce((s2,r)=>s2+r.ppl.length,0),tt=rows.reduce((s2,r)=>s2+r.tod,0),tw=rows.reduce((s2,r)=>s2+r.wk,0),ct=rows.filter(r=>r.tod).length,cw=rows.filter(r=>r.wk).length;
+  sum.innerHTML=`<div><small>Clinics</small><b>${rows.length}</b><small>${ct} used today · ${cw} this week</small></div><div><small>People</small><b>${tp}</b><small>${tt} today · ${tw} this week</small></div>`;sum.hidden=false;
+  if(!$("use-note").innerHTML)$("use-note").textContent="Every clinic on Dental Solutions. Only logins and app opens are shown, never patients or money. Counting started on 6 Nov 2026.";
+  box.innerHTML=rows.length?rows.map(r=>{const [k,lbl]=dotOf(r.last);return `<details class="usr"><summary><span class="udot ${k}" title="${lbl}"></span><span class="un"><b>${esc(r.c.name||r.c.id)}</b><small>${esc(r.c.city||"")}${r.c.city?" · ":""}code ${esc(r.c.id)} · ${r.tod} of ${r.ppl.length} today${r.c.status==="locked"?" · 🔒 locked":""}</small></span><span class="ul"><b>${esc(r.last?agoTxt(r.last):"never")}</b><small>${lbl}</small></span></summary>
+    <div class="ug"><div><small>People used (7 days)</small><b>${r.wk} / ${r.ppl.length}</b></div><div><small>Days active (30)</small><b>${r.days30}</b></div><div><small>App opens (7 days)</small><b>${r.opens7}</b></div><div><small>Admin</small><b style="font-size:.8rem">${esc(r.c.ownerName||"—")}</b></div></div>
+    <div class="uacts">${r.ppl.length?r.ppl.map(p=>{const [k2]=dotOf(p.last);return `<div class="upr"><i class="udot ${k2}"></i><span><b>${esc(p.m.name||p.m.username||"")}</b><small>${esc(roleName(roleOf(p.m)))} · ${p.d7}/7 days${p.opT?` · ${p.opT}× today`:""}${p.dev?" · "+esc(p.dev):""}</small></span><small class="upt">${esc(p.last?agoTxt(p.last):"never")}</small></div>`}).join(""):`<div><span class="muted">No logins yet</span></div>`}</div></details>`}).join(""):`<p class="muted">No active clinics yet.</p>`}
+$("cn-use").addEventListener("click",()=>{$("use-seg").hidden=false;$("use-sum").innerHTML="";openD($("usedlg"));openUseAll()});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-useg]");if(!b)return;if(b.dataset.useg==="all")openUseAll();else if(canSeeUse())openUse();else openUseAll()});
 /* ===== Preview the app as a staff member (admin only, nothing is saved) ===== */
 let pvReal=null,pvMain=null;
 function startPreview(card){if(myRole()!=="admin"||pvReal)return;const rv=card.querySelector(".ac-r").value,nm=(card.querySelector(".ac-n").value||"").trim()||"this person",perms=[...card.querySelectorAll("[data-perm]:checked")].map(i=>i.dataset.perm);
@@ -5615,7 +5678,7 @@ async function enterClinic(u,seq){
 function openWorkspace(u,code,mem,seq){
   if(lsGet("ds-lockfix1")!=="1"){lsSet("ds-lockfix1","1");lsSet("ds-locked-"+u.uid,null)}
   if(false){const st=lsGet("ds-ao"),lim=(st!==null&&st!==""&&+st>=0?+st:AO_DEF)*60000,last=+lsGet("ds-last-"+u.uid)||0;if(lim&&last&&Date.now()-last>=lim)lsSet("ds-locked-"+u.uid,"1")}
-  CLINIC=code;MEM=mem;useClinicDefaults(code,CDOC);setTimeout(pwFlush,1500);
+  CLINIC=code;MEM=mem;useClinicDefaults(code,CDOC);setTimeout(pwFlush,1500);setTimeout(()=>seenPing(true),4000);
   const legacy=code==="alawan";db={collection:n=>legacy?fsRoot.collection(n):fsRoot.collection("clinics").doc(code).collection(n)};
   me={by:mem.username||u.email,uid:u.uid};myName=mem.name||mem.username||u.email;
   document.body.classList.add("ws-on");hideGate();$("login").hidden=true;$("who").hidden=false;$("whoName").textContent=myName;canWrite=true;$("notice").hidden=true;
@@ -5795,6 +5858,7 @@ function openMore(){const b=document.body,vis=id=>{const x=$(id);return x&&!x.hi
     !b.classList.contains("is-staff")&&["online","🌐 Online booking (Instagram / Facebook)","#C13584",'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'],
     !b.classList.contains("is-staff")&&["prices","Treatment prices","#AD620B",'<path d="M4 7h16M4 12h16M4 17h10"/>'],
     vis("profBtn")&&["profBtn","Clinic profile & WhatsApp messages"],vis("acBtn")&&["acBtn","Staff access"],vis("consoleBtn")&&["consoleBtn","Owner console"],
+    canSeeUse()&&["use","👥 Who's using the app","#2563EB",'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.7.8 2.7 2.5 3 5.2"/>'],
     ["share","📲 Share app link with staff","#16A34A",'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>'],
     vis("installBtn")&&["installBtn","Install app on this phone"],["myPhoto","My photo"],["alBtn","Alerts & sounds"],["lookBtn","Appearance & layout"],["help","❓ Help & how to use"],vis("pwBtn")&&["pwBtn","Change password"],isSimple()?["classic","Switch to classic layout"]:["simple","Switch to simple layout"],["lock","🔒 Lock app"],["signOut","Sign out"]].filter(Boolean);
   $("moreWho").innerHTML=`${myPhoto?`<img class="avimg" src="${myPhoto}" alt="">`:`<span class="av">${esc(initials(myName||""))}</span>`}<div><b>${esc(myName||"")}</b><div class="muted small">${esc((myRole()==="admin"?"Admin":"Staff")+" · "+((CDOC&&CDOC.name)||S().clinic.name||""))}</div></div>`;
@@ -5842,6 +5906,7 @@ $("moreList").addEventListener("click",e=>{
   if(k==="online")return openOnline();
   if(k==="help")return openHelp();
   if(k==="share")return openShareApp();
+  if(k==="use")return openUse();
   if(k==="lock")return lockApp();
   if(k==="shares")return openShares();
   if(k==="myPhoto")return pickMyPhoto();
@@ -6126,12 +6191,23 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   const v=inp.value.trim(),list=supList();if(v&&!list.some(x=>x.toLowerCase()===v.toLowerCase()))list.push(v);
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
-/* tell the user when a newer version is published */
-const APP_BUILD="ds-v152";let updShown=false;
+/* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
+const APP_BUILD="ds-v154";let updShown=false,updTarget="",updTimer=null;
+function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
+async function updApply(){if(!updTarget)return;
+  if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
+  try{if(fsRoot&&fsRoot.waitForPendingWrites)await Promise.race([fsRoot.waitForPendingWrites(),new Promise(r=>setTimeout(r,4000))])}catch(e){}
+  try{if(sessionStorage.getItem("ds-upd")===updTarget){updShown=false;updTarget="";return}}catch(e){}
+  try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}
+  let ok=false;try{const r=await fetch("./index.html",{cache:"reload"});const t=await r.text();ok=t.includes('"'+updTarget+'"');await fetch("./",{cache:"reload"}).catch(()=>{})}catch(e){}
+  if(!ok){updShown=false;updTarget="";return}
+  try{sessionStorage.setItem("ds-upd",updTarget)}catch(e){}lsSet("ds-updated",updTarget);
+  location.reload()}
 async function updCheck(){if(updShown||location.protocol==="file:")return;try{const r=await fetch("sw.js?t="+Date.now(),{cache:"no-store"});const t=await r.text();const m=t.match(/CACHE\s*=\s*"([^"]+)"/);
-  if(m&&m[1]!==APP_BUILD){updShown=true;try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}
-    const b=document.createElement("button");b.type="button";b.className="updbar";b.innerHTML="✨ New version of the app is ready · <b>Tap to update</b>";b.onclick=async()=>{b.textContent="Updating…";try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}location.reload()};document.body.appendChild(b)}}catch(e){}}
-setTimeout(updCheck,4000);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")updCheck()});
+  if(m&&m[1]!==APP_BUILD){updShown=true;updTarget=m[1];try{const rg=await navigator.serviceWorker.getRegistration();if(rg)rg.update()}catch(e){}updApply()}}catch(e){}}
+setTimeout(()=>{try{const u=lsGet("ds-updated");if(u&&u===APP_BUILD){lsSet("ds-updated","");toast("✨ App updated to the latest version")}}catch(e){}},2500);
+setTimeout(updCheck,4000);setInterval(()=>{if(document.visibilityState==="visible")updCheck()},5*60000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")updCheck();else if(updTarget)updApply()});
 </script>
 </body>
 </html>
