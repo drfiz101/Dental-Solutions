@@ -538,11 +538,13 @@ b.due{color:var(--warn)}
 .qbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 9px;font-size:.75rem;color:var(--muted)}
 .qbtn:hover{border-color:var(--bad);color:var(--bad)}
 .lines{display:flex;flex-direction:column;gap:6px}
-.lhead,.line{display:grid;grid-template-columns:minmax(0,1fr) 60px 52px 92px 28px;gap:6px;align-items:center}
+.lhead,.line{display:grid;grid-template-columns:minmax(0,1fr) 60px 52px 92px 30px 28px;gap:6px;align-items:center}
 .lhead{font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
 .line input{padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);width:100%;min-width:0;color:inherit}
 .line.pr{grid-template-columns:minmax(0,1fr) 110px 28px}
-@media (max-width:520px){.lhead{display:none}.line:not(.pr){grid-template-columns:1fr 1fr 1.4fr 28px;grid-template-areas:"t t t t" "th q p x";padding-bottom:8px;border-bottom:1px solid var(--line)}.line:not(.pr) .l-t{grid-area:t}.line:not(.pr) .thw{grid-area:th}.line:not(.pr) .l-q{grid-area:q}.line:not(.pr) .l-p{grid-area:p}.line:not(.pr) .ldel{grid-area:x}}
+@media (max-width:520px){.lhead{display:none}.line:not(.pr){grid-template-columns:1fr 1fr 1.4fr 28px;grid-template-areas:"t t t t" "th q p x";padding-bottom:8px;border-bottom:1px solid var(--line)}.line:not(.pr) .l-t{grid-area:t}.line:not(.pr) .thw{grid-area:th}.line:not(.pr) .l-q{grid-area:q}.line:not(.pr) .l-p{grid-area:p}.line:not(.pr) .ldel{grid-area:x}.line:not(.pr){grid-template-columns:1fr 1fr 1.4fr 30px;grid-template-areas:"t t t e" "th q p x"}.line:not(.pr) .leye{grid-row:1;grid-column:4;justify-self:end}}
+.leye{width:30px;height:32px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);display:grid;place-items:center;padding:0}.leye svg{width:17px;height:17px}.leye .ec{display:none}.lhid .leye{background:#FDECEA;border-color:#F3B8B0;color:#A4231B}.lhid .leye .eo{display:none}.lhid .leye .ec{display:inline}.lhid .l-t,.lhid .l-p{text-decoration:line-through;color:var(--muted)}
+.bvhid{opacity:.55}.bvhid span>s{text-decoration:line-through}.bveye{border:0;background:none;color:var(--muted);padding:2px 6px;vertical-align:middle;cursor:pointer}.bveye svg{width:16px;height:16px;vertical-align:-3px}.bveye .ec{display:none}.bvhid .bveye{color:#A4231B}.bvhid .bveye .eo{display:none}.bvhid .bveye .ec{display:inline}.hidnote{background:#FDECEA;color:#A4231B;border-radius:8px;padding:6px 10px;font-size:.8rem;margin:6px 0}
 .totbox{background:var(--idle-soft);border-radius:10px;padding:6px 12px}
 .bvh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .h3s{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:6px 0 0}
@@ -652,7 +654,7 @@ header.top>*{position:relative;z-index:1}
 .thw input{flex:1;min-width:0}
 .thbtn{flex:none;width:32px;border:1px solid var(--mod);border-radius:8px;background:var(--mod-soft);color:var(--mod);display:grid;place-items:center;padding:0;min-height:34px}
 .thbtn svg{width:17px;height:17px}
-.lhead:not(.tmh),.line:not(.pr):not(.tm){grid-template-columns:minmax(0,1fr) 120px 52px 92px 28px}
+.lhead:not(.tmh),.line:not(.pr):not(.tm){grid-template-columns:minmax(0,1fr) 120px 52px 92px 32px 28px}
 .tooth.pick{background:var(--mod);border-color:var(--mod);color:var(--on-mod)}
 .jaw.child .teeth{grid-template-columns:repeat(10,minmax(0,1fr));max-width:420px;margin:0 auto;width:100%}
 .jaw.child .tooth:nth-child(8){margin-right:0}.jaw.child .tooth:nth-child(5){margin-right:3px}
@@ -667,7 +669,7 @@ header.top>*{position:relative;z-index:1}
 .thist h4{margin:0 0 4px;font-size:.85rem}
 .txsum{margin-top:12px;font-size:.84rem;display:flex;flex-wrap:wrap;gap:4px 12px}
 .txsum b{color:var(--c-pat)}
-@media (max-width:520px){.line:not(.pr):not(.tm){grid-template-columns:1.5fr .6fr 1fr 28px;grid-template-areas:"t t t t" "th q p x"}.line:not(.pr):not(.tm) .thw{grid-area:th}}
+@media (max-width:520px){.line:not(.pr):not(.tm){grid-template-columns:1.5fr .6fr 1fr 32px;grid-template-areas:"t t t e" "th q p x"}.line:not(.pr):not(.tm) .leye{grid-area:e;grid-row:auto;grid-column:auto}.line:not(.pr):not(.tm) .thw{grid-area:th}}
 
 .phone{display:flex;gap:4px;min-width:0}
 .phone .cc{flex:none;width:118px;padding:8px 4px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:inherit;font-size:.85rem;text-overflow:ellipsis}
@@ -1663,7 +1665,7 @@ input[type=date]{min-width:0;max-width:100%}
 <dialog id="bdlg" class="wide"><form class="dlg" id="bForm" novalidate>
   <h2 id="bT">New bill</h2>
   <div class="grid2"><div class="field"><label for="b-pat">Patient</label><input id="b-pat" list="b-pats" autocomplete="off" placeholder="Type name or mobile number"><datalist id="b-pats"></datalist></div><div class="field"><label for="b-d">Date</label><input id="b-d" type="date"></div></div>
-  <div class="field"><label>Treatments</label><div class="lhead"><span>Treatment</span><span>Teeth</span><span>Qty</span><span>Price</span><span></span></div><div class="lines" id="b-lines"></div><button type="button" class="btn small" id="b-add" style="align-self:flex-start;margin-top:6px">+ Add treatment</button><button type="button" class="btn small" id="b-old" style="align-self:flex-start;margin-top:6px">+ Previous outstanding balance</button><div class="field" id="b-oldw" hidden style="margin-top:8px;max-width:260px"><label for="b-oldd">Date of the original treatment</label><input id="b-oldd" type="date"></div><div class="prevbal" id="b-prev" hidden></div></div>
+  <div class="field"><label>Treatments</label><div class="lhead"><span>Treatment</span><span>Teeth</span><span>Qty</span><span>Price</span><span></span><span></span></div><div class="lines" id="b-lines"></div><button type="button" class="btn small" id="b-add" style="align-self:flex-start;margin-top:6px">+ Add treatment</button><button type="button" class="btn small" id="b-old" style="align-self:flex-start;margin-top:6px">+ Previous outstanding balance</button><div class="field" id="b-oldw" hidden style="margin-top:8px;max-width:260px"><label for="b-oldd">Date of the original treatment</label><input id="b-oldd" type="date"></div><div class="prevbal" id="b-prev" hidden></div></div>
   <div class="grid2"><div class="field"><label for="b-disc">Discount (Rs)</label><input id="b-disc" type="number" min="0" inputmode="numeric"></div><div class="field"><label for="b-note">Note</label><input id="b-note" maxlength="120" placeholder="Optional"></div></div>
   <div class="grid2 bshw" id="b-shw" hidden><div class="field"><label for="b-dent">Treated by 🔒</label><select id="b-dent"></select></div><div class="field"><label for="b-pct">Dentist share for this bill 🔒</label><div class="pctin"><input id="b-pct" type="number" min="0" max="100" inputmode="numeric" placeholder="Normal rate">%</div><small class="muted" id="b-pcth"></small></div>
     <div class="field"><label for="b-ref">Referred by 🔒</label><input id="b-ref" list="ref-names" maxlength="60" placeholder="Dentist who sent this patient (optional)" autocomplete="off"></div>
@@ -2876,7 +2878,7 @@ function apVars(a){const c=S().clinic,p=P[a.patientId]||{};return {map:clinicCon
 const apMsg=(a,k)=>{let m=fillT(S().templates[k],apVars(a)).replace(/^📍\s*$\n?/m,"");if(k==="confirm"||k==="reminder"){const c=S().clinic,map=clinicContact().map,ph=c.phone||"";const add=[ph&&!m.includes(ph)?`📞 *Clinic number:* ${ph}`:"",map&&!m.includes(map)?`📍 *Location:* ${map}`:""].filter(Boolean).join("\n");
   if(add){const i=m.search(/\n\n(Warm regards|Regards|Best regards)/i);m=i>=0?m.slice(0,i)+"\n\n"+add+m.slice(i):m+"\n\n"+add}}return m};
 function billCalc(b){const sub=(b.items||[]).reduce((s,i)=>s+(+i.qty||1)*(+i.price||0),0),total=Math.max(0,sub-(+b.discount||0)),paid=(b.payments||[]).reduce((s,p)=>s+(+p.amount||0),0);return {sub,total,paid,bal:Math.max(0,total-paid)}}
-function billVars(b){const c=S().clinic,t=billCalc(b);return {name:b.patientName||"",clinic:c.name,phone:c.phone,doctor:c.doctor,bill:b.no||"",date:fmtDate(b.date||ymd(new Date())),total:rs(t.total),paid:rs(t.paid),balance:rs(t.bal)}}
+function billVars(b){const c=S().clinic,t=billCalc(billOut(b));return {name:b.patientName||"",clinic:c.name,phone:c.phone,doctor:c.doctor,bill:b.no||"",date:fmtDate(b.date||ymd(new Date())),total:rs(t.total),paid:rs(t.paid),balance:rs(t.bal)}}
 const patLabel=p=>`${p.name} · ${p.phone||"no phone"}`;
 const patOpts=()=>Object.values(P).sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(p=>`<option value="${esc(patLabel(p))}">`).join("");
 function findPat(v){v=(v||"").trim();if(!v)return null;const all=Object.entries(P),e=all.find(([,p])=>patLabel(p)===v);if(e)return e[0];const lv=v.toLowerCase(),d=v.replace(/\D/g,"");let m=all.filter(([,p])=>(p.name||"").trim().toLowerCase()===lv);if(m.length!==1&&d.length>=7)m=all.filter(([,p])=>{const pd=String(p.phone||"").replace(/\D/g,"");return pd&&pd.slice(-10)===d.slice(-10)});return m.length===1?m[0][0]:null}
@@ -3534,7 +3536,8 @@ $("b-prices").addEventListener("click",()=>openPrices());
 $("b-filter").addEventListener("click",e=>{const b=e.target.closest("[data-bf]");if(b){billF=b.dataset.bf;render()}});
 $("b-rows").addEventListener("click",e=>{const b=e.target.closest("[data-bopen]");if(b)openBillView(b.dataset.bopen)});
 const bdlg=$("bdlg");let bEdit=null,bFromAp=null;
-const lineHTML=l=>{l=l||{};return `<div class="line"><input class="l-t" list="tr-list" placeholder="Treatment" value="${esc(l.desc||"")}" aria-label="Treatment"><div class="thw"><input class="l-th" placeholder="Tooth" value="${esc(l.tooth||"")}" aria-label="Teeth" maxlength="80"><button type="button" class="thbtn" data-pick title="Pick teeth on the chart" aria-label="Pick teeth on the chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3.5c-2.6 0-4 2-4 4.6 0 2.4 1 3.8 1.6 6 .6 2.3.8 6.4 2.6 6.4 1.6 0 1.6-4.7 3-5.6.7-.5 1.9-.5 2.6 0 1.4.9 1.4 5.6 3 5.6 1.8 0 2-4.1 2.6-6.4.6-2.2 1.6-3.6 1.6-6 0-2.6-1.4-4.6-4-4.6-1.8 0-2.8 1-4.5 1s-2.7-1-4.5-1z"/></svg></button></div><input class="l-q" type="number" min="1" value="${l.qty||1}" aria-label="Quantity" inputmode="numeric"><input class="l-p" type="number" min="0" placeholder="Rs" value="${l.price??""}" aria-label="Price in rupees" inputmode="numeric"><button type="button" class="ldel" data-lrm aria-label="Remove line">×</button></div>`};
+const EYE_IC=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="eo" d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle class="eo" cx="12" cy="12" r="3"/><path class="ec" d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-2.6 3.5M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/></svg>`;
+const lineHTML=l=>{l=l||{};return `<div class="line${l.hide?" lhid":""}"><input class="l-t" list="tr-list" placeholder="Treatment" value="${esc(l.desc||"")}" aria-label="Treatment"><div class="thw"><input class="l-th" placeholder="Tooth" value="${esc(l.tooth||"")}" aria-label="Teeth" maxlength="80"><button type="button" class="thbtn" data-pick title="Pick teeth on the chart" aria-label="Pick teeth on the chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3.5c-2.6 0-4 2-4 4.6 0 2.4 1 3.8 1.6 6 .6 2.3.8 6.4 2.6 6.4 1.6 0 1.6-4.7 3-5.6.7-.5 1.9-.5 2.6 0 1.4.9 1.4 5.6 3 5.6 1.8 0 2-4.1 2.6-6.4.6-2.2 1.6-3.6 1.6-6 0-2.6-1.4-4.6-4-4.6-1.8 0-2.8 1-4.5 1s-2.7-1-4.5-1z"/></svg></button></div><input class="l-q" type="number" min="1" value="${l.qty||1}" aria-label="Quantity" inputmode="numeric"><input class="l-p" type="number" min="0" placeholder="Rs" value="${l.price??""}" aria-label="Price in rupees" inputmode="numeric"><button type="button" class="leye" data-lhide aria-pressed="${l.hide?"true":"false"}" title="Show or hide this treatment on the patient's bill" aria-label="Hide on patient's bill">${EYE_IC}</button><button type="button" class="ldel" data-lrm aria-label="Remove line">×</button></div>`};
 function bPctHint(){const d=$("b-dent").value;$("b-pcth").textContent=!d?"Pick the dentist first":shOwner(d)?d+" is the owner · all to clinic":"Leave empty for "+d+"'s normal "+shRate(d)+"%";$("b-pct").disabled=!d||shOwner(d)}
 $("b-dent").addEventListener("change",bPctHint);
 function openBill(id,pre){
@@ -3550,14 +3553,14 @@ function openBill(id,pre){
     $("ref-names").innerHTML=refNames().map(n=>`<option value="${esc(n)}">`).join("");$("b-ref").value=b.refBy||"";$("b-refv").value=b.refAmt??""}}
   billTotals();bPrevUI();openD(bdlg);
 }
-const readLines=()=>[...$("b-lines").querySelectorAll(".line")].map(r=>({desc:r.querySelector(".l-t").value.trim(),tooth:r.querySelector(".l-th").value.trim(),qty:Math.max(1,+r.querySelector(".l-q").value||1),price:+r.querySelector(".l-p").value||0})).filter(l=>l.desc||l.price);
+const readLines=()=>[...$("b-lines").querySelectorAll(".line")].map(r=>({desc:r.querySelector(".l-t").value.trim(),tooth:r.querySelector(".l-th").value.trim(),qty:Math.max(1,+r.querySelector(".l-q").value||1),price:+r.querySelector(".l-p").value||0,...(r.classList.contains("lhid")?{hide:true}:{})})).filter(l=>l.desc||l.price);
 function billTotals(){const d=+$("b-disc").value||0,t=billCalc({items:readLines(),discount:d,payments:[{amount:bEdit?0:(+$("b-pay").value||0)}]});$("b-tot").innerHTML=`<div class="kv"><span>Subtotal</span><b>${rs(t.sub)}</b></div>${d?`<div class="kv"><span>Discount</span><b>− ${rs(d)}</b></div>`:""}<div class="kv tot"><span>Total</span><b>${rs(t.total)}</b></div>${bEdit?"":`<div class="kv"><span>Balance after payment</span><b>${rs(t.bal)}</b></div>`}`}
 $("b-old").addEventListener("click",()=>{const r=$("b-lines");const first=r.querySelector(".line");if(first&&!first.querySelector(".l-t").value&&!first.querySelector(".l-p").value)first.remove();r.insertAdjacentHTML("beforeend",lineHTML({desc:"Previous outstanding balance",qty:1}));$("b-oldw").hidden=false;const ln=r.lastElementChild;ln.querySelector(".l-p").focus();billTotals()});
 function bPrevUI(){const pid=findPat($("b-pat").value),box=$("b-prev");if(!pid||bEdit){box.hidden=true;return}const pb=Object.values(B).filter(x=>x.patientId===pid&&billCalc(x).bal>0),old=pb.reduce((a,x)=>a+billCalc(x).bal,0);
   if(!old){box.hidden=true;return}box.innerHTML=`<b>${esc(P[pid].name)}</b> already owes <b>${rs(old)}</b> on ${pl(pb.length,"earlier bill")} (${pb.map(x=>esc(x.no||"")).join(", ")}). It will show on this bill as <b>old balance</b>, so the total due is clear.`;box.hidden=false}
 for(const ev of ["input","change"])$("b-pat").addEventListener(ev,bPrevUI);
 $("b-add").addEventListener("click",()=>{$("b-lines").insertAdjacentHTML("beforeend",lineHTML());$("b-lines").lastElementChild.querySelector(".l-t").focus()});
-$("b-lines").addEventListener("click",e=>{const pk=e.target.closest("[data-pick]");if(pk){openTeeth(pk.closest(".line"));return}if(e.target.closest("[data-lrm]")){e.target.closest(".line").remove();if(!$("b-lines").children.length)$("b-lines").innerHTML=lineHTML();billTotals()}});
+$("b-lines").addEventListener("click",e=>{const hb=e.target.closest("[data-lhide]");if(hb){const r=hb.closest(".line"),on=!r.classList.contains("lhid");r.classList.toggle("lhid",on);hb.setAttribute("aria-pressed",String(on));toast(on?"Hidden on the patient's bill":"Shown on the patient's bill");return}const pk=e.target.closest("[data-pick]");if(pk){openTeeth(pk.closest(".line"));return}if(e.target.closest("[data-lrm]")){e.target.closest(".line").remove();if(!$("b-lines").children.length)$("b-lines").innerHTML=lineHTML();billTotals()}});
 $("b-lines").addEventListener("input",e=>{const r=e.target.closest(".line");if(e.target.classList.contains("l-t")){const lp=S().prices.find(x=>x.n===e.target.value),lc=lastCharge(findPat($("b-pat").value),e.target.value),pr=lc?{p:lc.price}:lp,pe=r.querySelector(".l-p");
     let h=r.querySelector(".l-last");if(lc){if(!h){h=document.createElement("small");h.className="l-last";r.appendChild(h)}h.textContent=`↺ Last charged to this patient: ${rs(lc.price)} on ${fmtDate(lc.date)}${lp&&+lp.p&&+lp.p!==lc.price?` (normal ${rs(lp.p)})`:""}`}else if(h)h.remove();
     if(pr&&(!pe.value||pe.dataset.auto)){if(+pr.p>0){pe.value=pr.p;pe.dataset.auto="1"}else if(pe.dataset.auto){pe.value="";delete pe.dataset.auto}}}if(e.target.classList.contains("l-p"))delete e.target.dataset.auto;billTotals()});
@@ -3581,7 +3584,7 @@ function openBillView(id){bvId=id;bvConf=false;bvSent=false;renderBV();openD(bvd
 function renderBV(){
   const b=B[bvId];if(!b){bvdlg.close();return}const t=billCalc(b),ok=waNum(b.phone);
   $("bv").innerHTML=`<div class="bvh"><div><h2>${esc(b.no||"Bill")}</h2><p class="muted" style="margin:2px 0 0">${esc(fmtDate(b.date))} · <button class="linkbtn" data-gopat="${esc(b.patientId)}">${esc(b.patientName)}</button>${b.phone?" · "+esc(b.phone):""}</p></div><span class="chip2 ${t.bal>0?"warn":"ok"}">${t.bal>0?"Due "+rs(t.bal):"Paid in full"}</span></div>
-  <div>${(b.items||[]).map(i=>`<div class="kv"><span>${esc(i.desc)}${i.tooth?` <small class="muted">· tooth ${esc(i.tooth)}</small>`:""}${(+i.qty||1)>1?` <small class="muted">× ${esc(i.qty)}</small>`:""}</span><b>${rs((+i.qty||1)*(+i.price||0))}</b></div>`).join("")}${b.discount?`<div class="kv"><span>Discount</span><b>− ${rs(b.discount)}</b></div>`:""}<div class="kv tot"><span>Total</span><b>${rs(t.total)}</b></div></div>
+  ${(b.items||[]).some(i=>i.hide)?`<p class="hidnote">👁 ${pl((b.items||[]).filter(i=>i.hide).length,"treatment")} hidden on the patient's bill. The patient's copy shows ${rs(billCalc(billOut(b)).total)}.</p>`:""}<div>${(b.items||[]).map((i,ix)=>`<div class="kv${i.hide?" bvhid":""}"><span><button type="button" class="bveye" data-bvhide="${ix}" title="Show or hide on the patient's bill" aria-label="${i.hide?"Show":"Hide"} on the patient's bill">${EYE_IC}</button>${esc(i.desc)}${i.tooth?` <small class="muted">· tooth ${esc(i.tooth)}</small>`:""}${(+i.qty||1)>1?` <small class="muted">× ${esc(i.qty)}</small>`:""}</span><b>${rs((+i.qty||1)*(+i.price||0))}</b></div>`).join("")}${b.discount?`<div class="kv"><span>Discount</span><b>− ${rs(b.discount)}</b></div>`:""}<div class="kv tot"><span>Total</span><b>${rs(t.total)}</b></div></div>
   ${miniChart(b.items)}
   <h3 class="h3s">Payments</h3>${(b.payments||[]).length?b.payments.map((p,ix)=>`<div class="kv"><span>${esc(fmtDate(p.date))} · ${esc(payLbl(p))}${p.ref?" · "+esc(p.ref):""}${p.receipt?` <button type="button" class="rcchip" data-prc="${esc(p.receipt)}">🧾 Receipt</button>`:""}</span><span class="kvr"><b>${rs(p.amount)}</b><button type="button" class="pedit" data-ppedit="${ix}" aria-label="Edit this payment">✎ Edit</button><button type="button" class="ldel" data-pdel="${ix}" aria-label="Remove this payment">×</button></span></div>`).join(""):`<p class="muted" style="margin:0">No payments yet.</p>`}
   <div class="kv tot"><span>Balance</span><b>${rs(t.bal)}</b></div>
@@ -3596,6 +3599,7 @@ function renderBV(){
 }
 $("bv").addEventListener("click",e=>{
   const t=e.target,b=B[bvId];if(!b)return;
+  const hv=t.closest("[data-bvhide]");if(hv){const ix=+hv.dataset.bvhide,its=(b.items||[]).map((x,i)=>{if(i!==ix)return x;const y={...x};if(y.hide)delete y.hide;else y.hide=true;return y});const nb={...b,items:its};delete nb.id;cset("bills",bvId,nb);B[bvId]={...B[bvId],items:its};renderBV();toast(its[ix].hide?"Hidden on the patient's bill":"Shown on the patient's bill");return}
   const pe=t.closest("[data-ppedit]");if(pe){const id=bvId,ix=+pe.dataset.ppedit,b0=B[id],py=(b0.payments||[])[ix];if(!py)return;const others=(b0.payments||[]).reduce((a,x,i)=>i===ix?a:a+(+x.amount||0),0),maxA=Math.max(0,billCalc(b0).total-others);
     payAsk({title:"Edit payment · "+(b0.no||"Bill"),sub:(b0.patientName||"")+" · "+fmtDate(py.date),amount:py.amount,max:maxA||0,editable:true,method:py.method||"Cash",bank:py.bank||"",ref:py.ref||"",receipt:py.receipt||"",date:py.date}).then(r=>{if(!r)return;const b1=B[id],ps=[...(b1.payments||[])];const np={...ps[ix],amount:r.amount,method:r.method,date:r.date||ps[ix].date};if(r.ref)np.ref=r.ref;else delete np.ref;if(r.bank)np.bank=r.bank;else delete np.bank;if(r.receipt)np.receipt=r.receipt;else delete np.receipt;ps[ix]=np;cset("bills",id,{...b1,payments:ps});if(bvId===id)renderBV();toast("Payment updated · "+rs(r.amount)+" ("+payLbl(r)+")")});return}
   if(t.closest("[data-bvpctreset]")){const nb={...b};delete nb.sharePct;cset("bills",bvId,nb);renderBV();toast("Normal share used");return}
@@ -4072,7 +4076,10 @@ function oldBalHTML(b,t){const pb=b.showPrev===false?[]:prevBills(b),oi=(b.items
   ${pb.map(x=>`<tr><td>Previous outstanding balance<span>Bill ${esc(x.no||"")} · ${esc(fmtDate(x.date))}</span></td><td>${rs(billCalc(x).bal)}</td></tr>`).join("")}
   ${t.paid?`<tr><td>Less: paid on this bill</td><td>− ${rs(t.paid)}</td></tr>`:""}
   <tr class="tot"><td>Total amount due</td><td>${rs(t.bal+prev)}</td></tr></tbody></table></div>`}
-function invoiceInner(b){
+/* The patient's copy leaves out treatments marked hidden; their amounts are not counted on it */
+function billOut(b){if(!(b.items||[]).some(i=>i.hide))return b;const items=b.items.filter(i=>!i.hide),sub=items.reduce((a,i)=>a+(+i.qty||1)*(+i.price||0),0),disc=Math.min(+b.discount||0,sub),total=sub-disc,paid=(b.payments||[]).reduce((a,p)=>a+(+p.amount||0),0);
+  let payments=b.payments||[];if(paid>total){const last=payments[payments.length-1]||{};payments=total>0?[{...last,amount:total,ref:""}]:[]}return {...b,items,discount:disc,payments}}
+function invoiceInner(b){b=billOut(b);
   const t=billCalc(b),c=S().clinic,p=P[b.patientId]||{},ap=b.apId&&A[b.apId],den=billDentist(b)||"";
   const logo=(document.querySelector(".head-logo img")||{}).src||"";
   const teeth={};for(const it of b.items||[])for(const n of teethOf(it.tooth))(teeth[n]=teeth[n]||[]).push(it.desc);
@@ -6241,7 +6248,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v155";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v156";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
