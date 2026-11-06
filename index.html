@@ -696,7 +696,24 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 20%,var(--c-
 .clk{font-family:var(--f-display);font-size:2.7rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .cdate{font-size:.95rem;opacity:.9}
 .copen{margin-top:10px;font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.14);border-radius:999px;padding:5px 11px;align-self:flex-start}
-.odot{width:9px;height:9px;border-radius:50%;background:#FFC857;flex:none}.odot.open{background:#7BE0A4}.odot.closed{background:#FF9A8B}
+.odot{width:9px;height:9px;border-radius:50%;background:#FFC857;flex:none}.odot.o-open{background:#7BE0A4;box-shadow:0 0 0 3px rgba(123,224,164,.3)}.odot.o-closed{background:#FF9A8B}
+.d-clock{position:relative;overflow:hidden;transition:background .6s}
+.ctop{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:1}.cleft{min-width:0}
+.cwx{display:flex;align-items:center;gap:6px;text-align:right;flex:none}.cwx svg{width:58px;height:58px;flex:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.18))}
+.cwx .wt b{display:block;font-family:var(--f-display);font-size:1.9rem;line-height:1;font-weight:700}.cwx .wt small{display:block;font-size:.74rem;opacity:.9;white-space:nowrap}
+.d-clock .copen{position:relative;z-index:1}#d-open[hidden]{display:none!important}.wxline{position:relative;z-index:1;font-size:.76rem;opacity:.88;margin-top:6px}
+#d-clockc[data-wx]{border-color:transparent}
+#d-clockc[data-wx="clear-day"]{background:linear-gradient(160deg,#2F80ED 0%,#56B4F5 60%,#8FD3FF 100%)}
+#d-clockc[data-wx="cloudy-day"]{background:linear-gradient(160deg,#4A6FA5 0%,#7C9CC4 70%,#A9BFD8 100%)}
+#d-clockc[data-wx="overcast"]{background:linear-gradient(160deg,#55606E 0%,#7D8896 100%)}
+#d-clockc[data-wx="rain"]{background:linear-gradient(160deg,#34495E 0%,#5D7186 100%)}
+#d-clockc[data-wx="storm"]{background:linear-gradient(160deg,#232B3A 0%,#4A4E69 100%)}
+#d-clockc[data-wx="fog"]{background:linear-gradient(160deg,#7A8691 0%,#A7B1BA 100%)}
+#d-clockc[data-wx="snow"]{background:linear-gradient(160deg,#6E8BAA 0%,#B8CCE0 100%)}
+#d-clockc[data-wx="clear-night"],#d-clockc[data-wx="cloudy-night"]{background:linear-gradient(160deg,#0F1C3F 0%,#24366B 70%,#3B4F8C 100%)}
+@keyframes wxspin{to{transform:rotate(360deg)}}@keyframes wxdrift{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}@keyframes wxdrop{0%{transform:translateY(-4px);opacity:0}30%{opacity:1}100%{transform:translateY(8px);opacity:0}}@keyframes wxflash{0%,88%,100%{opacity:0}90%,94%{opacity:1}}@keyframes wxtw{0%,100%{opacity:.3}50%{opacity:1}}
+.wx-rays{transform-origin:32px 32px;animation:wxspin 22s linear infinite}.wx-sm .wx-rays{transform-origin:22px 22px}.wx-cl{animation:wxdrift 6s ease-in-out infinite}.wx-dr{animation:wxdrop 1.1s linear infinite}.wx-dr:nth-child(2){animation-delay:.35s}.wx-dr:nth-child(3){animation-delay:.7s}.wx-bolt{animation:wxflash 3.5s infinite}.wx-st{animation:wxtw 2.4s ease-in-out infinite}.wx-st:nth-child(2){animation-delay:1.2s}
+@media (prefers-reduced-motion:reduce){.wx-rays,.wx-cl,.wx-dr,.wx-bolt,.wx-st{animation:none}}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 @media (max-width:460px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .kpi{background:var(--c-dash-soft);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -1334,7 +1351,7 @@ input[type=date]{min-width:0;max-width:100%}
     <div class="homebar"><div class="search hsrch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="hq" type="search" placeholder="Search patients, mobile, bills, lab, stock…" aria-label="Search the whole app" autocomplete="off"><div class="hres" id="hres" hidden></div></div><button type="button" class="btn small" id="homeEdit">✎ Customise home</button></div>
     <div class="dgrid">
       <div class="card d-simple" id="d-simple"></div>
-      <div class="card d-clock"><div class="clk" id="d-time"></div><div class="cdate" id="d-date"></div><div class="copen" id="d-open"></div></div>
+      <div class="card d-clock" id="d-clockc"><div class="ctop"><div class="cleft"><div class="clk" id="d-time"></div><div class="cdate" id="d-date"></div></div><div class="cwx" id="d-wx" hidden></div></div><div class="copen" id="d-open" hidden></div></div>
       <div class="card d-today"><h3>Today at a glance</h3><div class="kpis" id="d-kpis"></div></div>
       <div class="card d-rep" id="d-rep"></div>
       <div class="card d-appts"><div class="dh"><h3>Today's appointments</h3><button class="linkbtn" data-go="appointments">Open diary ›</button></div><div id="d-appts"></div></div>
@@ -3386,7 +3403,7 @@ const apOf=(f,t)=>Object.entries(A).filter(([,a])=>a.date>=f&&a.date<=t).map(([i
 function apRangeTiles(L){const live=L.filter(a=>a.status!=="cancelled");return `<div class="tile big"><small>Appointments</small><b>${live.length}</b><span>Chair 1: ${live.filter(a=>String(a.chair)==="1").length} · Chair 2: ${live.filter(a=>String(a.chair)==="2").length}</span></div><div class="tile"><small>Done</small><b>${L.filter(a=>a.status==="done").length}</b><span>${L.filter(a=>a.status==="noshow").length} no-show</span></div><div class="tile"><small>Still to come</small><b>${live.filter(a=>!["done","noshow"].includes(a.status)&&a.date>=ymd(new Date())).length}</b><span>${L.filter(a=>a.status==="cancelled").length} cancelled</span></div>`}
 function apRow(a){const st=a.status||"booked",S2=AST[st]||AST.booked;return `<button type="button" class="apr s-${st}" data-aprop="${esc(a.id)}"><span class="apt">${esc(fmtTime(a.time))}</span><span class="apn"><b>${esc(a.patientName||"")}</b><small>${esc(a.treatment||"")}${a.dentist?" · "+esc(a.dentist):""}</small></span><span class="apchr c${esc(a.chair)}">C${esc(a.chair)}</span><span class="chip2 ${S2[1]}">${S2[0]}</span></button>`}
 function renderApRange(){const box=$("ap-range"),today=ymd(new Date());
-  if(apMode==="week"){const f=wkStart(apDate),t=addDays(f,6),L=apOf(f,t);
+  if(apMode==="week"){const f=apDate,t=addDays(f,6),L=apOf(f,t);
     $("ap-label").textContent=`${fmtDate(f).replace(/ \d{4}$/,"")} – ${fmtDate(t)}`;$("ap-tiles").innerHTML=apRangeTiles(L);
     box.innerHTML=`<div class="apweek">${[0,1,2,3,4,5,6].map(i=>{const d=addDays(f,i),its=L.filter(a=>a.date===d),live=its.filter(a=>a.status!=="cancelled"),open=isOpen(d);
       return `<div class="card apday${d===today?" today":""}${open?"":" closed"}"><button type="button" class="apdh" data-apday="${d}"><span><b>${esc(dayName(d))}</b> ${esc(fmtDate(d).replace(/ \d{4}$/,""))}${d===today?" · today":""}</span><span class="muted small">${open?pl(live.length,"appointment"):"Closed"} ›</span></button>${its.length?its.map(apRow).join(""):`<p class="muted small apnone">${open?"No appointments":"Clinic closed"}</p>`}</div>`}).join("")}</div>`;return}
@@ -3415,7 +3432,7 @@ function renderAppts(){
 const apShift=k=>{if(apMode==="week")apDate=addDays(apDate,7*k);else if(apMode==="month"){const [y,m]=apDate.split("-").map(Number);apDate=ymd(new Date(y,m-1+k,1))}else apDate=addDays(apDate,k);render()};
 $("ap-prev").addEventListener("click",()=>apShift(-1));
 $("ap-next").addEventListener("click",()=>apShift(1));
-$("ap-mode").addEventListener("click",e=>{const b=e.target.closest("[data-apm]");if(!b)return;apMode=b.dataset.apm;try{localStorage.setItem("ds-apmode",apMode)}catch(x){}render()});
+$("ap-mode").addEventListener("click",e=>{const b=e.target.closest("[data-apm]");if(!b)return;apMode=b.dataset.apm;if(apMode==="week")apDate=ymd(new Date());try{localStorage.setItem("ds-apmode",apMode)}catch(x){}render()});
 $("ap-range").addEventListener("click",e=>{const r=e.target.closest("[data-aprop]");if(r){openAp(r.dataset.aprop);return}const d=e.target.closest("[data-apday]");if(d){apDate=d.dataset.apday;apMode="day";try{localStorage.setItem("ds-apmode","day")}catch(x){}render();window.scrollTo(0,0)}});
 $("ap-today").addEventListener("click",()=>{apDate=ymd(new Date());render()});
 $("ap-date").addEventListener("change",e=>{if(e.target.value){apDate=e.target.value;render()}});
@@ -3688,8 +3705,40 @@ function clinicStatus(){const now=new Date(),d=ymd(now),c=S().clinic,m=now.getHo
 function tickClock(){if(main!=="dashboard"||!$("d-time"))return;const now=new Date();
   $("d-time").textContent=now.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
   $("d-date").textContent=now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-  const [k,t]=clinicStatus();$("d-open").innerHTML=`<span class="odot ${k}"></span>${esc(t)}`}
+  const [k,t]=clinicStatus();$("d-open").innerHTML=`<span class="odot o-${k}"></span>${esc(t)}`;wxRender()}
 setInterval(tickClock,10000);
+/* ===== Live weather on the home clock (free, Open-Meteo; no key needed) ===== */
+let WX=null,wxBusy=false,wxAt=0;
+function wxKind(code,day){const c=+code;if(c===0||c===1)return day?"clear-day":"clear-night";if(c===2)return day?"cloudy-day":"cloudy-night";if(c===3)return "overcast";if(c===45||c===48)return "fog";if(c>=95)return "storm";if((c>=71&&c<=77)||c===85||c===86)return "snow";if((c>=51&&c<=67)||(c>=80&&c<=82))return "rain";return day?"cloudy-day":"cloudy-night"}
+function wxText(code){const c=+code;return c===0?"Clear sky":c===1?"Mostly clear":c===2?"Partly cloudy":c===3?"Cloudy":c===45||c===48?"Foggy":c>=51&&c<=57?"Drizzle":c>=61&&c<=65?"Rain":c===66||c===67?"Freezing rain":c>=71&&c<=77?"Snow":c>=80&&c<=82?"Rain showers":c===85||c===86?"Snow showers":c===95?"Thunderstorm":c>=96?"Thunderstorm & hail":"—"}
+function wxIcon(k){const sun=(cx,cy,r)=>`<defs><radialGradient id="wxs" cx="40%" cy="38%"><stop offset="0" stop-color="#FFF6B0"/><stop offset=".55" stop-color="#FFD23F"/><stop offset="1" stop-color="#FFA41B"/></radialGradient></defs><g class="wx-rays" style="transform-origin:${cx}px ${cy}px">${[0,45,90,135,180,225,270,315].map(a=>`<rect x="${cx-1.6}" y="${cy-r-9}" width="3.2" height="6" rx="1.6" fill="#FFC93C" transform="rotate(${a} ${cx} ${cy})"/>`).join("")}</g><circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#wxs)"/>`;
+  const moon=(cx,cy,r)=>`<defs><radialGradient id="wxm" cx="35%" cy="35%"><stop offset="0" stop-color="#FFFDF0"/><stop offset="1" stop-color="#D9DDEA"/></radialGradient><mask id="wxmm"><rect width="64" height="64" fill="#fff"/><circle cx="${cx+r*.55}" cy="${cy-r*.35}" r="${r*.9}" fill="#000"/></mask></defs><circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#wxm)" mask="url(#wxmm)"/><circle class="wx-st" cx="50" cy="12" r="1.3" fill="#fff"/><circle class="wx-st" cx="56" cy="24" r="1" fill="#fff"/>`;
+  const cloud=(x,y,sc,c1,c2)=>`<defs><linearGradient id="wxc${c1.slice(1)}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><g class="wx-cl" transform="translate(${x} ${y}) scale(${sc})"><path d="M14 34h30a10 10 0 0 0 0-20 14 14 0 0 0-26.5 3.5A8.3 8.3 0 0 0 14 34z" fill="url(#wxc${c1.slice(1)})"/></g>`;
+  const drops=(col)=>`<g>${[18,30,42].map(x=>`<path class="wx-dr" d="M${x} 46 l-2.5 6" stroke="${col}" stroke-width="2.6" stroke-linecap="round"/>`).join("")}</g>`;
+  const W="#FFFFFF",G="#E3E8EF",D="#9AA5B4",DD="#6B7685";let b="";
+  if(k==="clear-day")b=sun(32,32,14);else if(k==="clear-night")b=moon(30,32,15);
+  else if(k==="cloudy-day")b=sun(40,22,10)+cloud(2,12,1,W,G);else if(k==="cloudy-night")b=moon(40,22,11)+cloud(2,12,1,W,G);
+  else if(k==="overcast")b=cloud(10,4,.8,G,D)+cloud(2,14,1,W,G);
+  else if(k==="rain")b=cloud(10,0,.8,G,D)+cloud(2,8,1,"#F1F4F8",D)+drops("#8FD3FF");
+  else if(k==="storm")b=cloud(2,6,1,"#C9CFD8",DD)+`<path class="wx-bolt" d="M33 38l-7 12h6l-3 10 10-14h-6l4-8z" fill="#FFD23F"/>`+drops("#9EC9F0");
+  else if(k==="snow")b=cloud(2,8,1,W,G)+[18,30,42].map(x=>`<circle class="wx-dr" cx="${x}" cy="50" r="2.4" fill="#fff"/>`).join("");
+  else b=cloud(2,6,1,W,G)+`<g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".85"><path d="M10 50h40"/><path d="M16 57h32"/></g>`;
+  return `<svg viewBox="0 0 64 64" aria-hidden="true">${b}</svg>`}
+function wxCity(){return String((CDOC&&CDOC.city)||(S().clinic&&S().clinic.city)||"").trim()||"Peshawar"}
+async function wxLoad(force){if(wxBusy||!navigator.onLine&&!force)return;const city=wxCity(),ck="ds-wx-"+city.toLowerCase();
+  if(!WX){try{WX=JSON.parse(lsGet(ck)||"null")}catch(e){}}
+  if(!force&&WX&&WX.city===city&&Date.now()-WX.at<30*60000)return;
+  wxBusy=true;try{let g=null;try{g=JSON.parse(lsGet("ds-geo-"+city.toLowerCase())||"null")}catch(e){}
+    if(!g){if(/^peshawar$/i.test(city))g={lat:34.0151,lon:71.5249,name:"Peshawar"};else{const r=await fetch("https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&name="+encodeURIComponent(city));const j=await r.json();const x=j&&j.results&&j.results[0];if(!x)throw 0;g={lat:x.latitude,lon:x.longitude,name:x.name}}lsSet("ds-geo-"+city.toLowerCase(),JSON.stringify(g))}
+    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g.lat}&longitude=${g.lon}&current=temperature_2m,apparent_temperature,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=1`);const j=await r.json();
+    if(!j||!j.current)throw 0;WX={city,name:g.name,at:Date.now(),t:j.current.temperature_2m,feels:j.current.apparent_temperature,code:j.current.weather_code,day:j.current.is_day===1,hi:j.daily&&j.daily.temperature_2m_max&&j.daily.temperature_2m_max[0],lo:j.daily&&j.daily.temperature_2m_min&&j.daily.temperature_2m_min[0],rain:j.daily&&j.daily.precipitation_probability_max&&j.daily.precipitation_probability_max[0]};lsSet(ck,JSON.stringify(WX))}catch(e){}finally{wxBusy=false}wxRender()}
+function wxRender(){const box=$("d-wx"),card=$("d-clockc");if(!box||!card)return;if(!WX){box.hidden=true;card.removeAttribute("data-wx");return}
+  const k=wxKind(WX.code,WX.day),r=x=>Math.round(+x);card.setAttribute("data-wx",k);box.hidden=false;
+  const key=k+"|"+r(WX.t)+"|"+WX.hi+"|"+WX.lo+"|"+WX.rain;if(box.dataset.k===key)return;box.dataset.k=key;
+  box.innerHTML=`${wxIcon(k)}<div class="wt"><b>${r(WX.t)}°</b><small>${esc(wxText(WX.code))}</small><small>${WX.hi!=null?`H ${r(WX.hi)}° · L ${r(WX.lo)}°`:""}</small>${WX.rain>=30?`<small>☔ ${r(WX.rain)}% rain</small>`:""}</div>`;
+  box.title=`${WX.name}: feels like ${r(WX.feels)}°C`}
+setTimeout(()=>wxLoad(),1500);setInterval(()=>{if(document.visibilityState==="visible")wxLoad()},10*60000);
+
 /* ================= ONLINE BOOKING (book.html for Instagram / Facebook) ================= */
 /* dentist working hours */
 const DAYS3=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -5823,8 +5872,8 @@ $("alBody").addEventListener("change",e=>{const k=e.target.closest("[data-pushca
 /* customisable home widgets */
 const HOME_W=[["d-simple","Quick buttons & today's money"],["d-clock","Clock & opening hours"],["d-today","Today at a glance"],["d-rep","This month: income, expenses, profit"],["d-appts","Today's appointments"],["d-cal","Calendar"],["d-pay","Pending payments & bills"],["d-stock","Restock needed"],["d-exp","Expiring soon"],["d-money","Lab, reminders & spending"]];
 const homeKey=()=>"ds-home-"+(isSimple()?"simple":"classic");
-function homeDefault(){return isSimple()?{order:["d-simple","d-appts","d-rep","d-pay","d-clock","d-today","d-cal","d-stock","d-exp","d-money"],hidden:["d-clock","d-today","d-rep","d-cal","d-stock","d-exp","d-money","d-pay"]}:{order:HOME_W.map(w=>w[0]),hidden:["d-simple"]}}
-function homeGet(){let c=null;try{c=JSON.parse(localStorage.getItem(homeKey())||"null")}catch(e){}const d=homeDefault();if(!c||!Array.isArray(c.order))return d;const all=HOME_W.map(w=>w[0]);c.order=c.order.filter(k=>all.includes(k)).concat(all.filter(k=>!c.order.includes(k)));c.hidden=(c.hidden||[]).filter(k=>all.includes(k));return c}
+function homeDefault(){return isSimple()?{order:["d-clock","d-appts","d-simple","d-rep","d-pay","d-today","d-cal","d-stock","d-exp","d-money"],hidden:["d-clock","d-today","d-rep","d-cal","d-stock","d-exp","d-money","d-pay"]}:{order:["d-clock","d-appts",...HOME_W.map(w=>w[0]).filter(k=>k!=="d-appts"&&k!=="d-clock")],hidden:["d-simple"]}}
+function homeGet(){let c=null;try{c=JSON.parse(localStorage.getItem(homeKey())||"null")}catch(e){}const d=homeDefault();if(!c||!Array.isArray(c.order))return d;const all=HOME_W.map(w=>w[0]);c.order=c.order.filter(k=>all.includes(k)).concat(all.filter(k=>!c.order.includes(k)));c.hidden=(c.hidden||[]).filter(k=>all.includes(k));const fk=homeKey()+"-apfirst2";if(lsGet(fk)!=="1"){c.order=["d-clock","d-appts",...c.order.filter(k=>k!=="d-appts"&&k!=="d-clock")];c.hidden=c.hidden.filter(k=>k!=="d-appts");lsSet(fk,"1");try{localStorage.setItem(homeKey(),JSON.stringify(c))}catch(e){}}return c}
 function homeSave(c){try{localStorage.setItem(homeKey(),JSON.stringify(c))}catch(e){}homeApply()}
 function homeApply(){const c=homeGet();for(const el of document.querySelectorAll("#dashView .dgrid>.card")){const k=HOME_W.map(w=>w[0]).find(x=>el.classList.contains(x));if(!k)continue;el.style.order=String(c.order.indexOf(k));if(c.hidden.includes(k)){el.setAttribute("data-wh","");el.removeAttribute("data-ws")}else{el.setAttribute("data-ws","");el.removeAttribute("data-wh")}}}
 function homeRender(){const c=homeGet();$("homeList").innerHTML=c.order.map((k,i)=>{const n=(HOME_W.find(w=>w[0]===k)||[k,k])[1],on=!c.hidden.includes(k);return `<div class="hwrow${on?"":" off"}"><label><input type="checkbox" data-hw="${k}" ${on?"checked":""}> <span>${esc(n)}</span></label><button type="button" class="hwmv" data-hup="${k}" aria-label="Move ${esc(n)} up" ${i?"":"disabled"}>↑</button><button type="button" class="hwmv" data-hdn="${k}" aria-label="Move ${esc(n)} down" ${i<c.order.length-1?"":"disabled"}>↓</button></div>`}).join("")}
@@ -6192,7 +6241,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v154";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v155";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
