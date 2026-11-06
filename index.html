@@ -1679,8 +1679,8 @@ input[type=date]{min-width:0;max-width:100%}
   <p class="perr" id="b-err" hidden></p>
   <div class="actions"><span></span><div><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">Save bill</button></div></div>
 </form></dialog>
-<dialog id="cbdlg"><div class="dlg"><div class="dh"><h2>Choose what the patient sees</h2><button type="button" class="x" data-close aria-label="Close">×</button></div>
-  <p class="muted small" style="margin:0">Tick the treatments to show on the bill. Unticked ones are hidden from the patient and not counted.</p>
+<dialog id="cbdlg"><div class="dlg"><div class="dh"><h2>🧾 Sample bill</h2><button type="button" class="x" data-close aria-label="Close">×</button></div>
+  <p class="muted small" style="margin:0">All treatments from the plan are added. Untick any you don't want on this bill, and add your own discount. Nothing is saved; it's only for sending to the patient.</p>
   <div class="cbq"><button type="button" class="chip" data-cbq="due">Only unpaid</button><button type="button" class="chip" data-cbq="done">Only done</button><button type="button" class="chip" data-cbq="todo">Only to do</button><button type="button" class="chip" data-cbq="all">All</button><button type="button" class="chip" data-cbq="none">None</button></div>
   <div class="cblist" id="cb-list"></div><label class="cbdisc"><span>Discount on this bill (Rs)</span><input id="cb-disc" type="number" min="0" inputmode="numeric" placeholder="0"></label><div class="cbsum" id="cb-sum"></div>
   <div class="actions"><button type="button" class="btn" id="cb-pdf">Bill PDF</button><button type="button" class="wa" id="cb-send"><span>Send bill</span></button></div></div></dialog>
@@ -4137,7 +4137,7 @@ async function billPdfBlob(b){
 /* ===== Custom treatment bill: pick which treatments the patient sees ===== */
 let cbSel=new Set();
 function cbItems(){const p=P[selPat];return p?tpOrder(planOf(p)):[]}
-function openCB(){const its=cbItems();if(!its.length)return toast("No treatments in the plan yet.");cbSel=new Set(its.filter(i=>{const t=itemPay(i);return !(t&&t.bal<=0&&t.paid>0)}).map(i=>i.id));if(!cbSel.size)cbSel=new Set(its.map(i=>i.id));$("cb-disc").value="";$("cb-send").hidden=!waNum((P[selPat]||{}).phone);$("cb-send").innerHTML=WA_IC+"<span>Send bill</span>";renderCB();openD($("cbdlg"))}
+function openCB(){const its=cbItems();if(!its.length)return toast("No treatments in the plan yet.");cbSel=new Set(its.map(i=>i.id));$("cb-disc").value="";$("cb-send").hidden=!waNum((P[selPat]||{}).phone);$("cb-send").innerHTML=WA_IC+"<span>Send bill</span>";renderCB();openD($("cbdlg"))}
 function renderCB(){const its=cbItems();
   $("cb-list").innerHTML=its.map(it=>{const t=itemPay(it),full=!!(t&&t.bal<=0&&t.paid>0),part=!!(t&&t.paid>0&&t.bal>0),on=cbSel.has(it.id);
     return `<label class="cbr${on?" on":""}"><input type="checkbox" data-cbi="${esc(it.id)}" ${on?"checked":""}><span class="cbt"><b>${esc(it.tr)}</b><small>${it.tooth?"Tooth "+esc(it.tooth)+" · ":""}<i class="cbs ${it.done?"d":"n"}">${it.done?"✓ Done":"To do"}</i> <i class="cbs ${full?"p":part?"pp":"u"}">${full?"✓ Paid":part?"Part paid":"Not paid"}</i></small></span><b class="cba">${rs(itAmt(it))}</b></label>`}).join("");
@@ -4295,7 +4295,7 @@ function planCard(p){const tp=planOf(p);if(!tp.items.length)return "";const c=pl
   ${canShares()?(()=>{const d=tp.dentist||"",own=d&&shOwner(d);return `<div class="tpsh"><b>🔒 Dentist share</b><label>Treated by <select data-tpsh="dentist"><option value="">Not set</option>${[...new Set([...dentists().map(x=>x.name),d].filter(Boolean))].map(n=>`<option${n===d?" selected":""}>${esc(n)}</option>`).join("")}</select></label>${d&&!own?`<label>Share <input type="number" min="0" max="100" inputmode="numeric" data-tpsh="sharePct" value="${tp.sharePct??""}" placeholder="${shRate(d)}">%</label><small class="muted">${tp.sharePct!==undefined&&tp.sharePct!==""?"Used for every bill from this plan":"Empty = normal "+shRate(d)+"%"}</small>`:own?`<small class="muted">Owner · all to clinic</small>`:""}</div>`})():""}
   ${tpItems("plan",c,true)}${tpDiscRow("plan",c)}
   ${(()=>{const paid=Math.min(c.total,planPaid(tp)),pend=Math.max(0,c.total-paid);return `<div class="tsbox"><div class="t"><small>Total${c.disc?" (after discount)":""}</small><b>${rs(c.total)}</b></div><div class="p"><small>Paid</small><b>${rs(paid)}</b></div><div class="d${pend>0?"":" z"}"><small>Pending</small><b>${rs(pend)}</b></div></div>`})()}
-  <div class="tsact">${unb?`<button type="button" class="btn small primary" data-tpbill>Bill ${pl(unb,"done item")}</button>`:""}${waNum(p.phone)?`<button type="button" class="wa sm" data-tpbillsend>${WA_IC}<span>Send bill</span></button>`:""}<button type="button" class="btn small" data-tpbillpdf>Bill PDF</button><button type="button" class="btn small cbbtn" data-tpcustom>🧾 Choose what to show</button></div></div>`}
+  <div class="tsact">${unb?`<button type="button" class="btn small primary" data-tpbill>Bill ${pl(unb,"done item")}</button>`:""}${waNum(p.phone)?`<button type="button" class="wa sm" data-tpbillsend>${WA_IC}<span>Send bill</span></button>`:""}<button type="button" class="btn small" data-tpbillpdf>Bill PDF</button><button type="button" class="btn small cbbtn" data-tpcustom>🧾 Sample bill</button></div></div>`}
 const tpdlg=$("tpdlg");let tpEdit=null,tpKind="prop",tpReset=false,propOpen=false;const propInc={x:true,n:true,f:true};
 function priceFor(v){v=String(v||"").trim().toLowerCase();if(!v)return null;const ex=S().prices.find(x=>x.n.toLowerCase()===v);if(ex)return ex;
   const tk=s=>s.toLowerCase().replace(/zirconia/g,"zirconium").replace(/\brct\b/g,"root canal rct").replace(/\bcleaning\b/g,"scaling").split(/[^a-z]+/).filter(w=>w.length>2&&!["per","with","the","and","tooth","arch"].includes(w)),want=tk(v);if(!want.length)return null;
@@ -6272,7 +6272,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v158";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v159";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
