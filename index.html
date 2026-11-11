@@ -4473,8 +4473,16 @@ async function htmlPdfBlob(html){
   try{const cv=await window.html2canvas(box.firstElementChild,{scale:2,backgroundColor:"#ffffff",useCORS:true,logging:false});
     const pdf=new window.jspdf.jsPDF({unit:"pt",format:"a4"}),W=pdf.internal.pageSize.getWidth(),H=pdf.internal.pageSize.getHeight(),pageH=Math.floor(cv.width*H/W);
     const r=cv.height/pageH;if(r>1&&r<=FIT1){const w=W/r;pdf.addImage(cv.toDataURL("image/jpeg",.92),"JPEG",(W-w)/2,0,w,H);return pdf.output("blob")}
-    for(let y=0,pg=0;y<cv.height;y+=pageH,pg++){const h=Math.min(pageH,cv.height-y),c2=document.createElement("canvas");c2.width=cv.width;c2.height=h;const x=c2.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c2.width,h);x.drawImage(cv,0,y,cv.width,h,0,0,cv.width,h);
-      if(pg)pdf.addPage();pdf.addImage(c2.toDataURL("image/jpeg",.92),"JPEG",0,0,W,h*W/cv.width)}
+    /* cut pages only between blocks, never through a picture, table row or box */
+    const root=box.firstElementChild,rt=root.getBoundingClientRect().top,k=cv.height/root.scrollHeight,atoms=[];
+    root.querySelectorAll("tr,figure,img,.chart,.psum,.pt,.sum,.tot,.terms li,.ft,.docs,.hd,.nt,.kv,.dc,thead,.sec>div,.contact,.gen,p,li,.lg,.fd").forEach(el=>{const r=el.getBoundingClientRect();if(r.height>0)atoms.push([(r.top-rt)*k,(r.bottom-rt)*k])});
+    root.querySelectorAll("h3,h4,.sh").forEach(el=>{const r=el.getBoundingClientRect(),nx=el.nextElementSibling,nb=nx?Math.min(nx.getBoundingClientRect().bottom,r.bottom+140):r.bottom;atoms.push([(r.top-rt)*k,(nb-rt)*k])});
+    const pad=Math.round(28*k),cuts=[];let y=0;
+    while(y<cv.height-2){const room=pageH-(y?pad:0);let c=y+room;if(c>=cv.height){cuts.push([y,cv.height]);break}
+      for(let guard=0;guard<40;guard++){const hit=atoms.filter(([t,b])=>t<c-1&&b>c+1&&b-t<room*.92&&t>y+2);if(!hit.length)break;c=Math.min(...hit.map(a=>a[0]))-Math.round(6*k)}
+      if(c<y+room*.35)c=y+room;cuts.push([y,c]);y=c}
+    cuts.forEach(([y0,y1],pg)=>{const top=pg?pad:0,h=y1-y0,c2=document.createElement("canvas");c2.width=cv.width;c2.height=pageH;const x=c2.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c2.width,c2.height);x.drawImage(cv,0,y0,cv.width,h,0,top,cv.width,h);
+      if(pg)pdf.addPage();pdf.addImage(c2.toDataURL("image/jpeg",.92),"JPEG",0,0,W,H)});
     return pdf.output("blob")}finally{box.remove()}}
 function printHtml(title,html){const f=document.createElement("iframe");f.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0";document.body.appendChild(f);
   f.srcdoc=`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>@page{size:A4;margin:10mm}body{margin:0}.inv{margin:0 auto}tr{page-break-inside:avoid}</style></head><body>${html}</body></html>`;
@@ -6397,7 +6405,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v175";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v176";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
