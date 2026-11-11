@@ -4276,7 +4276,7 @@ function propSwitch(i){const p=P[selPat],alts=[...(p.propAlts||[])],pr=propOf(p)
   alts[i]={...pr,name:propOptName(pr,0)};propOptSave({proposal:{...emptyPlan(),...sel,name:sel.name||propOptName(sel,i+1)},propAlts:alts});toast("Showing "+(sel.name||"option"))}
 function propNewOpt(){const p=P[selPat],pr=propOf(p),alts=[...(p.propAlts||[])],n=alts.length+1;
   const name=prompt("Name for the new option (e.g. Implant option, Bridge option):",propOptName(null,n));if(name===null)return;
-  const copy=pr.items.length&&confirm("Start the new option with a copy of the treatments in \""+propOptName(pr,0)+"\"?\n\nOK = copy them, Cancel = start empty");
+  const copy=pr.items.length>0;
   const cur={...pr,name:propOptName(pr,0)};
   const fresh={...emptyPlan(),name:name.trim()||propOptName(null,n),...(copy?{items:pr.items.map(it=>({...it,id:nid("t")})),phaseDisc:{...(pr.phaseDisc||{})},discount:pr.discount||0}:{})};
   delete fresh.status;delete fresh.acceptedOn;
@@ -6343,7 +6343,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v166";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v167";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
