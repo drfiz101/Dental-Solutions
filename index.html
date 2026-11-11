@@ -720,6 +720,7 @@ header.top::before{background:linear-gradient(90deg,var(--c-dash) 0 20%,var(--c-
 body.no-pdf [data-tpcustom]{display:none!important}
 .nfbtns{display:flex;gap:8px;align-items:stretch}.natt{cursor:pointer}.natts{display:flex;flex-wrap:wrap;gap:6px}.natts:empty{display:none}.npend{position:relative;cursor:default}.nprm{position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;border:2px solid var(--surface);background:#A4231B;color:#fff;font-size:16px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}.nhint{margin:6px 0 0;font-size:.82rem;color:var(--accent)}.nchip{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);border-radius:999px;padding:4px 6px 4px 10px;font-size:.82rem;max-width:100%}.nchip button{border:0;background:rgba(0,0,0,.08);border-radius:50%;width:22px;height:22px;cursor:pointer;color:inherit}.nfiles{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.nfile{display:flex;flex-direction:column;align-items:center;gap:4px;width:132px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:5px;cursor:pointer;color:inherit;font:inherit}.nfile img,.nfile .nfi,.nfile .nfpdf{width:120px;height:120px;object-fit:cover;border-radius:6px;background:var(--bg);transition:transform .15s}.nfile:hover img{transform:scale(1.03)}.nfpdf{position:relative;display:grid;place-items:center;background:#FDECEA!important;overflow:hidden}.nfpdf img{position:absolute;inset:0;object-position:top;background:#fff}.nfpdf img:not([src]){display:none}.nfpdf i{font-style:normal;font-weight:800;font-size:.8rem;color:#A4231B}.nfpdf.ok i{position:absolute;right:4px;bottom:4px;background:#A4231B;color:#fff;border-radius:4px;padding:1px 5px;font-size:.62rem}.nfile .nfi{display:grid;place-items:center;font-weight:800;font-size:.8rem;color:#A4231B;background:#FDECEA}.nfile>span:last-child{font-size:.7rem;color:var(--muted);max-width:122px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pendhd{display:flex;justify-content:space-between;align-items:center;background:#FDECEA;color:#A4231B;border-radius:10px;padding:8px 12px;margin-bottom:6px;font-size:.9rem}.pendhd span{font-size:.75rem;font-weight:700}.pmon{font-weight:800;font-size:.8rem;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);margin:12px 0 2px}
+.lbopen{cursor:pointer;flex:1;min-width:0}@media (max-width:560px){.lbrow{flex-wrap:wrap}.lbrow .lbopen{flex-basis:100%}.lbrow .kvr{width:100%;display:flex;align-items:center;gap:8px;justify-content:flex-end}}.lbsheet{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:10px}.lbhead{display:flex;justify-content:space-between;gap:10px;border-bottom:2px solid var(--accent);padding-bottom:8px}.lbhead small,.lbamt span{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}.lbhead b{font-size:1.15rem}.lbhead .r{text-align:right}.lbrows>div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:.9rem}.lbrows span{color:var(--muted)}.lbrows b{text-align:right}.lbamt{display:flex;justify-content:space-between;align-items:baseline;background:var(--bg);border-radius:10px;padding:10px 12px}.lbamt b{font-size:1.5rem}.lbst{border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.lbst b{letter-spacing:.08em}.lbst span{font-size:.85rem}.lbst.ok{background:#E3F4EA;color:#1E6B43}.lbst.due{background:#FDECEA;color:#A4231B}.lbh{margin:4px 0 0;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}.lbpics{display:flex;gap:10px;flex-wrap:wrap}.lbpic{position:relative;width:calc(50% - 5px);display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid var(--line);border-radius:12px;padding:6px;background:var(--surface);cursor:pointer;color:inherit;font:inherit}.lbpic img,.lbpic .lbpdf{width:100%;height:130px;object-fit:cover;border-radius:8px;background:var(--bg)}.lbpic .lbpdf{display:grid;place-items:center;font-weight:800;color:#A4231B;background:#FDECEA}.lbpi{position:absolute;top:10px;left:10px;background:rgba(255,255,255,.9);border-radius:6px;padding:0 4px}.lbpic small{font-weight:700;font-size:.78rem}.lbpic.add{border-style:dashed;justify-content:center;min-height:150px;color:var(--muted)}.lbplus{font-size:2rem;line-height:1}.lbpay{border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:6px}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 @media (max-width:460px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .kpi{background:var(--c-dash-soft);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -1797,6 +1798,7 @@ input[type=date]{min-width:0;max-width:100%}
     <div class="actions"><span class="muted small" id="vb-sum"></span><div><button class="btn" id="vb-back" type="button">Back</button><button class="btn primary" id="vb-save" type="button">Add to stock</button></div></div>
   </div>
 </div></dialog>
+<dialog id="lbvdlg"><div class="dlg"><div class="dh"><h2 id="lbv-t">Lab bill</h2><button type="button" class="x" data-close aria-label="Close">×</button></div><div id="lbv-body"></div></div></dialog>
 <dialog id="lbbdlg"><form class="dlg" id="lbbForm" novalidate>
   <h2>Upload lab bill</h2>
   <div class="grid2">
@@ -1806,6 +1808,8 @@ input[type=date]{min-width:0;max-width:100%}
     <div class="field"><label for="lbb-amt">Amount (Rs)</label><input id="lbb-amt" type="number" min="0" inputmode="numeric" placeholder="Optional"></div>
     <div class="field"><label for="lbb-paid">Payment</label><select id="lbb-paid"><option value="pending">Pending</option><option value="paid">Paid</option></select></div>
     <div class="field"><label for="lbb-file">Bill (PDF or photo)</label><input id="lbb-file" type="file" accept="application/pdf,image/*"></div>
+    <div class="field lbbpay"><label for="lbb-method">Paid by</label><select id="lbb-method"></select></div>
+    <div class="field lbbpay"><label for="lbb-pfile">Payment proof (photo or PDF)</label><input id="lbb-pfile" type="file" accept="application/pdf,image/*"></div>
   </div>
   <div class="field"><label for="lbb-note">Note</label><input id="lbb-note" maxlength="200" placeholder="e.g. September statement, 6 cases"></div>
   <p class="perr" id="lbb-err" hidden></p>
@@ -5648,23 +5652,50 @@ const lbList=()=>Object.entries(LC).filter(([,c])=>c.kind==="bill").map(([id,c])
 function renderLabBills(){
   const list=lbList().filter(b=>!labLab||b.lab===labLab),pend=list.filter(b=>b.paid===false);
   $("lab-bills").innerHTML=`<div class="dh"><h3>Lab bills</h3><button class="btn small" data-lbnew>+ Upload lab bill</button></div>`+(pend.length?`<p class="muted small" style="margin:0 0 6px">${pl(pend.length,"bill")} pending · <b class="due">${rs(pend.reduce((s,b)=>s+(+b.amount||0),0))}</b></p>`:"")+
-  (list.length?list.slice(0,20).map(b=>`<div class="lbrow"><span><b>${esc(b.lab||"Lab")}</b>${b.billNo?" · Bill "+esc(b.billNo):""}<br><small class="muted">${esc(fmtDate(b.date))}${b.note?" · "+esc(b.note):""}</small></span><span class="kvr">${+b.amount?`<b class="${b.paid===false?"due":""}">${rs(b.amount)}</b>`:""}<span class="chip2 ${b.paid===false?"warn":"ok"}">${b.paid===false?"Pending":"Paid"}</span>${b.fileId?`<button class="btn small" data-lbview="${esc(b.fileId)}" data-lbt="${esc((b.lab||"Lab")+" bill · "+fmtDate(b.date))}">View</button>`:""}${b.paid===false?`<button class="btn small" data-lbpaid="${esc(b.id)}">Mark paid</button>`:""}${lbDel===b.id?`<button class="btn small danger" data-lbyes="${esc(b.id)}">Delete?</button>`:`<button class="ldel" data-lbdel="${esc(b.id)}" aria-label="Delete bill">×</button>`}</span></div>`).join(""):`<p class="muted" style="margin:0">No lab bills uploaded${labLab?" for "+esc(labLab):""}. Keep each lab's monthly bill here.</p>`);
+  (list.length?list.slice(0,20).map(b=>`<div class="lbrow"><span class="lbopen" data-lbopen="${esc(b.id)}" role="button" tabindex="0"><b>${esc(b.lab||"Lab")}</b>${b.payFileId?" 🧾":""}${b.billNo?" · Bill "+esc(b.billNo):""}<br><small class="muted">${esc(fmtDate(b.date))}${b.note?" · "+esc(b.note):""}</small></span><span class="kvr">${+b.amount?`<b class="${b.paid===false?"due":""}">${rs(b.amount)}</b>`:""}<span class="chip2 ${b.paid===false?"warn":"ok"}">${b.paid===false?"Pending":"Paid"}</span><button class="btn small" data-lbopen="${esc(b.id)}">Open</button>${lbDel===b.id?`<button class="btn small danger" data-lbyes="${esc(b.id)}">Delete?</button>`:`<button class="ldel" data-lbdel="${esc(b.id)}" aria-label="Delete bill">×</button>`}</span></div>`).join(""):`<p class="muted" style="margin:0">No lab bills uploaded${labLab?" for "+esc(labLab):""}. Keep each lab's monthly bill here.</p>`);
 }
-function openLbb(){$("lbb-lab").innerHTML=labs().map(l=>`<option>${esc(l.name)}</option>`).join("");if(labLab)$("lbb-lab").value=labLab;$("lbb-date").value=ymd(new Date());for(const k of ["lbb-no","lbb-amt","lbb-note","lbb-file"])$(k).value="";$("lbb-paid").value="pending";$("lbb-err").hidden=true;openD(lbbdlg)}
+function lbbPayShow(){const on=$("lbb-paid").value==="paid";document.querySelectorAll(".lbbpay").forEach(x=>x.hidden=!on)}
+$("lbb-paid").addEventListener("change",lbbPayShow);
+function openLbb(){$("lbb-method").innerHTML=PAY_M.map(m=>`<option>${m}</option>`).join("");$("lbb-pfile").value="";setTimeout(lbbPayShow,0);$("lbb-lab").innerHTML=labs().map(l=>`<option>${esc(l.name)}</option>`).join("");if(labLab)$("lbb-lab").value=labLab;$("lbb-date").value=ymd(new Date());for(const k of ["lbb-no","lbb-amt","lbb-note","lbb-file"])$(k).value="";$("lbb-paid").value="pending";$("lbb-err").hidden=true;openD(lbbdlg)}
 $("lab-bills").addEventListener("click",async e=>{const t=e.target;
   if(t.closest("[data-lbnew]"))return openLbb();
+  const ob=t.closest("[data-lbopen]");if(ob)return openLbv(ob.dataset.lbopen);
   const v=t.closest("[data-lbview]");if(v)return showPhoto(v.dataset.lbview,v.dataset.lbt);
   const p=t.closest("[data-lbpaid]");if(p){const b=LC[p.dataset.lbpaid];cset("labcases",p.dataset.lbpaid,{...b,paid:true,paidOn:ymd(new Date())});toast("Lab bill marked paid");return}
   const d=t.closest("[data-lbdel]");if(d){lbDel=d.dataset.lbdel;renderLabBills();setTimeout(()=>{if(lbDel===d.dataset.lbdel){lbDel=null;renderLabBills()}},4000);return}
-  const y=t.closest("[data-lbyes]");if(y){const b=LC[y.dataset.lbyes];lbDel=null;cdel("labcases",y.dataset.lbyes);if(b&&b.fileId)delFileDoc(b.fileId);toast("Lab bill deleted")}
+  const y=t.closest("[data-lbyes]");if(y){const b=LC[y.dataset.lbyes];lbDel=null;cdel("labcases",y.dataset.lbyes);if(b&&b.fileId)delFileDoc(b.fileId);if(b&&b.payFileId)delFileDoc(b.payFileId);toast("Lab bill deleted")}
 });
 $("lbbForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("lbb-err"),f=$("lbb-file").files&&$("lbb-file").files[0];
   if(!f&&!+$("lbb-amt").value){err.textContent="Attach the bill or enter the amount.";err.hidden=false;return}
   const sb=$("lbbForm").querySelector("button[type=submit]");let fileId=null;
   if(f){sb.disabled=true;sb.textContent="Uploading…";fileId=await saveAny(f);sb.disabled=false;sb.textContent="Save bill";if(!fileId)return}
-  const paid=$("lbb-paid").value==="paid";
-  cset("labcases",nid("lb"),{kind:"bill",lab:$("lbb-lab").value,date:$("lbb-date").value||ymd(new Date()),billNo:$("lbb-no").value.trim(),amount:+$("lbb-amt").value||0,paid:paid?true:false,paidOn:paid?ymd(new Date()):null,note:$("lbb-note").value.trim(),fileId,createdAt:new Date().toISOString(),...me});
+  const paid=$("lbb-paid").value==="paid",pf=paid&&$("lbb-pfile").files&&$("lbb-pfile").files[0];let payFileId=null;
+  if(pf){sb.disabled=true;sb.textContent="Uploading…";payFileId=await saveAny(pf);sb.disabled=false;sb.textContent="Save bill"}
+  cset("labcases",nid("lb"),{kind:"bill",lab:$("lbb-lab").value,date:$("lbb-date").value||ymd(new Date()),billNo:$("lbb-no").value.trim(),amount:+$("lbb-amt").value||0,paid:paid?true:false,paidOn:paid?ymd(new Date()):null,...(paid?{payMethod:$("lbb-method").value,paidBy:myName||me.by||""}:{}),...(payFileId?{payFileId}:{}),note:$("lbb-note").value.trim(),fileId,createdAt:new Date().toISOString(),...me});
   lbbdlg.close();toast("Lab bill saved")});
+
+/* ===== Lab bill opened as a proper bill: details, payment, bill and payment pictures ===== */
+let lbvId=null;
+function openLbv(id){lbvId=id;renderLbv();openD($("lbvdlg"))}
+function lbThumb(fid,label,kind){return fid?`<button type="button" class="lbpic" data-lbpic="${esc(fid)}" data-lbpt="${esc(label)}"><img data-lbthumb="${esc(fid)}" alt=""><small>${kind==="pay"?"💳":"🧾"} ${esc(label)}</small></button>`:`<label class="lbpic add"><input type="file" accept="image/*,application/pdf" data-lbup="${kind}" hidden><span class="lbplus">＋</span><small>Add ${kind==="pay"?"payment picture":"bill picture"}</small></label>`}
+function renderLbv(){const b=LC[lbvId];if(!b){$("lbvdlg").close();return}const c=S().clinic,paid=b.paid!==false,canPay=can("lab_pay")||isClinicOwner();
+  $("lbv-t").textContent=(b.lab||"Lab")+" · bill";
+  $("lbv-body").innerHTML=`<div class="lbsheet">
+    <div class="lbhead"><div><small>Lab</small><b>${esc(b.lab||"Lab")}</b></div><div class="r"><small>Bill${b.billNo?" no.":""}</small><b>${b.billNo?esc(b.billNo):"—"}</b></div></div>
+    <div class="lbrows"><div><span>Bill date</span><b>${esc(fmtDate(b.date))}</b></div>${b.note?`<div><span>Details</span><b>${esc(b.note)}</b></div>`:""}<div><span>Added by</span><b>${esc(b.by||"—")}</b></div></div>
+    <div class="lbamt lmoney"><span>Amount</span><b>${+b.amount?rs(b.amount):"—"}</b></div>
+    <div class="lbst ${paid?"ok":"due"}">${paid?`<b>✓ PAID</b><span>${b.paidOn?esc(fmtDate(b.paidOn)):""}${b.payMethod?" · "+esc(b.payMethod):""}${b.paidBy?" · by "+esc(b.paidBy):""}</span>`:`<b>PENDING</b><span>Not paid yet</span>`}</div>
+    <h4 class="lbh">Pictures</h4><div class="lbpics">${lbThumb(b.fileId,"Bill","bill")}${paid||b.payFileId?lbThumb(b.payFileId,"Payment","pay"):""}</div>
+    ${!paid&&canPay?`<div class="lbpay"><h4 class="lbh">Mark as paid</h4><div class="grid2"><div class="field"><label for="lbv-pd">Paid on</label><input id="lbv-pd" type="date" value="${ymd(new Date())}"></div><div class="field"><label for="lbv-pm">Paid by</label><select id="lbv-pm">${PAY_M.map(m=>`<option>${m}</option>`).join("")}</select></div></div><div class="field"><label for="lbv-pf">Payment picture (optional)</label><input id="lbv-pf" type="file" accept="image/*,application/pdf"></div><button type="button" class="btn primary" id="lbv-paybtn">✓ Mark paid</button></div>`:""}
+    ${paid&&canPay?`<button type="button" class="linkbtn" id="lbv-unpay">Undo paid</button>`:""}
+  </div>`;
+  document.querySelectorAll("#lbv-body img[data-lbthumb]").forEach(async im=>{const id=im.dataset.lbthumb,d=await getPhoto(id);if(!d)return;if(d.startsWith("data:application/pdf")){const u=typeof pdfThumb==="function"?await pdfThumb(id):"";if(u)im.src=u;else im.replaceWith(Object.assign(document.createElement("span"),{className:"lbpdf",textContent:"PDF"}))}else im.src=d})}
+$("lbvdlg").addEventListener("click",async e=>{const t=e.target,b=LC[lbvId];if(!b)return;
+  const pc=t.closest("[data-lbpic]");if(pc)return showPhoto(pc.dataset.lbpic,(b.lab||"Lab")+" · "+pc.dataset.lbpt+" · "+fmtDate(b.date));
+  if(t.closest("#lbv-unpay")){const nb={...b,paid:false,paidOn:null};delete nb.payMethod;delete nb.paidBy;cset("labcases",lbvId,nb);toast("Marked as pending");renderLbv();return}
+  const pb=t.closest("#lbv-paybtn");if(pb){const f=$("lbv-pf").files&&$("lbv-pf").files[0];let payFileId=b.payFileId||null;if(f){pb.disabled=true;pb.textContent="Uploading…";payFileId=await saveAny(f);pb.disabled=false;pb.textContent="✓ Mark paid"}
+    cset("labcases",lbvId,{...b,paid:true,paidOn:$("lbv-pd").value||ymd(new Date()),payMethod:$("lbv-pm").value,paidBy:myName||me.by||"",...(payFileId?{payFileId}:{})});toast("Lab bill marked paid");renderLbv()}});
+$("lbvdlg").addEventListener("change",async e=>{const u=e.target.closest("[data-lbup]");if(!u)return;const f=u.files&&u.files[0];if(!f)return;const b=LC[lbvId];toast("Uploading…");const id=await saveAny(f);if(!id)return;cset("labcases",lbvId,{...b,...(u.dataset.lbup==="pay"?{payFileId:id}:{fileId:id})});toast(u.dataset.lbup==="pay"?"Payment picture added":"Bill picture added");renderLbv()});
 const lcdlg=$("lcdlg");let lcEdit=null;
 previewInput($("lc-photo"),$("lc-prev"));
 fillShades("VITA classical","");
@@ -6289,7 +6320,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v164";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v165";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
