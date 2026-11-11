@@ -4094,8 +4094,8 @@ const INV_CSS=`
 .inv .thx{font-size:12px;color:#0F4F45}.inv .thx b{display:block;font-size:13px}
 .inv .gen{text-align:center;font-size:10px;color:#9aa9a5;margin-top:18px}
 `;
-function clinicDocs(){const c=S().clinic,al=CLINIC==="alawan"||!CLINIC,noPGT=d=>al?d.map(x=>({...x,lines:String(x.lines||"").split("\n").filter(l=>!/^\s*MDS\s*\(PGT\)\s*$/i.test(l)).join("\n")})):d;if(Array.isArray(c.docs))return noPGT(c.docs);
-  if(al)return [{name:"Dr. M. Faizan Malik",lines:"BDS (RDS)\nC Implant\nOral & Maxillofacial Prosthodontist"},{name:"Dr. Shazia Sami",lines:"BDS (RDS)\nC Implant\nD-Ortho\nConsultant Dental Surgeon\nFor Ladies & Children"}];return []}
+function clinicDocs(){const c=S().clinic,al=CLINIC==="alawan"||!CLINIC,EXC="Incharge / Consultant, Executive Clinic,\nGandhara University Peshawar",noPGT=d=>al?d.map(x=>{let ls=String(x.lines||"").replace(/MDS\s*\(PGT\)/ig,"MDS");if(/^MDS$/m.test(ls)&&/^Oral (&|and) Maxillofacial Prosthodontist$/mi.test(ls))ls=ls.split("\n").filter(l=>!/^Oral (&|and) Maxillofacial Prosthodontist$/i.test(l)).map(l=>l==="MDS"?"MDS (Oral & Maxillofacial Prosthodontist)":l).join("\n");if(/faizan/i.test(x.name||"")){if(!/Gandhara/i.test(ls))ls+="\n"+EXC;ls=ls.replace(/^C Implant$/m,"C Implant and GBR")}return {...x,lines:ls}}):d;if(Array.isArray(c.docs))return noPGT(c.docs);
+  if(al)return [{name:"Dr. M. Faizan Malik",lines:"BDS (RDS)\nC Implant and GBR\nMDS (Oral & Maxillofacial Prosthodontist)\n"+EXC},{name:"Dr. Shazia Sami",lines:"BDS (RDS)\nC Implant\nD-Ortho\nConsultant Dental Surgeon\nFor Ladies & Children"}];return []}
 function clinicContact(){const c=S().clinic;const al=CLINIC==="alawan"||!CLINIC;return {web:c.web??(al?"al-awan-dental-clinic.business.site":""),fb:c.fb??(al?"facebook.com/alawandentalclinic":""),email:c.email??(al?"alawandentalclinic@gmail.com":""),addr:c.address??(al?"Saddique Colony, Eidgah Road, near Sui Gas Office, Faqirabad, Peshawar City, Pakistan":""),map:c.map??(al?"https://maps.app.goo.gl/z4J85xYLciUD9vZZ7":"")}}
 function invDocsHTML(){const d=clinicDocs();if(!d.length)return "";return `<div class="docs">${d.slice(0,3).map((x,i)=>`<div class="dc${i===d.length-1&&d.length>1?" r":""}"><b>${esc(x.name)}</b>${String(x.lines||"").split("\n").filter(Boolean).map(l=>`<span>${esc(l)}</span>`).join("")}</div>`).join("")}</div>`}
 const AL_PAY="Habib Bank Ltd (HBL)\nAccount title: MUHAMMAD FAIZAN\nAccount no: 02247991856303\nIBAN: PK59HABB0002247991856303\nBranch: Peshawar Cantt\n\nNayaPay\n03459148761\nMuhammad Faizan Malik\n\nEasypaisa\n03459148761\nMuhammad Faizan Malik\n\nSadaPay\n03459148761\nMuhammad Faizan Malik";
@@ -6368,7 +6368,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v170";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v171";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
