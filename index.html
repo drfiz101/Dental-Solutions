@@ -4094,8 +4094,8 @@ const INV_CSS=`
 .inv .thx{font-size:12px;color:#0F4F45}.inv .thx b{display:block;font-size:13px}
 .inv .gen{text-align:center;font-size:10px;color:#9aa9a5;margin-top:18px}
 `;
-function clinicDocs(){const c=S().clinic;if(Array.isArray(c.docs))return c.docs;
-  if(CLINIC==="alawan"||!CLINIC)return [{name:"Dr. M. Faizan Malik",lines:"BDS (RDS)\nC Implant\nMDS (PGT)\nOral & Maxillofacial Prosthodontist"},{name:"Dr. Shazia Sami",lines:"BDS (RDS)\nC Implant\nD-Ortho\nConsultant Dental Surgeon\nFor Ladies & Children"}];return []}
+function clinicDocs(){const c=S().clinic,al=CLINIC==="alawan"||!CLINIC,noPGT=d=>al?d.map(x=>({...x,lines:String(x.lines||"").split("\n").filter(l=>!/^\s*MDS\s*\(PGT\)\s*$/i.test(l)).join("\n")})):d;if(Array.isArray(c.docs))return noPGT(c.docs);
+  if(al)return [{name:"Dr. M. Faizan Malik",lines:"BDS (RDS)\nC Implant\nOral & Maxillofacial Prosthodontist"},{name:"Dr. Shazia Sami",lines:"BDS (RDS)\nC Implant\nD-Ortho\nConsultant Dental Surgeon\nFor Ladies & Children"}];return []}
 function clinicContact(){const c=S().clinic;const al=CLINIC==="alawan"||!CLINIC;return {web:c.web??(al?"al-awan-dental-clinic.business.site":""),fb:c.fb??(al?"facebook.com/alawandentalclinic":""),email:c.email??(al?"alawandentalclinic@gmail.com":""),addr:c.address??(al?"Saddique Colony, Eidgah Road, near Sui Gas Office, Faqirabad, Peshawar City, Pakistan":""),map:c.map??(al?"https://maps.app.goo.gl/z4J85xYLciUD9vZZ7":"")}}
 function invDocsHTML(){const d=clinicDocs();if(!d.length)return "";return `<div class="docs">${d.slice(0,3).map((x,i)=>`<div class="dc${i===d.length-1&&d.length>1?" r":""}"><b>${esc(x.name)}</b>${String(x.lines||"").split("\n").filter(Boolean).map(l=>`<span>${esc(l)}</span>`).join("")}</div>`).join("")}</div>`}
 const AL_PAY="Habib Bank Ltd (HBL)\nAccount title: MUHAMMAD FAIZAN\nAccount no: 02247991856303\nIBAN: PK59HABB0002247991856303\nBranch: Peshawar Cantt\n\nNayaPay\n03459148761\nMuhammad Faizan Malik\n\nEasypaisa\n03459148761\nMuhammad Faizan Malik\n\nSadaPay\n03459148761\nMuhammad Faizan Malik";
@@ -4409,6 +4409,7 @@ function proposalInner(pid,opt){opt=opt||{};const p=P[pid],pl=propOf(p),cl=planC
 .prop .nt{display:grid;grid-template-columns:96px 1fr;gap:10px;font-size:12px;padding:5px 0;border-bottom:1px dashed #e3ebe8;page-break-inside:avoid}.prop .nt span{white-space:pre-wrap}
 .prop .terms{margin:14px 36px 0;font-size:11.5px;color:#3d4d49;border-top:1px solid #e3ebe8;padding-top:10px}.prop .terms li{margin:2px 0}
 .prop .ttl h1{font-size:19px;letter-spacing:.08em}
+.prop .psum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 36px 10px}.prop .psum>div{border:1.5px solid #dfe8e5;border-radius:10px;padding:9px 12px;background:#f6faf9}.prop .psum span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#5b6b67;font-weight:700}.prop .psum b{display:block;font-size:18px;margin-top:2px;color:#12312b}.prop .psum .dc{background:#fff6e8;border-color:#f1d9ad}.prop .psum .dc b{color:#9a5b00}.prop .psum .fn{background:#12453c;border-color:#12453c}.prop .psum .fn span{color:#cfe5df}.prop .psum .fn b{color:#fff}
 </style>
 <div class="bar"></div>
 <div class="hd"><div class="brand">${logo?`<img src="${esc(logo)}" alt="">`:""}<div><p class="cn">${esc(c.name)}</p>${c.tagline?`<p class="tag">${esc(c.tagline)}</p>`:""}<div class="ci">Phone / WhatsApp: ${esc(c.phone)}<br>${esc(openDaysText())} · ${esc(fmtTime(c.open))} – ${esc(fmtTime(c.close))}</div></div></div>
@@ -4417,6 +4418,7 @@ ${invDocsHTML()}
 <div class="pt"><div><span>Patient</span><b>${esc(p.name||"")}</b></div><div><span>File no.</span>${esc(p.fileNo||"—")}</div>
 <div><span>Mobile</span>${esc(p.phone||"—")}</div><div><span>Age / sex</span>${esc([p.age?p.age+" y":"",p.gender||""].filter(Boolean).join(" · ")||"—")}</div>
 ${pl.dentist?`<div><span>Prepared by</span><em style="font-style:normal">${esc(pl.dentist)}${dm&&dm.title?`<br><small style="color:#5b6b67">${esc(dm.title)}</small>`:""}</em></div>`:""}${p.alerts?`<div><span>Medical</span>${esc(p.alerts)}</div>`:""}</div>
+<div class="psum"><div><span>Actual price</span><b>${rs(cl.sub)}</b></div><div class="dc"><span>Discount</span><b>${cl.disc?"− "+rs(cl.disc):"—"}</b></div><div class="fn"><span>Price after discount</span><b>${rs(cl.total)}</b></div></div>
 <div class="chart"><h4><span>Dental chart</span><span style="text-transform:none;letter-spacing:0">Patient's right ◂ ▸ Patient's left</span></h4><div class="row">${UPPER.map(T).join("")}</div><div class="mid"></div><div class="row">${LOWER.map(T).join("")}</div>${kids?`<div class="row kid">${CH_U.map(T).join("")}</div><div class="mid"></div><div class="row kid">${CH_L.map(T).join("")}</div>`:""}
 <div class="lg"><span><i style="background:#2E6BB8;border-color:#2E6BB8"></i>Treatment proposed</span>${FM.length?`<span><b>Full mouth:</b> ${esc(FM.join(", "))}</span>`:""}${Object.keys(finds).length?`<span><i style="border:2px solid #B3261E"></i>Caries</span><span><i style="background:#E3F2E8"></i>Filled</span><span><i style="background:#FBEFD9"></i>Root canal</span><span><i style="border:2px solid #0F7A68"></i>Crown</span><span><i style="background:#1d2b28"></i>Implant</span><span><i style="border:2px dashed #B3261E"></i>To extract</span><span><s>00</s> Missing</span>`:""}</div></div>
 ${opt.f&&Object.keys(finds).length?`<div class="fd"><b>Findings:</b>${Object.entries(finds).map(([v,ns])=>`<span>${esc(TOOTH_ST[v]||v)}: ${esc(ns.join(", "))}</span>`).join("")}</div>`:""}
@@ -4429,7 +4431,6 @@ ${cl.phases.flatMap(g=>g.its).map(it=>`<tr><td>${++k}</td><td>${esc(it.tr)}${it.
 ${(()=>{const xs=opt.x?(p.xrays||[]).filter(x=>!x.pdf&&localPhotos[x.fileId]):[];return xs.length?`<h3 class="sh">Radiographs</h3><div class="sec" style="margin-top:8px"><div class="xg">${xs.map(x=>`<figure><img src="${localPhotos[x.fileId]}" alt=""><figcaption><b>${esc(x.type)}</b>${x.teeth?" · "+esc(x.teeth):""} · ${esc(fmtDate(x.date))}${x.note?`<br>${esc(x.note)}`:""}</figcaption></figure>`).join("")}</div></div>`:""})()}
 ${opt.n&&(p.notes||[]).length?`<h3 class="sh">Clinical notes</h3><div class="sec" style="margin-top:4px">${p.notes.map(n=>`<div class="nt"><b>${esc(fmtDate(n.d))}</b><span>${esc(n.t)}</span></div>`).join("")}</div>`:""}
 <ul class="terms"><li>This is an estimate based on today's examination. If the treatment needed changes during care, we will discuss it with you first.</li><li>Prices and discounts are valid for 30 days from the date above. Payment is made as each treatment is done; orthodontic and prosthetic work needs an advance.</li><li>Treatment is usually done in the order shown. Please ask us about any option you'd like to discuss.</li></ul>
-${invPayHTML()}
 <div class="ft"><div class="thx"><b>Thank you for choosing ${esc(c.name)}.</b>For appointments or questions, call or WhatsApp ${esc(c.phone)}.</div><div class="sig cg">Computer-generated treatment plan.<br>No signature required.</div></div>
 ${invContactHTML()}
 <p class="gen">${esc(proposalNo(p,pl))} · ${esc(p.name||"")} · printed ${esc(fmtDate(today))}</p></div>`}
@@ -6367,7 +6368,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v169";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v170";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
