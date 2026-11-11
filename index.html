@@ -2337,7 +2337,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&secOpen&&!document.
 $("sub").addEventListener("change",e=>{activeType=e.target.value;render()});
 document.addEventListener("click",e=>{
   const v=e.target.closest(".viewbtn");if(v){view=v.dataset.view;localSet("aa-view",view);render();return}
-  const m=e.target.closest(".mainbtn");if(m&&m.dataset.main){main=m.dataset.main;localSet("aa-main",main);render();window.scrollTo(0,0)}
+  const m=e.target.closest(".mainbtn");if(m&&m.dataset.main){main=m.dataset.main;if(main==="appointments")apDate=ymd(new Date());localSet("aa-main",main);render();window.scrollTo(0,0)}
 });
 $("cq").addEventListener("input",()=>render());
 $("cabGrid").addEventListener("click",e=>{const b=e.target.closest("[data-edit]");if(b&&canWrite)openEdit(b.dataset.edit)});
@@ -3353,7 +3353,7 @@ $("apForm").addEventListener("submit",async e=>{
   const doc={...base,patientId:pid,patientName:p.name,phone:p.phone||"",date:d,time:t,dur:+$("ap-dur").value||30,chair:apChair,dentist:$("ap-dent").value,treatment:$("ap-tr").value.trim(),visit:$("ap-visitw").hidden?"":$("ap-visit").value,note:$("ap-note").value.trim()};
   const changed=!apEdit||base.date!==d||base.time!==t;
   if(changed){doc.confirmSentAt=null;doc.remindedAt=null;doc.confirmCount=0}
-  const id=apEdit||nid("a");cset("appts",id,doc);apdlg.close();apDate=d;
+  const id=apEdit||nid("a");cset("appts",id,doc);apdlg.close();
   const rp=apEdit?"":$("ap-rep").value,more=[],skipped=[];
   if(rp){const n=Math.min(24,Math.max(2,Math.floor(+$("ap-repn").value||2)));let cur=d;
     for(let k=1;k<n;k++){let nd=rp==="m"?addMonths(d,k):addDays(cur,+rp);if(!isOpen(nd))nd=nextOpen(nd);cur=rp==="m"?cur:nd;
@@ -3459,7 +3459,7 @@ function renderAppts(){
 const apShift=k=>{if(apMode==="week")apDate=addDays(apDate,7*k);else if(apMode==="month"){const [y,m]=apDate.split("-").map(Number);apDate=ymd(new Date(y,m-1+k,1))}else apDate=addDays(apDate,k);render()};
 $("ap-prev").addEventListener("click",()=>apShift(-1));
 $("ap-next").addEventListener("click",()=>apShift(1));
-$("ap-mode").addEventListener("click",e=>{const b=e.target.closest("[data-apm]");if(!b)return;apMode=b.dataset.apm;if(apMode==="week")apDate=ymd(new Date());try{localStorage.setItem("ds-apmode",apMode)}catch(x){}render()});
+$("ap-mode").addEventListener("click",e=>{const b=e.target.closest("[data-apm]");if(!b)return;apMode=b.dataset.apm;if(apMode==="week"||apMode==="day")apDate=ymd(new Date());try{localStorage.setItem("ds-apmode",apMode)}catch(x){}render()});
 $("ap-range").addEventListener("click",e=>{const r=e.target.closest("[data-aprop]");if(r){openAp(r.dataset.aprop);return}const d=e.target.closest("[data-apday]");if(d){apDate=d.dataset.apday;apMode="day";try{localStorage.setItem("ds-apmode","day")}catch(x){}render();window.scrollTo(0,0)}});
 $("ap-today").addEventListener("click",()=>{apDate=ymd(new Date());render()});
 $("ap-date").addEventListener("change",e=>{if(e.target.value){apDate=e.target.value;render()}});
@@ -4007,7 +4007,7 @@ $("ph-book").addEventListener("click",()=>{
     if(!pid){pid=nid("p");cset("patients",pid,{name:r.name,phone:r.phone,createdAt:new Date().toISOString(),fileNo:nextFileNo(),teeth:{},notes:[],alerts:""})}
     const p=P[pid],doc={status:"booked",createdAt:new Date().toISOString(),...me,patientId:pid,patientName:p.name,phone:p.phone||"",date:r.date,time:r.time,dur:30,chair:r.chair,dentist:r.dentist,treatment:r.treatment,note:multiMode?(r.note||""):(txMode?"From text":"From photo")+(r.note?" · "+r.note:""),confirmSentAt:null,remindedAt:null};
     const id=nid("a");cset("appts",id,doc);done.push({id,doc});r.on=false});
-  phDone=done;renderPhDone();if(done.length){apDate=done[0].doc.date;render()}
+  phDone=done;renderPhDone();if(done.length)render();
 });
 function renderPhDone(){
   const d=phDone||[];$("ph-foot").hidden=true;
@@ -6289,7 +6289,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v163";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v164";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
