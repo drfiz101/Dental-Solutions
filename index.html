@@ -724,6 +724,7 @@ body.no-pdf [data-tpcustom]{display:none!important}
 .popts{display:flex;flex-wrap:wrap;gap:8px;padding:2px 2px 8px;margin:4px 0 6px}.popts .popt:not(.new){flex:1 1 150px}.popt{position:relative;flex:none;display:flex;align-items:stretch;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);min-width:132px}.popt.on{border-color:var(--accent);background:var(--accent-soft);padding:7px 30px 7px 11px;flex-direction:column}.popt b{display:block;font-size:.88rem;white-space:nowrap}.popt small{display:block;font-size:.72rem;color:var(--muted);white-space:nowrap}.poptb{border:0;background:none;text-align:left;padding:7px 30px 7px 11px;cursor:pointer;color:inherit;font:inherit;flex:1}.poptx{position:absolute;top:4px;right:4px;border:0;background:none;color:var(--muted);cursor:pointer;width:24px;height:24px;border-radius:6px;font-size:.95rem}.poptx:hover{background:rgba(0,0,0,.06)}.popt.new{border-style:dashed;color:var(--accent);font-weight:700;padding:0 14px;cursor:pointer;align-items:center;justify-content:center;min-width:auto}.popth{margin:0 0 6px}
 .xadd{cursor:pointer}.xrt select.xrtype{display:block;width:100%;max-width:100%;font-family:inherit;font-weight:700;font-size:.78rem!important;min-height:0!important;height:auto!important;border:1px solid var(--line);border-radius:6px;background-color:var(--surface);color:inherit;padding:3px 22px 3px 6px!important;margin-bottom:2px;background-position:right 6px center}.prfiles{border:1px dashed var(--line);border-radius:12px;padding:8px 10px;margin:6px 0 10px}.prfh{display:flex;justify-content:space-between;align-items:center;gap:8px}.prfh b{font-size:.85rem}.prfh .btn{cursor:pointer}
 .prfb{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.prpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;max-height:55vh;overflow:auto;padding:4px}.prpi{position:relative;display:flex;flex-direction:column;gap:4px;border:2px solid var(--line);border-radius:12px;padding:6px;cursor:pointer;background:var(--surface)}.prpi input{position:absolute;opacity:0;pointer-events:none}.prpi img{width:100%;height:110px;object-fit:cover;border-radius:8px;background:var(--bg)}.prpi small{font-size:.74rem;color:var(--muted);line-height:1.25}.prpt{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.35);color:transparent;display:grid;place-items:center;font-weight:900;box-shadow:0 1px 4px rgba(0,0,0,.3)}.prpi.on{border-color:var(--accent);background:var(--accent-soft)}.prpi.on .prpt{background:var(--accent);color:#fff}.prpi:focus-within{outline:2px solid var(--accent)}
+.sgday{align-self:flex-start}.sgprev{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#fff}#sg-img{width:760px;transform-origin:0 0}.sgpre{white-space:pre-wrap;font-family:inherit;font-size:.86rem;line-height:1.45;background:#E7F6EE;border:1px solid #CBE9D8;border-radius:12px;padding:10px 12px;margin:0;max-height:42vh;overflow:auto}.sgbtns{display:flex;gap:8px;flex-wrap:wrap}.sgbtns .wa{flex:1;justify-content:center}.sgauto{border-top:1px solid var(--line);padding-top:8px}.sgauto summary{cursor:pointer;font-weight:700}.sgauto p{margin:6px 0}.sglink{display:flex;gap:6px;flex-wrap:wrap}.sglink select{flex:none;width:auto}.sglink input{flex:1;min-width:140px;font-size:.8rem}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 @media (max-width:460px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .kpi{background:var(--c-dash-soft);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -1383,7 +1384,7 @@ input[type=date]{min-width:0;max-width:100%}
   </section>
   <section id="apView" class="view cview" hidden>
     <div class="vhead">
-      <div class="mnav"><button class="btn" id="ap-prev" aria-label="Previous day">‹</button><div class="dwrap"><h2 id="ap-label"></h2><input type="date" id="ap-date" aria-label="Go to date"></div><button class="btn" id="ap-next" aria-label="Next day">›</button><button class="btn small" id="ap-today">Today</button><button class="btn small primary" id="ap-share" title="Share this day's appointments as a picture">📤 Share day</button></div>
+      <div class="mnav"><button class="btn" id="ap-prev" aria-label="Previous day">‹</button><div class="dwrap"><h2 id="ap-label"></h2><input type="date" id="ap-date" aria-label="Go to date"></div><button class="btn" id="ap-next" aria-label="Next day">›</button><button class="btn small" id="ap-today">Today</button><button class="btn small primary" id="ap-share" title="Share this day's appointments as a picture">📤 Send day</button></div>
       <div class="vact"><button class="btn" id="ap-team">Team</button><button class="btn" id="ap-set">WhatsApp messages &amp; hours</button><button class="btn" id="ap-photo" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:17px;height:17px;vertical-align:-3px;margin-right:4px"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>From photo</button><input type="file" id="ph-file" accept="image/*" multiple hidden><button class="btn" id="ap-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:17px;height:17px;vertical-align:-3px;margin-right:4px"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M8 9h8M8 12h8M8 15h5"/></svg>Photo or text</button><button class="btn" id="ap-multi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:17px;height:17px;vertical-align:-3px;margin-right:4px"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M8 17h3M14 13h2M14 17h2"/></svg>Book several</button><button class="btn" id="ap-newpat">+ New patient</button><button class="btn primary" id="ap-new">+ Book appointment</button></div>
     </div>
     <div class="labmode apmode" id="ap-mode"><button type="button" data-apm="day">📅 Day</button><button type="button" data-apm="week">🗓 Week</button><button type="button" data-apm="month">📆 Month</button></div>
@@ -1875,6 +1876,18 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="uleg"><span><i class="udot now"></i>Using now</span><span><i class="udot today"></i>Today</span><span><i class="udot week"></i>This week</span><span><i class="udot old"></i>Not recently</span><span><i class="udot never"></i>Never</span></div>
   <div id="use-list" class="ulist"></div>
 </div></dialog>
+<dialog id="sgdlg"><div class="dlg"><div class="dh"><h2>📤 Send appointments to the staff group</h2><button type="button" class="x" data-close aria-label="Close">×</button></div>
+  <div class="seg sgday" role="group" aria-label="Which day"><button type="button" data-sgd="0" aria-pressed="true">Today</button><button type="button" data-sgd="1" aria-pressed="false">Tomorrow</button><button type="button" data-sgd="x" aria-pressed="false" id="sg-other" hidden>—</button></div>
+  <div class="sgprev"><div id="sg-img"></div></div><pre id="sg-text" hidden></pre>
+  <div class="sgbtns"><button type="button" class="wa" id="sg-pic"><span>Send picture</span></button></div>
+  <p class="muted small" style="margin:0">Choose WhatsApp, pick your clinic group and press send.</p>
+  <details class="sgauto"><summary>⏰ Open this by itself every day</summary>
+    <p class="small">Set a daily phone alarm that opens this screen at your chosen time. Then you only tap <b>Send</b> and pick the group.</p>
+    <div class="field"><label>Link for the alarm</label><div class="sglink"><select id="sg-which"><option value="today">Today's list</option><option value="tomorrow">Tomorrow's list</option></select><input id="sg-url" readonly><button type="button" class="btn small" id="sg-copy">Copy</button></div></div>
+    <p class="small"><b>iPhone:</b> open the <b>Shortcuts</b> app → <b>Automation</b> → <b>＋</b> → <b>Time of Day</b> → choose the time, <b>Daily</b>, <b>Run Immediately</b> → <b>Next</b> → add the action <b>Open URLs</b> → paste the link → <b>Done</b>.</p>
+    <p class="small"><b>Android:</b> in <b>Google Calendar</b> make an event at your chosen time, set it to <b>repeat every day</b>, and paste the link in the description. When the reminder comes, tap the link.</p>
+    <p class="small muted">The link opens in the phone's browser. Log in to the app there once.</p>
+  </details></div></dialog>
 <dialog id="appshdlg"><div class="dlg">
   <h2>📲 Share the app</h2>
   <p class="muted small" style="margin:0">Send this to new staff. They open the link, sign in with the clinic code plus the username and password you made for them in <b>Staff access</b>, then tap "Add to Home Screen".</p>
@@ -5908,7 +5921,7 @@ async function enterClinic(u,seq){
 function openWorkspace(u,code,mem,seq){
   if(lsGet("ds-lockfix1")!=="1"){lsSet("ds-lockfix1","1");lsSet("ds-locked-"+u.uid,null)}
   if(false){const st=lsGet("ds-ao"),lim=(st!==null&&st!==""&&+st>=0?+st:AO_DEF)*60000,last=+lsGet("ds-last-"+u.uid)||0;if(lim&&last&&Date.now()-last>=lim)lsSet("ds-locked-"+u.uid,"1")}
-  CLINIC=code;MEM=mem;useClinicDefaults(code,CDOC);setTimeout(pwFlush,1500);setTimeout(()=>seenPing(true),4000);
+  CLINIC=code;MEM=mem;useClinicDefaults(code,CDOC);setTimeout(pwFlush,1500);setTimeout(()=>seenPing(true),4000);setTimeout(sgFromUrl,1200);
   const legacy=code==="alawan";db={collection:n=>legacy?fsRoot.collection(n):fsRoot.collection("clinics").doc(code).collection(n)};
   me={by:mem.username||u.email,uid:u.uid};myName=mem.name||mem.username||u.email;
   document.body.classList.add("ws-on");hideGate();$("login").hidden=true;$("who").hidden=false;$("whoName").textContent=myName;canWrite=true;$("notice").hidden=true;
@@ -6339,7 +6352,31 @@ async function shareDay(btn){const d=apDate,old=btn?btn.textContent:"";if(btn){b
     const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},4000);toast("Picture saved · share it on WhatsApp")}
   catch(e){toast(navigator.onLine===false?"Open this once with internet so the picture maker is saved.":"Couldn't make the picture")}
   finally{if(btn){btn.disabled=false;btn.textContent=old}}}
-$("ap-share").addEventListener("click",e=>shareDay(e.currentTarget));
+/* ===== Send the day's appointments to the staff WhatsApp group ===== */
+let sgDate=null;
+function sgPrev(){const el=$("sg-img");if(!el)return;el.innerHTML=dayImageHTML(sgDate);requestAnimationFrame(()=>{const w=el.parentNode.clientWidth||300,inner=el.firstElementChild;if(!inner)return;const sc=Math.min(1,w/760);el.style.transform=`scale(${sc})`;el.parentNode.style.height=Math.ceil(inner.offsetHeight*sc)+"px"})}
+function sgText(d){const c=S().clinic,day=Object.values(A).filter(a=>a.date===d&&a.status!=="cancelled").sort((a,b)=>String(a.time).localeCompare(String(b.time)));
+  const dl=new Date(d+"T00:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"short",year:"numeric"});
+  const row=a=>{const p=P[a.patientId]||{},nm=a.patientName||p.name||"Patient";return `${fmtTime(a.time)} · ${nm}${a.treatment?" — "+a.treatment:""}${a.dentist?" ("+a.dentist+")":""}${a.status==="confirmed"?" ✅":a.status==="done"?" ✔ done":a.status==="noshow"?" ✖ no-show":""}`};
+  let t=`*${c.name||"Clinic"}*\n*Appointments · ${dl}*\n`;
+  if(!isOpen(d))t+=`_Clinic closed on ${dayName(d)}s_\n`;
+  if(!day.length)return t+"\nNo appointments booked.";
+  t+=`Total: ${day.length}\n`;const chs=[...new Set(day.map(a=>String(a.chair||"1")))].sort();
+  for(const ch of chs){const its=day.filter(a=>String(a.chair||"1")===ch);t+=`\n*Chair ${ch}* (${its.length})\n`+its.map(row).join("\n")+"\n"}
+  return t.trim()}
+function sgLink(){const u=new URL(location.href.split("#")[0].split("?")[0]);u.searchParams.set("send",$("sg-which").value);return u.toString()}
+function openSG(d){sgDate=d||ymd(new Date());const td=ymd(new Date()),tm=addDays(td,1),oth=sgDate!==td&&sgDate!==tm;
+  $("sg-other").hidden=!oth;if(oth)$("sg-other").textContent=fmtDate(sgDate);
+  document.querySelectorAll("[data-sgd]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.sgd==="0"?sgDate===td:b.dataset.sgd==="1"?sgDate===tm:oth)));
+  sgPrev();$("sg-pic").innerHTML=WA_IC+"<span>Send picture</span>";$("sg-url").value=sgLink();if(!$("sgdlg").open)openD($("sgdlg"))}
+$("sgdlg").addEventListener("click",async e=>{const b=e.target.closest("[data-sgd]");if(b){if(b.dataset.sgd==="x")return;openSG(addDays(ymd(new Date()),+b.dataset.sgd));return}
+  if(e.target.closest("#sg-send")){const t=sgText(sgDate);if(!window.claude&&navigator.share&&/Android|iPhone|iPad/.test(navigator.userAgent)){try{await navigator.share({text:t});return}catch(x){if(x&&x.name==="AbortError")return}}window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank");return}
+  if(e.target.closest("#sg-pic")){const b2=e.target.closest("#sg-pic"),old=apDate;apDate=sgDate;try{await shareDay(b2)}finally{apDate=old;b2.innerHTML=WA_IC+"<span>Send picture</span>"}return}
+  if(e.target.closest("#sg-copy")){try{await navigator.clipboard.writeText($("sg-url").value);toast("Link copied")}catch(x){$("sg-url").select();toast("Select and copy the link")}}});
+$("sg-which").addEventListener("change",()=>{$("sg-url").value=sgLink()});
+function sgFromUrl(){try{const q=new URLSearchParams(location.search),v=q.get("send");if(!v)return;q.delete("send");history.replaceState(null,"",location.pathname+(q.toString()?"?"+q:"")+location.hash);
+  const d=v==="tomorrow"?addDays(ymd(new Date()),1):/^\d{4}-\d{2}-\d{2}$/.test(v)?v:ymd(new Date());main="appointments";apDate=d;render();setTimeout(()=>openSG(d),300);[2000,5000].forEach(ms=>setTimeout(()=>{if($("sgdlg").open)sgPrev()},ms))}catch(e){}}
+$("ap-share").addEventListener("click",()=>openSG(apDate));
 for(const ev of ["input","change"])$("ap-tr").addEventListener(ev,()=>apVisitUI());
 $("ap-vsadd").addEventListener("click",()=>openVisitStages($("ap-tr").value.trim()));
 $("vs-add").addEventListener("click",()=>{$("vs-list").insertAdjacentHTML("beforeend",vsCard());$("vs-list").lastElementChild.querySelector(".vs-n").focus()});
@@ -6422,7 +6459,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v179";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v180";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
