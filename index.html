@@ -727,7 +727,7 @@ body.no-pdf [data-tpcustom]{display:none!important}
 .sgday{align-self:flex-start}.sgprev{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#fff}#sg-img{width:760px;transform-origin:0 0}.sgpre{white-space:pre-wrap;font-family:inherit;font-size:.86rem;line-height:1.45;background:#E7F6EE;border:1px solid #CBE9D8;border-radius:12px;padding:10px 12px;margin:0;max-height:42vh;overflow:auto}.sgbtns{display:flex;gap:8px;flex-wrap:wrap}.sgbtns .wa{flex:1;justify-content:center}.sgauto{border-top:1px solid var(--line);padding-top:8px}.sgauto summary{cursor:pointer;font-weight:700}.sgauto p{margin:6px 0}.sglink{display:flex;gap:6px;flex-wrap:wrap}.sglink select{flex:none;width:auto}.sglink input{flex:1;min-width:140px;font-size:.8rem}
 .reqbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:#FFF3D6;border:1px solid #F1D9AD;color:#8A5200;border-radius:10px;padding:7px 10px;margin:6px 0;font-size:.85rem;font-weight:600}.reqbar span{flex:1 1 180px}.reqban{background:#FFF3D6;border:1.5px solid #F1C76B;border-radius:14px;padding:10px 12px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;color:#6B4300}.reqit{display:grid;grid-template-columns:auto 1fr;gap:0 10px;text-align:left;border:1px solid #F1D9AD;background:#fff;border-radius:10px;padding:7px 10px;cursor:pointer;color:inherit;font:inherit}.reqit span{grid-row:span 2;font-weight:700;font-size:.82rem;align-self:center}.reqit small{color:var(--muted)}.apc.st-request{border-left:4px solid #E0A72E}
 .cmbsteps{margin:0 0 6px;padding-left:18px}.cmbsteps li{margin:2px 0}
-.bkbox{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}.bkres summary{cursor:pointer;font-weight:700;font-size:.9rem}.bkhist{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow:auto}.bkh{display:flex;align-items:center;gap:8px;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:7px 10px}.bkh span{min-width:0}.bkh small{display:block;color:var(--muted);font-size:.75rem}
+.bkbox{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}.bkres summary{cursor:pointer;font-weight:700;font-size:.9rem}.bkhist{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow:auto}.bkh{display:flex;align-items:center;gap:8px;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:7px 10px}.bkh span{min-width:0}.drb{display:flex;gap:6px;flex:none}.btn.danger{background:#B42318;border-color:#B42318;color:#fff}.bkh small{display:block;color:var(--muted);font-size:.75rem}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 @media (max-width:460px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .kpi{background:var(--c-dash-soft);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -1880,6 +1880,7 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="uleg"><span><i class="udot now"></i>Using now</span><span><i class="udot today"></i>Today</span><span><i class="udot week"></i>This week</span><span><i class="udot old"></i>Not recently</span><span><i class="udot never"></i>Never</span></div>
   <div id="use-list" class="ulist"></div>
 </div></dialog>
+<dialog id="drdlg"><div class="dlg"><div class="dh"><h2>🗑 Delete requests</h2><button type="button" class="x" data-close aria-label="Close">×</button></div><p class="muted small" style="margin:0">Others asked to remove these from your main lists. Nothing is removed until you approve.</p><div id="dr-list" class="bkhist"></div></div></dialog>
 <dialog id="bkdlg" class="wide"><div class="dlg"><div class="dh"><h2>💾 Backup &amp; history</h2><button type="button" class="x" data-close aria-label="Close">×</button></div>
   <div class="bkbox"><div><b>Full backup file</b><p class="muted small" style="margin:2px 0 0">All patients, appointments, bills, inventory, lab cases, expenses and settings in one file. Save it to your phone or Google Drive.</p><p class="small" id="bk-last" style="margin:4px 0 0"></p></div><button type="button" class="btn primary" id="bk-dl">⬇ Download backup</button></div>
   <details class="bkres"><summary>Restore from a backup file</summary><p class="muted small">Puts back everything from the file: missing or changed records return to how they were in the backup. Records added after the backup are kept.</p><label class="btn small" style="cursor:pointer">Choose backup file<input type="file" id="bk-file" accept=".json,application/json" hidden></label><p class="small" id="bk-rinfo"></p></details>
@@ -2596,7 +2597,7 @@ $("p-qty").addEventListener("input",()=>{const q=+$("p-qty").value,p=+$("p-price
 $("p-price").addEventListener("input",()=>{const q=+$("p-qty").value,p=+$("p-price").value;if(q&&p)$("p-total").value=Math.round(q*p);priceHint()});
 $("p-total").addEventListener("input",()=>{const q=+$("p-qty").value,t=+$("p-total").value;if(q&&t)$("p-price").value=Math.round(t/q*100)/100;priceHint()});
 $("p-cancel").addEventListener("click",()=>pdlg.close());
-$("p-del").addEventListener("click",()=>{const b=$("p-del"),lid=editLogId,l=logs[lid];if(!l)return;
+$("p-del").addEventListener("click",()=>{const b=$("p-del"),lid=editLogId,l=logs[lid];if(!l)return;if(!delOK()){askDel("logs",lid);pdlg.close();return}
   if(!b.dataset.sure){b.dataset.sure="1";b.textContent=`Tap again to delete (takes ${l.qty} ${l.unit||""} off stock)`;return}
   if(l.kind==="purchase"){const it=current(l.itemId);if(it&&it.qty!=null)patch(l.itemId,{qty:Math.max(0,(+it.qty||0)-(+l.qty||0))},true,{noLog:true})}
   delLog(lid);editLogId=null;pdlg.close();toast("Purchase deleted")});
@@ -2696,7 +2697,7 @@ $("p-list").addEventListener("click",e=>{
   const d=e.target.closest("[data-ldel]");if(d){pendingDel=d.dataset.ldel;render();return}
   if(e.target.closest("[data-lkeep]")){pendingDel=null;render();return}
   const y=e.target.closest("[data-lyes]");
-  if(y){const l=logs[y.dataset.lyes];pendingDel=null;
+  if(y){const l=logs[y.dataset.lyes];pendingDel=null;if(askDel("logs",y.dataset.lyes))return;
     if(l&&l.kind==="purchase"){const it=current(l.itemId);if(it&&it.qty!=null)patch(l.itemId,{qty:Math.max(0,(+it.qty||0)-(+l.qty||0))},true,{noLog:true})}
     delLog(y.dataset.lyes);toast("Purchase record deleted")}
 });
@@ -2841,9 +2842,26 @@ function openNC(onlyNew){ncOnlyNew=!!onlyNew;ncF="all";ncRender();openD($("ncdlg
 let actPopDone=false;
 function actPopCheck(){if(actPopDone||!actCats().length)return;actPopDone=true;if(!actSeen()){actMarkSeen();return}const n=actUnread().length;if(n)openNC(true)}
 async function cset(coll,id,doc){try{const d=actDescribe(coll,STORES[coll]()[id],doc);if(d)actLog(d[0],d[1])}catch(e){}STORES[coll]()[id]=doc;render();if(!db)return;W(db.collection(coll).doc(id).set(doc),e=>/permission|invalid_argument/.test((e&&e.code)||"")?"This account can't change clinic records.":"Couldn't save.")}
-async function cdel(coll,id){try{const d=actDescribe(coll,STORES[coll]()[id],null);if(d)actLog(d[0],d[1])}catch(e){}delete STORES[coll]()[id];render();if(!db)return;W(db.collection(coll).doc(id).delete(),"Couldn't delete.")}
+/* ===== Only the admin deletes: everyone else sends a delete request ===== */
+const delOK=()=>isClinicOwner()||myRole()==="admin";
+function delLabel(coll,id){try{if(coll==="logs"){const l=logs[id]||{};return l.kind==="expense"?`Expense · ${l.cat||""} ${rs(l.amount||0)}`:l.kind==="purchase"?`Purchase · ${(current(l.itemId)||{}).name||l.name||"item"} · ${l.qty||""} ${l.unit||""}`:"Record"}
+  const d=STORES[coll]()[id]||{};if(coll==="patients")return "Patient · "+(d.name||"");if(coll==="appts")return `Appointment · ${d.patientName||""} · ${fmtDate(d.date)} ${fmtTime(d.time)}`;if(coll==="bills")return `Bill ${d.no||""} · ${d.patientName||""} · ${rs(billCalc(d).total)}`;
+  if(coll==="labcases")return d.kind==="bill"?`Lab bill · ${d.lab||""} ${d.billNo?"#"+d.billNo:""} · ${rs(d.amount||0)}`:d.kind==="implant"?`Implant entry · ${d.patientName||""} · ${d.supplier||""}`:`Lab case · ${d.patientName||""} · ${d.work||""} · ${d.lab||""}`;}catch(e){}return coll}
+function askDel(coll,id){return false;const rid="dr_"+coll+"_"+id;if(logs[rid]&&logs[rid].status==="pending"){setTimeout(()=>toast("Already sent to the admin for approval"),60);return true}
+  const doc={kind:"delreq",coll,docId:id,label:delLabel(coll,id),status:"pending",at:new Date().toISOString(),date:ymd(new Date()),who:myName||me.by||"",uid:me.uid||""};
+  logs[rid]=doc;if(db)db.collection("logs").doc(rid).set(doc).catch(()=>{});setTimeout(()=>toast("🔒 Only the admin can delete. Request sent for approval."),60);render();return true}
+async function cdel(coll,id,opt){if(!(opt&&opt.sys)&&askDel(coll,id))return false;try{const d=actDescribe(coll,STORES[coll]()[id],null);if(d)actLog(d[0],d[1])}catch(e){}delete STORES[coll]()[id];render();if(!db)return;W(db.collection(coll).doc(id).delete(),"Couldn't delete.")}
 /* save only the settings that changed, so one phone can't wipe out what another phone added */
-async function saveSet(next){const prev=SET||{};SET=next;render();if(!db)return;const ref=db.collection("settings").doc("main"),FV=firebase.firestore.FieldValue,diff={};
+/* removing entries from master lists (labs, suppliers, team...) needs the clinic owner's OK */
+const MASTER_KEYS={labs:"Labs",team:"Team",banks:"Payment methods",supDir:"Suppliers",suppliers:"Suppliers",prices:"Treatment prices",visitStages:"Visit stages",shares:"Dentist shares",dhours:"Dentist timings"};
+function masterRemovals(prev,next){const out=[];for(const k of Object.keys(MASTER_KEYS)){const a=prev[k],b=next[k];if(a==null)continue;
+    const names=v=>Array.isArray(v)?v.map(x=>typeof x==="object"&&x?(x.name||x.n||x.label||JSON.stringify(x)):String(x)):v&&typeof v==="object"?Object.keys(v):[];
+    const gone=names(a).filter(n=>!names(b).includes(n));if(gone.length)out.push({k,gone})}return out}
+async function saveSet(next,opt){const prev0=SET||{};if(!(opt&&opt.sys)&&SET_LOADED&&!isClinicOwner()){const rm=masterRemovals(prev0,next);if(rm.length){
+    const keys=rm.map(r=>r.k),rid="dr_set_"+Date.now(),doc={kind:"delreq",coll:"settings",keys,next:JSON.parse(JSON.stringify(Object.fromEntries(keys.map(k=>[k,next[k]===undefined?null:next[k]])))),label:rm.map(r=>`Remove from ${MASTER_KEYS[r.k]}: ${r.gone.slice(0,6).join(", ")}${r.gone.length>6?"…":""}`).join(" · "),status:"pending",at:new Date().toISOString(),date:ymd(new Date()),who:myName||me.by||"",uid:me.uid||""};
+    logs[rid]=doc;if(db)db.collection("logs").doc(rid).set(doc).catch(()=>{});
+    const keep={...next};for(const k of keys)keep[k]=prev0[k];next=keep;setTimeout(()=>toast("🔒 Removing "+rm.map(r=>MASTER_KEYS[r.k]).join(", ")+" needs the clinic owner's OK. Request sent; other changes saved."),80)}}
+  const prev=SET||{};SET=next;render();if(!db)return;const ref=db.collection("settings").doc("main"),FV=firebase.firestore.FieldValue,diff={};
   for(const k of Object.keys(next))if(JSON.stringify(next[k])!==JSON.stringify(prev[k]))diff[k]=next[k]===undefined?FV.delete():next[k];
   if(SET_LOADED)for(const k of Object.keys(prev))if(!(k in next))diff[k]=FV.delete();
   if(!Object.keys(diff).length)return;
@@ -3705,7 +3723,7 @@ $("bv").addEventListener("click",e=>{
   const pd=t.closest("[data-pdel]");if(pd){const pays=[...(b.payments||[])];pays.splice(+pd.dataset.pdel,1);cset("bills",bvId,{...b,payments:pays});renderBV();toast("Payment removed");return}
   if(t.closest("[data-bvdel]")){bvConf=true;renderBV();return}
   if(t.closest("[data-bvno]")){bvConf=false;renderBV();return}
-  if(t.closest("[data-bvyes]")){try{refSync(bvId,null)}catch(x){}cdel("bills",bvId);bvdlg.close();toast("Bill deleted");return}
+  if(t.closest("[data-bvyes]")){if(askDel("bills",bvId)){bvdlg.close();return}try{refSync(bvId,null)}catch(x){}cdel("bills",bvId);bvdlg.close();toast("Bill deleted");return}
   if(t.closest("[data-bvedit]")){bvdlg.close();openBill(bvId);return}
   const pr=t.closest("[data-bvprint]");if(pr){printBill(bvId);return}
   const pd2=t.closest("[data-bvpdf]");if(pd2){downloadBill(bvId,pd2);return}
@@ -4408,7 +4426,7 @@ function tpPaidTick(el){const pid=selPat,p=P[pid],pl=planOf(p),it=pl.items.find(
   if(b.autoItem!==it.id&&(b.items||[]).length>1){el.checked=t.bal<=0;toast("Bill "+(b.no||"")+" also has other treatments. Open it from Bills below to change its payments.");return}
   if(b.autoItem!==it.id){if(!confirm("Mark \""+it.tr+"\" as NOT paid?\n\nThe "+rs(t.paid)+" received on bill "+(b.no||"")+" will be removed. The bill stays as unpaid.")){el.checked=t.bal<=0;return}cset("bills",it.billId,{...b,payments:[]});toast("Marked not paid");return}
   if(!confirm("Mark \""+it.tr+"\" as NOT paid?\n\nThe "+rs(t.paid)+" payment"+((b.payments||[]).length>1?"s":"")+" on bill "+(b.no||"")+" will be removed.")){el.checked=t.bal<=0;return}
-  cdel("bills",it.billId);const pp=P[pid],l=planOf(pp);cset("patients",pid,{...pp,plan:{...l,items:l.items.map(i=>{if(i.id!==it.id)return i;const u={...i};delete u.billNo;delete u.billId;delete u.autoBill;return u}),updatedAt:new Date().toISOString()}});toast("Marked not paid")}
+  if(askDel("bills",it.billId)){el.checked=true;return}cdel("bills",it.billId,{sys:true});const pp=P[pid],l=planOf(pp);cset("patients",pid,{...pp,plan:{...l,items:l.items.map(i=>{if(i.id!==it.id)return i;const u={...i};delete u.billNo;delete u.billId;delete u.autoBill;return u}),updatedAt:new Date().toISOString()}});toast("Marked not paid")}
 async function tpPayFlow(it,left,editable){const pid=selPat,p=P[pid];const r=await payAsk({title:"Payment for "+it.tr,sub:(p?p.name+" · ":"")+(editable?"Full amount "+rs(left)+" — or enter a smaller amount for an advance.":"Full payment "+rs(left)),amount:left,max:left,editable});
   if(!r)return;const today=ymd(new Date()),pl=planOf(P[pid]),cur=pl.items.find(i=>i.id===it.id)||it,b=cur.billId&&B[cur.billId],amt=r.amount,net=itemNet(pl,cur);
   const pay={date:today,amount:amt,method:r.method,...(r.bank?{bank:r.bank}:{}),...(r.ref?{ref:r.ref}:{}),...(r.receipt?{receipt:r.receipt}:{}),auto:cur.id,...me};
@@ -5070,7 +5088,7 @@ function mergePatients(keep,drop){if(!P[keep]||!P[drop]||keep===drop)return;cons
   nk.alerts=[...new Set([k.alerts,d.alerts].filter(Boolean))].join("; ");nk.teeth={...(d.teeth||{}),...(k.teeth||{})};
   nk.plan=mp(k.plan,d.plan);nk.proposal=mp(k.proposal,d.proposal);
   nk.mergedFrom=[...(k.mergedFrom||[]),...(d.mergedFrom||[]),{name:d.name,fileNo:d.fileNo||"",phone:d.phone||"",at:new Date().toISOString(),by:myName||""}];
-  for(const x of ["plan","proposal"])if(!nk[x])delete nk[x];cset("patients",keep,nk);cdel("patients",drop);if(selPat===drop)selPat=keep}
+  for(const x of ["plan","proposal"])if(!nk[x])delete nk[x];cset("patients",keep,nk);cdel("patients",drop,{sys:true});if(selPat===drop)selPat=keep}
 const mgdlg=$("mgdlg");let mgA=null,mgB=null;
 const mgLbl=p=>[p.name,p.fileNo,p.phone].filter(Boolean).join(" · ");
 function mgCount(id){const p=P[id]||{};const n=(o,f)=>Object.values(o).filter(f).length;
@@ -5151,7 +5169,7 @@ $("exForm").addEventListener("submit",async e=>{e.preventDefault();const amt=Mat
   if(!db){logs["local-"+Date.now()]=doc;render();toast("Expense added");return}
   const ref=db.collection("logs").doc();logs[ref.id]=doc;render();W(ref.set(doc));toast("Expense added")});
 $("ex-cat").addEventListener("change",exDentSync);
-$("ex-del").addEventListener("click",()=>{const id=exEdit;exdlg.close();delLog(id);if(!db||id.startsWith("local-")){}toast("Expense deleted")});
+$("ex-del").addEventListener("click",()=>{const id=exEdit;exdlg.close();if(askDel("logs",id))return;delLog(id);if(!db||id.startsWith("local-")){}toast("Expense deleted")});
 /* report PDF */
 function repInner(){const [f,t]=rpRange(rpPer,rpAnchor),r=repData(rpPer,f,t),c=S().clinic,logo=(document.querySelector(".head-logo img")||{}).src||"";
   const title={day:"DAILY REPORT",week:"WEEKLY REPORT",month:"MONTHLY REPORT",year:"YEARLY REPORT"}[rpPer];
@@ -5809,7 +5827,7 @@ $("lab-bills").addEventListener("click",async e=>{const t=e.target;
   const v=t.closest("[data-lbview]");if(v)return showPhoto(v.dataset.lbview,v.dataset.lbt);
   const p=t.closest("[data-lbpaid]");if(p){const b=LC[p.dataset.lbpaid];cset("labcases",p.dataset.lbpaid,{...b,paid:true,paidOn:ymd(new Date())});toast("Lab bill marked paid");return}
   const d=t.closest("[data-lbdel]");if(d){lbDel=d.dataset.lbdel;renderLabBills();setTimeout(()=>{if(lbDel===d.dataset.lbdel){lbDel=null;renderLabBills()}},4000);return}
-  const y=t.closest("[data-lbyes]");if(y){const b=LC[y.dataset.lbyes];lbDel=null;cdel("labcases",y.dataset.lbyes);lbFiles(b).forEach(x=>delFileDoc(x.id));toast("Lab bill deleted")}
+  const y=t.closest("[data-lbyes]");if(y){const b=LC[y.dataset.lbyes];lbDel=null;if(askDel("labcases",y.dataset.lbyes)){renderLabBills();return}cdel("labcases",y.dataset.lbyes);lbFiles(b).forEach(x=>delFileDoc(x.id));toast("Lab bill deleted")}
 });
 $("lbbForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("lbb-err"),bfs=[...($("lbb-file").files||[])],f=bfs[0];
   if(!f&&!+$("lbb-amt").value){err.textContent="Attach the bill or enter the amount.";err.hidden=false;return}
@@ -6001,7 +6019,7 @@ swipeDel($("patRows"),".prow2","[data-pdelp]");swipeDel($("list"),".row","[data-
 const delBill=id=>{const b=B[id];if(!b||!can("bill_del"))return null;return ()=>{if(confirm("Delete bill "+(b.no||"")+" for "+(b.patientName||"")+"?\n\nIts payments ("+rs(billCalc(b).paid)+") will be removed too.")){try{refSync(id,null)}catch(x){}cdel("bills",id);toast("Bill deleted")}}};
 const delAppt=id=>{const a=A[id];if(!a||!can("appt_del"))return null;return ()=>{if(confirm("Delete the appointment for "+(a.patientName||"")+" on "+fmtDate(a.date)+" at "+fmtTime(a.time)+"?")){cdel("appts",id);toast("Appointment deleted")}}};
 const delLab=id=>{const c=LC[id];if(!c||!can("lab_edit"))return null;return ()=>{if(confirm("Delete the lab case for "+(c.patientName||"")+(c.work?" ("+c.work+")":"")+"?")){cdel("labcases",id);toast("Lab case deleted")}}};
-const delExp=id=>{const e=logs[id];if(!e||!can("money"))return null;return ()=>{if(confirm("Delete this expense: "+(e.cat||"")+" "+rs(e.amount)+"?")){delLog(id);toast("Expense deleted")}}};
+const delExp=id=>{const e=logs[id];if(!e||!can("money"))return null;return ()=>{if(confirm("Delete this expense: "+(e.cat||"")+" "+rs(e.amount)+"?")){if(askDel("logs",id))return;delLog(id);toast("Expense deleted")}}};
 swipeDel(document.body,".brow[data-bopen],.kvb[data-bopen]",r=>delBill(r.dataset.bopen));
 swipeDel(document.body,".apc",r=>{const x=r.querySelector("[data-apedit]");return x?delAppt(x.dataset.apedit):null});
 swipeDel(document.body,".kvb[data-apopen]",r=>delAppt(r.dataset.apopen));
@@ -6136,6 +6154,7 @@ function openMore(){const b=document.body,vis=id=>{const x=$(id);return x&&!x.hi
     !b.classList.contains("is-staff")&&["online","🌐 Online booking (Instagram / Facebook)","#C13584",'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'],
     !b.classList.contains("is-staff")&&["prices","Treatment prices","#AD620B",'<path d="M4 7h16M4 12h16M4 17h10"/>'],
     vis("profBtn")&&["profBtn","Clinic profile & WhatsApp messages"],vis("acBtn")&&["acBtn","Staff access"],vis("consoleBtn")&&["consoleBtn","Owner console"],
+    isClinicOwner()&&drPend().length&&["delreq","🗑 Delete requests ("+drPend().length+")","#B42318",'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'],
     isClinicOwner()&&["backup","💾 Backup & history","#0F766E",'<path d="M4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7"/><ellipse cx="12" cy="7" rx="8" ry="3"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>'],
     canSeeUse()&&["use","👥 Who's using the app","#2563EB",'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.7.8 2.7 2.5 3 5.2"/>'],
     ["share","📲 Share app link with staff","#16A34A",'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>'],
@@ -6185,6 +6204,7 @@ $("moreList").addEventListener("click",e=>{
   if(k==="online")return openOnline();
   if(k==="help")return openHelp();
   if(k==="share")return openShareApp();
+  if(k==="delreq")return openDr();
   if(k==="backup")return openBk();
   if(k==="use")return openUse();
   if(k==="lock")return lockApp();
@@ -6390,6 +6410,21 @@ async function shareDay(btn){const d=apDate,old=btn?btn.textContent:"";if(btn){b
   catch(e){toast(navigator.onLine===false?"Open this once with internet so the picture maker is saved.":"Couldn't make the picture")}
   finally{if(btn){btn.disabled=false;btn.textContent=old}}}
 
+
+const drPend=()=>Object.entries(logs).filter(([,l])=>l.kind==="delreq"&&l.status==="pending").map(([id,l])=>({id,...l})).sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+function openDr(){renderDr();openD($("drdlg"))}
+function renderDr(){const L=drPend();$("dr-list").innerHTML=L.length?L.map(r=>{const gone=r.coll==="settings"?false:r.coll==="logs"?!logs[r.docId]:!(STORES[r.coll]&&STORES[r.coll]()[r.docId]);const dt=new Date(r.at);
+  return `<div class="bkh"><span><b>${esc(r.label||r.coll)}</b><small>Asked by ${esc(r.who||"staff")} · ${esc(dt.toLocaleDateString("en-GB",{day:"numeric",month:"short"}))}, ${esc(dt.toLocaleTimeString("en-GB",{hour:"numeric",minute:"2-digit",hour12:true}))}${gone?" · already gone":""}</small></span><span class="drb"><button type="button" class="btn small" data-drno="${esc(r.id)}">Keep</button><button type="button" class="btn small danger" data-dryes="${esc(r.id)}">Delete</button></span></div>`}).join(""):`<p class="muted small">No delete requests waiting.</p>`}
+function drDo(r){const c=r.coll,id=r.docId;
+  if(c==="settings"){const nx={...SET};for(const k of r.keys||[]){if(r.next&&r.next[k]!=null)nx[k]=r.next[k];else delete nx[k]}saveSet(nx,{sys:true});return}
+  if(c==="logs"){const l=logs[id];if(l&&l.kind==="purchase"){const it=current(l.itemId);if(it&&it.qty!=null)patch(l.itemId,{qty:Math.max(0,(+it.qty||0)-(+l.qty||0))},true,{noLog:true})}if(l)delLog(id);return}
+  const st=STORES[c]&&STORES[c]();if(!st||!st[id])return;
+  if(c==="bills"){try{refSync(id,null)}catch(e){}for(const [pid,p] of Object.entries(P)){const pl0=planOf(p);if(pl0.items.some(i=>i.billId===id))cset("patients",pid,{...p,plan:{...pl0,items:pl0.items.map(i=>{if(i.billId!==id)return i;const u={...i};delete u.billNo;delete u.billId;delete u.autoBill;return u})}})}}
+  if(c==="labcases"&&st[id].kind==="bill")lbFiles(st[id]).forEach(x=>delFileDoc(x.id));
+  cdel(c,id,{sys:true})}
+$("dr-list").addEventListener("click",e=>{const y=e.target.closest("[data-dryes]"),n=e.target.closest("[data-drno]");const rid=(y||n)&&(y||n).dataset[y?"dryes":"drno"];if(!rid)return;const r=logs[rid];if(!r)return;
+  if(y)drDo(r);const upd={...r,status:y?"approved":"rejected",doneAt:new Date().toISOString(),doneBy:myName||""};logs[rid]=upd;if(db)db.collection("logs").doc(rid).set(upd).catch(()=>{});toast(y?"Deleted":"Kept · request turned down");renderDr();render()});
+setTimeout(()=>{try{if(isClinicOwner()&&drPend().length)toast("🗑 "+pl(drPend().length,"delete request")+" waiting · Menu → Delete requests")}catch(e){}},7000);
 /* ===== Backup & settings history (clinic admin) ===== */
 const BK_LBL={labs:"Labs",suppliers:"Suppliers",supDir:"Suppliers",supHidden:"Suppliers",prices:"Treatment prices",team:"Team",clinic:"Clinic profile",templates:"WhatsApp messages",online:"Online booking",menuOrder:"Menu order",banks:"Payment methods",shares:"Dentist shares",push:"Alerts",visitStages:"Visit stages",dhours:"Dentist timings",home:"Home screen"};
 const bkKey=()=>"ds-lastbk-"+(CLINIC||"alawan");
@@ -6528,7 +6563,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v185";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v186";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
