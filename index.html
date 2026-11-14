@@ -727,6 +727,7 @@ body.no-pdf [data-tpcustom]{display:none!important}
 .sgday{align-self:flex-start}.sgprev{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#fff}#sg-img{width:760px;transform-origin:0 0}.sgpre{white-space:pre-wrap;font-family:inherit;font-size:.86rem;line-height:1.45;background:#E7F6EE;border:1px solid #CBE9D8;border-radius:12px;padding:10px 12px;margin:0;max-height:42vh;overflow:auto}.sgbtns{display:flex;gap:8px;flex-wrap:wrap}.sgbtns .wa{flex:1;justify-content:center}.sgauto{border-top:1px solid var(--line);padding-top:8px}.sgauto summary{cursor:pointer;font-weight:700}.sgauto p{margin:6px 0}.sglink{display:flex;gap:6px;flex-wrap:wrap}.sglink select{flex:none;width:auto}.sglink input{flex:1;min-width:140px;font-size:.8rem}
 .reqbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:#FFF3D6;border:1px solid #F1D9AD;color:#8A5200;border-radius:10px;padding:7px 10px;margin:6px 0;font-size:.85rem;font-weight:600}.reqbar span{flex:1 1 180px}.reqban{background:#FFF3D6;border:1.5px solid #F1C76B;border-radius:14px;padding:10px 12px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;color:#6B4300}.reqit{display:grid;grid-template-columns:auto 1fr;gap:0 10px;text-align:left;border:1px solid #F1D9AD;background:#fff;border-radius:10px;padding:7px 10px;cursor:pointer;color:inherit;font:inherit}.reqit span{grid-row:span 2;font-weight:700;font-size:.82rem;align-self:center}.reqit small{color:var(--muted)}.apc.st-request{border-left:4px solid #E0A72E}
 .cmbsteps{margin:0 0 6px;padding-left:18px}.cmbsteps li{margin:2px 0}
+.bkbox{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}.bkres summary{cursor:pointer;font-weight:700;font-size:.9rem}.bkhist{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow:auto}.bkh{display:flex;align-items:center;gap:8px;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:7px 10px}.bkh span{min-width:0}.bkh small{display:block;color:var(--muted);font-size:.75rem}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 @media (max-width:460px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .kpi{background:var(--c-dash-soft);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -1879,6 +1880,11 @@ input[type=date]{min-width:0;max-width:100%}
   <div class="uleg"><span><i class="udot now"></i>Using now</span><span><i class="udot today"></i>Today</span><span><i class="udot week"></i>This week</span><span><i class="udot old"></i>Not recently</span><span><i class="udot never"></i>Never</span></div>
   <div id="use-list" class="ulist"></div>
 </div></dialog>
+<dialog id="bkdlg" class="wide"><div class="dlg"><div class="dh"><h2>💾 Backup &amp; history</h2><button type="button" class="x" data-close aria-label="Close">×</button></div>
+  <div class="bkbox"><div><b>Full backup file</b><p class="muted small" style="margin:2px 0 0">All patients, appointments, bills, inventory, lab cases, expenses and settings in one file. Save it to your phone or Google Drive.</p><p class="small" id="bk-last" style="margin:4px 0 0"></p></div><button type="button" class="btn primary" id="bk-dl">⬇ Download backup</button></div>
+  <details class="bkres"><summary>Restore from a backup file</summary><p class="muted small">Puts back everything from the file: missing or changed records return to how they were in the backup. Records added after the backup are kept.</p><label class="btn small" style="cursor:pointer">Choose backup file<input type="file" id="bk-file" accept=".json,application/json" hidden></label><p class="small" id="bk-rinfo"></p></details>
+  <h4 class="lbh" style="margin-top:6px">Settings history</h4><p class="muted small" style="margin:0">Every change to labs, suppliers, prices, team, messages and other settings. Restore puts that setting back to how it was before the change.</p>
+  <div id="bk-hist" class="bkhist"></div></div></dialog>
 <dialog id="sgdlg"><div class="dlg"><div class="dh"><h2>📤 Send appointments to the staff group</h2><button type="button" class="x" data-close aria-label="Close">×</button></div>
   <div class="seg sgday" role="group" aria-label="Which day"><button type="button" data-sgd="0" aria-pressed="true">Today</button><button type="button" data-sgd="1" aria-pressed="false">Tomorrow</button><button type="button" data-sgd="x" aria-pressed="false" id="sg-other" hidden>—</button></div>
   <div class="sgprev"><div id="sg-img"></div></div><pre id="sg-text" hidden></pre>
@@ -2841,6 +2847,9 @@ async function saveSet(next){const prev=SET||{};SET=next;render();if(!db)return;
   for(const k of Object.keys(next))if(JSON.stringify(next[k])!==JSON.stringify(prev[k]))diff[k]=next[k]===undefined?FV.delete():next[k];
   if(SET_LOADED)for(const k of Object.keys(prev))if(!(k in next))diff[k]=FV.delete();
   if(!Object.keys(diff).length)return;
+  if(SET_LOADED){try{const ks=Object.keys(diff),pv={};for(const k of ks)pv[k]=prev[k]===undefined?null:prev[k];const hid="sh_"+Date.now()+"_"+Math.random().toString(36).slice(2,6);
+    db.collection("logs").doc(hid).set({kind:"sethist",at:new Date().toISOString(),date:ymd(new Date()),keys:ks,prev:JSON.parse(JSON.stringify(pv)),who:myName||me.by||"",uid:me.uid||""}).catch(()=>{});
+    const old=Object.entries(logs).filter(([,l])=>l.kind==="sethist").sort((a,b)=>String(b[1].at).localeCompare(String(a[1].at))).slice(80);for(const [id] of old)db.collection("logs").doc(id).delete().catch(()=>{})}catch(e){}}
   W(ref.update(diff).catch(e=>{if(e&&(e.code==="not-found"||/No document/i.test(e.message||"")))return ref.set(next,{merge:true});throw e}),"Couldn't save settings.")}
 function startClinic(){
   if(!db||clinicStarted)return;clinicStarted=true;
@@ -6127,6 +6136,7 @@ function openMore(){const b=document.body,vis=id=>{const x=$(id);return x&&!x.hi
     !b.classList.contains("is-staff")&&["online","🌐 Online booking (Instagram / Facebook)","#C13584",'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'],
     !b.classList.contains("is-staff")&&["prices","Treatment prices","#AD620B",'<path d="M4 7h16M4 12h16M4 17h10"/>'],
     vis("profBtn")&&["profBtn","Clinic profile & WhatsApp messages"],vis("acBtn")&&["acBtn","Staff access"],vis("consoleBtn")&&["consoleBtn","Owner console"],
+    isClinicOwner()&&["backup","💾 Backup & history","#0F766E",'<path d="M4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7"/><ellipse cx="12" cy="7" rx="8" ry="3"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>'],
     canSeeUse()&&["use","👥 Who's using the app","#2563EB",'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.7.8 2.7 2.5 3 5.2"/>'],
     ["share","📲 Share app link with staff","#16A34A",'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>'],
     vis("installBtn")&&["installBtn","Install app on this phone"],["myPhoto","My photo"],["alBtn","Alerts & sounds"],["lookBtn","Appearance & layout"],["help","❓ Help & how to use"],vis("pwBtn")&&["pwBtn","Change password"],isSimple()?["classic","Switch to classic layout"]:["simple","Switch to simple layout"],["lock","🔒 Lock app"],["signOut","Sign out"]].filter(Boolean);
@@ -6175,6 +6185,7 @@ $("moreList").addEventListener("click",e=>{
   if(k==="online")return openOnline();
   if(k==="help")return openHelp();
   if(k==="share")return openShareApp();
+  if(k==="backup")return openBk();
   if(k==="use")return openUse();
   if(k==="lock")return lockApp();
   if(k==="shares")return openShares();
@@ -6378,6 +6389,38 @@ async function shareDay(btn){const d=apDate,old=btn?btn.textContent:"";if(btn){b
     const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},4000);toast("Picture saved · share it on WhatsApp")}
   catch(e){toast(navigator.onLine===false?"Open this once with internet so the picture maker is saved.":"Couldn't make the picture")}
   finally{if(btn){btn.disabled=false;btn.textContent=old}}}
+
+/* ===== Backup & settings history (clinic admin) ===== */
+const BK_LBL={labs:"Labs",suppliers:"Suppliers",supDir:"Suppliers",supHidden:"Suppliers",prices:"Treatment prices",team:"Team",clinic:"Clinic profile",templates:"WhatsApp messages",online:"Online booking",menuOrder:"Menu order",banks:"Payment methods",shares:"Dentist shares",push:"Alerts",visitStages:"Visit stages",dhours:"Dentist timings",home:"Home screen"};
+const bkKey=()=>"ds-lastbk-"+(CLINIC||"alawan");
+function bkAgo(){const t=lsGet(bkKey());if(!t)return null;return Math.floor((Date.now()-new Date(t).getTime())/864e5)}
+function openBk(){const d=bkAgo();$("bk-last").innerHTML=d==null?`<span class="due">No backup downloaded on this phone yet.</span>`:d===0?"✓ Last backup: today":`Last backup: ${pl(d,"day")} ago${d>=7?` · <span class="due">time for a new one</span>`:""}`;$("bk-rinfo").textContent="";renderBkHist();openD($("bkdlg"))}
+function renderBkHist(){const h=Object.entries(logs).filter(([,l])=>l.kind==="sethist").map(([id,l])=>({id,...l})).sort((a,b)=>String(b.at).localeCompare(String(a.at))).slice(0,40);
+  $("bk-hist").innerHTML=h.length?h.map(x=>{const nm=[...new Set((x.keys||[]).map(k=>BK_LBL[k]||"Other settings"))].join(", ");const dt=new Date(x.at);return `<div class="bkh"><span><b>${esc(nm)}</b> changed<small>${esc(dt.toLocaleDateString("en-GB",{day:"numeric",month:"short"}))}, ${esc(dt.toLocaleTimeString("en-GB",{hour:"numeric",minute:"2-digit",hour12:true}))}${x.who?" · by "+esc(x.who):""}${(x.keys||[]).includes("labs")&&Array.isArray(x.prev&&x.prev.labs)?` · before: ${esc(x.prev.labs.map(l=>l.name).filter(Boolean).join(", ")||"no labs")}`:""}</small></span><button type="button" class="btn small" data-bkrest="${esc(x.id)}">Restore</button></div>`}).join(""):`<p class="muted small">No settings changes recorded yet. From now on every change is kept here.</p>`}
+async function bkDownload(btn){const old=btn.textContent;btn.disabled=true;btn.textContent="Preparing…";
+  try{const data={patients:P,appts:A,bills:B,labcases:LC,items:overrides,logs:Object.fromEntries(Object.entries(logs).filter(([,l])=>l.kind!=="seen"&&l.kind!=="sethist")),settings:{main:SET}};
+    const n=Object.values(data).reduce((a,o)=>a+Object.keys(o||{}).length,0),file={app:"Dental Solutions",clinic:CLINIC||"alawan",clinicName:S().clinic.name||"",at:new Date().toISOString(),ver:APP_BUILD,counts:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,Object.keys(v||{}).length])),data};
+    const blob=new Blob([JSON.stringify(file)],{type:"application/json"}),name=`Backup-${(S().clinic.name||"clinic").replace(/[^A-Za-z0-9]+/g,"-")}-${ymd(new Date())}.json`,f=new File([blob],name,{type:"application/json"});
+    let done=false;if(!window.claude&&navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:name});done=true}catch(e){if(e&&e.name==="AbortError"){return}}}
+    if(!done){const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},4000)}
+    lsSet(bkKey(),new Date().toISOString());toast(`Backup ready · ${n} records`);openBk()}
+  catch(e){toast("Couldn't make the backup")}finally{btn.disabled=false;btn.textContent=old}}
+async function bkRestore(file){let j;try{j=JSON.parse(await file.text())}catch(e){return toast("This isn't a Dental Solutions backup file.")}
+  if(!j||j.app!=="Dental Solutions"||!j.data)return toast("This isn't a Dental Solutions backup file.");
+  if((j.clinic||"alawan")!==(CLINIC||"alawan"))return toast("This backup is from another clinic ("+(j.clinicName||j.clinic)+").");
+  const when=new Date(j.at).toLocaleString("en-GB",{day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit",hour12:true}),c=j.counts||{};
+  if(!confirm(`Restore the backup from ${when}?\n\n${c.patients||0} patients, ${c.appts||0} appointments, ${c.bills||0} bills, ${c.labcases||0} lab records, ${c.items||0} stock items.\n\nRecords in the backup go back to how they were then. Newer records are kept.`))return;
+  $("bk-rinfo").textContent="Restoring… keep the app open.";let n=0;const cols=["patients","appts","bills","labcases","items","logs"];
+  try{for(const col of cols){const m=j.data[col]||{},ids=Object.keys(m);for(let i=0;i<ids.length;i+=400){const bt=(fsRoot&&fsRoot.batch?fsRoot:db).batch();for(const id of ids.slice(i,i+400)){bt.set(db.collection(col).doc(id),m[id]);n++}await bt.commit();$("bk-rinfo").textContent=`Restoring… ${n} records`}}
+    if(j.data.settings&&j.data.settings.main)saveSet({...SET,...j.data.settings.main});
+    $("bk-rinfo").textContent=`✓ Restored ${n} records and the settings.`;toast("Backup restored")}
+  catch(e){$("bk-rinfo").textContent="Stopped: "+(e&&e.message||"couldn't restore")+". Try again with internet."}}
+$("bk-dl").addEventListener("click",e=>bkDownload(e.currentTarget));
+$("bk-file").addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];e.target.value="";if(f)bkRestore(f)});
+$("bk-hist").addEventListener("click",e=>{const b=e.target.closest("[data-bkrest]");if(!b)return;const x=logs[b.dataset.bkrest];if(!x||!x.prev)return;const nm=[...new Set((x.keys||[]).map(k=>BK_LBL[k]||"Other settings"))].join(", ");
+  if(!confirm(`Put "${nm}" back to how it was before this change?`))return;const nx={...SET};for(const k of x.keys||[]){if(x.prev[k]===null||x.prev[k]===undefined)delete nx[k];else nx[k]=x.prev[k]}saveSet(nx);toast(nm+" restored");setTimeout(renderBkHist,500)});
+/* weekly reminder for the clinic admin */
+setTimeout(()=>{try{if(!isClinicOwner())return;const d=bkAgo(),k="ds-bknag-"+ymd(new Date());if((d==null||d>=7)&&!lsGet(k)){lsSet(k,"1");toast("💾 Time for this week's backup · Menu → Backup & history")}}catch(e){}},9000);
 /* ===== Send the day's appointments to the staff WhatsApp group ===== */
 let sgDate=null;
 function sgPrev(){const el=$("sg-img");if(!el)return;el.innerHTML=dayImageHTML(sgDate);requestAnimationFrame(()=>{const w=el.parentNode.clientWidth||300,inner=el.firstElementChild;if(!inner)return;const sc=Math.min(1,w/760);el.style.transform=`scale(${sc})`;el.parentNode.style.height=Math.ceil(inner.offsetHeight*sc)+"px"})}
@@ -6485,7 +6528,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v184";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v185";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
