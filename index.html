@@ -2836,7 +2836,12 @@ let actPopDone=false;
 function actPopCheck(){if(actPopDone||!actCats().length)return;actPopDone=true;if(!actSeen()){actMarkSeen();return}const n=actUnread().length;if(n)openNC(true)}
 async function cset(coll,id,doc){try{const d=actDescribe(coll,STORES[coll]()[id],doc);if(d)actLog(d[0],d[1])}catch(e){}STORES[coll]()[id]=doc;render();if(!db)return;W(db.collection(coll).doc(id).set(doc),e=>/permission|invalid_argument/.test((e&&e.code)||"")?"This account can't change clinic records.":"Couldn't save.")}
 async function cdel(coll,id){try{const d=actDescribe(coll,STORES[coll]()[id],null);if(d)actLog(d[0],d[1])}catch(e){}delete STORES[coll]()[id];render();if(!db)return;W(db.collection(coll).doc(id).delete(),"Couldn't delete.")}
-async function saveSet(next){SET=next;render();if(!db)return;W(db.collection("settings").doc("main").set(next),"Couldn't save settings.")}
+/* save only the settings that changed, so one phone can't wipe out what another phone added */
+async function saveSet(next){const prev=SET||{};SET=next;render();if(!db)return;const ref=db.collection("settings").doc("main"),FV=firebase.firestore.FieldValue,diff={};
+  for(const k of Object.keys(next))if(JSON.stringify(next[k])!==JSON.stringify(prev[k]))diff[k]=next[k]===undefined?FV.delete():next[k];
+  if(SET_LOADED)for(const k of Object.keys(prev))if(!(k in next))diff[k]=FV.delete();
+  if(!Object.keys(diff).length)return;
+  W(ref.update(diff).catch(e=>{if(e&&(e.code==="not-found"||/No document/i.test(e.message||"")))return ref.set(next,{merge:true});throw e}),"Couldn't save settings.")}
 function startClinic(){
   if(!db||clinicStarted)return;clinicStarted=true;
   const sub=(c,fn)=>{try{clinicUnsubs.push(db.collection(c).onSnapshot(snap=>{const m={};for(const d of snap.docs){const v=d.data();if(v)m[d.id]=v}fn(m);softRender()},()=>{}))}catch(e){}};
@@ -6480,7 +6485,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v183";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v184";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
