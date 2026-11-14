@@ -5679,7 +5679,9 @@ function labPrice(labName,work){const l=labs().find(x=>x.name===labName),pr=(l&&
 function lcAutoCost(){const lp=labPrice($("lc-lab").value,$("lc-work").value),h=$("lc-costh");if(!lp||!lp.p){h.textContent="";return}
   const perT=/crown|bridge|veneer|post|core|inlay|onlay|implant|pfm|zircon/i.test(lp.work+" "+$("lc-work").value),n=perT?Math.max(1,teethOf($("lc-teeth").value).length):1,amt=lp.p*n;h.textContent=`${$("lc-lab").value}: ${rs(lp.p)} per ${perT?"tooth":"case"}${n>1?` × ${n} = ${rs(amt)}`:""}`;
   if(!$("lc-cost").dataset.manual)$("lc-cost").value=amt}
-const labs=()=>S().labs.filter(l=>l.name);
+const labs=()=>{const L=S().labs.filter(l=>l.name),have=new Set(L.map(l=>l.name.trim().toLowerCase())),extra=[];
+  for(const c of Object.values(LC||{})){const n=String(c&&c.lab||"").trim();if(!n||c.kind==="implant"||have.has(n.toLowerCase()))continue;have.add(n.toLowerCase());extra.push({name:n,auto:true})}
+  return [...L,...extra.sort((a,b)=>a.name.localeCompare(b.name))]};
 const lcList=()=>Object.entries(LC).filter(([,c])=>!c.kind).map(([id,c])=>({id,...c}));
 const lcLate=c=>["imp","sent","remake","trial"].includes(c.status||"sent")&&c.due&&c.due<ymd(new Date());
 function lcMsg(c){const l=labs().find(x=>x.name===c.lab)||{};return `Assalam o Alaikum${l.name?" "+l.name:""},\n\nNew case from *${S().clinic.name}*:\nPatient: ${c.patientName}\nWork: ${c.work||"-"}\nTeeth: ${c.teeth||"-"}\nShade: ${shadeText(c)||"-"}\nDentist: ${c.dentist||"-"}\nNeeded by: ${c.due?dayName(c.due)+" "+fmtDate(c.due):"-"}${c.note?"\nInstructions: "+c.note:""}\n\nJazakAllah.`}
@@ -5876,7 +5878,7 @@ $("lcForm").addEventListener("submit",async e=>{
 });
 const lbdlg=$("lbdlg");
 const lbCard=l=>{l=l||{days:7,works:[]};const [c,v]=splitPhone(l.phone||"");return `<div class="lbc"><div class="grid2"><div class="field"><label>Lab name</label><input class="lb-n" value="${esc(l.name||"")}" maxlength="60"></div><div class="field"><label>Turnaround (days)</label><input class="lb-d" type="number" min="1" max="60" value="${+l.days||7}"></div><div class="field span2"><label>WhatsApp</label><div class="phone"><select class="lb-cc cc" aria-label="Country code">${ccOpts(c)}</select><input class="lb-p" type="tel" value="${esc(v)}" placeholder="${ccHint(c)}"></div></div><div class="field span2"><label>Work they do, one per line. Add their charge after = (per tooth for crowns &amp; bridges, per case for dentures)</label><textarea class="lb-w" rows="4" placeholder="Zirconia crown = 5000">${esc((l.works||[]).map(w=>w+((l.prices||{})[w]?" = "+(l.prices||{})[w]:"")).join("\n"))}</textarea></div></div><button type="button" class="btn small danger-outline" data-lbrm>Remove lab</button></div>`};
-function openLabs(){$("lb-list").innerHTML=(S().labs.length?S().labs:[{}]).map(lbCard).join("");$("lb-err").hidden=true;openD(lbdlg)}
+function openLabs(){const LL=[...S().labs,...labs().filter(l=>l.auto).map(l=>({name:l.name}))];$("lb-list").innerHTML=(LL.length?LL:[{}]).map(lbCard).join("");$("lb-err").hidden=true;openD(lbdlg)}
 $("lb-add").addEventListener("click",()=>{$("lb-list").insertAdjacentHTML("beforeend",lbCard());$("lb-list").lastElementChild.querySelector(".lb-n").focus()});
 $("lb-list").addEventListener("click",e=>{if(e.target.closest("[data-lbrm]"))e.target.closest(".lbc").remove()});
 $("lbForm").addEventListener("submit",e=>{e.preventDefault();const L2=[...$("lb-list").querySelectorAll(".lbc")].map(r=>({name:r.querySelector(".lb-n").value.trim(),days:+r.querySelector(".lb-d").value||7,phone:composePhone(r.querySelector(".lb-cc").value,r.querySelector(".lb-p").value),...(()=>{const works=[],prices={};for(const ln of r.querySelector(".lb-w").value.split("\n")){const m=ln.match(/^(.*?)\s*[=|]\s*(?:rs\.?\s*)?([\d,]+)\s*(?:\/?\s*(?:per\s*)?tooth)?\s*$/i),w=(m?m[1]:ln).trim();if(!w)continue;works.push(w);if(m)prices[w]=+m[2].replace(/,/g,"")}return {works,prices}})()})).filter(l=>l.name);
@@ -6478,7 +6480,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v182";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v183";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
