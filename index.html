@@ -2857,22 +2857,24 @@ const MASTER_KEYS={labs:"Labs",team:"Team",banks:"Payment methods",supDir:"Suppl
 function masterRemovals(prev,next){const out=[];for(const k of Object.keys(MASTER_KEYS)){const a=prev[k],b=next[k];if(a==null)continue;
     const names=v=>Array.isArray(v)?v.map(x=>typeof x==="object"&&x?(x.name||x.n||x.label||JSON.stringify(x)):String(x)):v&&typeof v==="object"?Object.keys(v):[];
     const gone=names(a).filter(n=>!names(b).includes(n));if(gone.length)out.push({k,gone})}return out}
+/* settings live in "main2": phones still on an old version keep writing the old "main" and can no longer wipe anything */
+const SETDOC="main2";let setMig=false;
 async function saveSet(next,opt){const prev0=SET||{};if(!(opt&&opt.sys)&&SET_LOADED&&!isClinicOwner()){const rm=masterRemovals(prev0,next);if(rm.length){
     const keys=rm.map(r=>r.k),rid="dr_set_"+Date.now(),doc={kind:"delreq",coll:"settings",keys,next:JSON.parse(JSON.stringify(Object.fromEntries(keys.map(k=>[k,next[k]===undefined?null:next[k]])))),label:rm.map(r=>`Remove from ${MASTER_KEYS[r.k]}: ${r.gone.slice(0,6).join(", ")}${r.gone.length>6?"…":""}`).join(" · "),status:"pending",at:new Date().toISOString(),date:ymd(new Date()),who:myName||me.by||"",uid:me.uid||""};
     logs[rid]=doc;if(db)db.collection("logs").doc(rid).set(doc).catch(()=>{});
     const keep={...next};for(const k of keys)keep[k]=prev0[k];next=keep;setTimeout(()=>toast("🔒 Removing "+rm.map(r=>MASTER_KEYS[r.k]).join(", ")+" needs the clinic owner's OK. Request sent; other changes saved."),80)}}
-  const prev=SET||{};SET=next;render();if(!db)return;const ref=db.collection("settings").doc("main"),FV=firebase.firestore.FieldValue,diff={};
+  const prev=SET||{};SET=next;render();if(!db)return;const ref=db.collection("settings").doc(SETDOC),FV=firebase.firestore.FieldValue,diff={};
   for(const k of Object.keys(next))if(JSON.stringify(next[k])!==JSON.stringify(prev[k]))diff[k]=next[k]===undefined?FV.delete():next[k];
   if(SET_LOADED)for(const k of Object.keys(prev))if(!(k in next))diff[k]=FV.delete();
   if(!Object.keys(diff).length)return;
   if(SET_LOADED){try{const ks=Object.keys(diff),pv={};for(const k of ks)pv[k]=prev[k]===undefined?null:prev[k];const hid="sh_"+Date.now()+"_"+Math.random().toString(36).slice(2,6);
     db.collection("logs").doc(hid).set({kind:"sethist",at:new Date().toISOString(),date:ymd(new Date()),keys:ks,prev:JSON.parse(JSON.stringify(pv)),who:myName||me.by||"",uid:me.uid||""}).catch(()=>{});
     const old=Object.entries(logs).filter(([,l])=>l.kind==="sethist").sort((a,b)=>String(b[1].at).localeCompare(String(a[1].at))).slice(80);for(const [id] of old)db.collection("logs").doc(id).delete().catch(()=>{})}catch(e){}}
-  W(ref.update(diff).catch(e=>{if(e&&(e.code==="not-found"||/No document/i.test(e.message||"")))return ref.set(next,{merge:true});throw e}),"Couldn't save settings.")}
+  W(ref.update(diff).catch(e=>{if(e&&(e.code==="not-found"||/No document/i.test(e.message||"")))return ref.set(next);throw e}),"Couldn't save settings.")}
 function startClinic(){
   if(!db||clinicStarted)return;clinicStarted=true;
   const sub=(c,fn)=>{try{clinicUnsubs.push(db.collection(c).onSnapshot(snap=>{const m={};for(const d of snap.docs){const v=d.data();if(v)m[d.id]=v}fn(m);softRender()},()=>{}))}catch(e){}};
-  sub("patients",m=>P=m);sub("appts",m=>{try{apNewCheck(m)}catch(e){}A=m;try{obSchedule()}catch(e){}});sub("bills",m=>B=m);sub("labcases",m=>LC=m);sub("settings",m=>{SET=m.main||{};SET_LOADED=true;aoCheck();try{addWahaj()}catch(e){}});
+  sub("patients",m=>P=m);sub("appts",m=>{try{apNewCheck(m)}catch(e){}A=m;try{obSchedule()}catch(e){}});sub("bills",m=>B=m);sub("labcases",m=>LC=m);sub("settings",m=>{SET=m[SETDOC]||m.main||{};SET_LOADED=true;try{if(!m[SETDOC]&&m.main&&myRole()==="admin"&&db&&!setMig){setMig=true;db.collection("settings").doc(SETDOC).set(m.main).catch(()=>{setMig=false})}}catch(e){};aoCheck();try{addWahaj()}catch(e){}});
   try{clinicUnsubs.push(fsRoot.collection("bookings").doc(CLINIC||"alawan").collection("items").where("status","==","new").onSnapshot(sn=>{for(const d of sn.docs)obQueue(d.id,d.data())},()=>{}))}catch(e){}
 }
 /* one-time: add Dr Wahaj Anees to Al Awan's doctors (only once, so removing him later sticks) */
@@ -5460,14 +5462,14 @@ async function openUse(){if(!canSeeUse()&&!(isSuper()&&!pvReal))return;$("use-se
   const keyOf=x=>x.uid||"";const byUid={};for(const m of mem)byUid[m.uid]=m;
   const made=[];for(const [id,b] of Object.entries(B))if(b.createdAt&&b.uid)made.push({uid:b.uid,at:b.createdAt,text:`Bill ${b.no||""} · ${b.patientName||""}`,cat:"bill"});
   for(const [id,a] of Object.entries(A))if(a.createdAt&&a.uid)made.push({uid:a.uid,at:a.createdAt,text:`Booked ${a.patientName||""} · ${fmtDate(a.date)} ${fmtTime(a.time||"")}`,cat:"appt"});
-  const rows=mem.map(m=>{const sv=seen.filter(x=>x.uid===m.uid),last=sv.map(x=>x.last).sort().pop()||"",days7=new Set(sv.filter(x=>x.date>=d7).map(x=>x.date)).size,days30=new Set(sv.filter(x=>x.date>=d30).map(x=>x.date)).size,opT=(sv.find(x=>x.date===today)||{}).opens||0,dev=[...new Set(sv.map(x=>x.dev).filter(Boolean))].join(", ");
+  const rows=mem.map(m=>{const sv=seen.filter(x=>x.uid===m.uid),last=sv.map(x=>x.last).sort().pop()||"",days7=new Set(sv.filter(x=>x.date>=d7).map(x=>x.date)).size,days30=new Set(sv.filter(x=>x.date>=d30).map(x=>x.date)).size,opT=(sv.find(x=>x.date===today)||{}).opens||0,dev=[...new Set(sv.map(x=>x.dev).filter(Boolean))].join(", "),ver=((sv.slice().sort((a,b)=>String(a.last).localeCompare(String(b.last))).pop())||{}).ver||"";
     const my=[...acts.filter(a=>a.uid===m.uid||(!a.uid&&a.who&&a.who===(m.name||m.username))),...made.filter(x=>x.uid===m.uid)].sort((a,b)=>String(b.at).localeCompare(String(a.at)));
     const lastAct=my[0]&&my[0].at||"",lastAny=[last,lastAct].sort().pop()||"",a7=my.filter(x=>String(x.at).slice(0,10)>=d7).length;
-    return {m,last,lastAny,days7,days30,opT,dev,my,a7}}).sort((a,b)=>String(b.lastAny).localeCompare(String(a.lastAny)));
+    return {m,last,lastAny,days7,days30,opT,dev,ver,my,a7}}).sort((a,b)=>String(b.lastAny).localeCompare(String(a.lastAny)));
   const dot=r=>{if(!r.lastAny)return ["never","Never used"];const m=(Date.now()-new Date(r.lastAny).getTime())/60000;return m<15?["now","Using now"]:ymd(new Date(r.lastAny))===today?["today","Used today"]:m<7*1440?["week","This week"]:["old","Not recently"]};
   box.innerHTML=rows.length?rows.map((r,i)=>{const [c,lbl]=dot(r);return `<details class="usr"${i===0?"":""}><summary><span class="udot ${c}" title="${lbl}"></span><span class="un"><b>${esc(r.m.name||r.m.username)}</b><small>${esc(roleName(roleOf(r.m)))} · @${esc(r.m.username||"")}</small></span><span class="ul"><b>${esc(r.lastAny?agoTxt(r.lastAny):"never")}</b><small>${lbl}</small></span></summary>
     <div class="ug"><div><small>Opened app</small><b>${r.last?esc(agoTxt(r.last)):"—"}</b></div><div><small>Days used (7 / 30)</small><b>${r.days7} / ${r.days30}</b></div><div><small>Opened today</small><b>${r.opT}×</b></div><div><small>Actions (7 days)</small><b>${r.a7}</b></div></div>
-    ${r.dev?`<p class="muted small" style="margin:6px 0 0">📱 ${esc(r.dev)}</p>`:""}
+    ${r.dev||r.ver?`<p class="muted small" style="margin:6px 0 0">📱 ${esc(r.dev||"")}${r.ver?` · app ${esc(r.ver.replace("ds-v","v"))}${+r.ver.replace(/\D/g,"")<+APP_BUILD.replace(/\D/g,"")?` <b class="due">⚠ old version: open the app on this phone to update</b>`:" ✓ latest"}`:""}</p>`:""}
     ${r.my.length?`<div class="uacts">${r.my.slice(0,12).map(a=>`<div><span>${esc(a.text)}</span><small>${esc(agoTxt(a.at))}</small></div>`).join("")}</div>`:`<p class="muted small">No saved work yet.</p>`}</details>`}).join(""):`<p class="muted">No staff logins yet. Add people in Staff access, then share the app link.</p>`;
   $("use-note").textContent=`${rows.filter(r=>r.lastAny&&ymd(new Date(r.lastAny))===today).length} of ${rows.length} people used the app today. "Opened app" is recorded from today onwards; saved work goes back further.`}
 /* ===== Dental Solutions owner: usage across all clinics (no patient or money data) ===== */
@@ -6563,7 +6565,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v186";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v187";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
