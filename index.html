@@ -535,6 +535,7 @@ b.due{color:var(--warn)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .newp{background:var(--accent-soft);border-radius:10px;padding:10px 12px}
 .aptx{display:grid;grid-template-columns:1fr 110px 30px;gap:6px;align-items:center;margin-top:6px}.aptx:first-of-type{margin-top:0}.aptx input{width:100%!important;min-width:0}
+#ap-toplanw{display:flex!important;flex-direction:row!important;align-items:center!important;gap:8px!important;width:auto!important;margin-top:8px!important;font-weight:600;text-transform:none!important;letter-spacing:0!important}#ap-toplanw input{width:20px!important;height:20px!important;min-width:20px!important;flex:none!important;margin:0!important;padding:0!important;accent-color:var(--accent)}#ap-toplanw span{flex:1;white-space:normal}
 input[data-tpick]{cursor:pointer;background:color-mix(in srgb,var(--accent) 6%,var(--surface))!important}.aptx .x{border:0;background:none;font-size:1.1rem;color:var(--muted);cursor:pointer;padding:4px}
 .quick{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .qbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 9px;font-size:.75rem;color:var(--muted)}
@@ -1669,7 +1670,7 @@ input[type=date]{min-width:0;max-width:100%}
     <div class="field"><label for="ap-dent">Dentist</label><select id="ap-dent"></select></div>
   </div>
   <p class="muted small" id="ap-denthint" style="margin:0">Add your dentists under <b>Team</b> to assign them and stop double booking a dentist.</p>
-  <div class="field"><label for="ap-tr">Treatments for this visit</label><div class="aptx"><input id="ap-tr" class="l-t" list="tr-list" maxlength="80" placeholder="e.g. Extraction"><input id="ap-tooth" class="l-th" data-tpick readonly maxlength="80" placeholder="🦷 Teeth" aria-label="Teeth — tap to pick on the chart"><span></span></div><div id="ap-txs"></div><button type="button" class="linkbtn" id="ap-txadd" style="align-self:flex-start;font-size:.85rem;margin-top:6px">＋ Add another treatment</button><label class="small" id="ap-toplanw" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="ap-toplan" checked> Add to treatment plan &amp; tooth chart</label></div>
+  <div class="field"><label for="ap-tr">Treatments for this visit</label><div class="aptx"><input id="ap-tr" class="l-t" list="tr-list" maxlength="80" placeholder="e.g. Extraction"><input id="ap-tooth" class="l-th" data-tpick readonly maxlength="80" placeholder="🦷 Teeth" aria-label="Teeth — tap to pick on the chart"><span></span></div><div id="ap-txs"></div><button type="button" class="linkbtn" id="ap-txadd" style="align-self:flex-start;font-size:.85rem;margin-top:6px">＋ Add another treatment</button><label class="small" id="ap-toplanw" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="ap-toplan" checked><span>Add to treatment plan &amp; tooth chart</span></label></div>
   <div class="field" id="ap-visitw" hidden><label for="ap-visit" id="ap-visitl">Which visit?</label><select id="ap-visit"></select><small class="muted" id="ap-visith"></small></div>
   <button type="button" class="linkbtn" id="ap-vsadd" hidden style="align-self:flex-start;font-size:.85rem">＋ Add visit stages for this treatment</button>
   <div class="field"><label for="ap-note">Note</label><input id="ap-note" maxlength="160" placeholder="Optional"></div>
@@ -6614,7 +6615,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v196";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v197";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
