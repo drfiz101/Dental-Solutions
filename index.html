@@ -534,6 +534,7 @@ b.due{color:var(--warn)}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .newp{background:var(--accent-soft);border-radius:10px;padding:10px 12px}
+.aptx{display:grid;grid-template-columns:1fr 110px 30px;gap:6px;align-items:center;margin-top:6px}.aptx:first-of-type{margin-top:0}.aptx input{width:100%!important;min-width:0}.aptx .x{border:0;background:none;font-size:1.1rem;color:var(--muted);cursor:pointer;padding:4px}
 .quick{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .qbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 9px;font-size:.75rem;color:var(--muted)}
 .qbtn:hover{border-color:var(--bad);color:var(--bad)}
@@ -1220,6 +1221,9 @@ html:root body.no-money #dashView .dgrid>.card.d-rep,html:root body.no-money #da
 .shtw{overflow-x:auto}.shtb{width:100%;border-collapse:collapse;font-size:.86rem;font-variant-numeric:tabular-nums}.shtb th{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:right;padding:6px 4px;border-bottom:1px solid var(--line)}.shtb td{text-align:right;padding:8px 4px;border-bottom:1px solid var(--line);white-space:nowrap}.shtb th:first-child,.shtb td:first-child{text-align:left;white-space:normal}.shtb td small{display:block;color:var(--muted);font-size:.74rem}.shtb .shd{color:#B7791F;font-weight:700}.shtb .shc{color:var(--ok,#276B43);font-weight:700}.shtb tr.sum td{font-weight:700;border-bottom:0}
 .bvsh{margin-top:12px;border-radius:14px;background:var(--accent-soft);padding:10px 12px}.bvsh h4{margin:0 0 6px;font-size:.8rem}.bvsh select{width:100%;height:42px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;padding:0 8px}
 .vdl{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 10px;align-items:start}.vdl.off{opacity:.6}
+.vdr{display:grid;grid-template-columns:22px minmax(0,1fr) 74px 92px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.vdr.off{opacity:.5}.vdr>input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}.vdr b{font-size:.92rem;line-height:1.25}.vdr input:not([type=checkbox]){min-width:0;width:100%!important;height:38px;border:1.5px solid var(--line);border-radius:10px;padding:0 8px;font:inherit;background:var(--surface);color:var(--ink)}.vdr small{font-size:.75rem}
+.vdbill{display:grid;grid-template-columns:auto 90px 1fr;gap:10px;align-items:center;margin-top:14px;padding-top:12px;border-top:2px solid var(--ink)}.vdbill label{font-weight:700;font-size:.9rem}.vdbill input{width:100%!important;height:38px}.vdtg{display:flex;flex-direction:column;gap:6px}.vdtg button{text-align:left;padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;font-size:.9rem}.vdtg button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:700}.vdtg small{color:var(--muted);font-weight:400}
+.vdtot2{display:flex;justify-content:flex-end;gap:10px;align-items:baseline}.vdtot2 b{font-size:1.2rem;white-space:nowrap}
 .vdl>input[type=checkbox]{width:20px;height:20px;margin-top:3px;accent-color:var(--accent)}.vdf{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:6px}.vdf input{min-width:0;height:40px;border:1.5px solid var(--line);border-radius:10px;padding:0 8px;font:inherit;background:var(--surface);color:var(--ink)}
 .vdf b{align-self:center}.vdb{grid-column:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.86rem}.vdb small{color:var(--muted)}.vdq{display:inline-flex;gap:4px}.vdq button{height:32px;padding:0 12px;border:1.5px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font:inherit;font-weight:700;font-size:.82rem}.vdq button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink,#fff)}
 .vdtag{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}.vdtot{margin-top:10px}
@@ -1560,13 +1564,13 @@ input[type=date]{min-width:0;max-width:100%}
 <dialog id="vddlg" class="wide"><form class="dlg" id="vdForm" novalidate>
   <h2 id="vd-t">✓ Visit done</h2>
   <p class="muted" id="vd-sub" style="margin:0"></p>
-  <h3 class="h3s" style="margin-top:12px">Work done today</h3>
-  <p class="muted small" style="margin:0 0 6px">Ticked work is saved to the patient's chart and treatment record.</p>
+  <h3 class="h3s" style="margin-top:12px">What was done today?</h3>
   <div id="vd-list"></div>
-  <button type="button" class="btn small" id="vd-add" style="margin-top:8px">+ Add more work done</button>
-  <div id="vd-tot" class="vdtot"></div>
+  <button type="button" class="linkbtn" id="vd-add" style="margin-top:10px;align-self:flex-start">＋ Add treatment</button>
+  <div id="vd-tgw" hidden><p class="small" style="margin:12px 0 6px;font-weight:700">Which bill?</p><div class="vdtg" id="vd-tg"></div></div>
+  <div id="vd-billw" class="vdbill"><label for="vd-disc">Discount</label><input id="vd-disc" type="number" min="0" inputmode="numeric" placeholder="Rs 0"><div id="vd-tot" class="vdtot2"></div></div>
   <p class="perr" id="vd-err" hidden></p>
-  <div class="actions"><button type="button" class="btn" id="vd-skip">Just mark done</button><div><button type="button" class="btn" id="vd-cancel">Cancel</button><button type="submit" class="btn primary" id="vd-save">Save</button></div></div>
+  <div class="actions"><button type="button" class="btn" id="vd-cancel">Cancel</button><div><button type="button" class="btn" id="vd-nobill">Done, no bill</button><button type="submit" class="btn primary" id="vd-save">Save & make bill</button></div></div>
 </form></dialog>
 <dialog id="nxdlg"><div class="dlg">
   <h2>📅 Add another appointment?</h2>
@@ -1664,7 +1668,7 @@ input[type=date]{min-width:0;max-width:100%}
     <div class="field"><label for="ap-dent">Dentist</label><select id="ap-dent"></select></div>
   </div>
   <p class="muted small" id="ap-denthint" style="margin:0">Add your dentists under <b>Team</b> to assign them and stop double booking a dentist.</p>
-  <div class="field"><label for="ap-tr">Treatment</label><input id="ap-tr" list="tr-list" maxlength="80" placeholder="e.g. Root canal — molar"></div>
+  <div class="field"><label for="ap-tr">Treatments for this visit</label><div class="aptx"><input id="ap-tr" list="tr-list" maxlength="80" placeholder="e.g. Extraction"><input id="ap-tooth" maxlength="40" placeholder="Teeth e.g. 36 46" aria-label="Teeth"><span></span></div><div id="ap-txs"></div><button type="button" class="linkbtn" id="ap-txadd" style="align-self:flex-start;font-size:.85rem;margin-top:6px">＋ Add another treatment</button><label class="small" id="ap-toplanw" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="ap-toplan" checked> Add to treatment plan &amp; tooth chart</label></div>
   <div class="field" id="ap-visitw" hidden><label for="ap-visit" id="ap-visitl">Which visit?</label><select id="ap-visit"></select><small class="muted" id="ap-visith"></small></div>
   <button type="button" class="linkbtn" id="ap-vsadd" hidden style="align-self:flex-start;font-size:.85rem">＋ Add visit stages for this treatment</button>
   <div class="field"><label for="ap-note">Note</label><input id="ap-note" maxlength="160" placeholder="Optional"></div>
@@ -3407,10 +3411,27 @@ function openAp(id,pre){
   const dl=dentists();$("ap-dent").innerHTML=`<option value="">Not assigned</option>`+dl.map(m=>`<option value="${esc(m.name)}">${esc(m.name)}${m.title?" · "+esc(m.title):""}</option>`).join("")+(a.dentist&&!dl.some(m=>m.name===a.dentist)?`<option value="${esc(a.dentist)}">${esc(a.dentist)}</option>`:"");
   $("ap-dent").value=a.dentist||"";if(!id&&pre&&pre.treatment)$("ap-tr").value=pre.treatment;$("ap-denthint").hidden=dl.length>0;
   $("ap-d").value=a.date||apDate;$("ap-dur").value=String(a.dur||30);
-  apTimes(a.time||firstFree($("ap-d").value,apChair)||"");$("ap-tr").value=a.treatment||"";$("ap-note").value=a.note||"";apVisitUI(a.visit||"");
+  apTimes(a.time||firstFree($("ap-d").value,apChair)||"");apTxFill(a);$("ap-note").value=a.note||"";apVisitUI(a.visit||"");
   $("ap-del").hidden=!id;$("ap-conf").hidden=true;$("ap-err").hidden=true;
   apClash();openD(apdlg);if(!a.patientId)$("ap-pat").focus();
 }
+/* ---- several treatments in one visit → plan & tooth chart ---- */
+const TX_SKIP=/check.?up|consult|review|recall|follow.?up|examination|opd|x-?ray only|suture removal|dressing change/i;
+function apTxRow(tr,tooth){const d=document.createElement("div");d.className="aptx";d.innerHTML=`<input data-txt list="tr-list" maxlength="80" placeholder="Treatment" aria-label="Treatment" value="${esc(tr||"")}"><input data-tth maxlength="40" placeholder="Teeth" aria-label="Teeth" value="${esc(tooth||"")}"><button type="button" class="x" data-txdel aria-label="Remove">✕</button>`;$("ap-txs").appendChild(d);return d}
+function apTxFill(a){$("ap-txs").innerHTML="";const L=Array.isArray(a.txs)&&a.txs.length?a.txs:[{tr:a.treatment||"",tooth:""}];$("ap-tr").value=L[0].tr||"";$("ap-tooth").value=L[0].tooth||"";for(const x of L.slice(1))apTxRow(x.tr,x.tooth);$("ap-toplan").checked=a.toPlan!==false}
+function apTxRead(){const L=[{tr:$("ap-tr").value.trim(),tooth:$("ap-tooth").value.trim()}];for(const r of $("ap-txs").children)L.push({tr:r.querySelector("[data-txt]").value.trim(),tooth:r.querySelector("[data-tth]").value.trim()});return L.filter(x=>x.tr)}
+$("ap-txadd").addEventListener("click",()=>{apTxRow("","").querySelector("[data-txt]").focus()});
+$("ap-txs").addEventListener("click",e=>{const b=e.target.closest("[data-txdel]");if(b)b.closest(".aptx").remove()});
+function apPr(t){const pr=priceFor(t),a=String(t).toLowerCase().trim();return pr&&(pr.n.toLowerCase().includes(a)||a.includes(pr.n.toLowerCase()))?pr:null}
+function apTxToPlan(pid,apId,txs,oldIds,d){const p=P[pid];if(!p)return [];const pl=planOf(p),now=new Date().toISOString();let items=pl.items.slice();const ids=[],used=new Set();
+  for(const x of txs){if(TX_SKIP.test(x.tr))continue;const ts=teethOf(x.tooth).filter(n=>n<50),tk=ts.slice().sort().join(",");
+    const ex=items.find(i=>!i.done&&!used.has(i.id)&&vdMatch(x.tr,i.tr)&&(teethOf(i.tooth).filter(n=>n<50).sort().join(",")===tk||(!tk&&(oldIds||[]).includes(i.id))));
+    if(ex){used.add(ex.id);ids.push(ex.id);if(ex.fromAp===apId&&ex.tooth!==x.tooth)items=items.map(i=>i.id===ex.id?{...i,tooth:x.tooth}:i);continue}
+    const pr=apPr(x.tr),lc=lastCharge(pid,pr?pr.n:x.tr),it={id:nid("tp"),tr:pr?pr.n:x.tr,tooth:x.tooth||"",qty:ts.length&&ts.length<28?ts.length:1,price:lc?+lc.price||0:(pr?+pr.p||0:0),phase:tpGuessPhase(x.tr),note:"Booked "+fmtDate(d),done:false,fromAp:apId};
+    items.push(it);ids.push(it.id);used.add(it.id)}
+  const drop=new Set((oldIds||[]).filter(i=>!ids.includes(i)));items=items.filter(i=>!(drop.has(i.id)&&i.fromAp===apId&&!i.done&&!i.billNo));
+  if(JSON.stringify(items)!==JSON.stringify(pl.items))cset("patients",pid,{...P[pid],plan:{...pl,items,updatedAt:now,createdAt:pl.createdAt||now}});
+  return ids}
 function apConflicts(){return overlaps($("ap-d").value,apChair,$("ap-t").value,$("ap-dur").value,apEdit,$("ap-dent").value)}
 let apNew=false;
 function setApNew(on){apNew=on;$("ap-patwrap").hidden=on;$("ap-newp").hidden=!on;$("ap-toggle-new").textContent=on?"Choose a registered patient":"+ New patient";$("ap-newmsg").textContent="New patient · a file number is given automatically"}
@@ -3433,15 +3454,20 @@ $("apForm").addEventListener("submit",async e=>{
   if(!isOpen(d)){err.textContent=`The clinic is closed on ${dayName(d)}s. Please choose ${openDaysText()}.`;err.hidden=false;$("ap-d").focus();return}
   const clash=apConflicts();if(clash.length){apClash();err.textContent="This time is already booked. Choose a free time, another OT or another dentist.";err.hidden=false;return}
   const base=apEdit?A[apEdit]:{status:"booked",createdAt:new Date().toISOString(),...me};
-  const doc={...base,patientId:pid,patientName:p.name,phone:p.phone||"",date:d,time:t,dur:+$("ap-dur").value||30,chair:apChair,dentist:$("ap-dent").value,treatment:$("ap-tr").value.trim(),visit:$("ap-visitw").hidden?"":$("ap-visit").value,note:$("ap-note").value.trim()};
+  const doc={...base,patientId:pid,patientName:p.name,phone:p.phone||"",date:d,time:t,dur:+$("ap-dur").value||30,chair:apChair,dentist:$("ap-dent").value,treatment:apTxRead().map(x=>x.tr).join(" + "),txs:apTxRead(),toPlan:$("ap-toplan").checked,visit:$("ap-visitw").hidden?"":$("ap-visit").value,note:$("ap-note").value.trim()};
   const changed=!apEdit||base.date!==d||base.time!==t;
   if(changed){doc.confirmSentAt=null;doc.remindedAt=null;doc.confirmCount=0}
-  const id=apEdit||nid("a");cset("appts",id,doc);apdlg.close();
+  const id=apEdit||nid("a");
+  {const T=doc.txs;if(!(T.length>1||T.some(x=>x.tooth)))doc.txs=null;
+   const old=apEdit&&base.patientId===pid?(base.planIds||[]):[];
+   if(doc.toPlan&&T.length){const ids=apTxToPlan(pid,id,T,old,d);doc.planIds=ids;if(ids.length&&!old.length)setTimeout(()=>toast("Added to treatment plan & tooth chart"),900)}
+   else if(old.length){apTxToPlan(pid,id,[],old,d);doc.planIds=[]}}
+  cset("appts",id,doc);apdlg.close();
   const rp=apEdit?"":$("ap-rep").value,more=[],skipped=[];
   if(rp){const n=Math.min(24,Math.max(2,Math.floor(+$("ap-repn").value||2)));let cur=d;
     for(let k=1;k<n;k++){let nd=rp==="m"?addMonths(d,k):addDays(cur,+rp);if(!isOpen(nd))nd=nextOpen(nd);cur=rp==="m"?cur:nd;
       if(overlaps(nd,doc.chair,doc.time,doc.dur,null,doc.dentist).length){skipped.push(nd);continue}
-      const d2={...doc,date:nd,createdAt:new Date().toISOString(),confirmSentAt:null,remindedAt:null,status:"booked",note:(doc.note?doc.note+" · ":"")+`Visit ${k+1} of ${n}`};
+      const d2={...doc,planIds:[],date:nd,createdAt:new Date().toISOString(),confirmSentAt:null,remindedAt:null,status:"booked",note:(doc.note?doc.note+" · ":"")+`Visit ${k+1} of ${n}`};
       cset("appts",nid("a"),d2);more.push(nd)}}
   if(changed)showBooked(id,doc,!!apEdit);else toast("Appointment saved");
   if(more.length||skipped.length){$("wa-p").textContent+=` · ${more.length?`+${pl(more.length,"more visit")} booked: `+more.map(x=>fmtDate(x)).join(", "):""}${skipped.length?` · Not booked (already taken): ${skipped.map(x=>fmtDate(x)).join(", ")}`:""}`}
@@ -3584,40 +3610,61 @@ function lastCharge(pid,desc){const d=String(desc||"").trim().toLowerCase().repl
   return best}
 const vdMatch=(a,b)=>{const tk=x=>String(x||"").toLowerCase().replace(/\brct\b/g,"root canal").split(/[^a-z]+/).filter(w=>w.length>2&&!["per","with","the","and","tooth","arch","visit"].includes(w));const A1=tk(a),B1=new Set(tk(b));return A1.length&&A1.some(w=>B1.has(w))};
 function visitDone(id){const a=A[id];if(!a)return;const p=P[a.patientId];vdAp=id;vdLines=[];
-  const pl=p?planOf(p):emptyPlan(),pend=pl.items.filter(i=>!i.done),tr=String(a.treatment||"").replace(/^(trial|fitting):\s*/i,"").trim(),hit=pend.filter(i=>tr&&vdMatch(tr,i.tr));
-  for(const i of pend)vdLines.push({key:nid("v"),src:"plan",planId:i.id,desc:i.tr,tooth:i.tooth||"",qty:+i.qty||1,price:itemNet(pl,i),done:hit.includes(i),bill:true,billed:i.billNo||""});
-  if(!hit.length&&tr){const pr=priceFor(tr),lc=lastCharge(a.patientId,pr?pr.n:tr);vdLines.unshift({key:nid("v"),src:"ap",desc:pr?pr.n:tr,tooth:"",qty:1,price:lc?lc.price:(pr?+pr.p||0:0),done:true,bill:true})}
+  const pl=p?planOf(p):emptyPlan(),pend=pl.items.filter(i=>!i.done),tr=String(a.treatment||"").replace(/^(trial|fitting):\s*/i,"").trim(),ids=a.planIds||[],hit=pend.filter(i=>ids.includes(i.id)||(!ids.length&&tr&&!(a.txs&&a.txs.length>1)&&vdMatch(tr,i.tr)));
+  for(const i of pend)vdLines.push({key:nid("v"),src:"plan",planId:i.id,desc:i.tr,tooth:i.tooth||"",qty:+i.qty||1,price:Math.round(itemNet(pl,i)/(+i.qty||1)),done:hit.includes(i),bill:true,billed:i.billNo||""});
+  if(a.txs&&a.txs.length>1||(a.txs&&a.txs[0]&&a.txs[0].tooth)){for(const x of a.txs.slice().reverse()){if(hit.some(i=>vdMatch(x.tr,i.tr)))continue;const pr=apPr(x.tr),lc=lastCharge(a.patientId,pr?pr.n:x.tr),ts=teethOf(x.tooth);vdLines.unshift({key:nid("v"),src:"ap",desc:pr?pr.n:x.tr,tooth:x.tooth||"",qty:ts.length&&ts.length<28?ts.length:1,price:lc?lc.price:(pr?+pr.p||0:0),done:true,bill:true})}}
+  else if(!hit.length&&tr){const pr=priceFor(tr),lc=lastCharge(a.patientId,pr?pr.n:tr);vdLines.unshift({key:nid("v"),src:"ap",desc:pr?pr.n:tr,tooth:"",qty:1,price:lc?lc.price:(pr?+pr.p||0:0),done:true,bill:true})}
   $("vd-t").textContent="✓ Visit done · "+(a.patientName||"Patient");$("vd-sub").textContent=`${fmtDate(a.date)}, ${fmtTime(a.time)} · OT ${a.chair||""}${a.dentist?" · "+a.dentist:""}${a.treatment?" · booked for "+a.treatment:""}`;
-  $("vd-err").hidden=true;vdRender();openD($("vddlg"))}
+  $("vd-err").hidden=true;$("vd-disc").value="";{const c=vdCands(),fromPlan=vdLines.some(l=>l.done&&l.src==="plan");const pc=c.find(x=>x.k==="plan"),tc=c.find(x=>x.k==="today");vdTarget=fromPlan&&pc?pc.id:tc?tc.id:pc?pc.id:"new"}vdRender();openD($("vddlg"))}
 function vdRender(){const canB=can("bill_edit");trOpts();
-  $("vd-list").innerHTML=vdLines.length?vdLines.map(l=>`<div class="vdl${l.done?"":" off"}" data-vk="${l.key}"><input type="checkbox" data-vdone ${l.done?"checked":""} aria-label="Done: ${esc(l.desc||"work")}"><div class="vdf">${l.src==="plan"?`<b>${esc(l.desc)} <span class="vdtag">From plan</span></b><input data-vf="tooth" placeholder="Tooth" value="${esc(l.tooth)}" aria-label="Tooth">`:`<input data-vf="desc" list="tr-list" placeholder="Treatment" value="${esc(l.desc)}" aria-label="Treatment"><input data-vf="tooth" placeholder="Tooth" value="${esc(l.tooth)}" aria-label="Tooth">`}<input data-vf="price" type="number" min="0" inputmode="numeric" placeholder="Rs" value="${l.price||""}" aria-label="Price in rupees"${l.billed?" disabled":""}></div>
-    ${canB&&l.done?`<div class="vdb">${l.billed?`<small>Already on bill ${esc(l.billed)}</small>`:l.src==="new"?`<span>Add to the bill?</span><span class="vdq"><button type="button" data-vbill="1" aria-pressed="${l.bill===true}">Yes, add</button><button type="button" data-vbill="0" aria-pressed="${l.bill===false}">No</button></span>`:`<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-vbillc ${l.bill?"checked":""}> Add to the bill</label>`}</div>`:""}</div>`).join(""):`<p class="muted small">Nothing booked for this visit. Tap <b>+ Add more work done</b>.</p>`;
-  const bl=vdLines.filter(l=>l.done&&l.bill===true&&!l.billed&&l.desc),tot=bl.reduce((a,l)=>a+(+l.price||0)*(+l.qty||1),0);
-  $("vd-tot").innerHTML=canB?(bl.length?`<div class="kv tot"><span>New bill · ${pl(bl.length,"item")}</span><b>${rs(tot)}</b></div>`:`<p class="muted small" style="margin:0">No bill will be made.</p>`):"";
-  $("vd-save").textContent=canB&&bl.length?"Save & make bill":"Save"}
+  const row=l=>`<div class="vdr${l.done?"":" off"}" data-vk="${l.key}"><input type="checkbox" data-vdone ${l.done?"checked":""} aria-label="Done: ${esc(l.desc||"work")}">${l.src==="new"?`<input data-vf="desc" list="tr-list" placeholder="Treatment" value="${esc(l.desc)}" aria-label="Treatment">`:`<b>${esc(l.desc)}</b>`}<input data-vf="tooth" placeholder="Teeth" value="${esc(l.tooth)}" aria-label="Teeth">${canB?(l.billed?`<small class="muted">Billed ${esc(l.billed)}</small>`:`<input data-vf="amt" type="number" min="0" inputmode="numeric" placeholder="Rs" value="${(+l.price||0)*(+l.qty||1)||""}" aria-label="Amount in rupees">`):"<span></span>"}</div>`;
+  const main=vdLines.filter(l=>l.src!=="plan"||l.done||l.shown),more=vdLines.filter(l=>!main.includes(l));
+  $("vd-list").innerHTML=(main.length?main.map(row).join(""):`<p class="muted small" style="margin:4px 0">Tap <b>+ Add treatment</b> to add what was done.</p>`)+(more.length?`<button type="button" class="linkbtn" data-vmore style="margin-top:8px;font-size:.88rem">▸ Other treatments in plan (${more.length})</button>`:"");
+  vdTot()}
+let vdTarget="new";
+function vdCands(){const a=vdAp&&A[vdAp],pid=a&&a.patientId,p=pid&&P[pid];if(!p)return [];const out=[],td=ymd(new Date()),seen=new Set();
+  const pb=[...new Set(planOf(p).items.map(i=>i.billId).filter(Boolean))].map(id=>[id,B[id]]).filter(([,b])=>b&&!b.hb).sort((x,y)=>(y[1].createdAt||"").localeCompare(x[1].createdAt||""));
+  if(pb[0]){out.push({id:pb[0][0],b:pb[0][1],k:"plan"});seen.add(pb[0][0])}
+  const tb=Object.entries(B).filter(([k,b])=>b.patientId===pid&&b.date===td&&!b.hb&&!seen.has(k)).sort((x,y)=>(y[1].createdAt||"").localeCompare(x[1].createdAt||""))[0];
+  if(tb)out.push({id:tb[0],b:tb[1],k:"today"});return out}
+function vdTgRender(){const c=vdCands(),bl=vdLines.some(l=>l.done&&!l.billed&&String(l.desc||"").trim());$("vd-tgw").hidden=!can("bill_edit")||!c.length||!bl;if(!c.length){vdTarget="new";return}
+  if(vdTarget!=="new"&&!c.some(x=>x.id===vdTarget))vdTarget=c[0].id;
+  $("vd-tg").innerHTML=c.map(x=>{const t=billCalc(x.b);return `<button type="button" data-tg="${x.id}" aria-pressed="${vdTarget===x.id}">Add to ${x.k==="plan"?"treatment plan bill":"today's bill"} ${esc(x.b.no||"")} <small>· ${fmtDate(x.b.date)} · ${rs(t.total)}${t.bal>0?" · "+rs(t.bal)+" due":""}</small></button>`}).join("")+`<button type="button" data-tg="new" aria-pressed="${vdTarget==="new"}">Make a new bill</button>`}
+$("vd-tg").addEventListener("click",e=>{const b=e.target.closest("[data-tg]");if(!b)return;vdTarget=b.dataset.tg;vdTot()});
+function vdTot(){const canB=can("bill_edit"),bl=vdLines.filter(l=>l.done&&!l.billed&&String(l.desc||"").trim()),sub=bl.reduce((a,l)=>a+(+l.price||0)*(+l.qty||1),0),disc=Math.min(+$("vd-disc").value||0,sub);
+  $("vd-billw").hidden=!canB;$("vd-tot").innerHTML=canB?`<span>Total</span><b>${rs(sub-disc)}</b>`:"";
+  const pid0=vdAp&&A[vdAp]&&A[vdAp].patientId,td=ymd(new Date()),sd=vdTarget!=="new"&&B[vdTarget];vdTgRender();$("vd-save").textContent=canB?(bl.length?(sd?"Add to bill":"Save & make bill"):"Save"):"Save";$("vd-nobill").hidden=!canB||!bl.length}
 const vdL=el=>{const r=el.closest("[data-vk]");return r&&vdLines.find(l=>l.key===r.dataset.vk)};
-$("vd-list").addEventListener("input",e=>{const l=vdL(e.target),f=e.target.dataset.vf;if(!l||!f)return;if(f==="desc"){l.desc=e.target.value;const lc=lastCharge(vdAp&&A[vdAp]&&A[vdAp].patientId,l.desc),pr=lc?{p:lc.price}:S().prices.find(x=>x.n===l.desc);if(pr&&+pr.p>0){l.price=+pr.p;const pe=e.target.closest(".vdf").querySelector('[data-vf="price"]');pe.value=pr.p}}else if(f==="price")l.price=+e.target.value||0;else l.tooth=e.target.value;
-  const bl=vdLines.filter(x=>x.done&&x.bill===true&&!x.billed&&x.desc),tot=bl.reduce((a,x)=>a+(+x.price||0)*(+x.qty||1),0);if(can("bill_edit"))$("vd-tot").innerHTML=bl.length?`<div class="kv tot"><span>New bill · ${pl(bl.length,"item")}</span><b>${rs(tot)}</b></div>`:`<p class="muted small" style="margin:0">No bill will be made.</p>`});
-$("vd-list").addEventListener("change",e=>{const l=vdL(e.target);if(!l)return;if(e.target.matches("[data-vdone]")){l.done=e.target.checked;vdRender()}else if(e.target.matches("[data-vbillc]")){l.bill=e.target.checked;vdRender()}});
-$("vd-list").addEventListener("click",e=>{const b=e.target.closest("[data-vbill]");if(!b)return;const l=vdL(b);if(!l)return;l.bill=b.dataset.vbill==="1";vdRender()});
-$("vd-add").addEventListener("click",()=>{vdLines.push({key:nid("v"),src:"new",desc:"",tooth:"",qty:1,price:0,done:true,bill:null});vdRender();const r=$("vd-list").lastElementChild;if(r){const i=r.querySelector('[data-vf="desc"]');if(i)i.focus()}});
+$("vd-disc").addEventListener("input",vdTot);
+$("vd-list").addEventListener("input",e=>{const l=vdL(e.target),f=e.target.dataset.vf;if(!l||!f)return;
+  if(f==="desc"){l.desc=e.target.value;const pr=apPr(l.desc),lc=lastCharge(vdAp&&A[vdAp]&&A[vdAp].patientId,pr?pr.n:l.desc),v=lc?lc.price:(pr?+pr.p||0:0);if(v>0){l.price=v;const n=teethOf(l.tooth).length;l.qty=n&&n<28?n:1;const pe=e.target.closest(".vdr").querySelector('[data-vf="amt"]');if(pe)pe.value=l.price*l.qty}}
+  else if(f==="amt"){const v=+e.target.value||0,q=+l.qty||1;if(q>1&&v%q===0)l.price=v/q;else{l.qty=1;l.price=v}}
+  else{l.tooth=e.target.value;if(l.src==="new"&&l.price){const n=teethOf(l.tooth).length,q=n&&n<28?n:1,pe=e.target.closest(".vdr").querySelector('[data-vf="amt"]');if(q!==l.qty){const unit=+l.price;l.qty=q;if(pe)pe.value=unit*q}}}
+  vdTot()});
+$("vd-list").addEventListener("change",e=>{const l=vdL(e.target);if(l&&e.target.matches("[data-vdone]")){l.done=e.target.checked;if(!l.done&&l.src==="plan")l.shown=true;e.target.closest(".vdr").classList.toggle("off",!l.done);vdTot()}});
+$("vd-list").addEventListener("click",e=>{if(e.target.closest("[data-vmore]")){for(const l of vdLines)l.shown=true;vdRender()}});
+$("vd-add").addEventListener("click",()=>{vdLines.push({key:nid("v"),src:"new",desc:"",tooth:"",qty:1,price:0,done:true});vdRender();const r=[...$("vd-list").querySelectorAll(".vdr")].pop();if(r){const i=r.querySelector('[data-vf="desc"]');if(i)i.focus()}});
 $("vd-cancel").addEventListener("click",()=>{vdAp=null;$("vddlg").close();renderAppts()});
 $("vddlg").addEventListener("close",()=>{if(vdAp){vdAp=null;try{renderAppts()}catch(e){}}});
-$("vd-skip").addEventListener("click",()=>{const id=vdAp,a=A[id];vdAp=null;$("vddlg").close();if(a)cset("appts",id,{...a,status:"done",doneAt:new Date().toISOString()});toast("Marked done");setTimeout(()=>askNext(id),250)});
-$("vdForm").addEventListener("submit",e=>{e.preventDefault();const id=vdAp,a=A[id],err=$("vd-err");if(!a)return;const canB=can("bill_edit");
+$("vd-nobill").addEventListener("click",()=>vdSave(false));
+$("vdForm").addEventListener("submit",e=>{e.preventDefault();vdSave(true)});
+function vdSave(mk){const id=vdAp,a=A[id],err=$("vd-err");if(!a)return;const canB=can("bill_edit")&&mk;
   const done=vdLines.filter(l=>l.done&&String(l.desc||"").trim());
-  if(canB&&done.some(l=>l.src==="new"&&l.bill===null)){err.textContent="For the work you added, choose Yes or No for adding it to the bill.";err.hidden=false;return}
   const today=ymd(new Date()),pid=a.patientId,p=P[pid];
-  const billL=canB?done.filter(l=>l.bill===true&&!l.billed):[];let billId=null,billNo="";
-  if(billL.length){billId=nid("b");billNo=nextBillNo(today);
-    cset("bills",billId,{no:billNo,createdAt:new Date().toISOString(),...me,patientId:pid,patientName:a.patientName||(p&&p.name)||"",phone:(p&&p.phone)||a.phone||"",date:today,items:billL.map(l=>({desc:l.desc.trim(),tooth:l.tooth||"",qty:+l.qty||1,price:+l.price||0})),discount:0,note:"Visit "+fmtDate(a.date)+(a.treatment?" · "+a.treatment:""),apId:id,...(a.dentist?{dentist:a.dentist}:{}),payments:[]})}
+  const billL=canB?done.filter(l=>!l.billed):[];let billId=null,billNo="";
+  const noPr=billL.filter(l=>!(+l.price>0));if(noPr.length){err.textContent=`Enter the amount for ${noPr.map(l=>l.desc).join(", ")} — or tap "Done, no bill".`;err.hidden=false;return}
+  const sameDay=billL.length&&vdTarget!=="new"&&B[vdTarget]?[vdTarget,B[vdTarget]]:null;
+  if(sameDay){const [bid,b]=sameDay;billId=bid;billNo=b.no;const have=new Set((b.items||[]).map(it=>(it.desc||"").trim().toLowerCase()+"|"+(it.tooth||"")));const add=billL.filter(l=>!have.has(l.desc.trim().toLowerCase()+"|"+(l.tooth||"")));
+    cset("bills",bid,{...b,items:[...(b.items||[]),...add.map(l=>({desc:l.desc.trim(),tooth:l.tooth||"",qty:+l.qty||1,price:+l.price||0}))],discount:(+b.discount||0)+(+$("vd-disc").value||0),updatedAt:new Date().toISOString()})}
+  else if(billL.length){billId=nid("b");billNo=nextBillNo(today);const sub=billL.reduce((s,l)=>s+(+l.price||0)*(+l.qty||1),0);
+    cset("bills",billId,{no:billNo,createdAt:new Date().toISOString(),...me,patientId:pid,patientName:a.patientName||(p&&p.name)||"",phone:(p&&p.phone)||a.phone||"",date:today,items:billL.map(l=>({desc:l.desc.trim(),tooth:l.tooth||"",qty:+l.qty||1,price:+l.price||0})),discount:Math.min(+$("vd-disc").value||0,sub),note:"Visit "+fmtDate(a.date)+(a.treatment?" · "+a.treatment:""),apId:id,...(a.dentist?{dentist:a.dentist}:{}),payments:[]})}
   if(p&&done.length){const pl=planOf(P[pid]),inBill=l=>billL.includes(l);
     const items=pl.items.map(i=>{const l=done.find(x=>x.src==="plan"&&x.planId===i.id);if(!l)return i;return {...i,done:true,doneOn:today,tooth:l.tooth||i.tooth||"",...(inBill(l)?{billNo,billId}:{})}});
-    for(const l of done.filter(x=>x.src!=="plan"))items.push({id:nid("tp"),tr:l.desc.trim(),tooth:l.tooth||"",qty:+l.qty||1,price:+l.price||0,phase:2,note:"",done:true,doneOn:today,fromAp:id,...(inBill(l)?{billNo,billId}:{})});
+    for(const l of done.filter(x=>x.src!=="plan"))items.push({id:nid("tp"),tr:l.desc.trim(),tooth:l.tooth||"",qty:+l.qty||1,price:+l.price||0,phase:tpGuessPhase(l.desc),note:"",done:true,doneOn:today,fromAp:id,...(inBill(l)?{billNo,billId}:{})});
     cset("patients",pid,{...P[pid],plan:{...pl,items,updatedAt:new Date().toISOString(),createdAt:pl.createdAt||new Date().toISOString()}});
     chartFromBill(pid,done.map(l=>({desc:l.desc,tooth:l.tooth})))}
   cset("appts",id,{...A[id],status:"done",doneAt:new Date().toISOString()});vdAp=null;$("vddlg").close();
-  if(billId){toast("Visit done · chart updated · bill "+billNo+" made");openBillView(billId)}else toast(done.length?"Visit done · chart updated":"Marked done");setTimeout(()=>askNext(id),300)});
+  if(billId){toast(sameDay?"Visit done · added to bill "+billNo:"Visit done · bill "+billNo+" made");openBillView(billId)}else toast(done.length?"Visit done · chart updated":"Marked done");setTimeout(()=>askNext(id),300)}
 $("apView").addEventListener("change",e=>{const s=e.target.closest("[data-st]");if(!s)return;const a=A[s.dataset.st];s.blur();if(s.value==="done"&&a.status!=="done"&&a.patientId&&P[a.patientId]){visitDone(s.dataset.st);return}cset("appts",s.dataset.st,{...a,status:s.value});if(s.value==="noshow")toast("Marked no-show. You can send a 'missed visit' WhatsApp.");if(s.value==="done"){toast("Marked done. Tap Bill to charge for the treatment.");setTimeout(()=>askNext(s.dataset.st),300)}});
 
 /* ---- ask to book the next appointment after a visit ---- */
@@ -6565,7 +6612,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v188";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v190";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
