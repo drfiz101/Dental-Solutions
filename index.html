@@ -534,7 +534,8 @@ b.due{color:var(--warn)}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .newp{background:var(--accent-soft);border-radius:10px;padding:10px 12px}
-.aptx{display:grid;grid-template-columns:1fr 110px 30px;gap:6px;align-items:center;margin-top:6px}.aptx:first-of-type{margin-top:0}.aptx input{width:100%!important;min-width:0}.aptx .x{border:0;background:none;font-size:1.1rem;color:var(--muted);cursor:pointer;padding:4px}
+.aptx{display:grid;grid-template-columns:1fr 110px 30px;gap:6px;align-items:center;margin-top:6px}.aptx:first-of-type{margin-top:0}.aptx input{width:100%!important;min-width:0}
+input[data-tpick]{cursor:pointer;background:color-mix(in srgb,var(--accent) 6%,var(--surface))!important}.aptx .x{border:0;background:none;font-size:1.1rem;color:var(--muted);cursor:pointer;padding:4px}
 .quick{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .qbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 9px;font-size:.75rem;color:var(--muted)}
 .qbtn:hover{border-color:var(--bad);color:var(--bad)}
@@ -1668,7 +1669,7 @@ input[type=date]{min-width:0;max-width:100%}
     <div class="field"><label for="ap-dent">Dentist</label><select id="ap-dent"></select></div>
   </div>
   <p class="muted small" id="ap-denthint" style="margin:0">Add your dentists under <b>Team</b> to assign them and stop double booking a dentist.</p>
-  <div class="field"><label for="ap-tr">Treatments for this visit</label><div class="aptx"><input id="ap-tr" list="tr-list" maxlength="80" placeholder="e.g. Extraction"><input id="ap-tooth" maxlength="40" placeholder="Teeth e.g. 36 46" aria-label="Teeth"><span></span></div><div id="ap-txs"></div><button type="button" class="linkbtn" id="ap-txadd" style="align-self:flex-start;font-size:.85rem;margin-top:6px">＋ Add another treatment</button><label class="small" id="ap-toplanw" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="ap-toplan" checked> Add to treatment plan &amp; tooth chart</label></div>
+  <div class="field"><label for="ap-tr">Treatments for this visit</label><div class="aptx"><input id="ap-tr" class="l-t" list="tr-list" maxlength="80" placeholder="e.g. Extraction"><input id="ap-tooth" class="l-th" data-tpick readonly maxlength="80" placeholder="🦷 Teeth" aria-label="Teeth — tap to pick on the chart"><span></span></div><div id="ap-txs"></div><button type="button" class="linkbtn" id="ap-txadd" style="align-self:flex-start;font-size:.85rem;margin-top:6px">＋ Add another treatment</button><label class="small" id="ap-toplanw" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="ap-toplan" checked> Add to treatment plan &amp; tooth chart</label></div>
   <div class="field" id="ap-visitw" hidden><label for="ap-visit" id="ap-visitl">Which visit?</label><select id="ap-visit"></select><small class="muted" id="ap-visith"></small></div>
   <button type="button" class="linkbtn" id="ap-vsadd" hidden style="align-self:flex-start;font-size:.85rem">＋ Add visit stages for this treatment</button>
   <div class="field"><label for="ap-note">Note</label><input id="ap-note" maxlength="160" placeholder="Optional"></div>
@@ -3417,9 +3418,10 @@ function openAp(id,pre){
 }
 /* ---- several treatments in one visit → plan & tooth chart ---- */
 const TX_SKIP=/check.?up|consult|review|recall|follow.?up|examination|opd|x-?ray only|suture removal|dressing change/i;
-function apTxRow(tr,tooth){const d=document.createElement("div");d.className="aptx";d.innerHTML=`<input data-txt list="tr-list" maxlength="80" placeholder="Treatment" aria-label="Treatment" value="${esc(tr||"")}"><input data-tth maxlength="40" placeholder="Teeth" aria-label="Teeth" value="${esc(tooth||"")}"><button type="button" class="x" data-txdel aria-label="Remove">✕</button>`;$("ap-txs").appendChild(d);return d}
+function apTxRow(tr,tooth){const d=document.createElement("div");d.className="aptx";d.innerHTML=`<input data-txt class="l-t" list="tr-list" maxlength="80" placeholder="Treatment" aria-label="Treatment" value="${esc(tr||"")}"><input data-tth class="l-th" data-tpick readonly maxlength="80" placeholder="🦷 Teeth" aria-label="Teeth — tap to pick on the chart" value="${esc(tooth||"")}"><button type="button" class="x" data-txdel aria-label="Remove">✕</button>`;$("ap-txs").appendChild(d);return d}
 function apTxFill(a){$("ap-txs").innerHTML="";const L=Array.isArray(a.txs)&&a.txs.length?a.txs:[{tr:a.treatment||"",tooth:""}];$("ap-tr").value=L[0].tr||"";$("ap-tooth").value=L[0].tooth||"";for(const x of L.slice(1))apTxRow(x.tr,x.tooth);$("ap-toplan").checked=a.toPlan!==false}
 function apTxRead(){const L=[{tr:$("ap-tr").value.trim(),tooth:$("ap-tooth").value.trim()}];for(const r of $("ap-txs").children)L.push({tr:r.querySelector("[data-txt]").value.trim(),tooth:r.querySelector("[data-tth]").value.trim()});return L.filter(x=>x.tr)}
+document.addEventListener("click",e=>{const t=e.target.closest("input[data-tpick]");if(!t)return;e.preventDefault();t.blur();const row=t.closest(".aptx,.vdr");if(row)openTeeth(row)});
 $("ap-txadd").addEventListener("click",()=>{apTxRow("","").querySelector("[data-txt]").focus()});
 $("ap-txs").addEventListener("click",e=>{const b=e.target.closest("[data-txdel]");if(b)b.closest(".aptx").remove()});
 function apPr(t){const pr=priceFor(t),a=String(t).toLowerCase().trim();return pr&&(pr.n.toLowerCase().includes(a)||a.includes(pr.n.toLowerCase()))?pr:null}
@@ -3617,7 +3619,7 @@ function visitDone(id){const a=A[id];if(!a)return;const p=P[a.patientId];vdAp=id
   $("vd-t").textContent="✓ Visit done · "+(a.patientName||"Patient");$("vd-sub").textContent=`${fmtDate(a.date)}, ${fmtTime(a.time)} · OT ${a.chair||""}${a.dentist?" · "+a.dentist:""}${a.treatment?" · booked for "+a.treatment:""}`;
   $("vd-err").hidden=true;$("vd-disc").value="";{const c=vdCands(),fromPlan=vdLines.some(l=>l.done&&l.src==="plan");const pc=c.find(x=>x.k==="plan"),tc=c.find(x=>x.k==="today");vdTarget=fromPlan&&pc?pc.id:tc?tc.id:pc?pc.id:"new"}vdRender();openD($("vddlg"))}
 function vdRender(){const canB=can("bill_edit");trOpts();
-  const row=l=>`<div class="vdr${l.done?"":" off"}" data-vk="${l.key}"><input type="checkbox" data-vdone ${l.done?"checked":""} aria-label="Done: ${esc(l.desc||"work")}">${l.src==="new"?`<input data-vf="desc" list="tr-list" placeholder="Treatment" value="${esc(l.desc)}" aria-label="Treatment">`:`<b>${esc(l.desc)}</b>`}<input data-vf="tooth" placeholder="Teeth" value="${esc(l.tooth)}" aria-label="Teeth">${canB?(l.billed?`<small class="muted">Billed ${esc(l.billed)}</small>`:`<input data-vf="amt" type="number" min="0" inputmode="numeric" placeholder="Rs" value="${(+l.price||0)*(+l.qty||1)||""}" aria-label="Amount in rupees">`):"<span></span>"}</div>`;
+  const row=l=>`<div class="vdr${l.done?"":" off"}" data-vk="${l.key}"><input type="checkbox" data-vdone ${l.done?"checked":""} aria-label="Done: ${esc(l.desc||"work")}">${l.src==="new"?`<input data-vf="desc" class="l-t" list="tr-list" placeholder="Treatment" value="${esc(l.desc)}" aria-label="Treatment">`:`<b>${esc(l.desc)}</b><input type="hidden" class="l-t" value="${esc(l.desc)}">`}<input data-vf="tooth" class="l-th" data-tpick readonly placeholder="🦷 Teeth" value="${esc(l.tooth)}" aria-label="Teeth — tap to pick on the chart">${canB?(l.billed?`<small class="muted">Billed ${esc(l.billed)}</small>`:`<input data-vf="amt" type="number" min="0" inputmode="numeric" placeholder="Rs" value="${(+l.price||0)*(+l.qty||1)||""}" aria-label="Amount in rupees">`):"<span></span>"}</div>`;
   const main=vdLines.filter(l=>l.src!=="plan"||l.done||l.shown),more=vdLines.filter(l=>!main.includes(l));
   $("vd-list").innerHTML=(main.length?main.map(row).join(""):`<p class="muted small" style="margin:4px 0">Tap <b>+ Add treatment</b> to add what was done.</p>`)+(more.length?`<button type="button" class="linkbtn" data-vmore style="margin-top:8px;font-size:.88rem">▸ Other treatments in plan (${more.length})</button>`:"");
   vdTot()}
@@ -3639,7 +3641,7 @@ $("vd-disc").addEventListener("input",vdTot);
 $("vd-list").addEventListener("input",e=>{const l=vdL(e.target),f=e.target.dataset.vf;if(!l||!f)return;
   if(f==="desc"){l.desc=e.target.value;const pr=apPr(l.desc),lc=lastCharge(vdAp&&A[vdAp]&&A[vdAp].patientId,pr?pr.n:l.desc),v=lc?lc.price:(pr?+pr.p||0:0);if(v>0){l.price=v;const n=teethOf(l.tooth).length;l.qty=n&&n<28?n:1;const pe=e.target.closest(".vdr").querySelector('[data-vf="amt"]');if(pe)pe.value=l.price*l.qty}}
   else if(f==="amt"){const v=+e.target.value||0,q=+l.qty||1;if(q>1&&v%q===0)l.price=v/q;else{l.qty=1;l.price=v}}
-  else{l.tooth=e.target.value;if(l.src==="new"&&l.price){const n=teethOf(l.tooth).length,q=n&&n<28?n:1,pe=e.target.closest(".vdr").querySelector('[data-vf="amt"]');if(q!==l.qty){const unit=+l.price;l.qty=q;if(pe)pe.value=unit*q}}}
+  else{l.tooth=e.target.value;if(l.price){const n=teethOf(l.tooth).length,q=n&&n<28?n:1,pe=e.target.closest(".vdr").querySelector('[data-vf="amt"]');if(q!==l.qty){const unit=+l.price;l.qty=q;if(pe)pe.value=unit*q}}}
   vdTot()});
 $("vd-list").addEventListener("change",e=>{const l=vdL(e.target);if(l&&e.target.matches("[data-vdone]")){l.done=e.target.checked;if(!l.done&&l.src==="plan")l.shown=true;e.target.closest(".vdr").classList.toggle("off",!l.done);vdTot()}});
 $("vd-list").addEventListener("click",e=>{if(e.target.closest("[data-vmore]")){for(const l of vdLines)l.shown=true;vdRender()}});
@@ -3863,7 +3865,7 @@ function renderTh(){const U=thSet==="adult"?UPPER:CH_U,L=thSet==="adult"?LOWER:C
 $("th-chart").addEventListener("click",e=>{const t=e.target.closest("[data-th]");if(!t)return;const n=+t.dataset.th;thSel.has(n)?thSel.delete(n):thSel.add(n);renderTh()});
 $("th-set").addEventListener("click",e=>{const t=e.target.closest("[data-set]");if(t){thSet=t.dataset.set;renderTh()}});
 $("th-arch").addEventListener("click",e=>{const t=e.target.closest("[data-arch]");if(!t)return;const a=t.dataset.arch;if(a==="clear")thSel.clear();else{const U=thSet==="adult"?UPPER:CH_U,L=thSet==="adult"?LOWER:CH_L;(a==="upper"?U:a==="lower"?L:[...U,...L]).forEach(n=>thSel.add(n))}renderTh()});
-$("th-ok").addEventListener("click",()=>{if(thLine){const inp=thLine.querySelector(".l-th");inp.value=teethText([...thSel]);const lt=thLine.querySelector(".l-t"),lq=thLine.querySelector(".l-q"),cnt=[...thSel].length;if(lt&&lq&&cnt>1&&/per tooth|filling|veneer/i.test(lt.value))lq.value=cnt;if(thLine.closest("#bdlg"))billTotals()}thdlg.close()});
+$("th-ok").addEventListener("click",()=>{if(thLine){const inp=thLine.querySelector(".l-th");inp.value=teethText([...thSel]);const lt=thLine.querySelector(".l-t"),lq=thLine.querySelector(".l-q"),cnt=[...thSel].length;if(lt&&lq&&cnt>1&&/per tooth|filling|veneer/i.test(lt.value))lq.value=cnt;if(thLine.closest("#bdlg"))billTotals();try{inp.dispatchEvent(new Event("input",{bubbles:true}))}catch(e){}}thdlg.close()});
 
 /* ================= DASHBOARD ================= */
 let calMonth=ymd(new Date()).slice(0,7),calSel=null;
@@ -6612,7 +6614,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v195";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v196";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
