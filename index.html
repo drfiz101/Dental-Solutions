@@ -136,6 +136,12 @@ body.hf-lab [data-main="lab"],body.hf-inventory [data-main="inventory"],body.hf-
 .bduec{font-size:.86rem!important;white-space:nowrap}.btot{font-size:.88rem;color:var(--muted)}.btot b{color:var(--ink)}
 .bdue{display:flex;flex-direction:column;align-items:flex-end;color:#B45309;line-height:1.1}.bdue small{font-size:.72rem;font-weight:500;color:var(--muted);margin-top:2px}
 .btotal{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 4px 8px;margin-top:6px;border-top:2px solid var(--ink);font-weight:700}.btotal b{font-size:1.3rem}.btotal small{font-weight:500;color:var(--muted)}
+#ap-planpick{margin:2px 0 10px;padding:10px;border-radius:12px;background:var(--accent-soft)}
+.pp-h{font-size:.8rem;font-weight:700;margin-bottom:8px;text-transform:none;letter-spacing:0}
+.pp-list{display:flex;flex-wrap:wrap;gap:6px}
+.pp-it{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--accent);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px 6px 6px;font:inherit;font-size:.85rem;cursor:pointer;text-align:left}
+.pp-it small{color:var(--muted)}.pp-ck{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:800;font-size:.8rem;flex:none}
+.pp-it.on{background:var(--accent);color:var(--accent-ink)}.pp-it.on small{color:inherit;opacity:.85}.pp-it.on .pp-ck{background:rgba(255,255,255,.25);color:#fff}
 </style>
 <style>
 /* Layout: clinic header + status filters, horizontally scrolling category tabs, one dense stock table that becomes cards on phones */
@@ -1701,7 +1707,7 @@ input[type=date]{min-width:0;max-width:100%}
     <div class="field"><label for="ap-dent">Dentist</label><select id="ap-dent"></select></div>
   </div>
   <p class="muted small" id="ap-denthint" style="margin:0">Add your dentists under <b>Team</b> to assign them and stop double booking a dentist.</p>
-  <div class="field"><label for="ap-tr">Treatments for this visit</label><div class="aptx"><input id="ap-tr" class="l-t" list="tr-list" maxlength="80" placeholder="e.g. Extraction"><input id="ap-tooth" class="l-th" data-tpick readonly maxlength="80" placeholder="🦷 Teeth" aria-label="Teeth — tap to pick on the chart"><span></span></div><div id="ap-txs"></div><button type="button" class="linkbtn" id="ap-txadd" style="align-self:flex-start;font-size:.85rem;margin-top:6px">＋ Add another treatment</button><label class="small" id="ap-toplanw" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="ap-toplan" checked><span>Add to treatment plan &amp; tooth chart</span></label></div>
+  <div class="field"><label for="ap-tr">Treatments for this visit</label><div id="ap-planpick" hidden></div><div class="aptx"><input id="ap-tr" class="l-t" list="tr-list" maxlength="80" placeholder="e.g. Extraction"><input id="ap-tooth" class="l-th" data-tpick readonly maxlength="80" placeholder="🦷 Teeth" aria-label="Teeth — tap to pick on the chart"><span></span></div><div id="ap-txs"></div><button type="button" class="linkbtn" id="ap-txadd" style="align-self:flex-start;font-size:.85rem;margin-top:6px">＋ Add another treatment</button><label class="small" id="ap-toplanw" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="ap-toplan" checked><span>Add to treatment plan &amp; tooth chart</span></label></div>
   <div class="field" id="ap-visitw" hidden><label for="ap-visit" id="ap-visitl">Which visit?</label><select id="ap-visit"></select><small class="muted" id="ap-visith"></small></div>
   <button type="button" class="linkbtn" id="ap-vsadd" hidden style="align-self:flex-start;font-size:.85rem">＋ Add visit stages for this treatment</button>
   <div class="field"><label for="ap-note">Note</label><input id="ap-note" maxlength="160" placeholder="Optional"></div>
@@ -3475,12 +3481,22 @@ function openAp(id,pre){
 /* ---- several treatments in one visit → plan & tooth chart ---- */
 const TX_SKIP=/check.?up|consult|review|recall|follow.?up|examination|opd|x-?ray only|suture removal|dressing change/i;
 function apTxRow(tr,tooth){const d=document.createElement("div");d.className="aptx";d.innerHTML=`<input data-txt class="l-t" list="tr-list" maxlength="80" placeholder="Treatment" aria-label="Treatment" value="${esc(tr||"")}"><input data-tth class="l-th" data-tpick readonly maxlength="80" placeholder="🦷 Teeth" aria-label="Teeth — tap to pick on the chart" value="${esc(tooth||"")}"><button type="button" class="x" data-txdel aria-label="Remove">✕</button>`;$("ap-txs").appendChild(d);return d}
-function apTxFill(a){$("ap-txs").innerHTML="";const L=Array.isArray(a.txs)&&a.txs.length?a.txs:[{tr:a.treatment||"",tooth:""}];$("ap-tr").value=L[0].tr||"";$("ap-tooth").value=L[0].tooth||"";for(const x of L.slice(1))apTxRow(x.tr,x.tooth);$("ap-toplan").checked=a.toPlan!==false}
+function apTxFill(a){$("ap-txs").innerHTML="";const L=Array.isArray(a.txs)&&a.txs.length?a.txs:[{tr:a.treatment||"",tooth:""}];$("ap-tr").value=L[0].tr||"";$("ap-tooth").value=L[0].tooth||"";for(const x of L.slice(1))apTxRow(x.tr,x.tooth);$("ap-toplan").checked=apEdit?a.toPlan!==false:true;try{apPlanPick()}catch(e){}}
+function apPlanPick(){const el=$("ap-planpick");if(!el)return;const pid=apNew?null:findPat($("ap-pat").value),p=pid&&P[pid];const items=p?(planOf(p).items||[]).filter(i=>!i.done):[];
+  if(!items.length){el.hidden=true;el.innerHTML="";return}const cur=apTxRead();const isIn=i=>cur.some(x=>vdMatch(x.tr,i.tr)&&teethOf(x.tooth).sort().join()===teethOf(i.tooth).sort().join());
+  el.hidden=false;el.innerHTML=`<div class="pp-h">📋 Left in treatment plan · tap to add</div><div class="pp-list">${items.map(i=>`<button type="button" class="pp-it${isIn(i)?" on":""}" data-ppick="${esc(i.id)}" aria-pressed="${isIn(i)}"><span class="pp-ck">${isIn(i)?"✓":"+"}</span><span><b>${esc(i.tr)}</b>${i.tooth?` <small>· ${esc(i.tooth)}</small>`:""}</span></button>`).join("")}</div>`}
+$("ap-planpick").addEventListener("click",e=>{const b=e.target.closest("[data-ppick]");if(!b)return;const pid=findPat($("ap-pat").value),p=pid&&P[pid];if(!p)return;const it=(planOf(p).items||[]).find(i=>i.id===b.dataset.ppick);if(!it)return;
+  const rows=[{tr:$("ap-tr"),th:$("ap-tooth"),el:null},...[...$("ap-txs").children].map(r=>({tr:r.querySelector("[data-txt]"),th:r.querySelector("[data-tth]"),el:r}))];
+  const hit=rows.find(r=>vdMatch(r.tr.value,it.tr)&&teethOf(r.th.value).sort().join()===teethOf(it.tooth).sort().join());
+  if(hit){if(hit.el)hit.el.remove();else{const nx=rows[1];if(nx){$("ap-tr").value=nx.tr.value;$("ap-tooth").value=nx.th.value;nx.el.remove()}else{$("ap-tr").value="";$("ap-tooth").value=""}}}
+  else{const empty=rows.find(r=>!r.tr.value.trim());if(empty){empty.tr.value=it.tr;empty.th.value=it.tooth||""}else apTxRow(it.tr,it.tooth||"")}
+  $("ap-toplan").checked=true;try{apVisitUI("")}catch(x){}apPlanPick()});
 function apTxRead(){const L=[{tr:$("ap-tr").value.trim(),tooth:$("ap-tooth").value.trim()}];for(const r of $("ap-txs").children)L.push({tr:r.querySelector("[data-txt]").value.trim(),tooth:r.querySelector("[data-tth]").value.trim()});return L.filter(x=>x.tr)}
 document.addEventListener("click",e=>{const t=e.target.closest("input[data-tpick]");if(!t)return;e.preventDefault();t.blur();const row=t.closest(".aptx,.vdr");if(row)openTeeth(row)});
 $("hfList").addEventListener("change",e=>{const c=e.target.closest("[data-hf]");if(!c||!isClinicOwner())return;const h=new Set((SET&&SET.hideFeat)||[]);c.checked?h.delete(c.dataset.hf):h.add(c.dataset.hf);saveSet({...SET,hideFeat:[...h]});hfApply();toast(c.checked?"Shown again":"Hidden for everyone")});
+apdlg.addEventListener("input",e=>{if(e.target.matches("#ap-tr,[data-txt],#ap-pat,#ap-tooth,[data-tth]")){clearTimeout(apdlg.__pp);apdlg.__pp=setTimeout(()=>{try{apPlanPick()}catch(x){}},250)}});
 $("ap-txadd").addEventListener("click",()=>{apTxRow("","").querySelector("[data-txt]").focus()});
-$("ap-txs").addEventListener("click",e=>{const b=e.target.closest("[data-txdel]");if(b)b.closest(".aptx").remove()});
+$("ap-txs").addEventListener("click",e=>{const b=e.target.closest("[data-txdel]");if(b){b.closest(".aptx").remove();try{apPlanPick()}catch(x){}}});
 function apPr(t){const pr=priceFor(t),a=String(t).toLowerCase().trim();return pr&&(pr.n.toLowerCase().includes(a)||a.includes(pr.n.toLowerCase()))?pr:null}
 function apTxToPlan(pid,apId,txs,oldIds,d){const p=P[pid];if(!p)return [];const pl=planOf(p),now=new Date().toISOString();let items=pl.items.slice();const ids=[],used=new Set();
   for(const x of txs){if(TX_SKIP.test(x.tr))continue;const ts=teethOf(x.tooth).filter(n=>n<50),tk=ts.slice().sort().join(",");
@@ -6609,7 +6625,7 @@ $("vs-reset").addEventListener("click",()=>{$("vs-list").innerHTML=VS_DEF.map(vs
 $("vsForm").addEventListener("submit",e=>{e.preventDefault();const L=[...$("vs-list").querySelectorAll(".vsc")].map(c=>({name:c.querySelector(".vs-n").value.trim(),words:c.querySelector(".vs-w").value.trim(),visits:c.querySelector(".vs-v").value.split("\n").map(x=>x.trim()).filter(Boolean)})).filter(r=>r.name||r.words||r.visits.length);
   const bad=L.find(r=>!r.name||!r.words||!r.visits.length);if(bad){$("vs-err").textContent=`Fill in the treatment, its words and at least one visit${bad.name?" for "+bad.name:""}.`;$("vs-err").hidden=false;return}
   saveSet({...SET,visitStages:L});$("vsdlg").close();toast("Treatment visits saved");if(apdlg.open)apVisitUI()});
-$("ap-pat").addEventListener("change",()=>{if(!$("ap-visitw").hidden&&!apEdit){$("ap-visit").value="";apVisitUI("")}});
+$("ap-pat").addEventListener("change",()=>{try{apPlanPick()}catch(e){}if(!$("ap-visitw").hidden&&!apEdit){$("ap-visit").value="";apVisitUI("")}});
 /* supplier dropdowns */
 const SUP_DEF=["Haseeb / Kashif","Mukhtiyar","E-Dental Mart","Hamayun Dental Supply","Aamar","Shah Sb","Aman Shah"];
 
@@ -6683,7 +6699,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v200";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v201";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
