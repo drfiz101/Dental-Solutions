@@ -3723,11 +3723,13 @@ $("vd-cancel").addEventListener("click",()=>{vdAp=null;$("vddlg").close();render
 $("vddlg").addEventListener("close",()=>{if(vdAp){vdAp=null;try{renderAppts()}catch(e){}}});
 $("vd-nobill").addEventListener("click",()=>vdSave(false));
 $("vdForm").addEventListener("submit",e=>{e.preventDefault();vdSave(true)});
-function vdSave(mk){const id=vdAp,a=A[id],err=$("vd-err");if(!a)return;const canB=can("bill_edit")&&mk;
+function vdSave(mk){if($("vddlg").__busy)return;const id=vdAp,a=A[id],err=$("vd-err");if(!a)return;const canB=can("bill_edit")&&mk;
   const done=vdLines.filter(l=>l.done&&String(l.desc||"").trim());
   const today=ymd(new Date()),pid=a.patientId,p=P[pid];
   const billL=canB?done.filter(l=>!l.billed):[];let billId=null,billNo="";
   const noPr=billL.filter(l=>!(+l.price>0));if(noPr.length){err.textContent=`Enter the amount for ${noPr.map(l=>l.desc).join(", ")} — or tap "Done, no bill".`;err.hidden=false;return}
+  if(billL.length){const tgt=vdTarget!=="new"&&B[vdTarget]?vdTarget:null,inT=new Set(tgt?(B[tgt].items||[]).map(x=>dupNorm(x.desc)+"|"+(x.tooth||"")):[]);const dd=billDups(pid,billL.filter(l=>!inT.has(dupNorm(l.desc)+"|"+(l.tooth||""))).map(l=>({desc:l.desc,tooth:l.tooth})),null,today);if(dd.length&&!confirm(dupMsg(dd)))return}
+  $("vddlg").__busy=true;setTimeout(()=>{$("vddlg").__busy=false},1500);
   const sameDay=billL.length&&vdTarget!=="new"&&B[vdTarget]?[vdTarget,B[vdTarget]]:null;
   if(sameDay){const [bid,b]=sameDay;billId=bid;billNo=b.no;const have=new Set((b.items||[]).map(it=>(it.desc||"").trim().toLowerCase()+"|"+(it.tooth||"")));const add=billL.filter(l=>!have.has(l.desc.trim().toLowerCase()+"|"+(l.tooth||"")));
     cset("bills",bid,{...b,items:[...(b.items||[]),...add.map(l=>({desc:l.desc.trim(),tooth:l.tooth||"",qty:+l.qty||1,price:+l.price||0}))],discount:(+b.discount||0)+(+$("vd-disc").value||0),updatedAt:new Date().toISOString()})}
@@ -3740,8 +3742,8 @@ function vdSave(mk){const id=vdAp,a=A[id],err=$("vd-err");if(!a)return;const can
     chartFromBill(pid,done.map(l=>({desc:l.desc,tooth:l.tooth})))}
   cset("appts",id,{...A[id],status:"done",doneAt:new Date().toISOString()});vdAp=null;$("vddlg").close();
   if(billId){toast(sameDay?"Visit done · added to bill "+billNo:"Visit done · bill "+billNo+" made");openBillView(billId);const bd=$("bvdlg");if(bd){bd.addEventListener("close",()=>setTimeout(()=>askNext(id),250),{once:true})}else setTimeout(()=>askNext(id),300)}else{toast(done.length?"Visit done · chart updated":"Marked done");setTimeout(()=>askNext(id),300)}}
-async function takePay(id){const b=B[id];if(!b)return;const bal=billCalc(b).bal;if(bal<=0){toast("This bill is already paid");return}
-  const r=await payAsk({title:"Take payment · "+(b.no||"Bill"),sub:(b.patientName||"")+" · due "+rs(bal),amount:bal,max:bal,editable:true});if(!r)return;
+let tpBusy=false;async function takePay(id){if(tpBusy)return;const b=B[id];if(!b)return;const bal=billCalc(b).bal;if(bal<=0){toast("This bill is already paid");return}
+  tpBusy=true;let r;try{r=await payAsk({title:"Take payment · "+(b.no||"Bill"),sub:(b.patientName||"")+" · due "+rs(bal),amount:bal,max:bal,editable:true})}finally{setTimeout(()=>{tpBusy=false},800)}if(!r)return;
   const b2=B[id];cset("bills",id,{...b2,payments:[...(b2.payments||[]),{date:ymd(new Date()),amount:r.amount,method:r.method,...(r.bank?{bank:r.bank}:{}),...(r.ref?{ref:r.ref}:{}),...(r.receipt?{receipt:r.receipt}:{}),...me}]});
   toast("✓ "+rs(r.amount)+" received ("+payLbl(r)+")");setTimeout(()=>openBillView(id),250)}
 document.addEventListener("click",e=>{const t=e.target.closest("[data-tpay]");if(!t)return;e.preventDefault();e.stopPropagation();if(!can("bill_edit")){toast("You don't have permission to take payments");return}takePay(t.dataset.tpay)},true);
@@ -3786,7 +3788,16 @@ const EYE_IC=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 const lineHTML=l=>{l=l||{};return `<div class="line${l.hide?" lhid":""}"><input class="l-t" list="tr-list" placeholder="Treatment" value="${esc(l.desc||"")}" aria-label="Treatment"><div class="thw"><input class="l-th" placeholder="Tooth" value="${esc(l.tooth||"")}" aria-label="Teeth" maxlength="80"><button type="button" class="thbtn" data-pick title="Pick teeth on the chart" aria-label="Pick teeth on the chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3.5c-2.6 0-4 2-4 4.6 0 2.4 1 3.8 1.6 6 .6 2.3.8 6.4 2.6 6.4 1.6 0 1.6-4.7 3-5.6.7-.5 1.9-.5 2.6 0 1.4.9 1.4 5.6 3 5.6 1.8 0 2-4.1 2.6-6.4.6-2.2 1.6-3.6 1.6-6 0-2.6-1.4-4.6-4-4.6-1.8 0-2.8 1-4.5 1s-2.7-1-4.5-1z"/></svg></button></div><input class="l-q" type="number" min="1" value="${l.qty||1}" aria-label="Quantity" inputmode="numeric"><input class="l-p" type="number" min="0" placeholder="Rs" value="${l.price??""}" aria-label="Price in rupees" inputmode="numeric"><button type="button" class="leye" data-lhide aria-pressed="${l.hide?"true":"false"}" title="Show or hide this treatment on the patient's bill" aria-label="Hide on patient's bill">${EYE_IC}</button><button type="button" class="ldel" data-lrm aria-label="Remove line">×</button></div>`};
 function bPctHint(){const d=$("b-dent").value;$("b-pcth").textContent=!d?"Pick the dentist first":shOwner(d)?d+" is the owner · all to clinic":"Leave empty for "+d+"'s normal "+shRate(d)+"%";$("b-pct").disabled=!d||shOwner(d)}
 $("b-dent").addEventListener("change",bPctHint);
+/* ---- never bill the same work twice ---- */
+const dupNorm=t=>String(t||"").toLowerCase().replace(/\(treatment dated[^)]*\)/,"").replace(/[^a-z0-9]+/g,"");
+function billDups(pid,items,exclId,date){if(!pid)return [];const out=[];const mine=Object.entries(B).filter(([k,b])=>k!==exclId&&b.patientId===pid&&!b.hb);
+  for(const it of items||[]){const d=dupNorm(it.desc);if(!d||/oldbalance|previousoutstanding/.test(d))continue;const tk=teethOf(it.tooth).filter(n=>n<50).sort().join(",");
+    for(const [k,b] of mine){const hit=(b.items||[]).find(x=>{const xd=dupNorm(x.desc);if(!(xd===d||vdMatch(it.desc,x.desc)))return false;const xt=teethOf(x.tooth).filter(n=>n<50).sort().join(",");return tk?(xt===tk):(!xt&&b.date===(date||ymd(new Date())))});
+      if(hit){out.push({desc:it.desc,tooth:it.tooth||"",no:b.no||"bill",date:b.date,id:k});break}}}
+  return out}
+const dupMsg=L=>"⚠️ Already billed for this patient:\n\n"+L.map(x=>"• "+x.desc+(x.tooth?" ("+x.tooth+")":"")+" — on "+x.no+", "+fmtDate(x.date)).join("\n")+"\n\nBill it again anyway?";
 function openBill(id,pre){
+  if(!id&&pre&&pre.fromAp&&A[pre.fromAp]){const ex=Object.entries(B).find(([k,b])=>b.apId===pre.fromAp);if(ex){toast("This visit already has bill "+(ex[1].no||""));openBillView(ex[0]);return}}
   if(!(pre&&pre.items))bPlanIds=null;bEdit=id;bFromAp=null;trOpts();$("b-pats").innerHTML=patOpts();
   const b=id?{...B[id]}:{date:ymd(new Date()),items:[],discount:0};
   if(!id&&pre){if(pre.patientId)b.patientId=pre.patientId;if(pre.items&&pre.items.length)b.items=pre.items;if(pre.discount)b.discount=pre.discount;if(pre.fromAp&&A[pre.fromAp]){const a=A[pre.fromAp];bFromAp=pre.fromAp;b.patientId=a.patientId;b.patientName=a.patientName;if(a.treatment){const pr=S().prices.find(x=>x.n===a.treatment);b.items=[{desc:a.treatment,qty:1,price:pr?pr.p:""}]}}}
@@ -3812,11 +3823,13 @@ $("b-lines").addEventListener("input",e=>{const r=e.target.closest(".line");if(e
     if(pr&&(!pe.value||pe.dataset.auto)){if(+pr.p>0){pe.value=pr.p;pe.dataset.auto="1"}else if(pe.dataset.auto){pe.value="";delete pe.dataset.auto}}}if(e.target.classList.contains("l-p"))delete e.target.dataset.auto;billTotals()});
 for(const f of ["b-disc","b-pay"])$(f).addEventListener("input",billTotals);
 $("bForm").addEventListener("submit",e=>{
-  e.preventDefault();const err=$("b-err"),pid=findPat($("b-pat").value);
+  e.preventDefault();if(bdlg.__busy)return;const err=$("b-err"),pid=findPat($("b-pat").value);
   if(!pid){err.textContent="Choose the patient from the list. New patients are added in the Patients tab.";err.hidden=false;return}
   const items=readLines();if(!items.length){err.textContent="Add at least one treatment with its price.";err.hidden=false;return}
   {const od=$("b-oldd").value;for(const it of items)if(/^(old balance|previous outstanding balance)/i.test(it.desc||"")){it.desc=it.desc.replace(/\s*[·(].*$/,"");if(od){it.oldDate=od;it.desc+=" (treatment dated "+fmtDate(od)+")"}}}
   const p=P[pid],date=$("b-d").value||ymd(new Date());
+  {const prevK=new Set(bEdit&&B[bEdit]?(B[bEdit].items||[]).map(x=>dupNorm(x.desc)+"|"+(x.tooth||"")):[]),newIt=items.filter(x=>!prevK.has(dupNorm(x.desc)+"|"+(x.tooth||""))),dd=billDups(pid,newIt,bEdit,date);if(dd.length&&!confirm(dupMsg(dd)))return}
+  bdlg.__busy=true;setTimeout(()=>{bdlg.__busy=false},1500);
   const base=bEdit?B[bEdit]:{no:nextBillNo(date),createdAt:new Date().toISOString(),payments:[],...me};
   const doc={...base,patientId:pid,patientName:p.name,phone:p.phone||"",date,items,discount:+$("b-disc").value||0,note:$("b-note").value.trim()};
   if(bFromAp)doc.apId=bFromAp;
@@ -6699,7 +6712,7 @@ function supSync(id){const inp=$(id);if(!inp)return;let sel=inp.previousElementS
   sel.innerHTML=`<option value="">— Choose supplier —</option>`+list.map(x=>`<option${x.toLowerCase()===v.toLowerCase()?" selected":""}>${esc(x)}</option>`).join("")+`<option value="+">+ Add other supplier…</option>`;
   if(v){const o=[...sel.options].find(o=>o.value.toLowerCase()===v.toLowerCase());if(o)sel.value=o.value}inp.hidden=true}
 /* updates install themselves: when a newer version is published, the app refreshes on its own at a safe moment */
-const APP_BUILD="ds-v201";let updShown=false,updTarget="",updTimer=null;
+const APP_BUILD="ds-v202";let updShown=false,updTarget="",updTimer=null;
 function updSafe(){if(document.querySelector("dialog[open]"))return false;const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return false;if(pvReal)return false;if(typeof window.__pend==="number"&&window.__pend)return false;return true}
 async function updApply(){if(!updTarget)return;
   if(document.visibilityState==="visible"&&!updSafe()){clearTimeout(updTimer);updTimer=setTimeout(updApply,5000);return}
